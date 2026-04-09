@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,6 +23,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "apps.common.apps.CommonConfig",
+    "apps.catalog.apps.CatalogConfig",
+    "apps.vehicles.apps.VehiclesConfig",
+    "apps.cart.apps.CartConfig",
+    "apps.orders.apps.OrdersConfig",
 ]
 
 MIDDLEWARE = [
