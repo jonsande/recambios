@@ -1,70 +1,78 @@
 # AGENTS.md
 
 ## Project overview
-Este repositorio contiene una tienda online de recambios de coches construida con Django.
-El objetivo es priorizar robustez, claridad, mantenibilidad y escalabilidad.
+This repository contains a Django-based automotive parts e-commerce project.
+Priorities: robustness, clarity, maintainability, accessibility, and scalability.
 
-## Core principles
-- Haz cambios pequeños, trazables y fáciles de revisar.
-- No mezcles refactor y nueva funcionalidad en el mismo cambio salvo necesidad clara.
-- Prioriza legibilidad y dominio correcto antes que abstracciones prematuras.
-- Mantén separadas las responsabilidades entre catálogo, compatibilidades de vehículos, carrito, pedidos y checkout.
+## Technical baseline
+- Backend framework: Django
+- Database target: PostgreSQL
+- Frontend styling: Tailwind CSS
+- Templating approach: Django templates first
+- JavaScript approach: progressive enhancement; avoid unnecessary frontend complexity
+- Accessibility target: WCAG 2.1 AA by default
 
 ## Architecture rules
-- El código de aplicación vive en `src/apps/`.
-- La configuración Django vive en `src/config/`.
-- La lógica compartida debe ir en `src/apps/common/` solo si realmente es reutilizable.
-- Evita dependencias circulares entre apps.
-- Las compatibilidades de vehículos deben modelarse con relaciones explícitas, no con campos de texto libres en `Product`.
-- Las referencias OEM y equivalentes deben modelarse de forma separada del producto principal.
+- Django project config lives in `src/config/`.
+- Django apps live in `src/apps/`.
+- Keep domain boundaries explicit: `common`, `catalog`, `vehicles`, `cart`, `orders`, `checkout`, `search`.
+- Product identity, product references, and vehicle compatibility must be modeled separately.
+- Avoid circular dependencies between apps.
+- Keep reusable domain logic out of templates.
+
+## Frontend and UI rules
+- Use Tailwind CSS for frontend styling. Do not introduce Bootstrap.
+- Prefer reusable utility patterns and design tokens over ad hoc styling.
+- Favor server-rendered Django templates and progressive enhancement unless a stronger frontend requirement appears later.
+- Build a coherent design system: typography, spacing, colors, states, form controls, cards, navigation, filters, product grids, pagination, and empty states.
+- The frontend should feel modern, clean, and high-trust for automotive e-commerce.
+
+## Skill usage rules
+- Use `tailwind-design-system` for design tokens, component structure, visual consistency, responsive patterns, and reusable UI conventions.
+- Use `web-accessibility` for semantic HTML, keyboard interaction, ARIA usage, focus management, contrast, and accessibility review.
+- If both skills apply, `web-accessibility` takes precedence for semantics and interaction requirements, while `tailwind-design-system` governs styling and component patterns.
+- Use `django-feature` for implementing or extending Django functionality.
+- Use `ecommerce-catalog` for product catalog, references, fitment, compatibility, and automotive-specific modeling.
+- Use `django-tests` when behavior changes or new business rules are introduced.
+- Use `django-refactor` only for behavior-preserving cleanup or structural improvements.
+- Use `deployment-checklist` for production settings, static/media strategy, process management, and release readiness.
+
+## Data modeling rules
+- Separate product identity from product references.
+- Support multiple references per product, including OEM and equivalent codes.
+- Model vehicle compatibility as structured relations, not free text.
+- Prefer normalized entities for make, model, generation, engine, and year range.
+- Add indexes for frequent lookups, especially reference codes, slugs, and compatibility joins.
+- Design for future multi-supplier support, even if the first release only uses one supplier.
 
 ## Coding rules
-- Escribe código Python claro, con nombres explícitos.
-- Prefiere class-based models y function-based helpers simples.
-- No introduzcas complejidad innecesaria.
-- Añade type hints cuando mejoren claridad.
-- Mantén imports ordenados.
-- Evita comentarios obvios; comenta solo decisiones no triviales.
+- Make small, reviewable changes.
+- Do not mix refactor and feature work unless necessary.
+- Prefer explicit, readable code over clever abstractions.
+- Add type hints when they improve clarity.
+- Keep imports tidy and follow project linting rules.
+- Avoid placeholder code that is not immediately useful.
 
-## Django conventions
-- Usa un modelo por responsabilidad clara.
-- Añade `verbose_name` y `verbose_name_plural` cuando ayude al admin.
-- Define `__str__` útil en todos los modelos.
-- Añade índices a campos de búsqueda frecuentes.
-- Usa `select_related` y `prefetch_related` cuando la consulta lo requiera.
-- Mantén la lógica de negocio fuera de las plantillas.
-- Usa formularios, servicios o helpers antes de meter demasiada lógica en vistas.
+## Testing and validation
+Before finishing a task:
+- run `ruff check .`
+- run the smallest relevant test set
+- run `python src/manage.py check`
+- run `python src/manage.py makemigrations --check` when models may be affected
+- summarize assumptions, changed files, and follow-up risks
 
-## Tests and validation
-Antes de dar una tarea por terminada:
-- ejecuta lint
-- ejecuta tests relevantes
-- verifica migraciones
-- revisa imports y nombres
-- resume qué cambió y qué queda pendiente
+## Accessibility requirements
+- All interactive functionality must be usable by keyboard alone.
+- Do not remove visible focus indication.
+- All images must have appropriate `alt` text.
+- All form fields must have associated labels.
+- Use semantic HTML elements before adding ARIA.
+- Meet WCAG 2.1 AA contrast expectations by default.
 
-## Commands
-- Instalar dependencias: `pip install -r requirements/dev.txt`
-- Ejecutar servidor: `python src/manage.py runserver`
-- Crear migraciones: `python src/manage.py makemigrations`
-- Aplicar migraciones: `python src/manage.py migrate`
-- Ejecutar tests: `pytest`
-- Lint: `ruff check .`
-- Formato: `ruff format .`
-
-## Done means
-Un cambio se considera completo cuando:
-1. el código está implementado
-2. las migraciones son coherentes
-3. los tests relevantes pasan
-4. no rompe convenciones del proyecto
-5. se documenta cualquier decisión importante
-
-## Interaction style
-Cuando la tarea sea grande:
-1. inspecciona primero el contexto
-2. propón un plan breve
-3. implementa por pasos
-4. valida antes de cerrar
-
-Cuando falte información importante, indica la suposición adoptada y sigue con la opción más segura.
+## Output expectations
+When completing a task, summarize:
+- files changed
+- behavior introduced or modified
+- assumptions made
+- validation performed
+- follow-up risks or recommended next steps
