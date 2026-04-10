@@ -5,12 +5,12 @@
 ## Progreso general
 
 - [ ] **Fase 0** — Preparación técnica del proyecto
-  - [ ] cerrar split settings
-  - [ ] configurar PostgreSQL en desarrollo
-  - [ ] revisar `.env`, `.env.example`, `.gitignore`, `pyproject.toml`
+  - [x] cerrar split settings
+  - [x] configurar PostgreSQL en desarrollo
+  - [x] revisar `.env`, `.env.example`, `.gitignore`, `pyproject.toml`
   - [ ] preparar base Tailwind
   - [ ] cerrar Git/GitHub
-  - [ ] añadir documentación base (`AGENTS.md`, `SKILLS.md`, `STEPS.md`, `TODO.md`)
+  - [x] añadir documentación base (`AGENTS.md`, `SKILLS.md`, `STEPS.md`, `TODO.md`)
 
 - [ ] **Fase 1** — Núcleo del dominio y modelo de datos
   - [ ] Supplier

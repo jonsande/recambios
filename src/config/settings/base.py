@@ -8,7 +8,7 @@ APPS_DIR = BASE_DIR / "src"
 
 # Security
 SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="127.0.0.1,localhost",
@@ -24,10 +24,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "apps.common.apps.CommonConfig",
+    "apps.users.apps.UsersConfig",
+    "apps.suppliers.apps.SuppliersConfig",
     "apps.catalog.apps.CatalogConfig",
     "apps.vehicles.apps.VehiclesConfig",
+    "apps.search.apps.SearchConfig",
     "apps.cart.apps.CartConfig",
+    "apps.inquiries.apps.InquiriesConfig",
     "apps.orders.apps.OrdersConfig",
+    "apps.checkout.apps.CheckoutConfig",
+    "apps.imports.apps.ImportsConfig",
+    "apps.pages.apps.PagesConfig",
+    "apps.seo.apps.SeoConfig",
 ]
 
 MIDDLEWARE = [
@@ -41,6 +49,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+ASGI_APPLICATION = "config.asgi.application"
 
 TEMPLATES = [
     {

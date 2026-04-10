@@ -14,9 +14,15 @@ venv/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 staticfiles/
 media/
+node_modules/
+*.log
 
 .vscode/
 .idea/
