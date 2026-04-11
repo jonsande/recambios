@@ -398,6 +398,15 @@ Permitir carga manual del catálogo mediante Excel.
 - no duplicar entidades normalizadas
 - registrar errores sin corromper datos
 
+### Mejoras posteriores previstas dentro de la línea de importación
+- dry-run / preview sin escritura en base de datos
+- soporte para categorías jerárquicas en importación
+- extensión de importación a `PartNumber`
+- extensión de importación a `ProductAttributeValue`
+- extensión de importación a `ProductVehicleFitment`
+- estrategia de importación de imágenes
+- posible mapeo flexible por proveedor en fases posteriores
+
 ### Verificación
 - una importación válida crea/actualiza correctamente
 - una importación inválida informa errores entendibles
@@ -509,85 +518,8 @@ Implementar la capa inicial de comunicaciones del flujo comercial.
 
 ---
 
-## FASE 9 — Catálogo público base
-**[SKILLS: django-feature, tailwind-design-system, web-accessibility]**
-
-### Objetivos
-Construir el catálogo navegable público.
-
-### Debe incluir
-- home básica
-- listado de categorías
-- listado de productos
-- ficha de producto
-- páginas corporativas básicas
-- navegación clara
-
-### Reglas UI
-- Mobile-First
-- Tailwind
-- componentes reutilizables
-- HTML semántico
-- diseño serio, técnico y claro
-
-### Verificación
-- páginas renderizan sin errores
-- móvil funciona correctamente
-- desktop escala correctamente
-- accesibilidad básica cubierta
-
----
-
-## FASE 10 — Búsqueda técnica y filtros
-**[SKILLS: ecommerce-catalog, django-feature, django-tests]**
-
-### Objetivos
-Implementar búsqueda útil para usuarios técnicos y generales.
-
-### Debe incluir
-- búsqueda por SKU
-- búsqueda por referencia cruzada
-- búsqueda por marca/modelo cuando proceda
-- filtros por marca, año, modelo, categoría, condición y atributos técnicos
-- resultados refinables
-
-### Reglas
-- la búsqueda por referencia tiene prioridad de calidad
-- el sistema debe permitir encontrar productos por marca de vehículo
-- optimizar consultas razonablemente
-
-### Verificación
-- consultas técnicas devuelven resultados correctos
-- filtros combinados funcionan
-- tests básicos de búsqueda pasan
-
----
-
-## FASE 11 — Compatibilidad por vehículo
-**[SKILLS: ecommerce-catalog, django-feature, django-tests]**
-
-### Objetivos
-Permitir navegar y validar compatibilidades.
-
-### Debe incluir
-- relación producto-vehículo operativa
-- consulta por marca/modelo/año o combinación equivalente
-- visualización clara en ficha de producto
-- estructura compatible con distintos tipos de vehículo
-
-### Reglas
-- no optimizar solo para coches; debe ser soportable para otros vehículos desde v1
-- mantener la estructura extensible
-
-### Verificación
-- se puede consultar compatibilidad
-- la relación es consistente
-- tests y validaciones de integridad pasan
-
----
-
-## FASE 12 — Frontend refinado y sistema visual
-**[SKILLS: tailwind-design-system, web-accessibility]**
+## FASE 9 — Frontend refinado y sistema visual
+**[SKILLS: tailwind-design-system, web-accessibility, web-design-guidelines]**
 
 ### Objetivos
 Refinar UI y convertirla en un sistema coherente.
@@ -612,7 +544,7 @@ Refinar UI y convertirla en un sistema coherente.
 
 ---
 
-## FASE 13 — Oferta confirmada y pago posterior
+## FASE 10 — Oferta confirmada y pago posterior
 **[SKILLS: django-feature, django-tests]**
 
 ### Objetivos
@@ -637,7 +569,7 @@ Preparar la capa posterior a la confirmación manual de disponibilidad, precio y
 
 ---
 
-## FASE 14 — SEO, rendimiento y contenido bilingüe
+## FASE 11 — SEO, rendimiento y contenido bilingüe
 **[SKILLS: seo-audit, web-performance-optimization, web-accessibility]**
 
 ### Objetivos
@@ -665,7 +597,7 @@ Dejar la web preparada para indexación y uso real.
 
 ---
 
-## FASE 15 — Producción y despliegue
+## FASE 12 — Producción y despliegue
 **[SKILLS: deployment-checklist]**
 
 ### Objetivos
@@ -701,9 +633,8 @@ Preparar despliegue en servidor contratado.
 - el modelo de datos central está implementado
 - migraciones son coherentes
 - existen índices y unicidades básicas
-- el dominio soporta referencias, compatibilidades, proveedor e inquiries
+- el dominio soporta referencias, compatibilidades, proveedor e imports
 - `Product` soporta `published_at`
-- `Inquiry` soporta seguimiento temporal básico (`response_due_at` o equivalente)
 - `SupplierImport` conserva trazabilidad temporal completa
 
 ### Fase 2
@@ -742,34 +673,20 @@ Preparar despliegue en servidor contratado.
 - cliente y equipo interno reciben comunicaciones básicas correctas
 
 ### Fase 9
-- el catálogo público es navegable y usable en móvil
-- la ficha de producto y los listados son claros
-- la base visual ya es consistente
-
-### Fase 10
-- la búsqueda por referencia y SKU funciona con fiabilidad
-- los filtros mínimos acordados están operativos
-- el refinado de resultados es usable
-
-### Fase 11
-- la compatibilidad por vehículo puede consultarse y entenderse
-- el sistema soporta distintos tipos de vehículo sin acoplarse solo a coches
-
-### Fase 12
 - la interfaz es coherente, clara y mobile-first
 - los componentes reutilizables cubren las áreas clave
 - accesibilidad funcional mínima está revisada
 
-### Fase 13
+### Fase 10
 - existe base funcional para aceptación de oferta confirmada y pago posterior
 - la solución mantiene separado el flujo de solicitud inicial del pago
 
-### Fase 14
+### Fase 11
 - SEO técnico base está implementado
 - ES/EN están operativos en estructura y contenido base
 - rendimiento es razonable para una primera versión pública
 
-### Fase 15
+### Fase 12
 - producción está documentada y configurada
 - el despliegue es reproducible
 - existe checklist de release y rollback básico
