@@ -13,22 +13,22 @@
   - [x] añadir documentación base (`AGENTS.md`, `SKILLS.md`, `STEPS.md`, `TODO.md`)
 
 - [ ] **Fase 1** — Núcleo del dominio y modelo de datos
-  - [ ] Supplier
-  - [ ] Brand
-  - [ ] Category
-  - [ ] Condition
-  - [ ] Product
-  - [ ] PartNumber
-  - [ ] Vehicle
-  - [ ] ProductVehicleFitment
-  - [ ] AttributeDefinition
-  - [ ] ProductAttributeValue
-  - [ ] ProductImage
+  - [x] Supplier
+  - [x] Brand
+  - [x] Category
+  - [x] Condition
+  - [x] Product
+  - [x] PartNumber
+  - [x] Vehicle
+  - [x] ProductVehicleFitment
+  - [x] AttributeDefinition
+  - [x] ProductAttributeValue
+  - [x] ProductImage
   - [ ] Inquiry / QuoteRequest
   - [ ] InquiryItem / QuoteRequestItem
-  - [ ] SupplierImport
-  - [ ] SupplierImportRow
-  - [ ] índices y unicidades básicas
+  - [x] SupplierImport
+  - [x] SupplierImportRow
+  - [x] índices y unicidades básicas
 
 - [ ] **Fase 2** — Admin, roles y permisos
   - [ ] admin útil del catálogo
