@@ -53,7 +53,13 @@
   - [ ] trazabilidad de importación
   - [ ] informe de errores
 
-- [ ] **Fase 5** — Catálogo público base
+- [ ] **Fase 8** — Emails transaccionales y comunicaciones
+  - [ ] confirmación interna de nueva solicitud
+  - [ ] confirmación al cliente de recepción
+  - [ ] plantillas base ES/EN
+  - [ ] configuración de email para desarrollo y producción
+
+- [ ] **Fase 9** — Catálogo público base
   - [ ] home
   - [ ] categorías
   - [ ] listado de productos
@@ -61,7 +67,7 @@
   - [ ] páginas corporativas
   - [ ] navegación base
 
-- [ ] **Fase 6** — Búsqueda técnica y filtros
+- [ ] **Fase 10** — Búsqueda técnica y filtros
   - [ ] búsqueda por SKU
   - [ ] búsqueda por referencia cruzada
   - [ ] búsqueda por marca/modelo
@@ -72,19 +78,31 @@
   - [ ] filtros por condición
   - [ ] filtros por atributos técnicos
 
-- [ ] **Fase 7** — Compatibilidad por vehículo
+- [ ] **Fase 11** — Compatibilidad por vehículo
   - [ ] consulta por vehículo
   - [ ] visualización en ficha
   - [ ] soporte para diferentes tipos de vehículo
 
-- [ ] **Fase 8** — Frontend refinado y sistema visual
+- [ ] **Fase 12** — Frontend refinado y sistema visual
   - [ ] componentes reutilizables
   - [ ] mobile-first sólido
   - [ ] accesibilidad funcional
   - [ ] estados vacíos y errores
   - [ ] refinado de tablas y bloques técnicos
 
-- [ ] **Fase 9** — SEO, rendimiento y bilingüe ES/EN
+- [ ] **Fase 13** — Oferta confirmada y pago posterior
+  - [ ] base de oferta confirmada
+  - [ ] aceptación o rechazo por el cliente
+  - [ ] trazabilidad del importe final confirmado
+  - [ ] base para pago posterior
+
+  - [ ] componentes reutilizables
+  - [ ] mobile-first sólido
+  - [ ] accesibilidad funcional
+  - [ ] estados vacíos y errores
+  - [ ] refinado de tablas y bloques técnicos
+
+- [ ] **Fase 14** — SEO, rendimiento y bilingüe ES/EN
   - [ ] meta tags dinámicos
   - [ ] sitemap
   - [ ] robots.txt
@@ -92,7 +110,7 @@
   - [ ] base ES/EN operativa
   - [ ] optimización razonable de imágenes
 
-- [ ] **Fase 10** — Producción y despliegue
+- [ ] **Fase 15** — Producción y despliegue
   - [ ] settings de producción
   - [ ] static/media
   - [ ] gunicorn
