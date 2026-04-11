@@ -31,11 +31,11 @@
   - [x] índices y unicidades básicas
 
 - [ ] **Fase 2** — Admin, roles y permisos
-  - [ ] admin útil del catálogo
-  - [ ] filtros y búsquedas de admin
-  - [ ] roles mínimos
-  - [ ] permisos de proveedor restringido
-  - [ ] revisión/publicación interna
+  - [x] admin útil del catálogo
+  - [x] filtros y búsquedas de admin
+  - [x] roles mínimos
+  - [x] permisos de proveedor restringido
+  - [x] revisión/publicación interna
 
 - [ ] **Fase 3** — Importación Excel
   - [ ] plantilla oficial descargable

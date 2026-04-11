@@ -48,7 +48,7 @@ class SupplierImport(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Import {self.id} · {self.supplier.code}"
+        return f"Import {self.id} - {self.supplier.code}"
 
 
 class SupplierImportRow(models.Model):
@@ -99,4 +99,4 @@ class SupplierImportRow(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Import {self.supplier_import_id} · row {self.row_number}"
+        return f"Import {self.supplier_import.pk} - row {self.row_number}"

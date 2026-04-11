@@ -167,6 +167,9 @@ class Product(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
+        permissions = [
+            ("can_publish_product", "Can publish product"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["supplier", "supplier_product_code"],
@@ -396,4 +399,4 @@ class ProductImage(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.product.sku} image {self.id}"
+        return f"ProductImage {self.pk}"
