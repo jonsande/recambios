@@ -4,7 +4,7 @@
 ## Tienda online de recambios de automoción — v1
 
 > Propósito: este archivo guía a Codex fase por fase.
-> Antes de empezar una fase, debe leerse este documento completo y las skills indicadas.
+> Antes de tocar una fase, debe leerse el documento completo además del bloque correspondiente y las skills indicadas.
 > No avanzar a la siguiente fase si falla la verificación de la actual.
 
 ---
@@ -12,16 +12,15 @@
 ## ⚠️ Reglas fundamentales
 
 1. Lee `SKILLS.md` antes de empezar cualquier fase.
-2. Lee la skill indicada en `[SKILLS]` ANTES de escribir código en cada fase.
-3. Respeta el enfoque **Mobile-First** en toda decisión de frontend.
-4. No introduzcas Bootstrap.
-5. No implementes compra inmediata como flujo principal de v1.
-6. Mantén PostgreSQL como base de datos objetivo desde desarrollo.
-7. No modeles referencias, compatibilidades o atributos técnicos como texto libre si deben ser buscables o filtrables.
-8. No avances de fase si falla la verificación.
-9. Haz commits atómicos por bloque funcional.
-10. Prioriza claridad y robustez sobre velocidad aparente.
-11. Si una decisión de UI entra en conflicto con accesibilidad, gana accesibilidad.
+2. Respeta el enfoque **Mobile-First** en toda decisión de frontend.
+3. No introduzcas Bootstrap.
+4. No implementes compra inmediata como flujo principal de v1.
+5. Mantén PostgreSQL como base de datos objetivo desde desarrollo.
+6. No modeles referencias, compatibilidades o atributos técnicos como texto libre si deben ser buscables o filtrables.
+7. No avances de fase si falla la verificación.
+8. Haz commits atómicos por bloque funcional.
+9. Prioriza claridad y robustez sobre velocidad aparente.
+10. Si una decisión de UI entra en conflicto con accesibilidad, gana accesibilidad.
 
 ---
 
@@ -346,7 +345,40 @@ Construir un backoffice útil desde muy pronto.
 
 ---
 
-## FASE 3 — Importación Excel
+## FASE 3 — Inquiry / QuoteRequest
+**[SKILLS: django-feature, django-tests]**
+
+### Objetivos
+Implementar la base del flujo de solicitud comercial de la v1.
+
+### Debe incluir
+- modelo `Inquiry` / `QuoteRequest`
+- modelo `InquiryItem` / `QuoteRequestItem`
+- soporte para usuario registrado
+- soporte para invitado
+- estados de solicitud claros
+- datos de contacto del solicitante
+- notas del cliente
+- notas internas
+- `response_due_at`
+- `supplier_feedback_at`
+- admin útil para revisión interna
+
+### Reglas
+- no implementar todavía UI pública
+- no implementar envío de emails todavía
+- no implementar pago ni checkout
+- mantener el flujo alineado con la lógica de solicitud previa de la v1
+
+### Verificación
+- una solicitud puede existir para usuario registrado o invitado
+- las líneas de solicitud quedan correctamente asociadas
+- el admin permite revisar y actualizar estados
+- tests básicos de integridad y flujo pasan
+
+---
+
+## FASE 4 — Importación Excel
 **[SKILLS: django-feature, ecommerce-catalog, django-tests]**
 
 ### Objetivos
@@ -373,7 +405,7 @@ Permitir carga manual del catálogo mediante Excel.
 
 ---
 
-## FASE 4 — Catálogo público base
+## FASE 5 — Catálogo público base
 **[SKILLS: django-feature, tailwind-design-system, web-accessibility]**
 
 ### Objetivos
@@ -402,7 +434,7 @@ Construir el catálogo navegable público.
 
 ---
 
-## FASE 5 — Búsqueda técnica y filtros
+## FASE 6 — Búsqueda técnica y filtros
 **[SKILLS: ecommerce-catalog, django-feature, django-tests]**
 
 ### Objetivos
@@ -427,7 +459,7 @@ Implementar búsqueda útil para usuarios técnicos y generales.
 
 ---
 
-## FASE 6 — Compatibilidad por vehículo
+## FASE 7 — Compatibilidad por vehículo
 **[SKILLS: ecommerce-catalog, django-feature, django-tests]**
 
 ### Objetivos
@@ -447,35 +479,6 @@ Permitir navegar y validar compatibilidades.
 - se puede consultar compatibilidad
 - la relación es consistente
 - tests y validaciones de integridad pasan
-
----
-
-## FASE 7 — Flujo de solicitud comercial
-**[SKILLS: django-feature, django-tests, web-accessibility]**
-
-### Objetivos
-Implementar el flujo real de negocio de la v1.
-
-### Debe incluir
-- botón por producto
-- carrito de solicitud
-- solicitud como invitado
-- solicitud como usuario registrado
-- formulario de datos de cliente
-- notas/comentarios
-- estados de solicitud
-- panel interno para revisar solicitudes
-
-### Reglas
-- no implementar checkout de compra inmediata como flujo principal
-- si hay precio visible, mostrarlo como orientativo
-- si no hay precio visible, usar CTA de consulta
-
-### Verificación
-- invitado puede enviar solicitud
-- usuario registrado puede enviar solicitud
-- la solicitud genera registros internos correctos
-- el backoffice puede gestionarla
 
 ---
 
@@ -580,29 +583,29 @@ Preparar despliegue en servidor contratado.
 - el proveedor no puede publicar ni acceder a áreas restringidas
 
 ### Fase 3
+- `Inquiry` y `InquiryItem` están implementados
+- una solicitud puede existir para usuario registrado o invitado
+- el estado de la solicitud es entendible y gestionable
+- el backoffice puede revisar y actualizar solicitudes
+
+### Fase 4
 - existe plantilla Excel oficial descargable
 - la importación crea o actualiza datos sin duplicidades graves
 - errores y trazabilidad quedan registrados
 
-### Fase 4
+### Fase 5
 - el catálogo público es navegable y usable en móvil
 - la ficha de producto y los listados son claros
 - la base visual ya es consistente
 
-### Fase 5
+### Fase 6
 - la búsqueda por referencia y SKU funciona con fiabilidad
 - los filtros mínimos acordados están operativos
 - el refinado de resultados es usable
 
-### Fase 6
+### Fase 7
 - la compatibilidad por vehículo puede consultarse y entenderse
 - el sistema soporta distintos tipos de vehículo sin acoplarse solo a coches
-
-### Fase 7
-- un invitado puede enviar una solicitud completa
-- un usuario registrado puede enviar una solicitud completa
-- existe carrito de solicitud multiartículo
-- el backoffice puede revisar y actualizar estados
 
 ### Fase 8
 - la interfaz es coherente, clara y mobile-first

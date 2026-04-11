@@ -12,7 +12,7 @@
   - [x] cerrar Git/GitHub
   - [x] añadir documentación base (`AGENTS.md`, `SKILLS.md`, `STEPS.md`, `TODO.md`)
 
-- [ ] **Fase 1** — Núcleo del dominio y modelo de datos
+- [x] **Fase 1** — Núcleo del dominio y modelo de datos
   - [x] Supplier
   - [x] Brand
   - [x] Category
@@ -24,20 +24,28 @@
   - [x] AttributeDefinition
   - [x] ProductAttributeValue
   - [x] ProductImage
-  - [ ] Inquiry / QuoteRequest
-  - [ ] InquiryItem / QuoteRequestItem
   - [x] SupplierImport
   - [x] SupplierImportRow
   - [x] índices y unicidades básicas
 
-- [ ] **Fase 2** — Admin, roles y permisos
+- [x] **Fase 2** — Admin, roles y permisos
   - [x] admin útil del catálogo
   - [x] filtros y búsquedas de admin
   - [x] roles mínimos
   - [x] permisos de proveedor restringido
   - [x] revisión/publicación interna
 
-- [ ] **Fase 3** — Importación Excel
+- [ ] **Fase 3** — Inquiry / QuoteRequest
+  - [ ] Inquiry / QuoteRequest
+  - [ ] InquiryItem / QuoteRequestItem
+  - [ ] soporte para usuario registrado
+  - [ ] soporte para invitado
+  - [ ] estados de solicitud
+  - [ ] admin útil de solicitudes
+  - [ ] notas internas y del cliente
+  - [ ] seguimiento temporal básico
+
+- [ ] **Fase 4** — Importación Excel
   - [ ] plantilla oficial descargable
   - [ ] importación manual
   - [ ] validación de columnas
@@ -45,7 +53,7 @@
   - [ ] trazabilidad de importación
   - [ ] informe de errores
 
-- [ ] **Fase 4** — Catálogo público base
+- [ ] **Fase 5** — Catálogo público base
   - [ ] home
   - [ ] categorías
   - [ ] listado de productos
@@ -53,7 +61,7 @@
   - [ ] páginas corporativas
   - [ ] navegación base
 
-- [ ] **Fase 5** — Búsqueda técnica y filtros
+- [ ] **Fase 6** — Búsqueda técnica y filtros
   - [ ] búsqueda por SKU
   - [ ] búsqueda por referencia cruzada
   - [ ] búsqueda por marca/modelo
@@ -64,18 +72,10 @@
   - [ ] filtros por condición
   - [ ] filtros por atributos técnicos
 
-- [ ] **Fase 6** — Compatibilidad por vehículo
+- [ ] **Fase 7** — Compatibilidad por vehículo
   - [ ] consulta por vehículo
   - [ ] visualización en ficha
   - [ ] soporte para diferentes tipos de vehículo
-
-- [ ] **Fase 7** — Flujo de solicitud comercial
-  - [ ] botón por producto
-  - [ ] carrito de solicitud
-  - [ ] solicitud como invitado
-  - [ ] solicitud como usuario registrado
-  - [ ] estados de solicitud
-  - [ ] panel interno de gestión
 
 - [ ] **Fase 8** — Frontend refinado y sistema visual
   - [ ] componentes reutilizables
