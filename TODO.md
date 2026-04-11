@@ -35,15 +35,15 @@
   - [x] permisos de proveedor restringido
   - [x] revisión/publicación interna
 
-- [ ] **Fase 3** — Inquiry / QuoteRequest
-  - [ ] Inquiry / QuoteRequest
-  - [ ] InquiryItem / QuoteRequestItem
-  - [ ] soporte para usuario registrado
-  - [ ] soporte para invitado
-  - [ ] estados de solicitud
-  - [ ] admin útil de solicitudes
-  - [ ] notas internas y del cliente
-  - [ ] seguimiento temporal básico
+- [x] **Fase 3** — Inquiry / QuoteRequest
+  - [x] Inquiry / QuoteRequest
+  - [x] InquiryItem / QuoteRequestItem
+  - [x] soporte para usuario registrado
+  - [x] soporte para invitado
+  - [x] estados de solicitud
+  - [x] admin útil de solicitudes
+  - [x] notas internas y del cliente
+  - [x] seguimiento temporal básico
 
 - [ ] **Fase 4** — Importación Excel
   - [ ] plantilla oficial descargable
