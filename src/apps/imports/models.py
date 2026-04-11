@@ -32,6 +32,7 @@ class SupplierImport(models.Model):
     total_rows = models.PositiveIntegerField(default=0)
     successful_rows = models.PositiveIntegerField(default=0)
     failed_rows = models.PositiveIntegerField(default=0)
+    processing_notes = models.TextField(blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

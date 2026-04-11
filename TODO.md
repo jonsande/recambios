@@ -46,12 +46,12 @@
   - [x] seguimiento temporal básico
 
 - [ ] **Fase 4** — Importación Excel
-  - [ ] plantilla oficial descargable
-  - [ ] importación manual
-  - [ ] validación de columnas
+  - [x] plantilla oficial descargable
+  - [x] importación manual
+  - [x] validación de columnas
   - [ ] preview o simulación
-  - [ ] trazabilidad de importación
-  - [ ] informe de errores
+  - [x] trazabilidad de importación
+  - [x] informe de errores
 
 - [ ] **Fase 8** — Emails transaccionales y comunicaciones
   - [ ] confirmación interna de nueva solicitud
