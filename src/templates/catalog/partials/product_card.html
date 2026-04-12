@@ -21,7 +21,13 @@
     </div>
     <div class="flex justify-between gap-2">
       <dt class="font-medium">{% trans "Marca" %}</dt>
-      <dd class="text-right">{{ product.brand.name }}</dd>
+      <dd class="text-right">
+        {% if product.brand %}
+          {{ product.brand.name }}
+        {% else %}
+          {% trans "Sin marca especificada" %}
+        {% endif %}
+      </dd>
     </div>
     <div class="flex justify-between gap-2">
       <dt class="font-medium">{% trans "Categoría" %}</dt>

@@ -129,6 +129,8 @@ class Product(models.Model):
         "catalog.Brand",
         on_delete=models.PROTECT,
         related_name="products",
+        null=True,
+        blank=True,
     )
     category = models.ForeignKey(
         "catalog.Category",

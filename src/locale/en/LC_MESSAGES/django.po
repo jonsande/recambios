@@ -39,12 +39,26 @@ msgstr "Yes"
 msgid "No"
 msgstr "No"
 
-#: src/apps/catalog/views.py:70
+#: src/apps/catalog/views.py:39
+#, python-format
+msgid "%(start)s en adelante"
+msgstr "%(start)s onwards"
+
+#: src/apps/catalog/views.py:41
+#, python-format
+msgid "%(end)s y anteriores"
+msgstr "%(end)s and earlier"
+
+#: src/apps/catalog/views.py:42
+msgid "Año no especificado"
+msgstr "Year not specified"
+
+#: src/apps/catalog/views.py:73
 #, python-format
 msgid "Productos de %(category)s"
 msgstr "%(category)s products"
 
-#: src/apps/catalog/views.py:74
+#: src/apps/catalog/views.py:77
 msgid "Catálogo de recambios"
 msgstr "Spare parts catalog"
 
@@ -155,6 +169,11 @@ msgstr "SKU"
 msgid "Marca"
 msgstr "Brand"
 
+#: src/templates/catalog/partials/product_card.html:30
+#: src/templates/catalog/product_detail.html:34
+msgid "Sin marca especificada"
+msgstr "Brand not specified"
+
 #: src/templates/catalog/partials/product_card.html:27
 #: src/templates/catalog/product_detail.html:32
 msgid "Categoría"
@@ -219,6 +238,22 @@ msgstr "Primary"
 #: src/templates/catalog/product_detail.html:98
 msgid "Datos técnicos"
 msgstr "Technical data"
+
+#: src/templates/catalog/product_detail.html:110
+msgid "Aplicaciones del producto"
+msgstr "Product applications"
+
+#: src/templates/catalog/product_detail.html:116
+msgid "Años"
+msgstr "Years"
+
+#: src/templates/catalog/product_detail.html:117
+msgid "Motor"
+msgstr "Engine"
+
+#: src/templates/catalog/product_detail.html:118
+msgid "Compatibilidad verificada"
+msgstr "Compatibility verified"
 
 #: src/templates/catalog/product_list.html:13
 msgid "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial."

@@ -33,6 +33,16 @@ def _render_attribute_value(attribute_value) -> str:
     return value
 
 
+def _render_year_range(year_start, year_end) -> str:
+    if year_start and year_end:
+        return f"{year_start}-{year_end}"
+    if year_start and not year_end:
+        return _("%(start)s en adelante") % {"start": year_start}
+    if year_end and not year_start:
+        return _("%(end)s y anteriores") % {"end": year_end}
+    return _("Año no especificado")
+
+
 class CategoryListView(ListView):
     template_name = "catalog/category_list.html"
     context_object_name = "categories"
@@ -85,6 +95,7 @@ class ProductDetailView(DetailView):
         return get_public_products_queryset().prefetch_related(
             "part_numbers__brand",
             "attribute_values__attribute_definition",
+            "fitments__vehicle__brand",
         )
 
     def get_context_data(self, **kwargs):
@@ -95,6 +106,32 @@ class ProductDetailView(DetailView):
             "part_number_type",
             "number_normalized",
         )
+
+        fitments = product.fitments.select_related("vehicle__brand").filter(
+            vehicle__is_active=True
+        ).order_by("-is_verified", "vehicle__brand__name", "vehicle__model", "vehicle__year_start")
+        context["fitments"] = [
+            {
+                "vehicle_name": " ".join(
+                    part
+                    for part in [
+                        fitment.vehicle.brand.name,
+                        fitment.vehicle.model,
+                        fitment.vehicle.generation,
+                        fitment.vehicle.variant,
+                    ]
+                    if part
+                ),
+                "year_range": _render_year_range(
+                    fitment.vehicle.year_start,
+                    fitment.vehicle.year_end,
+                ),
+                "engine_code": fitment.vehicle.engine_code,
+                "fitment_notes": fitment.fitment_notes,
+                "is_verified": fitment.is_verified,
+            }
+            for fitment in fitments
+        ]
 
         raw_attribute_values = product.attribute_values.select_related(
             "attribute_definition"

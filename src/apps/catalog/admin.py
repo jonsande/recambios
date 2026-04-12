@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from apps.suppliers.access import get_active_supplier_ids_for_user, user_can_manage_supplier
 from apps.users.roles import is_restricted_supplier_user
+from apps.vehicles.models import ProductVehicleFitment
 
 from .models import (
     AttributeDefinition,
@@ -169,6 +170,24 @@ class ProductImageInline(admin.TabularInline):
     fields = ("image", "alt_text", "sort_order", "is_primary")
 
 
+class ProductVehicleFitmentInline(admin.TabularInline):
+    model = ProductVehicleFitment
+    extra = 0
+    fields = ("vehicle", "fitment_notes", "source", "is_verified")
+    autocomplete_fields = ("vehicle",)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "vehicle":
+            kwargs["queryset"] = db_field.related_model.objects.filter(is_active=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        if is_restricted_supplier_user(request.user):
+            readonly_fields.extend(("source", "is_verified"))
+        return tuple(dict.fromkeys(readonly_fields))
+
+
 @admin.register(Product)
 class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     supplier_lookup = "supplier_id"
@@ -199,7 +218,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     list_select_related = ("supplier", "brand", "category", "condition")
     autocomplete_fields = ("supplier", "brand", "category", "condition")
     prepopulated_fields = {"slug": ("title",)}
-    inlines = (PartNumberInline, ProductImageInline)
+    inlines = (PartNumberInline, ProductImageInline, ProductVehicleFitmentInline)
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "updated_at"
     fieldsets = (
@@ -308,6 +327,19 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 obj.published_at = None
 
         super().save_model(request, obj, form, change)
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is ProductVehicleFitment and is_restricted_supplier_user(request.user):
+            instances = formset.save(commit=False)
+            for deleted_obj in formset.deleted_objects:
+                deleted_obj.delete()
+            for fitment in instances:
+                fitment.source = ProductVehicleFitment.FitmentSource.SUPPLIER
+                fitment.is_verified = False
+                fitment.save()
+            formset.save_m2m()
+            return
+        super().save_formset(request, form, formset, change)
 
 
 @admin.register(PartNumber)

@@ -250,8 +250,6 @@ def _process_data_row(
     row_messages: list[str] = []
     if not title:
         raise ImportProcessingError("Missing required value: title.")
-    if not brand_name:
-        raise ImportProcessingError("Missing required value: brand_name.")
     if not category_name:
         raise ImportProcessingError("Missing required value: category_name.")
     if not condition_code:
@@ -270,7 +268,10 @@ def _process_data_row(
             "sku is required to create a new product when no existing match is found."
         )
 
-    brand, brand_created = _get_or_create_brand(brand_name)
+    brand = None
+    brand_created = False
+    if brand_name:
+        brand, brand_created = _get_or_create_brand(brand_name)
     category, category_created = _get_or_create_category(category_name)
     condition = Condition.objects.filter(code__iexact=condition_code).first()
     if not condition:
@@ -321,7 +322,8 @@ def _process_data_row(
     else:
         product = target_product
         product.title = title
-        product.brand = brand
+        if brand_name:
+            product.brand = brand
         product.category = category
         product.condition = condition
         product.supplier = import_record.supplier
@@ -353,7 +355,7 @@ def _process_data_row(
 
         product.save()
 
-    created_brand_name = brand.name if brand_created else None
+    created_brand_name = brand.name if brand and brand_created else None
     created_category_name = category.name if category_created else None
     if created_brand_name:
         row_messages.append(f"Auto-created brand '{created_brand_name}'")

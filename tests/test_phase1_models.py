@@ -65,6 +65,26 @@ def test_product_sku_is_globally_unique() -> None:
 
 
 @pytest.mark.django_db
+def test_product_brand_can_be_empty_when_not_required() -> None:
+    supplier = make_supplier(code="SUP-NOBRAND")
+    category = make_category(name="Electrical", slug="electrical")
+    condition = make_condition(code="core", name="Core", slug="core")
+
+    product = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-NOBRAND-1",
+        sku="SKU-NOBRAND-1",
+        slug="product-sku-nobrand-1",
+        title="No Brand Product",
+        brand=None,
+        category=category,
+        condition=condition,
+    )
+
+    assert product.brand is None
+
+
+@pytest.mark.django_db
 def test_part_number_is_normalized_for_lookup() -> None:
     product = make_product(sku="SKU-PN")
     part_number = PartNumber.objects.create(

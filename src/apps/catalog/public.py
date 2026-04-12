@@ -7,19 +7,17 @@ PUBLIC_PRODUCT_FILTER = Q(
     publication_status=Product.PublicationStatus.PUBLISHED,
     published_at__isnull=False,
     supplier__is_active=True,
-    brand__is_active=True,
     category__is_active=True,
     condition__is_active=True,
-)
+) & (Q(brand__isnull=True) | Q(brand__is_active=True))
 
 PUBLIC_CATEGORY_PRODUCT_FILTER = Q(
     products__is_active=True,
     products__publication_status=Product.PublicationStatus.PUBLISHED,
     products__published_at__isnull=False,
     products__supplier__is_active=True,
-    products__brand__is_active=True,
     products__condition__is_active=True,
-)
+) & (Q(products__brand__isnull=True) | Q(products__brand__is_active=True))
 
 
 def get_public_products_queryset() -> QuerySet[Product]:

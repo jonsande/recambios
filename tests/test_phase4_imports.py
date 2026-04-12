@@ -86,8 +86,8 @@ def test_import_fails_when_required_columns_are_missing(django_user_model) -> No
     supplier = make_supplier("SUP-MISS-COL")
     user = make_staff_user(django_user_model, "import_user_missing")
     import_file = build_import_file(
-        headers=["brand_name", "category_name", "condition_code", "sku"],
-        rows=[["Bosch", "Alternator", "new", "SKU-1"]],
+        headers=["title", "condition_code", "sku"],
+        rows=[["Starter Motor", "new", "SKU-1"]],
     )
     import_record = SupplierImport.objects.create(
         supplier=supplier,
@@ -100,6 +100,46 @@ def test_import_fails_when_required_columns_are_missing(django_user_model) -> No
     assert result.import_status == SupplierImport.ImportStatus.FAILED
     assert "Missing required columns" in result.processing_notes
     assert result.rows.count() == 0
+
+
+@pytest.mark.django_db
+def test_import_creates_product_with_blank_brand_name(django_user_model) -> None:
+    supplier = make_supplier("SUP-BRAND-BLANK")
+    user = make_staff_user(django_user_model, "import_user_brand_blank")
+    make_condition("new", "Nuevo", "new")
+
+    import_file = build_import_file(
+        headers=list(CANONICAL_IMPORT_COLUMNS),
+        rows=[
+            [
+                "Brand Optional Product",
+                "",
+                "Alternator",
+                "new",
+                "SKU-BRAND-BLANK-1",
+                "SUP-BRAND-BLANK-1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        ],
+    )
+    import_record = SupplierImport.objects.create(
+        supplier=supplier,
+        uploaded_by=user,
+        original_file=import_file,
+    )
+
+    result = run_supplier_import(import_record, user)
+    product = Product.objects.get(sku="SKU-BRAND-BLANK-1")
+
+    assert result.import_status == SupplierImport.ImportStatus.COMPLETED
+    assert product.brand is None
 
 
 @pytest.mark.django_db
@@ -216,6 +256,59 @@ def test_import_updates_existing_product_by_sku(django_user_model) -> None:
     assert result.import_status == SupplierImport.ImportStatus.COMPLETED
     assert product.title == "Updated title"
     assert Product.objects.filter(supplier=supplier).count() == 1
+
+
+@pytest.mark.django_db
+def test_import_preserves_existing_brand_when_brand_name_is_blank(django_user_model) -> None:
+    supplier = make_supplier("SUP-BRAND-PRES")
+    user = make_staff_user(django_user_model, "import_user_brand_preserve")
+    brand = Brand.objects.create(name="Preserve Brand", slug="preserve-brand")
+    category = Category.objects.create(name="Starter", slug="starter-pres")
+    condition = make_condition("pres-new", "Nuevo Pres", "pres-new")
+    product = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-BRAND-PRES-1",
+        sku="SKU-BRAND-PRES-1",
+        slug="sku-brand-pres-1",
+        title="Old Brand Product",
+        brand=brand,
+        category=category,
+        condition=condition,
+    )
+
+    import_file = build_import_file(
+        headers=list(CANONICAL_IMPORT_COLUMNS),
+        rows=[
+            [
+                "Updated Brand Product",
+                "",
+                "Starter",
+                "pres-new",
+                "SKU-BRAND-PRES-1",
+                "SUP-BRAND-PRES-1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        ],
+    )
+    import_record = SupplierImport.objects.create(
+        supplier=supplier,
+        uploaded_by=user,
+        original_file=import_file,
+    )
+
+    result = run_supplier_import(import_record, user)
+    product.refresh_from_db()
+
+    assert result.import_status == SupplierImport.ImportStatus.COMPLETED
+    assert product.title == "Updated Brand Product"
+    assert product.brand_id == brand.id
 
 
 @pytest.mark.django_db

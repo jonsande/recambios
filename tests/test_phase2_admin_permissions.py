@@ -16,6 +16,7 @@ from apps.users.roles import (
     ROLE_REGISTERED_CUSTOMER,
     ROLE_RESTRICTED_SUPPLIER,
 )
+from apps.vehicles.models import ProductVehicleFitment, Vehicle
 
 
 def make_supplier(code: str) -> Supplier:
@@ -184,6 +185,67 @@ def test_internal_staff_can_publish_and_published_at_is_set(django_user_model) -
 
     assert product.publication_status == Product.PublicationStatus.PUBLISHED
     assert product.published_at is not None
+
+
+@pytest.mark.django_db
+def test_product_admin_includes_fitment_inline() -> None:
+    product_admin = ProductAdmin(Product, AdminSite())
+
+    inline_models = {inline.model for inline in product_admin.inlines}
+    assert ProductVehicleFitment in inline_models
+
+
+@pytest.mark.django_db
+def test_restricted_supplier_fitment_inline_forces_source_and_verification(
+    django_user_model,
+) -> None:
+    supplier = make_supplier("SUP-FIT")
+    brand = make_brand("Fit Brand", "fit-brand")
+    category = make_category("Fit Category", "fit-category")
+    condition = make_condition("fit-cond", "Fit Condition", "fit-condition")
+    product = make_product(supplier, brand, category, condition, "SKU-FIT")
+    vehicle = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=brand,
+        model="A3",
+        generation="8P",
+        year_start=2006,
+        year_end=2012,
+    )
+
+    supplier_user = make_staff_user(django_user_model, "restricted_fitment_editor")
+    supplier_user.groups.add(Group.objects.get(name=ROLE_RESTRICTED_SUPPLIER))
+    SupplierUserAssignment.objects.create(supplier=supplier, user=supplier_user, is_active=True)
+
+    product_admin = ProductAdmin(Product, AdminSite())
+    request = build_request(supplier_user)
+
+    fitment = ProductVehicleFitment(
+        product=product,
+        vehicle=vehicle,
+        source=ProductVehicleFitment.FitmentSource.MANUAL,
+        is_verified=True,
+    )
+
+    class DummyFormset:
+        model = ProductVehicleFitment
+        deleted_objects = []
+        save_m2m_called = False
+
+        def save(self, commit=True):
+            assert not commit
+            return [fitment]
+
+        def save_m2m(self):
+            self.save_m2m_called = True
+
+    formset = DummyFormset()
+    product_admin.save_formset(request, form=None, formset=formset, change=True)
+    fitment.refresh_from_db()
+
+    assert fitment.source == ProductVehicleFitment.FitmentSource.SUPPLIER
+    assert fitment.is_verified is False
+    assert formset.save_m2m_called
 
 
 @pytest.mark.django_db

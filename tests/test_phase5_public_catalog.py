@@ -9,6 +9,7 @@ from apps.catalog.models import Brand, Category, Condition, Product
 from apps.catalog.views import CategoryListView, ProductDetailView, ProductListView
 from apps.pages.views import AboutView, ContactView, HomeView, LegalView
 from apps.suppliers.models import Supplier
+from apps.vehicles.models import ProductVehicleFitment, Vehicle
 
 
 def make_supplier(code: str) -> Supplier:
@@ -40,7 +41,7 @@ def make_condition(code: str, name: str, slug: str, *, is_active: bool = True) -
 def make_product(
     *,
     supplier: Supplier,
-    brand: Brand,
+    brand: Brand | None,
     category: Category,
     condition: Condition,
     sku: str,
@@ -183,6 +184,33 @@ def test_public_category_and_product_views_use_only_public_products(client) -> N
 
 
 @pytest.mark.django_db
+def test_public_product_list_includes_published_products_with_null_brand(client) -> None:
+    supplier = make_supplier("SUP-P5-NOBRAND")
+    category = make_category("No Brand Category", "no-brand-category")
+    condition = make_condition("nobrand-new", "Nuevo No Brand", "nobrand-new")
+    product = make_product(
+        supplier=supplier,
+        brand=None,
+        category=category,
+        condition=condition,
+        sku="SKU-P5-NOBRAND",
+        title="No Brand Public Product",
+    )
+
+    response = client.get("/es/productos/")
+    detail_response = client.get(f"/es/productos/{product.slug}/")
+    products = list(response.context["products"])
+    content = response.content.decode()
+    detail_content = detail_response.content.decode()
+
+    assert response.status_code == 200
+    assert detail_response.status_code == 200
+    assert [item.id for item in products] == [product.id]
+    assert "Sin marca especificada" in content
+    assert "Sin marca especificada" in detail_content
+
+
+@pytest.mark.django_db
 def test_category_and_product_detail_routes_work_in_both_languages(client) -> None:
     supplier = make_supplier("SUP-P5-ROUTES")
     brand = make_brand("Valeo P5", "valeo-p5")
@@ -268,6 +296,52 @@ def test_price_visibility_messages_follow_business_rules(client) -> None:
     assert "Último precio conocido" in visible_content
     assert "Confirmar disponibilidad y plazo" in visible_content
     assert "Consultar precio y plazo" in hidden_content
+
+
+@pytest.mark.django_db
+def test_product_detail_renders_fitment_applications(client) -> None:
+    supplier = make_supplier("SUP-P5-FIT")
+    product_brand = make_brand("Brand P5 Fit", "brand-p5-fit")
+    vehicle_brand = make_brand("Seat P5 Fit", "seat-p5-fit")
+    category = make_category("Fit Category", "fit-category")
+    condition = make_condition("fit-new", "Nuevo Fit", "fit-new")
+    product = make_product(
+        supplier=supplier,
+        brand=product_brand,
+        category=category,
+        condition=condition,
+        sku="SKU-P5-FIT",
+        title="Fitment Product",
+    )
+    vehicle = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=vehicle_brand,
+        model="Leon",
+        generation="III",
+        variant="1.6 TDI",
+        year_start=2014,
+        year_end=2020,
+        engine_code="CAYC",
+        is_active=True,
+    )
+    ProductVehicleFitment.objects.create(
+        product=product,
+        vehicle=vehicle,
+        fitment_notes="Montaje delantero",
+        source=ProductVehicleFitment.FitmentSource.MANUAL,
+        is_verified=True,
+    )
+
+    response = client.get(f"/es/productos/{product.slug}/")
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "Aplicaciones del producto" in content
+    assert "Seat P5 Fit Leon III 1.6 TDI" in content
+    assert "Años: 2014-2020" in content
+    assert "Motor: CAYC" in content
+    assert "Compatibilidad verificada" in content
+    assert "Montaje delantero" in content
 
 
 @pytest.mark.django_db

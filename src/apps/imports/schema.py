@@ -4,12 +4,12 @@ from dataclasses import dataclass
 
 REQUIRED_IMPORT_COLUMNS: tuple[str, ...] = (
     "title",
-    "brand_name",
     "category_name",
     "condition_code",
 )
 
 OPTIONAL_IMPORT_COLUMNS: tuple[str, ...] = (
+    "brand_name",
     "sku",
     "supplier_product_code",
     "short_description",
@@ -22,7 +22,22 @@ OPTIONAL_IMPORT_COLUMNS: tuple[str, ...] = (
     "featured",
 )
 
-CANONICAL_IMPORT_COLUMNS: tuple[str, ...] = REQUIRED_IMPORT_COLUMNS + OPTIONAL_IMPORT_COLUMNS
+CANONICAL_IMPORT_COLUMNS: tuple[str, ...] = (
+    "title",
+    "brand_name",
+    "category_name",
+    "condition_code",
+    "sku",
+    "supplier_product_code",
+    "short_description",
+    "long_description",
+    "price_visibility_mode",
+    "last_known_price",
+    "currency",
+    "unit_of_sale",
+    "is_active",
+    "featured",
+)
 KNOWN_IMPORT_COLUMNS: set[str] = set(CANONICAL_IMPORT_COLUMNS)
 
 
