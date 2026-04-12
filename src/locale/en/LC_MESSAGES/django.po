@@ -259,32 +259,100 @@ msgstr "Compatibility verified"
 msgid "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial."
 msgstr "Initial public listing of published products. Visible price is informative and always subject to commercial validation."
 
-#: src/templates/catalog/product_list.html:27
+#: src/templates/catalog/product_list.html:20
+msgid "Búsqueda técnica y filtros"
+msgstr "Technical search and filters"
+
+#: src/templates/catalog/product_list.html:22
+msgid "Usa SKU, referencias o términos de vehículo para encontrar recambios publicados."
+msgstr "Use SKU, references, or vehicle terms to find published spare parts."
+
+#: src/templates/catalog/product_list.html:26
+msgid "Formulario de búsqueda y filtros de catálogo"
+msgstr "Catalog search and filter form"
+
+#: src/templates/catalog/product_list.html:29
+msgid "Buscar por SKU o referencia"
+msgstr "Search by SKU or reference"
+
+#: src/templates/catalog/product_list.html:36
+msgid "Ej.: SKU-1234, 06A145710N, A3 8P"
+msgstr "Example: SKU-1234, 06A145710N, A3 8P"
+
+#: src/templates/catalog/product_list.html:44
+msgid "Marca de vehículo"
+msgstr "Vehicle brand"
+
+#: src/templates/catalog/product_list.html:52
+msgid "Todas las marcas"
+msgstr "All brands"
+
+#: src/templates/catalog/product_list.html:61
+msgid "Modelo de vehículo"
+msgstr "Vehicle model"
+
+#: src/templates/catalog/product_list.html:69
+msgid "Todos los modelos"
+msgstr "All models"
+
+#: src/templates/catalog/product_list.html:78
+msgid "Año"
+msgstr "Year"
+
+#: src/templates/catalog/product_list.html:108
+msgid "Todas las categorías"
+msgstr "All categories"
+
+#: src/templates/catalog/product_list.html:126
+msgid "Todas las condiciones"
+msgstr "All conditions"
+
+#: src/templates/catalog/product_list.html:137
+msgid "Filtros técnicos"
+msgstr "Technical filters"
+
+#: src/templates/catalog/product_list.html:177
+msgid "Aplicar búsqueda y filtros"
+msgstr "Apply search and filters"
+
+#: src/templates/catalog/product_list.html:184
+msgid "Limpiar filtros"
+msgstr "Clear filters"
+
+#: src/templates/catalog/product_list.html:196
 msgid "Paginación de productos"
 msgstr "Product pagination"
 
-#: src/templates/catalog/product_list.html:33
+#: src/templates/catalog/product_list.html:202
 msgid "Anterior"
 msgstr "Previous"
 
-#: src/templates/catalog/product_list.html:38
+#: src/templates/catalog/product_list.html:207
 #, python-format
 msgid "\n              Página %(current)s de %(total)s\n            "
 msgstr "\n              Page %(current)s of %(total)s\n            "
 
-#: src/templates/catalog/product_list.html:48
+#: src/templates/catalog/product_list.html:217
 msgid "Siguiente"
 msgstr "Next"
 
-#: src/templates/catalog/product_list.html:54
+#: src/templates/catalog/product_list.html:224
+msgid "No hay resultados para tu búsqueda o filtros actuales."
+msgstr "No results match your current search or filters."
+
+#: src/templates/catalog/product_list.html:225
+msgid "Ajusta los criterios o limpia filtros para ver más productos publicados."
+msgstr "Adjust the criteria or clear filters to see more published products."
+
+#: src/templates/catalog/product_list.html:228
 msgid "No hay productos publicados en esta sección."
 msgstr "No products are published in this section."
 
-#: src/templates/catalog/product_list.html:55
+#: src/templates/catalog/product_list.html:229
 msgid "Puedes volver al listado de categorías para navegar otras áreas del catálogo."
 msgstr "You can return to the category list to browse other catalog areas."
 
-#: src/templates/catalog/product_list.html:56
+#: src/templates/catalog/product_list.html:230
 msgid "Ver categorías"
 msgstr "View categories"
 
