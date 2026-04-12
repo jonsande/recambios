@@ -1,0 +1,94 @@
+{
+  "source": "ERA TecDoc Electronic Catalog",
+  "url": "https://ecom.eraspares.es/ec",
+  "extraction_date": "2026-04-12 23:50:17",
+  "categories": [
+    {
+      "area_id": 869,
+      "name": "Sistema elÃ©ctrico",
+      "product_count": 0
+    },
+    {
+      "area_id": 949,
+      "name": "Sensores",
+      "product_count": 0
+    },
+    {
+      "area_id": 886,
+      "name": "Sistema elÃ©ctrico del motor",
+      "product_count": 0
+    },
+    {
+      "area_id": 1696,
+      "name": "Turismos",
+      "product_count": 0
+    },
+    {
+      "area_id": 894,
+      "name": "Interruptor/Sensor",
+      "product_count": 0
+    },
+    {
+      "area_id": 1169,
+      "name": "Turismos",
+      "product_count": 0
+    },
+    {
+      "area_id": 1293,
+      "name": "Sensores/conmutadores",
+      "product_count": 0
+    },
+    {
+      "area_id": 3513,
+      "name": "Turismos",
+      "product_count": 0
+    }
+  ],
+  "products": [
+    {
+      "reference": "330082",
+      "brand": "ERA",
+      "description": "ARGENTA",
+      "area_id": 1960,
+      "attributes": {},
+      "oe_numbers": [],
+      "applications": []
+    },
+    {
+      "reference": "330083",
+      "brand": "ERA",
+      "description": "ALFETTA",
+      "area_id": 1960,
+      "attributes": {},
+      "oe_numbers": [],
+      "applications": []
+    },
+    {
+      "reference": "330085",
+      "brand": "ERA",
+      "description": "BEDFORD BLITZ",
+      "area_id": 1960,
+      "attributes": {},
+      "oe_numbers": [],
+      "applications": []
+    },
+    {
+      "reference": "330086",
+      "brand": "ERA",
+      "description": "N AX",
+      "area_id": 1960,
+      "attributes": {},
+      "oe_numbers": [],
+      "applications": []
+    },
+    {
+      "reference": "330087",
+      "brand": "ERA",
+      "description": "SUZUKI GRAND VITARA",
+      "area_id": 1960,
+      "attributes": {},
+      "oe_numbers": [],
+      "applications": []
+    }
+  ]
+}

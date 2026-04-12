@@ -1,7 +1,16 @@
 import pytest
 from django.db import IntegrityError, transaction
+from django.utils.text import slugify
 
-from apps.catalog.models import Brand, Category, Condition, PartNumber, Product, ProductImage
+from apps.catalog.models import (
+    Brand,
+    Category,
+    Condition,
+    PartNumber,
+    PartNumberType,
+    Product,
+    ProductImage,
+)
 from apps.suppliers.models import Supplier
 from apps.vehicles.models import ProductVehicleFitment, Vehicle
 
@@ -26,6 +35,10 @@ def make_condition(code: str = "new", name: str = "Nuevo", slug: str = "new") ->
     return Condition.objects.create(code=code, name=name, slug=slug)
 
 
+def get_part_number_type(code: str) -> PartNumberType:
+    return PartNumberType.objects.get(code=code)
+
+
 def make_product(sku: str = "SKU-0001") -> Product:
     supplier = make_supplier()
     brand = make_brand()
@@ -35,7 +48,6 @@ def make_product(sku: str = "SKU-0001") -> Product:
         supplier=supplier,
         supplier_product_code=f"P-{sku}",
         sku=sku,
-        slug=f"product-{sku.lower()}",
         title=f"Product {sku}",
         brand=brand,
         category=category,
@@ -56,7 +68,6 @@ def test_product_sku_is_globally_unique() -> None:
             supplier=supplier_2,
             supplier_product_code="SUP2-1",
             sku="SKU-UNIQUE",
-            slug="product-sku-unique-2",
             title="Duplicated SKU",
             brand=brand,
             category=category,
@@ -74,7 +85,6 @@ def test_product_brand_can_be_empty_when_not_required() -> None:
         supplier=supplier,
         supplier_product_code="SUP-NOBRAND-1",
         sku="SKU-NOBRAND-1",
-        slug="product-sku-nobrand-1",
         title="No Brand Product",
         brand=None,
         category=category,
@@ -90,7 +100,7 @@ def test_part_number_is_normalized_for_lookup() -> None:
     part_number = PartNumber.objects.create(
         product=product,
         number_raw=" ab-12 3 /x ",
-        part_number_type=PartNumber.PartNumberType.OEM,
+        part_number_type=get_part_number_type("OEM"),
     )
 
     assert part_number.number_normalized == "AB123X"
@@ -103,7 +113,7 @@ def test_only_one_primary_part_number_per_product() -> None:
     PartNumber.objects.create(
         product=product,
         number_raw="A-100",
-        part_number_type=PartNumber.PartNumberType.INTERNAL,
+        part_number_type=get_part_number_type("AIM"),
         is_primary=True,
     )
 
@@ -111,9 +121,89 @@ def test_only_one_primary_part_number_per_product() -> None:
         PartNumber.objects.create(
             product=product,
             number_raw="B-200",
-            part_number_type=PartNumber.PartNumberType.OEM,
+            part_number_type=get_part_number_type("OEM"),
             is_primary=True,
         )
+
+
+@pytest.mark.django_db
+def test_required_part_number_types_are_seeded() -> None:
+    assert set(PartNumberType.objects.values_list("code", flat=True)) == {"OEM", "OES", "AIM"}
+
+
+@pytest.mark.django_db
+def test_custom_part_number_type_can_be_created() -> None:
+    custom_type = PartNumberType.objects.create(code="aftermarket")
+
+    assert custom_type.code == "AFTERMARKET"
+    assert custom_type.name == "AFTERMARKET"
+
+
+@pytest.mark.django_db
+def test_part_number_uses_part_number_type_relation() -> None:
+    product = make_product(sku="SKU-PN-TYPE")
+    custom_type = PartNumberType.objects.create(code="XREF", name="Cross Reference")
+    part_number = PartNumber.objects.create(
+        product=product,
+        number_raw="X-123",
+        part_number_type=custom_type,
+    )
+
+    assert part_number.part_number_type_id == custom_type.id
+    assert part_number.part_number_type.code == "XREF"
+
+
+@pytest.mark.django_db
+def test_product_slug_is_generated_from_sku_and_overrides_manual_value() -> None:
+    supplier = make_supplier(code="SUP-SLUG")
+    brand = make_brand(name="Slug Brand", slug="slug-brand")
+    category = make_category(name="Slug Category", slug="slug-category")
+    condition = make_condition(code="slug-new", name="Slug New", slug="slug-new")
+
+    product = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-SLUG-1",
+        sku="SKU / Slug 001",
+        slug="manual-slug",
+        title="Slug Product",
+        brand=brand,
+        category=category,
+        condition=condition,
+    )
+
+    assert product.slug == slugify(product.sku)
+
+
+@pytest.mark.django_db
+def test_product_slug_appends_deterministic_suffix_when_slugified_skus_collide() -> None:
+    supplier = make_supplier(code="SUP-SLUG-COLLIDE")
+    brand = make_brand(name="Slug Collision Brand", slug="slug-collision-brand")
+    category = make_category(name="Slug Collision Category", slug="slug-collision-category")
+    condition = make_condition(code="slug-collision", name="Slug Collision", slug="slug-collision")
+
+    first = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-SLUG-COLLIDE-1",
+        sku="SKU A",
+        title="Slug Collision 1",
+        brand=brand,
+        category=category,
+        condition=condition,
+    )
+    second = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-SLUG-COLLIDE-2",
+        sku="SKU-A",
+        title="Slug Collision 2",
+        brand=brand,
+        category=category,
+        condition=condition,
+    )
+
+    assert first.slug == "sku-a"
+    assert second.slug.startswith("sku-a-")
+    assert second.slug != first.slug
+    assert len(second.slug.rsplit("-", maxsplit=1)[-1]) == 8
 
 
 @pytest.mark.django_db

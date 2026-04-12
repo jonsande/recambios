@@ -299,12 +299,6 @@ def _process_data_row(
             supplier=import_record.supplier,
             sku=sku,
             supplier_product_code=supplier_product_code or None,
-            slug=_build_unique_slug(
-                Product,
-                f"{title}-{sku}",
-                max_length=180,
-                fallback_prefix="product",
-            ),
             title=title,
             short_description=short_description,
             long_description=long_description,

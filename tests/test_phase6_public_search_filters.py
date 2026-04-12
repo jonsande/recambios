@@ -9,6 +9,7 @@ from apps.catalog.models import (
     Category,
     Condition,
     PartNumber,
+    PartNumberType,
     Product,
     ProductAttributeValue,
 )
@@ -52,6 +53,10 @@ def make_condition(code: str, name: str, slug: str, *, is_active: bool = True) -
 
 
 
+def get_part_number_type(code: str) -> PartNumberType:
+    return PartNumberType.objects.get(code=code)
+
+
 def make_product(
     *,
     supplier: Supplier,
@@ -71,7 +76,6 @@ def make_product(
         supplier=supplier,
         supplier_product_code=f"{supplier.code}-{sku}",
         sku=sku,
-        slug=f"product-{sku.lower()}",
         title=title,
         short_description=f"Short {title}",
         long_description=f"Long {title}",
@@ -156,7 +160,7 @@ def test_search_by_part_number_raw_and_normalized_returns_product(client) -> Non
     PartNumber.objects.create(
         product=product,
         number_raw="06A-145-710N",
-        part_number_type=PartNumber.PartNumberType.OEM,
+        part_number_type=get_part_number_type("OEM"),
     )
 
     raw_response = client.get("/es/productos/?q=06A-145-710N")
@@ -348,12 +352,12 @@ def test_search_results_do_not_duplicate_products_when_multiple_joins_match(clie
     PartNumber.objects.create(
         product=product,
         number_raw="REF-777",
-        part_number_type=PartNumber.PartNumberType.OE,
+        part_number_type=get_part_number_type("OES"),
     )
     PartNumber.objects.create(
         product=product,
         number_raw="REF 777",
-        part_number_type=PartNumber.PartNumberType.OEM,
+        part_number_type=get_part_number_type("OEM"),
     )
 
     response = client.get("/es/productos/?q=REF777")

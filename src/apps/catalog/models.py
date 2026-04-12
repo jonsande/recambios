@@ -1,8 +1,10 @@
+import hashlib
 import re
 from decimal import Decimal
 
 from django.db import models
 from django.db.models import Q
+from django.utils.text import slugify
 
 PART_NUMBER_NORMALIZER_RE = re.compile(r"[^A-Z0-9]+")
 ATTRIBUTE_SPACES_RE = re.compile(r"\s+")
@@ -104,6 +106,35 @@ class Condition(models.Model):
         return self.name
 
 
+class PartNumberType(models.Model):
+    REQUIRED_BASE_CODES = ("OEM", "OES", "AIM")
+
+    code = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=80, blank=True)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        indexes = [
+            models.Index(
+                fields=["is_active", "sort_order"],
+                name="cat_pntype_active_sort_idx",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.code
+
+    def save(self, *args, **kwargs) -> None:
+        self.code = normalize_part_number(self.code or "")
+        if not self.name:
+            self.name = self.code
+        super().save(*args, **kwargs)
+
+
 class Product(models.Model):
     class PublicationStatus(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -121,7 +152,7 @@ class Product(models.Model):
     )
     supplier_product_code = models.CharField(max_length=64, null=True, blank=True)
     sku = models.CharField(max_length=64, unique=True)
-    slug = models.SlugField(max_length=180, unique=True)
+    slug = models.SlugField(max_length=180, unique=True, editable=False)
     title = models.CharField(max_length=220)
     short_description = models.CharField(max_length=280, blank=True)
     long_description = models.TextField(blank=True)
@@ -201,15 +232,25 @@ class Product(models.Model):
     def __str__(self) -> str:
         return f"{self.sku} - {self.title}"
 
+    def _build_slug_from_sku(self) -> str:
+        max_length = self._meta.get_field("slug").max_length
+        base_slug = slugify(self.sku).strip("-") or "product"
+        base_slug = base_slug[:max_length].rstrip("-") or "product"
+
+        if not Product.objects.exclude(pk=self.pk).filter(slug=base_slug).exists():
+            return base_slug
+
+        suffix = hashlib.sha1(self.sku.encode("utf-8")).hexdigest()[:8]
+        trimmed_length = max_length - len(suffix) - 1
+        trimmed_base = base_slug[:trimmed_length].rstrip("-") or "product"
+        return f"{trimmed_base}-{suffix}"
+
+    def save(self, *args, **kwargs) -> None:
+        self.slug = self._build_slug_from_sku()
+        super().save(*args, **kwargs)
+
 
 class PartNumber(models.Model):
-    class PartNumberType(models.TextChoices):
-        INTERNAL = "internal", "Internal"
-        OE = "oe", "OE"
-        OEM = "oem", "OEM"
-        EQUIVALENT = "equivalent", "Equivalent"
-        LEGACY = "legacy", "Legacy"
-
     product = models.ForeignKey(
         "catalog.Product",
         on_delete=models.CASCADE,
@@ -224,11 +265,10 @@ class PartNumber(models.Model):
     )
     number_raw = models.CharField(max_length=128)
     number_normalized = models.CharField(max_length=128, editable=False, db_index=True)
-    part_number_type = models.CharField(
-        max_length=20,
-        choices=PartNumberType.choices,
-        default=PartNumberType.INTERNAL,
-        db_index=True,
+    part_number_type = models.ForeignKey(
+        "catalog.PartNumberType",
+        on_delete=models.PROTECT,
+        related_name="part_numbers",
     )
     is_primary = models.BooleanField(default=False, db_index=True)
     notes = models.TextField(blank=True)

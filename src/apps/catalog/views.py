@@ -406,6 +406,7 @@ class ProductDetailView(DetailView):
     def get_queryset(self):
         return get_public_products_queryset().prefetch_related(
             "part_numbers__brand",
+            "part_numbers__part_number_type",
             "attribute_values__attribute_definition",
             "fitments__vehicle__brand",
         )
@@ -413,9 +414,13 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product = context["product"]
-        context["part_numbers"] = product.part_numbers.select_related("brand").order_by(
-            "-is_primary",
+        context["part_numbers"] = product.part_numbers.select_related(
+            "brand",
             "part_number_type",
+        ).order_by(
+            "-is_primary",
+            "part_number_type__sort_order",
+            "part_number_type__code",
             "number_normalized",
         )
 

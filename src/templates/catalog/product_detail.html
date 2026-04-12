@@ -89,7 +89,7 @@
             <li class="rounded-md border border-slate-200 p-3">
               <p class="font-medium text-slate-900">{{ part_number.number_raw }}</p>
               <p class="mt-1 text-xs text-slate-600">
-                {{ part_number.get_part_number_type_display }}
+                {{ part_number.part_number_type.code }}
                 {% if part_number.brand %}· {{ part_number.brand.name }}{% endif %}
                 {% if part_number.is_primary %}· {% trans "Principal" %}{% endif %}
               </p>

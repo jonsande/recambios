@@ -12,6 +12,7 @@ from .models import (
     Category,
     Condition,
     PartNumber,
+    PartNumberType,
     Product,
     ProductAttributeValue,
     ProductImage,
@@ -150,8 +151,19 @@ class ConditionAdmin(ReferenceDataAdminMixin, admin.ModelAdmin):
     date_hierarchy = "updated_at"
 
 
+@admin.register(PartNumberType)
+class PartNumberTypeAdmin(ReferenceDataAdminMixin, admin.ModelAdmin):
+    list_display = ("code", "name", "sort_order", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("code", "name")
+    ordering = ("sort_order", "code")
+    readonly_fields = ("created_at", "updated_at")
+    date_hierarchy = "updated_at"
+
+
 class PartNumberInline(admin.TabularInline):
     model = PartNumber
+    verbose_name_plural = "PART NUMBERS"
     extra = 0
     fields = (
         "number_raw",
@@ -163,15 +175,22 @@ class PartNumberInline(admin.TabularInline):
     readonly_fields = ("number_normalized",)
     autocomplete_fields = ("brand",)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "part_number_type":
+            kwargs["queryset"] = PartNumberType.objects.filter(is_active=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
+    verbose_name_plural = "PRODUCT IMAGES"
     extra = 0
     fields = ("image", "alt_text", "sort_order", "is_primary")
 
 
 class ProductVehicleFitmentInline(admin.TabularInline):
     model = ProductVehicleFitment
+    verbose_name_plural = "PRODUCT VEHICLE FITMENTS"
     extra = 0
     fields = ("vehicle", "fitment_notes", "source", "is_verified")
     autocomplete_fields = ("vehicle",)
@@ -217,9 +236,8 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     ordering = ("-updated_at",)
     list_select_related = ("supplier", "brand", "category", "condition")
     autocomplete_fields = ("supplier", "brand", "category", "condition")
-    prepopulated_fields = {"slug": ("title",)}
-    inlines = (PartNumberInline, ProductImageInline, ProductVehicleFitmentInline)
-    readonly_fields = ("created_at", "updated_at")
+    inlines = (PartNumberInline, ProductVehicleFitmentInline, ProductImageInline)
+    readonly_fields = ("slug", "created_at", "updated_at")
     date_hierarchy = "updated_at"
     fieldsets = (
         (
@@ -227,10 +245,10 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "supplier",
-                    "supplier_product_code",
                     "sku",
-                    "slug",
+                    "supplier_product_code",
                     "title",
+                    "slug",
                     "short_description",
                     "long_description",
                 )
@@ -240,12 +258,12 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             "Classification",
             {"fields": ("brand", "category", "condition", "is_active", "featured")},
         ),
+        ("Pricing", {"fields": ("last_known_price", "currency", "unit_of_sale")}),
+        ("Dimensions", {"fields": ("weight", "length", "width", "height")}),
         (
             "Publication",
             {"fields": ("publication_status", "published_at", "price_visibility_mode")},
         ),
-        ("Pricing", {"fields": ("last_known_price", "currency", "unit_of_sale")}),
-        ("Dimensions", {"fields": ("weight", "length", "width", "height")}),
         ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 
@@ -358,7 +376,7 @@ class PartNumberAdmin(DraftScopedAdminMixin, admin.ModelAdmin):
     list_filter = ("part_number_type", "is_primary", "brand")
     search_fields = ("number_raw", "number_normalized", "product__sku", "product__title")
     ordering = ("number_normalized",)
-    list_select_related = ("product", "brand", "product__supplier")
+    list_select_related = ("product", "part_number_type", "brand", "product__supplier")
     autocomplete_fields = ("product", "brand")
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "updated_at"

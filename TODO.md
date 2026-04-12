@@ -59,7 +59,7 @@
   - [ ] extensión de importación a ProductVehicleFitment
   - [ ] estrategia de importación de imágenes
 
-- [ ] **Fase 5** — Catálogo público base
+- [x] **Fase 5** — Catálogo público base
   - [x] home
   - [x] categorías
   - [x] listado de productos
@@ -67,16 +67,16 @@
   - [x] páginas corporativas
   - [x] navegación base
 
-- [ ] **Fase 6** — Búsqueda técnica y filtros
-  - [ ] búsqueda por SKU
-  - [ ] búsqueda por referencia cruzada
-  - [ ] búsqueda por marca/modelo
-  - [ ] filtros por marca
-  - [ ] filtros por año
-  - [ ] filtros por modelo
-  - [ ] filtros por categoría
-  - [ ] filtros por condición
-  - [ ] filtros por atributos técnicos
+- [x] **Fase 6** — Búsqueda técnica y filtros
+  - [x] búsqueda por SKU
+  - [x] búsqueda por referencia cruzada
+  - [x] búsqueda por marca/modelo
+  - [x] filtros por marca
+  - [x] filtros por año
+  - [x] filtros por modelo
+  - [x] filtros por categoría
+  - [x] filtros por condición
+  - [x] filtros por atributos técnicos
 
 - [ ] **Fase 7** — Compatibilidad por vehículo
   - [ ] consulta por vehículo

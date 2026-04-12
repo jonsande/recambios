@@ -1,0 +1,2217 @@
+{
+  "source": "ERA TecDoc Electronic Catalog",
+  "url": "https://ecom.eraspares.es/ec",
+  "extraction_date": "2026-04-13 00:04:16",
+  "products": [
+    {
+      "reference": "330082",
+      "brand": "ERA",
+      "description": "ERA Sensor 330082",
+      "category_names": [
+        "Sensores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4067872",
+            "4108672",
+            "4276954",
+            "4349082",
+            "4407984",
+            "4409505",
+            "4414600",
+            "4448131",
+            "60813687",
+            "7588802",
+            "7588882"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "numbers": [
+            "2101",
+            "3808"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "156"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "124",
+            "126",
+            "127",
+            "131",
+            "132",
+            "ARGENTA",
+            "BARCHETTA",
+            "BRAVA",
+            "BRAVO",
+            "CINQUECENTO",
+            "COUPE",
+            "DUCATO",
+            "DUNA",
+            "ELBA",
+            "FIORINO",
+            "MAREA",
+            "PALIO",
+            "PANDA",
+            "PUNTO",
+            "REGATA",
+            "RITMO",
+            "SEICENTO",
+            "SIENA",
+            "STRADA",
+            "TEMPRA",
+            "TIPO",
+            "UNO",
+            "9FSO126P",
+            "POLONEZINNOCENTIELBA"
+          ]
+        },
+        {
+          "brand": "Iveco",
+          "models": [
+            "DAILY"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "models": [
+            "110",
+            "NADESCHDA",
+            "NIVA",
+            "SAMARA"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "112",
+            "BETA",
+            "PRISMA"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "FURA",
+            "RONDAZASTAVA101"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330083",
+      "brand": "ERA",
+      "description": "ERA Sensor 330083",
+      "category_names": [
+        "Sensores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "34362106",
+            "4171667",
+            "60515838",
+            "60515839"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "75",
+            "90",
+            "ALFETTA",
+            "GIULIETTA",
+            "SPIDER"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "IBIZA",
+            "MALAGA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330085",
+      "brand": "ERA",
+      "description": "ERA Sensor 330085",
+      "category_names": [
+        "Sensores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Opel",
+          "numbers": [
+            "3439088",
+            "9193163",
+            "92061480",
+            "92063941"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Ford",
+          "models": [
+            "BLITZ",
+            "CHEVANNE"
+          ]
+        },
+        {
+          "brand": "Daewoo",
+          "models": [
+            "ESPEROHOLDENBARINA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "AGILA",
+            "ARENA",
+            "ASCONA",
+            "ASTRA",
+            "CLASSIC",
+            "CALIBRA",
+            "COMBO",
+            "CORSA",
+            "FRONTERA",
+            "KADETT",
+            "MANTA",
+            "MERIVA",
+            "MOKKA",
+            "OMEGA",
+            "REKORD",
+            "SENATOR",
+            "SIGNUM",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA",
+            "ZAFIRA"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "9-3",
+            "9-5"
+          ]
+        },
+        {
+          "brand": "Vauxhall",
+          "models": [
+            "AGILA",
+            "ASTRA",
+            "ASTRAVAN",
+            "CORSA",
+            "CORSAVAN",
+            "FRONTERA",
+            "OMEGA",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330086",
+      "brand": "ERA",
+      "description": "ERA Sensor 330086",
+      "category_names": [
+        "Sensores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Peugeot",
+          "numbers": [
+            "0242",
+            "1337",
+            "1338",
+            "0242",
+            "1337",
+            "1338"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Fiat",
+          "models": [
+            "DUCATO",
+            "TALENTO"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "205",
+            "305",
+            "309",
+            "405",
+            "504",
+            "505",
+            "604",
+            "J5TALBOTSIMCA",
+            "SOLARA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330087",
+      "brand": "ERA",
+      "description": "ERA Sensor 330087",
+      "category_names": [
+        "Sensores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Daihatsu",
+          "numbers": [
+            "83420",
+            "87201",
+            "83420",
+            "87701"
+          ]
+        },
+        {
+          "brand": "Honda",
+          "numbers": [
+            "37750"
+          ]
+        },
+        {
+          "brand": "Mazda",
+          "numbers": [
+            "0118",
+            "18510",
+            "0118",
+            "89181",
+            "10884"
+          ]
+        },
+        {
+          "brand": "Mitsubishi",
+          "numbers": [
+            "850107"
+          ]
+        },
+        {
+          "brand": "Suzuki",
+          "numbers": [
+            "34850",
+            "65011",
+            "34850",
+            "65020",
+            "34850",
+            "65021",
+            "34850"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Suzuki",
+          "models": [
+            "GRAND",
+            "VITARA",
+            "SJ",
+            "410"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661005",
+      "brand": "ERA",
+      "description": "ERA Sensor 661005",
+      "category_names": [
+        "Relé"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "7573490",
+            "82430021"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "156"
+          ]
+        },
+        {
+          "brand": "Bmw",
+          "models": [
+            "3CITRO",
+            "NXANTIA"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "BRAVA",
+            "BRAVO",
+            "CROMA",
+            "DUCATO",
+            "ELBA",
+            "FIORINO",
+            "MAREA",
+            "MULTIPLA",
+            "PALIO",
+            "PUNTO",
+            "SEICENTO",
+            "SIENA",
+            "STRADA",
+            "TEMPRA",
+            "TIPO",
+            "UNO"
+          ]
+        },
+        {
+          "brand": "Ford",
+          "models": [
+            "ESCORT",
+            "FIESTA",
+            "TRANSIT"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "DEDRA",
+            "DELTA",
+            "LYBRA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "VECTRA"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "306"
+          ]
+        },
+        {
+          "brand": "Skoda",
+          "models": [
+            "FAVORIT"
+          ]
+        },
+        {
+          "brand": "Toyota",
+          "models": [
+            "RUNNER",
+            "COROLLA"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "POLO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661006",
+      "brand": "ERA",
+      "description": "ERA Sensor 661006",
+      "category_names": [
+        "Relé"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "7595406"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Fiat",
+          "models": [
+            "CINQUECENTO",
+            "DUCATO",
+            "ELBA",
+            "FIORINO",
+            "PANDA",
+            "TALENTO"
+          ]
+        },
+        {
+          "brand": "Renault",
+          "models": [
+            "ESPACE",
+            "RAPID"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661022",
+      "brand": "ERA",
+      "description": "ERA Sensor 661022",
+      "category_names": [
+        "Relé"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "51769616"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Audi",
+          "models": [
+            "100",
+            "200",
+            "80",
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A6",
+            "A8",
+            "CABRIOLET",
+            "COUPE",
+            "Q3",
+            "Q5",
+            "TT",
+            "V8"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "PUNTO"
+          ]
+        },
+        {
+          "brand": "Mercedes",
+          "models": [
+            "BENZVITO"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "ZAFIRA"
+          ]
+        },
+        {
+          "brand": "Skoda",
+          "models": [
+            "SUPERB"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "AMAROK",
+            "CADDY",
+            "EOS",
+            "GOLF",
+            "PASSAT",
+            "PHAETON",
+            "TOUAREG",
+            "TRANSPORTER"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661050",
+      "brand": "ERA",
+      "description": "ERA Sensor 661050",
+      "category_names": [
+        "Relé"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Vauxhall",
+          "models": [
+            "AMPERA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661089",
+      "brand": "ERA",
+      "description": "ERA Sensor 661089",
+      "category_names": [
+        "Relé"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Audi",
+          "models": [
+            "200",
+            "A3",
+            "A4",
+            "A8",
+            "QUATTRO",
+            "TT"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "ALHAMBRA",
+            "AROSA",
+            "CORDOBA",
+            "IBIZA",
+            "INCA",
+            "LEON",
+            "TOLEDO"
+          ]
+        },
+        {
+          "brand": "Skoda",
+          "models": [
+            "FABIA",
+            "OCTAVIA",
+            "SUPERB"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "BORA",
+            "CADDY",
+            "CORRADO",
+            "GOLF",
+            "JETTA",
+            "LT",
+            "28-35",
+            "40-55",
+            "NEW",
+            "BEETLE",
+            "PASSAT",
+            "PHAETON",
+            "POLO",
+            "SCIROCCO",
+            "SHARAN",
+            "TOUAREG",
+            "TRANSPORTER",
+            "VENTO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661131",
+      "brand": "ERA",
+      "description": "ERA Sensor 661131",
+      "category_names": [
+        "Unidades de control"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Vw",
+          "models": [
+            "CADDY",
+            "GOLF",
+            "PASSAT",
+            "POLO",
+            "TRANSPORTER",
+            "VENTO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661132",
+      "brand": "ERA",
+      "description": "ERA Sensor 661132",
+      "category_names": [
+        "Unidades de control"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Audi",
+          "models": [
+            "A3"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "ALHAMBRA",
+            "AROSA",
+            "CORDOBA",
+            "IBIZA",
+            "INCA",
+            "LEON",
+            "TOLEDO"
+          ]
+        },
+        {
+          "brand": "Skoda",
+          "models": [
+            "FABIA",
+            "OCTAVIA"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "BORA",
+            "CADDY",
+            "FOX",
+            "GOLF",
+            "JETTA",
+            "LUPO",
+            "NEW",
+            "BEETLE",
+            "PASSAT",
+            "POLO",
+            "SHARAN",
+            "TOUAREG",
+            "TRANSPORTER",
+            "MULTIVAN"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661137",
+      "brand": "ERA",
+      "description": "ERA Sensor 661137",
+      "category_names": [
+        "Unidades de control"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Audi",
+          "models": [
+            "100",
+            "80",
+            "90"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "CADDY",
+            "GOLF",
+            "JETTA",
+            "PASSAT",
+            "POLO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661138",
+      "brand": "ERA",
+      "description": "ERA Sensor 661138",
+      "category_names": [
+        "Unidades de control"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Ford",
+          "numbers": [
+            "1238537",
+            "1238565",
+            "1238627",
+            "35601160",
+            "3650116",
+            "6143688"
+          ]
+        },
+        {
+          "brand": "General Motors",
+          "numbers": [
+            "1320",
+            "21930840"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Ford",
+          "models": [
+            "GRANADA",
+            "SCORPIO",
+            "SIERRA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "ASCONA",
+            "ASTRA",
+            "KADETT",
+            "OMEGA",
+            "REKORD",
+            "SENATOR",
+            "VECTRA"
+          ]
+        },
+        {
+          "brand": "Vauxhall",
+          "models": [
+            "ASTRA",
+            "CARLTON",
+            "CAVALIER",
+            "FRONTERA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661139",
+      "brand": "ERA",
+      "description": "ERA Sensor 661139",
+      "category_names": [
+        "Unidades de control"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Vw",
+          "models": [
+            "GOLF",
+            "JETTA",
+            "PASSAT"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330000",
+      "brand": "ERA",
+      "description": "ERA Sensor 330000",
+      "category_names": [
+        "Sistema eléctrico del motor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4133922",
+            "4249594",
+            "4298311",
+            "4414583",
+            "4414599",
+            "4422049",
+            "4459907",
+            "5428649",
+            "5556508",
+            "60593847",
+            "60805536",
+            "60807764",
+            "95494103",
+            "98469129"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "numbers": [
+            "2101",
+            "3810",
+            "2101",
+            "3810"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "155",
+            "164CITRO",
+            "NCX"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "124",
+            "125",
+            "126",
+            "127",
+            "128",
+            "131",
+            "132",
+            "242",
+            "SERIE",
+            "ARGENTA",
+            "CROMA",
+            "DUCATO",
+            "DUNA",
+            "FIORINO",
+            "PANDA",
+            "REGATA",
+            "RITMO",
+            "TALENTO",
+            "TEMPRA",
+            "TIPO",
+            "UNO",
+            "9FSO126P"
+          ]
+        },
+        {
+          "brand": "Iveco",
+          "models": [
+            "DAILY"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "models": [
+            "110",
+            "1200-1600",
+            "NADESCHDA",
+            "NIVA",
+            "PRIORA",
+            "SAMARA",
+            "TOSCANA"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "BETA",
+            "DEDRA",
+            "DELTA",
+            "PRISMA",
+            "THEMA",
+            "TREVI",
+            "Y10"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "ASCONA",
+            "CORSA",
+            "KADETT",
+            "MANTA",
+            "OMEGA",
+            "SENATOR"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "505PININFARINASPIDEREUROPA"
+          ]
+        },
+        {
+          "brand": "Porsche",
+          "models": [
+            "BOXSTER",
+            "CAYMAN"
+          ]
+        },
+        {
+          "brand": "Renault",
+          "models": [
+            "11",
+            "18",
+            "20",
+            "25",
+            "ESPACE",
+            "MASTER",
+            "RAPID",
+            "SUPER",
+            "TRAFIC"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "90",
+            "900",
+            "9000",
+            "9-3"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "IBIZA",
+            "MALAGA",
+            "RONDA"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "models": [
+            "340-360"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "LT",
+            "28-35",
+            "28-46ZASTAVA101",
+            "YUGO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330001",
+      "brand": "ERA",
+      "description": "ERA Sensor 330001",
+      "category_names": [
+        "Sistema eléctrico del motor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4151243",
+            "4151564",
+            "4152127",
+            "4304418",
+            "4305685",
+            "4431182",
+            "4473333",
+            "4998770",
+            "5927407",
+            "6745"
+          ]
+        },
+        {
+          "brand": "Mercedes",
+          "numbers": [
+            "5927408",
+            "287887"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Bmw",
+          "models": [
+            "1500-2000",
+            "1600",
+            "2000",
+            "2000-3"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "1000",
+            "SERIE",
+            "126",
+            "127",
+            "1500",
+            "1500-2300",
+            "500",
+            "600",
+            "850",
+            "900",
+            "FIORINO",
+            "PANDA",
+            "UNOFSO125P",
+            "126P",
+            "POLONEZ"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "112"
+          ]
+        },
+        {
+          "brand": "Mercedes",
+          "models": [
+            "BENZG",
+            "CLASE",
+            "SPRINTER",
+            "VITOPUCHG-MODELL"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "127",
+            "128",
+            "133",
+            "850",
+            "FURA",
+            "IBIZA",
+            "MARBELLA",
+            "PANDA",
+            "TERRASMARTCABRIO",
+            "CITY-COUPE",
+            "CROSSBLADE",
+            "FORTWO",
+            "ROADSTER"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "LT",
+            "28-35",
+            "28-46ZASTAVA101"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330002",
+      "brand": "ERA",
+      "description": "ERA Sensor 330002",
+      "category_names": [
+        "Sistema eléctrico del motor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "510621",
+            "60504190"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "33",
+            "ALFASUD"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330003",
+      "brand": "ERA",
+      "description": "ERA Sensor 330003",
+      "category_names": [
+        "Sistema eléctrico del motor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Peugeot",
+          "numbers": [
+            "1131",
+            "1131"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "numbers": [
+            "3342004"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Peugeot",
+          "models": [
+            "505"
+          ]
+        },
+        {
+          "brand": "Renault",
+          "models": [
+            "11",
+            "18",
+            "20",
+            "25",
+            "ESPACE",
+            "MASTER",
+            "RAPID",
+            "SUPER",
+            "TRAFIC"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "90",
+            "900",
+            "9000",
+            "9-3"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "models": [
+            "340-360"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330004",
+      "brand": "ERA",
+      "description": "ERA Sensor 330004",
+      "category_names": [
+        "Sistema eléctrico del motor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Volvo",
+          "numbers": [
+            "1257137",
+            "1257137"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Audi",
+          "models": [
+            "100",
+            "200",
+            "50",
+            "80",
+            "90",
+            "COUPE",
+            "QUATTRO",
+            "V8"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "TOLEDO"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "models": [
+            "240",
+            "740",
+            "760",
+            "780",
+            "940",
+            "960"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "CADDY",
+            "CORRADO",
+            "DERBY",
+            "GOLF",
+            "JETTA",
+            "PASSAT",
+            "POLO",
+            "SANTANA",
+            "SCIROCCO",
+            "TRANSPORTER",
+            "VENTO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330082",
+      "brand": "ERA",
+      "description": "ERA Sensor 330082",
+      "category_names": [
+        "Interruptor/Sensor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4067872",
+            "4108672",
+            "4276954",
+            "4349082",
+            "4407984",
+            "4409505",
+            "4414600",
+            "4448131",
+            "60813687",
+            "7588802",
+            "7588882"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "numbers": [
+            "2101",
+            "3808"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "156"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "124",
+            "126",
+            "127",
+            "131",
+            "132",
+            "ARGENTA",
+            "BARCHETTA",
+            "BRAVA",
+            "BRAVO",
+            "CINQUECENTO",
+            "COUPE",
+            "DUCATO",
+            "DUNA",
+            "ELBA",
+            "FIORINO",
+            "MAREA",
+            "PALIO",
+            "PANDA",
+            "PUNTO",
+            "REGATA",
+            "RITMO",
+            "SEICENTO",
+            "SIENA",
+            "STRADA",
+            "TEMPRA",
+            "TIPO",
+            "UNO",
+            "9FSO126P",
+            "POLONEZINNOCENTIELBA"
+          ]
+        },
+        {
+          "brand": "Iveco",
+          "models": [
+            "DAILY"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "models": [
+            "110",
+            "NADESCHDA",
+            "NIVA",
+            "SAMARA"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "112",
+            "BETA",
+            "PRISMA"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "FURA",
+            "RONDAZASTAVA101"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330083",
+      "brand": "ERA",
+      "description": "ERA Sensor 330083",
+      "category_names": [
+        "Interruptor/Sensor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "34362106",
+            "4171667",
+            "60515838",
+            "60515839"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "75",
+            "90",
+            "ALFETTA",
+            "GIULIETTA",
+            "SPIDER"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "IBIZA",
+            "MALAGA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330085",
+      "brand": "ERA",
+      "description": "ERA Sensor 330085",
+      "category_names": [
+        "Interruptor/Sensor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Opel",
+          "numbers": [
+            "3439088",
+            "9193163",
+            "92061480",
+            "92063941"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Ford",
+          "models": [
+            "BLITZ",
+            "CHEVANNE"
+          ]
+        },
+        {
+          "brand": "Daewoo",
+          "models": [
+            "ESPEROHOLDENBARINA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "AGILA",
+            "ARENA",
+            "ASCONA",
+            "ASTRA",
+            "CLASSIC",
+            "CALIBRA",
+            "COMBO",
+            "CORSA",
+            "FRONTERA",
+            "KADETT",
+            "MANTA",
+            "MERIVA",
+            "MOKKA",
+            "OMEGA",
+            "REKORD",
+            "SENATOR",
+            "SIGNUM",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA",
+            "ZAFIRA"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "9-3",
+            "9-5"
+          ]
+        },
+        {
+          "brand": "Vauxhall",
+          "models": [
+            "AGILA",
+            "ASTRA",
+            "ASTRAVAN",
+            "CORSA",
+            "CORSAVAN",
+            "FRONTERA",
+            "OMEGA",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330086",
+      "brand": "ERA",
+      "description": "ERA Sensor 330086",
+      "category_names": [
+        "Interruptor/Sensor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Peugeot",
+          "numbers": [
+            "0242",
+            "1337",
+            "1338",
+            "0242",
+            "1337",
+            "1338"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Fiat",
+          "models": [
+            "DUCATO",
+            "TALENTO"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "205",
+            "305",
+            "309",
+            "405",
+            "504",
+            "505",
+            "604",
+            "J5TALBOTSIMCA",
+            "SOLARA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330087",
+      "brand": "ERA",
+      "description": "ERA Sensor 330087",
+      "category_names": [
+        "Interruptor/Sensor"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Daihatsu",
+          "numbers": [
+            "83420",
+            "87201",
+            "83420",
+            "87701"
+          ]
+        },
+        {
+          "brand": "Honda",
+          "numbers": [
+            "37750"
+          ]
+        },
+        {
+          "brand": "Mazda",
+          "numbers": [
+            "0118",
+            "18510",
+            "0118",
+            "89181",
+            "10884"
+          ]
+        },
+        {
+          "brand": "Mitsubishi",
+          "numbers": [
+            "850107"
+          ]
+        },
+        {
+          "brand": "Suzuki",
+          "numbers": [
+            "34850",
+            "65011",
+            "34850",
+            "65020",
+            "34850",
+            "65021",
+            "34850"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Suzuki",
+          "models": [
+            "GRAND",
+            "VITARA",
+            "SJ",
+            "410"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330082",
+      "brand": "ERA",
+      "description": "ERA Sensor 330082",
+      "category_names": [
+        "Sensores/Conmutadores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4067872",
+            "4108672",
+            "4276954",
+            "4349082",
+            "4407984",
+            "4409505",
+            "4414600",
+            "4448131",
+            "60813687",
+            "7588802",
+            "7588882"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "numbers": [
+            "2101",
+            "3808"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "156"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "124",
+            "126",
+            "127",
+            "131",
+            "132",
+            "ARGENTA",
+            "BARCHETTA",
+            "BRAVA",
+            "BRAVO",
+            "CINQUECENTO",
+            "COUPE",
+            "DUCATO",
+            "DUNA",
+            "ELBA",
+            "FIORINO",
+            "MAREA",
+            "PALIO",
+            "PANDA",
+            "PUNTO",
+            "REGATA",
+            "RITMO",
+            "SEICENTO",
+            "SIENA",
+            "STRADA",
+            "TEMPRA",
+            "TIPO",
+            "UNO",
+            "9FSO126P",
+            "POLONEZINNOCENTIELBA"
+          ]
+        },
+        {
+          "brand": "Iveco",
+          "models": [
+            "DAILY"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "models": [
+            "110",
+            "NADESCHDA",
+            "NIVA",
+            "SAMARA"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "112",
+            "BETA",
+            "PRISMA"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "FURA",
+            "RONDAZASTAVA101"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330083",
+      "brand": "ERA",
+      "description": "ERA Sensor 330083",
+      "category_names": [
+        "Sensores/Conmutadores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "34362106",
+            "4171667",
+            "60515838",
+            "60515839"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "75",
+            "90",
+            "ALFETTA",
+            "GIULIETTA",
+            "SPIDER"
+          ]
+        },
+        {
+          "brand": "Seat",
+          "models": [
+            "IBIZA",
+            "MALAGA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330085",
+      "brand": "ERA",
+      "description": "ERA Sensor 330085",
+      "category_names": [
+        "Sensores/Conmutadores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Opel",
+          "numbers": [
+            "3439088",
+            "9193163",
+            "92061480",
+            "92063941"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Ford",
+          "models": [
+            "BLITZ",
+            "CHEVANNE"
+          ]
+        },
+        {
+          "brand": "Daewoo",
+          "models": [
+            "ESPEROHOLDENBARINA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "AGILA",
+            "ARENA",
+            "ASCONA",
+            "ASTRA",
+            "CLASSIC",
+            "CALIBRA",
+            "COMBO",
+            "CORSA",
+            "FRONTERA",
+            "KADETT",
+            "MANTA",
+            "MERIVA",
+            "MOKKA",
+            "OMEGA",
+            "REKORD",
+            "SENATOR",
+            "SIGNUM",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA",
+            "ZAFIRA"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "9-3",
+            "9-5"
+          ]
+        },
+        {
+          "brand": "Vauxhall",
+          "models": [
+            "AGILA",
+            "ASTRA",
+            "ASTRAVAN",
+            "CORSA",
+            "CORSAVAN",
+            "FRONTERA",
+            "OMEGA",
+            "SINTRA",
+            "TIGRA",
+            "VECTRA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330086",
+      "brand": "ERA",
+      "description": "ERA Sensor 330086",
+      "category_names": [
+        "Sensores/Conmutadores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Peugeot",
+          "numbers": [
+            "0242",
+            "1337",
+            "1338",
+            "0242",
+            "1337",
+            "1338"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Fiat",
+          "models": [
+            "DUCATO",
+            "TALENTO"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "205",
+            "305",
+            "309",
+            "405",
+            "504",
+            "505",
+            "604",
+            "J5TALBOTSIMCA",
+            "SOLARA"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "330087",
+      "brand": "ERA",
+      "description": "ERA Sensor 330087",
+      "category_names": [
+        "Sensores/Conmutadores"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Daihatsu",
+          "numbers": [
+            "83420",
+            "87201",
+            "83420",
+            "87701"
+          ]
+        },
+        {
+          "brand": "Honda",
+          "numbers": [
+            "37750"
+          ]
+        },
+        {
+          "brand": "Mazda",
+          "numbers": [
+            "0118",
+            "18510",
+            "0118",
+            "89181",
+            "10884"
+          ]
+        },
+        {
+          "brand": "Mitsubishi",
+          "numbers": [
+            "850107"
+          ]
+        },
+        {
+          "brand": "Suzuki",
+          "numbers": [
+            "34850",
+            "65011",
+            "34850",
+            "65020",
+            "34850",
+            "65021",
+            "34850"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Suzuki",
+          "models": [
+            "GRAND",
+            "VITARA",
+            "SJ",
+            "410"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661005",
+      "brand": "ERA",
+      "description": "ERA Sensor 661005",
+      "category_names": [
+        "Relé/Intermitentes"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "7573490",
+            "82430021"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Alfa Romeo",
+          "models": [
+            "156"
+          ]
+        },
+        {
+          "brand": "Bmw",
+          "models": [
+            "3CITRO",
+            "NXANTIA"
+          ]
+        },
+        {
+          "brand": "Fiat",
+          "models": [
+            "BRAVA",
+            "BRAVO",
+            "CROMA",
+            "DUCATO",
+            "ELBA",
+            "FIORINO",
+            "MAREA",
+            "MULTIPLA",
+            "PALIO",
+            "PUNTO",
+            "SEICENTO",
+            "SIENA",
+            "STRADA",
+            "TEMPRA",
+            "TIPO",
+            "UNO"
+          ]
+        },
+        {
+          "brand": "Ford",
+          "models": [
+            "ESCORT",
+            "FIESTA",
+            "TRANSIT"
+          ]
+        },
+        {
+          "brand": "Lancia",
+          "models": [
+            "DEDRA",
+            "DELTA",
+            "LYBRA"
+          ]
+        },
+        {
+          "brand": "Opel",
+          "models": [
+            "VECTRA"
+          ]
+        },
+        {
+          "brand": "Peugeot",
+          "models": [
+            "306"
+          ]
+        },
+        {
+          "brand": "Skoda",
+          "models": [
+            "FAVORIT"
+          ]
+        },
+        {
+          "brand": "Toyota",
+          "models": [
+            "RUNNER",
+            "COROLLA"
+          ]
+        },
+        {
+          "brand": "Vw",
+          "models": [
+            "POLO"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661006",
+      "brand": "ERA",
+      "description": "ERA Sensor 661006",
+      "category_names": [
+        "Relé/Intermitentes"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "7595406"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Fiat",
+          "models": [
+            "CINQUECENTO",
+            "DUCATO",
+            "ELBA",
+            "FIORINO",
+            "PANDA",
+            "TALENTO"
+          ]
+        },
+        {
+          "brand": "Renault",
+          "models": [
+            "ESPACE",
+            "RAPID"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661145",
+      "brand": "ERA",
+      "description": "ERA Sensor 661145",
+      "category_names": [
+        "Relé/Intermitentes"
+      ],
+      "oe_numbers": [
+        {
+          "brand": "Fiat",
+          "numbers": [
+            "4476337"
+          ]
+        },
+        {
+          "brand": "Ford",
+          "numbers": [
+            "6041768",
+            "13350",
+            "13350"
+          ]
+        },
+        {
+          "brand": "Iveco",
+          "numbers": [
+            "4069103"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "numbers": [
+            "2103",
+            "3726",
+            "2105",
+            "3747",
+            "2108",
+            "3747"
+          ]
+        },
+        {
+          "brand": "Porsche",
+          "numbers": [
+            "8517088",
+            "8572463"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "numbers": [
+            "1210124"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "brand": "Ford",
+          "models": [
+            "CAPRI",
+            "TRANSIT"
+          ]
+        },
+        {
+          "brand": "Lada",
+          "models": [
+            "1200-1600"
+          ]
+        },
+        {
+          "brand": "Porsche",
+          "models": [
+            "911",
+            "914",
+            "928"
+          ]
+        },
+        {
+          "brand": "Saab",
+          "models": [
+            "90",
+            "99"
+          ]
+        },
+        {
+          "brand": "Volvo",
+          "models": [
+            "140"
+          ]
+        }
+      ],
+      "attributes": {}
+    },
+    {
+      "reference": "661148",
+      "brand": "ERA",
+      "description": "ERA Sensor 661148",
+      "category_names": [
+        "Relé/Intermitentes"
+      ],
+      "oe_numbers": [],
+      "applications": [],
+      "attributes": {}
+    },
+    {
+      "reference": "661149",
+      "brand": "ERA",
+      "description": "ERA Sensor 661149",
+      "category_names": [
+        "Relé/Intermitentes"
+      ],
+      "oe_numbers": [],
+      "applications": [
+        {
+          "brand": "Seat",
+          "models": [
+            "132"
+          ]
+        }
+      ],
+      "attributes": {}
+    }
+  ],
+  "areas_scraped": [
+    "Sensores",
+    "Dinamo/Alternador/Piezas",
+    "Sistema de arranque",
+    "Relé",
+    "Instrumentos",
+    "Alternador/Arrancador",
+    "Unidades de control",
+    "Sistema eléctrico del motor",
+    "Interruptor/Sensor",
+    "Sensores/Conmutadores",
+    "Interruptores/Relés",
+    "Relé/Intermitentes",
+    "Iluminación/Señales",
+    "Faros principales"
+  ]
+}

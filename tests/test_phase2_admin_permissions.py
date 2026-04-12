@@ -1,4 +1,5 @@
 import pytest
+from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
@@ -6,7 +7,7 @@ from django.db import IntegrityError, transaction
 from django.test import RequestFactory
 
 from apps.catalog.admin import ProductAdmin
-from apps.catalog.models import Brand, Category, Condition, Product
+from apps.catalog.models import Brand, Category, Condition, PartNumberType, Product
 from apps.imports.admin import SupplierImportAdmin
 from apps.imports.models import SupplierImport
 from apps.suppliers.models import Supplier, SupplierUserAssignment
@@ -193,6 +194,32 @@ def test_product_admin_includes_fitment_inline() -> None:
 
     inline_models = {inline.model for inline in product_admin.inlines}
     assert ProductVehicleFitment in inline_models
+
+
+@pytest.mark.django_db
+def test_part_number_type_is_registered_in_admin() -> None:
+    assert PartNumberType in admin.site._registry
+
+
+@pytest.mark.django_db
+def test_product_admin_layout_order_and_slug_readonly(django_user_model) -> None:
+    product_admin = ProductAdmin(Product, AdminSite())
+    request = build_request(make_staff_user(django_user_model, "layout_staff"))
+
+    assert [name for name, _ in product_admin.fieldsets] == [
+        "Product Identity",
+        "Classification",
+        "Pricing",
+        "Dimensions",
+        "Publication",
+        "Audit",
+    ]
+    assert [inline.verbose_name_plural for inline in product_admin.inlines] == [
+        "PART NUMBERS",
+        "PRODUCT VEHICLE FITMENTS",
+        "PRODUCT IMAGES",
+    ]
+    assert "slug" in product_admin.get_readonly_fields(request)
 
 
 @pytest.mark.django_db
