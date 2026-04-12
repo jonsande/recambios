@@ -60,12 +60,12 @@
   - [ ] estrategia de importación de imágenes
 
 - [ ] **Fase 5** — Catálogo público base
-  - [ ] home
-  - [ ] categorías
-  - [ ] listado de productos
-  - [ ] ficha de producto
-  - [ ] páginas corporativas
-  - [ ] navegación base
+  - [x] home
+  - [x] categorías
+  - [x] listado de productos
+  - [x] ficha de producto
+  - [x] páginas corporativas
+  - [x] navegación base
 
 - [ ] **Fase 6** — Búsqueda técnica y filtros
   - [ ] búsqueda por SKU

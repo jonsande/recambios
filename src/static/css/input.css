@@ -1,15 +1,24 @@
 @import "tailwindcss";
 
-/* Tokens del proyecto: fáciles de cambiar más adelante */
 @theme {
-  --color-primary: #1d4ed8;
+  --color-primary: #0f172a;
   --color-primary-foreground: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-muted: #f8fafc;
+  --color-surface-muted: #f1f5f9;
   --color-border: #e2e8f0;
   --color-text: #0f172a;
-  --color-text-muted: #475569;
+  --color-text-muted: #334155;
 
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Inter", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
+  --font-display: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+  }
+
+  a {
+    @apply underline-offset-2;
+  }
 }

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
+
+{% block content %}
+  <section>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ page_title }}</h1>
+    {% if current_category and current_category.description %}
+      <p class="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">{{ current_category.description }}</p>
+    {% else %}
+      <p class="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
+        {% trans "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial." %}
+      </p>
+    {% endif %}
+  </section>
+
+  <section class="mt-6">
+    {% if products %}
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for product in products %}
+          {% include "catalog/partials/product_card.html" with product=product %}
+        {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-8 flex items-center justify-center gap-2" aria-label="{% trans 'Paginación de productos' %}">
+          {% if page_obj.has_previous %}
+            <a
+              href="?page={{ page_obj.previous_page_number }}"
+              class="rounded-md border border-slate-400 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+            >
+              {% trans "Anterior" %}
+            </a>
+          {% endif %}
+
+          <span class="text-sm text-slate-700">
+            {% blocktrans with current=page_obj.number total=page_obj.paginator.num_pages %}
+              Página {{ current }} de {{ total }}
+            {% endblocktrans %}
+          </span>
+
+          {% if page_obj.has_next %}
+            <a
+              href="?page={{ page_obj.next_page_number }}"
+              class="rounded-md border border-slate-400 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+            >
+              {% trans "Siguiente" %}
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      {% trans "No hay productos publicados en esta sección." as empty_message %}
+      {% trans "Puedes volver al listado de categorías para navegar otras áreas del catálogo." as empty_help %}
+      {% trans "Ver categorías" as categories_label %}
+      {% url 'catalog:category_list' as categories_url %}
+      {% include "components/empty_state.html" with title=empty_message message=empty_help cta_href=categories_url cta_label=categories_label %}
+    {% endif %}
+  </section>
+{% endblock %}

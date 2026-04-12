@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inicio | Recambios Técnicos" %}{% endblock %}
+
+{% block content %}
+  <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-sm sm:p-8">
+    <p class="text-sm font-semibold uppercase tracking-wide text-slate-600">
+      {% trans "Plataforma de recambios de automoción" %}
+    </p>
+    <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+      {% trans "Catálogo técnico para consulta profesional y particular" %}
+    </h1>
+    <p class="mt-4 max-w-3xl text-sm text-slate-700 sm:text-base">
+      {% trans "Selecciona recambios por categoría o revisa productos publicados. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación." %}
+    </p>
+    <div class="mt-5 flex flex-wrap gap-3">
+      <a
+        href="{% url 'catalog:category_list' %}"
+        class="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      >
+        {% trans "Explorar categorías" %}
+      </a>
+      <a
+        href="{% url 'catalog:product_list' %}"
+        class="inline-flex rounded-md border border-slate-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      >
+        {% trans "Ver productos publicados" %}
+      </a>
+    </div>
+  </section>
+
+  <section class="mt-8">
+    <header class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="text-xl font-semibold text-slate-950">{% trans "Categorías destacadas" %}</h2>
+      <a
+        href="{% url 'catalog:category_list' %}"
+        class="text-sm font-semibold text-slate-900 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      >
+        {% trans "Ver todas" %}
+      </a>
+    </header>
+
+    {% if highlight_categories %}
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for category in highlight_categories %}
+          <li>
+            <a
+              href="{% url 'catalog:category_products' category_slug=category.slug %}"
+              class="block rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:border-slate-500 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+            >
+              <h3 class="text-base font-semibold text-slate-950">{{ category.name }}</h3>
+              {% if category.description %}
+                <p class="mt-2 text-sm text-slate-600">{{ category.description|truncatewords:18 }}</p>
+              {% endif %}
+              <p class="mt-3 text-sm text-slate-700">
+                {% blocktrans count total=category.public_product_count %}
+                  1 producto publicado
+                {% plural %}
+                  {{ total }} productos publicados
+                {% endblocktrans %}
+              </p>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      {% trans "No hay categorías públicas disponibles todavía." as empty_message %}
+      {% trans "Las categorías aparecerán cuando existan productos publicados y activos." as empty_help %}
+      {% include "components/empty_state.html" with title=empty_message message=empty_help %}
+    {% endif %}
+  </section>
+
+  <section class="mt-10">
+    <h2 class="text-xl font-semibold text-slate-950">{{ products_section_title }}</h2>
+    <p class="mt-2 text-sm text-slate-600">
+      {% trans "Presentación pública inicial del catálogo. Para precio final y plazo siempre se requiere confirmación previa." %}
+    </p>
+
+    {% if home_products %}
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for product in home_products %}
+          {% include "catalog/partials/product_card.html" with product=product %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="mt-4">
+        {% trans "No hay productos públicos disponibles." as empty_message %}
+        {% trans "Publica productos desde el panel interno para que aparezcan aquí." as empty_help %}
+        {% include "components/empty_state.html" with title=empty_message message=empty_help %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

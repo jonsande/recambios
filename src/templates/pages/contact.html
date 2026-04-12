@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Contacto | Recambios Técnicos" %}{% endblock %}
+
+{% block content %}
+  <article class="rounded-2xl border border-slate-300 bg-white p-6 shadow-sm sm:p-8">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+      {% trans "Contacto comercial" %}
+    </h1>
+    <p class="mt-4 text-sm text-slate-700 sm:text-base">
+      {% trans "Si necesitas confirmar disponibilidad, precio final y plazo de un recambio, contáctanos por correo o teléfono indicando la referencia técnica y la cantidad." %}
+    </p>
+
+    {% if product_hint %}
+      <section class="mt-6 rounded-lg border border-slate-300 bg-slate-50 p-4">
+        <h2 class="text-base font-semibold text-slate-900">{% trans "Producto seleccionado" %}</h2>
+        <p class="mt-2 text-sm text-slate-700">
+          {% trans "Referencia recibida desde catálogo:" %} <strong>{{ product_hint }}</strong>
+        </p>
+      </section>
+    {% endif %}
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-2">
+      <div class="rounded-lg border border-slate-300 p-4">
+        <h2 class="text-base font-semibold text-slate-900">{% trans "Correo" %}</h2>
+        <p class="mt-2 text-sm text-slate-700">
+          <a
+            href="mailto:info@recambiostecnicos.example"
+            class="underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+            info@recambiostecnicos.example
+          </a>
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-slate-300 p-4">
+        <h2 class="text-base font-semibold text-slate-900">{% trans "Teléfono" %}</h2>
+        <p class="mt-2 text-sm text-slate-700">
+          <a
+            href="tel:+34900000000"
+            class="underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+            +34 900 000 000
+          </a>
+        </p>
+      </div>
+    </section>
+  </article>
+{% endblock %}

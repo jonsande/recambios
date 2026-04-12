@@ -1,0 +1,378 @@
+# English translations for the public catalog phase.
+# Copyright (C) 2026
+# This file is distributed under the same license as the project.
+msgid ""
+msgstr ""
+"Project-Id-Version: recambios\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-12 02:31+0200\n"
+"PO-Revision-Date: 2026-04-12 02:38+0200\n"
+"Last-Translator: Codex\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/apps/catalog/urls.py:9
+msgid "categorias/"
+msgstr "categories/"
+
+#: src/apps/catalog/urls.py:11
+msgid "categorias/<slug:category_slug>/"
+msgstr "categories/<slug:category_slug>/"
+
+#: src/apps/catalog/urls.py:15
+msgid "productos/"
+msgstr "products/"
+
+#: src/apps/catalog/urls.py:16
+msgid "productos/<slug:slug>/"
+msgstr "products/<slug:slug>/"
+
+#: src/apps/catalog/views.py:25
+msgid "Sí"
+msgstr "Yes"
+
+#: src/apps/catalog/views.py:25
+msgid "No"
+msgstr "No"
+
+#: src/apps/catalog/views.py:70
+#, python-format
+msgid "Productos de %(category)s"
+msgstr "%(category)s products"
+
+#: src/apps/catalog/views.py:74
+msgid "Catálogo de recambios"
+msgstr "Spare parts catalog"
+
+#: src/apps/pages/urls.py:10
+msgid "nosotros/"
+msgstr "about/"
+
+#: src/apps/pages/urls.py:11
+msgid "contacto/"
+msgstr "contact/"
+
+#: src/apps/pages/urls.py:12
+msgid "legal/"
+msgstr "legal/"
+
+#: src/apps/pages/views.py:20
+msgid "Productos destacados"
+msgstr "Featured products"
+
+#: src/apps/pages/views.py:23
+msgid "Últimos productos publicados"
+msgstr "Latest published products"
+
+#: src/templates/base.html:8
+msgid "Recambios de Automoción"
+msgstr "Automotive Spare Parts"
+
+#: src/templates/base.html:16
+msgid "Saltar al contenido principal"
+msgstr "Skip to main content"
+
+#: src/templates/base.html:26 src/templates/base.html:95
+#: src/templates/catalog/product_detail.html:4
+#: src/templates/catalog/product_list.html:4
+msgid "Recambios Técnicos"
+msgstr "Technical Spare Parts"
+
+#: src/templates/base.html:29
+msgid "Navegación principal"
+msgstr "Main navigation"
+
+#: src/templates/base.html:33
+msgid "Inicio"
+msgstr "Home"
+
+#: src/templates/base.html:38
+msgid "Categorías"
+msgstr "Categories"
+
+#: src/templates/base.html:43
+msgid "Productos"
+msgstr "Products"
+
+#: src/templates/base.html:48
+msgid "Nosotros"
+msgstr "About"
+
+#: src/templates/base.html:53 src/templates/pages/legal.html:27
+msgid "Contacto"
+msgstr "Contact"
+
+#: src/templates/base.html:58
+msgid "Legal"
+msgstr "Legal"
+
+#: src/templates/base.html:66
+msgid "Idioma"
+msgstr "Language"
+
+#: src/templates/base.html:94
+msgid "Catálogo técnico orientado a consulta previa de disponibilidad, precio y plazo."
+msgstr "Technical catalog designed for prior confirmation of availability, price, and lead time."
+
+#: src/templates/catalog/category_list.html:4
+msgid "Categorías | Recambios Técnicos"
+msgstr "Categories | Technical Spare Parts"
+
+#: src/templates/catalog/category_list.html:9
+msgid "Categorías de recambios"
+msgstr "Spare part categories"
+
+#: src/templates/catalog/category_list.html:12
+msgid "Selecciona una categoría para revisar productos publicados y su información técnica básica."
+msgstr "Select a category to review published products and their basic technical information."
+
+#: src/templates/catalog/category_list.html:30 src/templates/pages/home.html:57
+#, python-format
+msgid "\n                  1 producto publicado\n                "
+msgid_plural "\n                  %(total)s productos publicados\n                "
+msgstr[0] "\n                  1 published product\n                "
+msgstr[1] "\n                  %(total)s published products\n                "
+
+#: src/templates/catalog/category_list.html:41
+msgid "No hay categorías disponibles."
+msgstr "No categories are available."
+
+#: src/templates/catalog/category_list.html:42
+msgid "Las categorías aparecerán cuando existan productos publicados."
+msgstr "Categories will appear once products are published."
+
+#: src/templates/catalog/partials/product_card.html:19
+#: src/templates/catalog/product_detail.html:24
+msgid "SKU"
+msgstr "SKU"
+
+#: src/templates/catalog/partials/product_card.html:23
+#: src/templates/catalog/product_detail.html:28
+msgid "Marca"
+msgstr "Brand"
+
+#: src/templates/catalog/partials/product_card.html:27
+#: src/templates/catalog/product_detail.html:32
+msgid "Categoría"
+msgstr "Category"
+
+#: src/templates/catalog/partials/product_card.html:31
+#: src/templates/catalog/product_detail.html:36
+msgid "Condición"
+msgstr "Condition"
+
+#: src/templates/catalog/partials/product_card.html:39
+#: src/templates/catalog/product_detail.html:46
+msgid "Último precio conocido"
+msgstr "Last known price"
+
+#: src/templates/catalog/partials/product_card.html:45
+msgid "Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo."
+msgstr "Indicative price subject to confirmation of availability, final amount, and lead time."
+
+#: src/templates/catalog/partials/product_card.html:51
+#: src/templates/catalog/product_detail.html:56
+msgid "Confirmar disponibilidad y plazo"
+msgstr "Confirm availability and lead time"
+
+#: src/templates/catalog/partials/product_card.html:58
+#: src/templates/catalog/product_detail.html:66
+msgid "Consultar precio y plazo"
+msgstr "Check price and lead time"
+
+#: src/templates/catalog/partials/product_card.html:68
+msgid "Ver detalle técnico"
+msgstr "View technical details"
+
+#: src/templates/catalog/product_detail.html:14
+msgid "Volver al listado de productos"
+msgstr "Back to product list"
+
+#: src/templates/catalog/product_detail.html:43
+msgid "Disponibilidad y precio"
+msgstr "Availability and pricing"
+
+#: src/templates/catalog/product_detail.html:50
+msgid "Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo."
+msgstr "This value is informative and does not constitute a final offer. Before confirming any operation, availability, final price, and lead time are validated."
+
+#: src/templates/catalog/product_detail.html:60
+msgid "Este producto se gestiona bajo consulta previa."
+msgstr "This product is managed through prior consultation."
+
+#: src/templates/catalog/product_detail.html:73
+msgid "Descripción técnica"
+msgstr "Technical description"
+
+#: src/templates/catalog/product_detail.html:80
+msgid "Referencias del producto"
+msgstr "Product references"
+
+#: src/templates/catalog/product_detail.html:88
+msgid "Principal"
+msgstr "Primary"
+
+#: src/templates/catalog/product_detail.html:98
+msgid "Datos técnicos"
+msgstr "Technical data"
+
+#: src/templates/catalog/product_list.html:13
+msgid "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial."
+msgstr "Initial public listing of published products. Visible price is informative and always subject to commercial validation."
+
+#: src/templates/catalog/product_list.html:27
+msgid "Paginación de productos"
+msgstr "Product pagination"
+
+#: src/templates/catalog/product_list.html:33
+msgid "Anterior"
+msgstr "Previous"
+
+#: src/templates/catalog/product_list.html:38
+#, python-format
+msgid "\n              Página %(current)s de %(total)s\n            "
+msgstr "\n              Page %(current)s of %(total)s\n            "
+
+#: src/templates/catalog/product_list.html:48
+msgid "Siguiente"
+msgstr "Next"
+
+#: src/templates/catalog/product_list.html:54
+msgid "No hay productos publicados en esta sección."
+msgstr "No products are published in this section."
+
+#: src/templates/catalog/product_list.html:55
+msgid "Puedes volver al listado de categorías para navegar otras áreas del catálogo."
+msgstr "You can return to the category list to browse other catalog areas."
+
+#: src/templates/catalog/product_list.html:56
+msgid "Ver categorías"
+msgstr "View categories"
+
+#: src/templates/pages/about.html:4
+msgid "Nosotros | Recambios Técnicos"
+msgstr "About | Technical Spare Parts"
+
+#: src/templates/pages/about.html:9
+msgid "Sobre la plataforma"
+msgstr "About the platform"
+
+#: src/templates/pages/about.html:12
+msgid "Recambios Técnicos es una plataforma orientada a la localización y consulta de recambios de automoción con enfoque técnico. Nuestro objetivo es ofrecer información clara de producto para particulares, talleres y profesionales."
+msgstr "Technical Spare Parts is a platform focused on locating and consulting automotive spare parts with a technical approach. Our goal is to provide clear product information for individuals, workshops, and professionals."
+
+#: src/templates/pages/about.html:15
+msgid "El flujo comercial en esta fase es de consulta previa: la disponibilidad, el precio final y el plazo se validan manualmente antes de cualquier confirmación."
+msgstr "The commercial flow in this phase is based on prior consultation: availability, final price, and lead time are manually validated before any confirmation."
+
+#: src/templates/pages/contact.html:4
+msgid "Contacto | Recambios Técnicos"
+msgstr "Contact | Technical Spare Parts"
+
+#: src/templates/pages/contact.html:9
+msgid "Contacto comercial"
+msgstr "Commercial contact"
+
+#: src/templates/pages/contact.html:12
+msgid "Si necesitas confirmar disponibilidad, precio final y plazo de un recambio, contáctanos por correo o teléfono indicando la referencia técnica y la cantidad."
+msgstr "If you need to confirm availability, final price, and lead time for a spare part, contact us by email or phone and include the technical reference and quantity."
+
+#: src/templates/pages/contact.html:17
+msgid "Producto seleccionado"
+msgstr "Selected product"
+
+#: src/templates/pages/contact.html:19
+msgid "Referencia recibida desde catálogo:"
+msgstr "Reference received from catalog:"
+
+#: src/templates/pages/contact.html:26
+msgid "Correo"
+msgstr "Email"
+
+#: src/templates/pages/contact.html:38
+msgid "Teléfono"
+msgstr "Phone"
+
+#: src/templates/pages/home.html:4
+msgid "Inicio | Recambios Técnicos"
+msgstr "Home | Technical Spare Parts"
+
+#: src/templates/pages/home.html:9
+msgid "Plataforma de recambios de automoción"
+msgstr "Automotive spare parts platform"
+
+#: src/templates/pages/home.html:12
+msgid "Catálogo técnico para consulta profesional y particular"
+msgstr "Technical catalog for professional and individual consultation"
+
+#: src/templates/pages/home.html:15
+msgid "Selecciona recambios por categoría o revisa productos publicados. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación."
+msgstr "Select spare parts by category or review published products. Availability, final price, and lead time are always confirmed before processing any transaction."
+
+#: src/templates/pages/home.html:22
+msgid "Explorar categorías"
+msgstr "Explore categories"
+
+#: src/templates/pages/home.html:28
+msgid "Ver productos publicados"
+msgstr "View published products"
+
+#: src/templates/pages/home.html:35
+msgid "Categorías destacadas"
+msgstr "Featured categories"
+
+#: src/templates/pages/home.html:40
+msgid "Ver todas"
+msgstr "View all"
+
+#: src/templates/pages/home.html:68
+msgid "No hay categorías públicas disponibles todavía."
+msgstr "No public categories are available yet."
+
+#: src/templates/pages/home.html:69
+msgid "Las categorías aparecerán cuando existan productos publicados y activos."
+msgstr "Categories will appear once products are published and active."
+
+#: src/templates/pages/home.html:77
+msgid "Presentación pública inicial del catálogo. Para precio final y plazo siempre se requiere confirmación previa."
+msgstr "Initial public catalog presentation. Final price and lead time always require prior confirmation."
+
+#: src/templates/pages/home.html:88
+msgid "No hay productos públicos disponibles."
+msgstr "No public products are available."
+
+#: src/templates/pages/home.html:89
+msgid "Publica productos desde el panel interno para que aparezcan aquí."
+msgstr "Publish products from the internal panel so they appear here."
+
+#: src/templates/pages/legal.html:4
+msgid "Legal | Recambios Técnicos"
+msgstr "Legal | Technical Spare Parts"
+
+#: src/templates/pages/legal.html:9
+msgid "Aviso legal y condiciones básicas"
+msgstr "Legal notice and basic terms"
+
+#: src/templates/pages/legal.html:13
+msgid "Información general"
+msgstr "General information"
+
+#: src/templates/pages/legal.html:15
+msgid "Este sitio muestra información técnica y comercial orientativa sobre recambios. La disponibilidad, el precio final y el plazo de entrega requieren validación previa por el equipo interno."
+msgstr "This site shows indicative technical and commercial information about spare parts. Availability, final price, and delivery time require prior validation by the internal team."
+
+#: src/templates/pages/legal.html:20
+msgid "Alcance de la información"
+msgstr "Scope of information"
+
+#: src/templates/pages/legal.html:22
+msgid "Las referencias y descripciones publicadas se revisan de forma continua, pero pueden existir variaciones de proveedor. Se recomienda confirmar cada solicitud antes de formalizar cualquier operación."
+msgstr "Published references and descriptions are reviewed continuously, but supplier variations may exist. It is recommended to confirm each request before formalizing any operation."
+
+#: src/templates/pages/legal.html:29
+msgid "Para cualquier consulta comercial o legal, utiliza la página de contacto."
+msgstr "For any commercial or legal inquiry, use the contact page."
