@@ -69,7 +69,24 @@ class Vehicle(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.brand.name} {self.model} {self.generation}".strip()
+        label_parts = [self.brand.name, self.model]
+        if self.generation:
+            label_parts.append(self.generation)
+        if self.variant:
+            label_parts.append(self.variant)
+
+        year_label = ""
+        if self.year_start and self.year_end:
+            year_label = f"{self.year_start}-{self.year_end}"
+        elif self.year_start:
+            year_label = f"{self.year_start}+"
+        elif self.year_end:
+            year_label = f"-{self.year_end}"
+
+        label = " ".join(label_parts)
+        if year_label:
+            return f"{label} [{year_label}]"
+        return label
 
 
 class ProductVehicleFitment(models.Model):

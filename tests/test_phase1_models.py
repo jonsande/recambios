@@ -134,6 +134,52 @@ def test_fitment_relationship_is_unique_per_product_vehicle() -> None:
 
 
 @pytest.mark.django_db
+def test_vehicle_string_representation_includes_variant_and_year_range() -> None:
+    brand = make_brand(name="BMW", slug="bmw")
+    vehicle = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=brand,
+        model="3 Series",
+        generation="E90",
+        variant="320d",
+        year_start=2008,
+        year_end=2011,
+    )
+
+    assert str(vehicle) == "BMW 3 Series E90 320d [2008-2011]"
+
+
+@pytest.mark.django_db
+def test_vehicle_string_representation_handles_partial_or_missing_years() -> None:
+    brand = make_brand(name="Audi", slug="audi")
+    year_start_only = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=brand,
+        model="A4",
+        generation="B8",
+        year_start=2008,
+    )
+    year_end_only = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=brand,
+        model="A4",
+        generation="B8",
+        variant="Avant",
+        year_end=2015,
+    )
+    no_years = Vehicle.objects.create(
+        vehicle_type=Vehicle.VehicleType.CAR,
+        brand=brand,
+        model="A4",
+        generation="B8",
+    )
+
+    assert str(year_start_only) == "Audi A4 B8 [2008+]"
+    assert str(year_end_only) == "Audi A4 B8 Avant [-2015]"
+    assert str(no_years) == "Audi A4 B8"
+
+
+@pytest.mark.django_db
 def test_only_one_primary_image_per_product() -> None:
     product = make_product(sku="SKU-PRIMARY-IMG")
     ProductImage.objects.create(
