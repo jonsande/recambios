@@ -87,20 +87,31 @@
   - [x] plantillas base ES/EN
   - [x] configuración de email para desarrollo y producción
 
-- [ ] **Fase 9** — Frontend refinado y sistema visual
+- [ ] **Fase 9** — Formulario público de solicitud y carrito de solicitud
+  - [ ] botón de solicitud por producto
+  - [ ] carrito de solicitud multiartículo
+  - [ ] formulario público de solicitud
+  - [ ] solicitud como invitado
+  - [ ] solicitud como usuario registrado
+  - [ ] validación de datos del cliente
+  - [ ] creación de `Inquiry` e `InquiryItem` desde la web pública
+  - [ ] transición a `submitted` solo en el envío final real
+  - [ ] página de confirmación posterior al envío
+
+- [ ] **Fase 10** — Frontend refinado y sistema visual
   - [ ] componentes reutilizables
   - [ ] mobile-first sólido
   - [ ] accesibilidad funcional
   - [ ] estados vacíos y errores
   - [ ] refinado de tablas y bloques técnicos
 
-- [ ] **Fase 10** — Oferta confirmada y pago posterior
+- [ ] **Fase 11** — Oferta confirmada y pago posterior
   - [ ] base de oferta confirmada
   - [ ] aceptación o rechazo por el cliente
   - [ ] trazabilidad del importe final confirmado
   - [ ] base para pago posterior
 
-- [ ] **Fase 11** — SEO, rendimiento y bilingüe ES/EN
+- [ ] **Fase 12** — SEO, rendimiento y bilingüe ES/EN
   - [ ] meta tags dinámicos
   - [ ] sitemap
   - [ ] robots.txt
@@ -111,7 +122,7 @@
   - [ ] estrategia de selección inicial de idioma
   - [ ] política estable para `/es/` y `/en/`
 
-- [ ] **Fase 12** — Producción y despliegue
+- [ ] **Fase 13** — Producción y despliegue
   - [ ] settings de producción
   - [ ] static/media
   - [ ] gunicorn

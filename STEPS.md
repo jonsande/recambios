@@ -518,7 +518,41 @@ Implementar la capa inicial de comunicaciones del flujo comercial.
 
 ---
 
-## FASE 9 — Frontend refinado y sistema visual
+## FASE 9 — Formulario público de solicitud y carrito de solicitud
+**[SKILLS: django-feature, django-tests, tailwind-design-system, web-accessibility]**
+
+### Objetivos
+Permitir que el usuario cree y envíe solicitudes reales desde la web pública, sin depender del admin.
+
+### Debe incluir
+- botón de solicitud por producto
+- carrito de solicitud multiartículo
+- formulario público de solicitud
+- solicitud como invitado
+- solicitud como usuario registrado
+- validación clara de datos del cliente
+- creación de `Inquiry` y `InquiryItem` desde la UI pública
+- transición al estado `submitted` solo en el envío final real
+- página de confirmación posterior al envío
+
+### Reglas
+- no implementar todavía checkout ni pago
+- no convertir el carrito de solicitud en carrito de compra
+- no enviar emails hasta el submit final real
+- mantener el flujo alineado con el modelo comercial de consulta previa
+- mobile-first y accesible desde el principio
+
+### Verificación
+- un invitado puede enviar una solicitud completa desde la web
+- un usuario registrado puede enviar una solicitud completa desde la web
+- el carrito de solicitud permite varios artículos
+- al enviar la solicitud se crean correctamente `Inquiry` e `InquiryItem`
+- los emails de la Fase 8 se disparan una sola vez al entrar en `submitted`
+- el flujo público es usable en móvil
+
+---
+
+## FASE 10 — Frontend refinado y sistema visual
 **[SKILLS: tailwind-design-system, web-accessibility, web-design-guidelines]**
 
 ### Objetivos
@@ -544,7 +578,7 @@ Refinar UI y convertirla en un sistema coherente.
 
 ---
 
-## FASE 10 — Oferta confirmada y pago posterior
+## FASE 11 — Oferta confirmada y pago posterior
 **[SKILLS: django-feature, django-tests]**
 
 ### Objetivos
@@ -569,7 +603,7 @@ Preparar la capa posterior a la confirmación manual de disponibilidad, precio y
 
 ---
 
-## FASE 11 — SEO, rendimiento y contenido bilingüe
+## FASE 12 — SEO, rendimiento y contenido bilingüe
 **[SKILLS: seo-audit, web-performance-optimization, web-accessibility]**
 
 ### Objetivos
@@ -605,7 +639,7 @@ Dejar la web preparada para indexación y uso real.
 
 ---
 
-## FASE 12 — Producción y despliegue
+## FASE 13 — Producción y despliegue
 **[SKILLS: deployment-checklist]**
 
 ### Objetivos
@@ -681,21 +715,29 @@ Preparar despliegue en servidor contratado.
 - cliente y equipo interno reciben comunicaciones básicas correctas
 
 ### Fase 9
+- existe un formulario público de solicitud usable
+- existe carrito de solicitud multiartículo
+- un invitado puede enviar una solicitud completa
+- un usuario registrado puede enviar una solicitud completa
+- el envío final crea correctamente `Inquiry` e `InquiryItem`
+- el submit público dispara correctamente los emails transaccionales una sola vez
+
+### Fase 10
 - la interfaz es coherente, clara y mobile-first
 - los componentes reutilizables cubren las áreas clave
 - accesibilidad funcional mínima está revisada
 
-### Fase 10
+### Fase 11
 - existe base funcional para aceptación de oferta confirmada y pago posterior
 - la solución mantiene separado el flujo de solicitud inicial del pago
 
-### Fase 11
+### Fase 12
 - SEO técnico base está implementado
 - ES/EN están operativos en estructura y contenido base
 - rendimiento es razonable para una primera versión pública
 - existe una estrategia clara de idioma público
 
-### Fase 12
+### Fase 13
 - producción está documentada y configurada
 - el despliegue es reproducible
 - existe checklist de release y rollback básico
