@@ -95,6 +95,23 @@ def test_product_brand_can_be_empty_when_not_required() -> None:
 
 
 @pytest.mark.django_db
+def test_product_quantity_defaults_are_applied() -> None:
+    product = make_product(sku="SKU-QTY-DEFAULT")
+
+    assert product.quantity == 1
+    assert product.unit_of_quantity == "Pcs"
+
+
+@pytest.mark.django_db
+def test_product_quantity_cannot_be_less_than_one() -> None:
+    product = make_product(sku="SKU-QTY-ZERO")
+    product.quantity = 0
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        product.save(update_fields=["quantity"])
+
+
+@pytest.mark.django_db
 def test_part_number_is_normalized_for_lookup() -> None:
     product = make_product(sku="SKU-PN")
     part_number = PartNumber.objects.create(

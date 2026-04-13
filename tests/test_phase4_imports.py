@@ -143,6 +143,49 @@ def test_import_creates_product_with_blank_brand_name(django_user_model) -> None
 
 
 @pytest.mark.django_db
+def test_import_persists_quantity_fields_when_provided(django_user_model) -> None:
+    supplier = make_supplier("SUP-QTY-IMP")
+    user = make_staff_user(django_user_model, "import_user_quantity")
+    make_condition("new", "Nuevo", "new")
+
+    import_file = build_import_file(
+        headers=list(CANONICAL_IMPORT_COLUMNS),
+        rows=[
+            [
+                "Quantity Product",
+                "",
+                "Alternator",
+                "new",
+                "SKU-QTY-IMPORT-1",
+                "SUP-QTY-IMPORT-1",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "pack",
+                "6",
+                "pairs",
+                "",
+                "",
+            ]
+        ],
+    )
+    import_record = SupplierImport.objects.create(
+        supplier=supplier,
+        uploaded_by=user,
+        original_file=import_file,
+    )
+
+    result = run_supplier_import(import_record, user)
+    product = Product.objects.get(sku="SKU-QTY-IMPORT-1")
+
+    assert result.import_status == SupplierImport.ImportStatus.COMPLETED
+    assert product.quantity == 6
+    assert product.unit_of_quantity == "pairs"
+
+
+@pytest.mark.django_db
 def test_import_records_row_level_traceability(django_user_model) -> None:
     supplier = make_supplier("SUP-TRACE")
     user = make_staff_user(django_user_model, "import_user_trace")
@@ -489,8 +532,10 @@ def test_unknown_extra_columns_are_ignored_with_warning(django_user_model) -> No
                 "",
                 "",
                 "",
+                "",
+                "",
                 "ignored value",
-            ]
+            ],
         ],
     )
     import_record = SupplierImport.objects.create(

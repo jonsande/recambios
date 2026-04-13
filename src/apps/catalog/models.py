@@ -189,6 +189,8 @@ class Product(models.Model):
     last_known_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, default="EUR")
     unit_of_sale = models.CharField(max_length=32, default="unit")
+    quantity = models.PositiveIntegerField(default=1)
+    unit_of_quantity = models.CharField(max_length=32, default="Pcs")
     weight = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     length = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     width = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
@@ -212,6 +214,10 @@ class Product(models.Model):
             models.CheckConstraint(
                 condition=~Q(publication_status="published") | Q(published_at__isnull=False),
                 name="catalog_product_pub_requires_date_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(quantity__gte=1),
+                name="catalog_product_quantity_gte_1_ck",
             ),
         ]
         indexes = [

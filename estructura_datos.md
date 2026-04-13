@@ -1,9 +1,14 @@
+# Estructura de datos (estado actual)
 
-### Entidades nucleares esperadas
+Última revisión: 2026-04-13
+
+## Entidades nucleares actuales
 - `Supplier`
+- `SupplierUserAssignment`
 - `Brand`
 - `Category`
 - `Condition`
+- `PartNumberType`
 - `Product`
 - `PartNumber`
 - `Vehicle`
@@ -11,217 +16,235 @@
 - `AttributeDefinition`
 - `ProductAttributeValue`
 - `ProductImage`
-- `QuoteRequest` / `Inquiry`
-- `QuoteRequestItem` / `InquiryItem`
+- `Inquiry`
+- `InquiryItem`
 - `SupplierImport`
 - `SupplierImportRow`
 
-### Propuesta inicial de campos por entidad
+## Campos por entidad
 
-#### Supplier
-- id                        : Identificador interno único del proveedor.
-- name                      : Nombre comercial oficial del proveedor.
-- slug                      : Versión del nombre preparada para URL o identificadores legibles.
-- code                      : Código interno corto del proveedor, útil para integraciones o gestión interna.
-- country                   : País del proveedor.
-- website                   : Página web oficial del proveedor.
-- contact_name              : Nombre de la persona de contacto principal.
-- contact_email             : Email de contacto principal del proveedor.
-- contact_phone             : Teléfono de contacto principal del proveedor.
-- is_active                 : Indica si el proveedor está activo en el sistema.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Supplier
+- `id`: identificador interno.
+- `name`: nombre comercial del proveedor.
+- `slug`: slug único del proveedor.
+- `code`: código interno único del proveedor.
+- `country`: país del proveedor.
+- `website`: web del proveedor.
+- `contact_name`: nombre de contacto.
+- `contact_email`: email de contacto.
+- `contact_phone`: teléfono de contacto.
+- `is_active`: proveedor activo/inactivo.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Brand
-- id                        : Identificador interno único de la marca.
-- name                      : Nombre canónico de la marca.
-- slug                      : Versión del nombre preparada para URL o filtros legibles.
-- brand_type                : Tipo de marca; por ejemplo, marca de vehículo, fabricante de recambio o ambas.
-- country                   : País asociado a la marca, si se desea almacenar.
-- is_active                 : Indica si la marca está activa y disponible para uso en catálogo.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### SupplierUserAssignment
+- `id`: identificador interno.
+- `supplier`: proveedor asociado.
+- `user`: usuario asociado.
+- `is_active`: asignación activa/inactiva.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Category
-- id                        : Identificador interno único de la categoría.
-- name                      : Nombre visible de la categoría.
-- slug                      : Versión del nombre preparada para URL amigables.
-- parent                    : Categoría padre, para construir jerarquías de categorías.
-- description               : Texto descriptivo opcional de la categoría.
-- sort_order                : Orden numérico para controlar cómo se listan las categorías.
-- is_active                 : Indica si la categoría está activa y visible en el sistema.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Brand
+- `id`: identificador interno.
+- `name`: nombre de marca.
+- `slug`: slug único de marca.
+- `brand_type`: tipo de marca (`vehicle`, `parts`, `both`).
+- `country`: país asociado.
+- `is_active`: marca activa/inactiva.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Condition
-- id                        : Identificador interno único de la condición del producto.
-- code                      : Código interno estable de la condición; por ejemplo `new`, `used`, `remanufactured`.
-- name                      : Nombre visible de la condición; por ejemplo “Nuevo” o “Usado”.
-- slug                      : Versión preparada para URLs, filtros o uso interno legible.
-- description               : Explicación opcional de lo que significa esa condición.
-- is_active                 : Indica si esa condición puede seguir utilizándose en el catálogo.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Category
+- `id`: identificador interno.
+- `name`: nombre de categoría.
+- `slug`: slug único de categoría.
+- `parent`: categoría padre (autorreferencia, opcional).
+- `description`: descripción opcional.
+- `sort_order`: orden de visualización.
+- `is_active`: categoría activa/inactiva.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Product
-- id                        : Identificador interno único del producto (interno al sistema). Lo genera el sistema. Es único. No sirve para relaciones internas entre tablas. No debe tener significado comercial. Le importa al sistema, no al usuario.
-- supplier                  : Proveedor al que pertenece el producto.
-- supplier_product_code     : Código con el que el proveedor identifica internamente ese producto.
-- sku                       : Código interno de tu tienda.
-- slug                      : Etiqueta para URL amigables.
-- title                     : Nombre comercial visible.
-- short_description         : Descripción breve para listados, tarjetas o resúmenes.
-- long_description          : Descripción detallada del producto, con más contexto técnico o comercial.
-- brand                     : Marca principal del producto, por ejemplo Valeo, Bosch, BMW.
-- category                  : Categoría principal del producto.
-- condition                 : Estado o condición del producto; por ejemplo nuevo, usado, reacondicionado.
-- publication_status        : Estado editorial del producto; por ejemplo borrador, pendiente de revisión o publicado.
-- published_at              : Fecha y hora en que el producto se publica realmente en la web.
-- price_visibility_mode     : Define si el producto muestra precio visible o si obliga a consultar precio y plazo.
-- last_known_price          : Último precio conocido del producto; no implica precio final garantizado.
-- currency                  : Moneda del precio almacenado; por ejemplo EUR.
-- unit_of_sale              : Unidad de venta; por ejemplo unidad, juego, kit, pareja.
-- weight                    : Peso del producto, útil para logística o información técnica.
-- length                    : Longitud del producto o embalaje, si se desea gestionar.
-- width                     : Anchura del producto o embalaje.
-- height                    : Altura del producto o embalaje.
-- featured                  : Indica si el producto debe destacarse en home, categorías u otras zonas.
-- is_active                 : Indica si el producto está activo en el sistema.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Condition
+- `id`: identificador interno.
+- `code`: código único de condición.
+- `name`: nombre único de condición.
+- `slug`: slug único de condición.
+- `description`: descripción opcional.
+- `is_active`: condición activa/inactiva.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### PartNumber
-- id                        : Identificador interno único de la referencia.
-- product                   : Producto al que pertenece esta referencia.
-- brand                     : Marca asociada a esa referencia concreta.
-- number_raw                : Referencia tal como aparece en origen, sin normalizar.
-- number_normalized         : Referencia transformada para facilitar búsquedas robustas.
-- part_number_type          : Tipo de referencia; por ejemplo interna, OE, OEM, equivalente o antigua.
-- is_primary                : Indica si esta es la referencia principal del producto.
-- notes                     : Observaciones opcionales sobre la referencia.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### PartNumberType
+- `id`: identificador interno.
+- `code`: código único del tipo de referencia (normalizado en mayúsculas y sin símbolos).
+- `name`: nombre visible del tipo.
+- `sort_order`: orden de visualización.
+- `is_active`: tipo activo/inactivo.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Vehicle
-- id                        : Identificador interno único del vehículo o configuración de vehículo.
-- vehicle_type              : Tipo de vehículo; por ejemplo coche, moto, camión, furgoneta.
-- brand                     : Marca del vehículo.
-- model                     : Modelo del vehículo.
-- generation                : Generación o serie del modelo, si aplica.
-- variant                   : Variante o versión concreta del vehículo.
-- year_start                : Año desde el que aplica esa configuración de vehículo.
-- year_end                  : Año hasta el que aplica esa configuración de vehículo.
-- engine_code               : Código de motor, cuando sea relevante.
-- fuel_type                 : Tipo de combustible; por ejemplo gasolina, diésel, híbrido.
-- displacement_cc           : Cilindrada en centímetros cúbicos.
-- power_hp                  : Potencia en caballos.
-- power_kw                  : Potencia en kilovatios.
-- notes                     : Observaciones técnicas o aclaraciones sobre la configuración del vehículo.
-- is_active                 : Indica si esta configuración de vehículo sigue activa para el catálogo.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Product
+- `id`: identificador interno.
+- `supplier`: proveedor propietario del producto.
+- `supplier_product_code`: código de proveedor (opcional).
+- `sku`: SKU único global.
+- `slug`: slug único autogenerado desde `sku`.
+- `title`: título del producto.
+- `short_description`: descripción corta.
+- `long_description`: descripción larga.
+- `brand`: marca del producto (opcional).
+- `category`: categoría principal.
+- `condition`: condición del producto.
+- `publication_status`: estado editorial (`draft`, `review`, `published`).
+- `published_at`: fecha/hora de publicación (opcional).
+- `price_visibility_mode`: visibilidad de precio (`hidden`, `visible_info`).
+- `last_known_price`: último precio conocido (opcional).
+- `currency`: moneda (por defecto `EUR`).
+- `unit_of_sale`: unidad de venta (por defecto `unit`).
+- `quantity`: cantidad asociada al producto (entero, por defecto `1`).
+- `unit_of_quantity`: unidad de esa cantidad (por defecto `Pcs`).
+- `weight`: peso (opcional).
+- `length`: largo (opcional).
+- `width`: ancho (opcional).
+- `height`: alto (opcional).
+- `featured`: producto destacado.
+- `is_active`: producto activo/inactivo.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### ProductVehicleFitment
-- id                        : Identificador interno único de la relación de compatibilidad.
-- product                   : Producto compatible.
-- vehicle                   : Vehículo o configuración de vehículo compatible.
-- fitment_notes             : Notas específicas sobre la compatibilidad.
-- source                    : Fuente del dato de compatibilidad; por ejemplo proveedor, importación o revisión manual.
-- is_verified               : Indica si la compatibilidad ha sido verificada manualmente o se considera fiable.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### PartNumber
+- `id`: identificador interno.
+- `product`: producto al que pertenece la referencia.
+- `brand`: marca asociada a la referencia (opcional).
+- `number_raw`: referencia en formato origen.
+- `number_normalized`: referencia normalizada para búsqueda.
+- `part_number_type`: tipo de referencia (`FK` a `PartNumberType`).
+- `is_primary`: referencia principal del producto.
+- `notes`: notas opcionales.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### AttributeDefinition
-- id                        : Identificador interno único de la definición de atributo.
-- name                      : Nombre visible del atributo; por ejemplo voltaje, color, lado de montaje.
-- slug                      : Versión del nombre preparada para uso interno, filtros o URLs técnicas.
-- data_type                 : Tipo de dato esperado; por ejemplo texto, número o booleano.
-- unit                      : Unidad asociada al atributo, si aplica; por ejemplo V, mm, kg.
-- is_filterable             : Indica si este atributo se puede usar como filtro en el catálogo.
-- is_visible_on_product     : Indica si debe mostrarse en la ficha pública del producto.
-- allows_multiple_values    : Indica si un producto puede tener más de un valor para ese atributo.
-- sort_order                : Orden de visualización del atributo.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### Vehicle
+- `id`: identificador interno.
+- `vehicle_type`: tipo de vehículo (`car`, `motorcycle`, `truck`, `van`, `other`).
+- `brand`: marca del vehículo.
+- `model`: modelo del vehículo.
+- `generation`: generación (opcional).
+- `variant`: variante (opcional).
+- `year_start`: año inicio (opcional).
+- `year_end`: año fin (opcional).
+- `engine_code`: código de motor (opcional).
+- `fuel_type`: combustible (`gasoline`, `diesel`, `hybrid`, `electric`, `lpg`, `cng`, `other`).
+- `displacement_cc`: cilindrada en cc (opcional).
+- `power_hp`: potencia en hp (opcional).
+- `power_kw`: potencia en kW (opcional).
+- `notes`: notas técnicas (opcional).
+- `is_active`: vehículo activo/inactivo.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### ProductAttributeValue
-- id                        : Identificador interno único del valor de atributo.
-- product                   : Producto al que pertenece este valor.
-- attribute_definition      : Definición del atributo al que corresponde este valor.
-- value_text                : Valor textual del atributo, cuando el tipo de dato es texto.
-- value_number              : Valor numérico del atributo, cuando el tipo de dato es número.
-- value_boolean             : Valor booleano del atributo, cuando el tipo de dato es sí/no.
-- value_normalized          : Versión normalizada del valor, útil para búsquedas o filtros consistentes.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### ProductVehicleFitment
+- `id`: identificador interno.
+- `product`: producto compatible.
+- `vehicle`: vehículo compatible.
+- `fitment_notes`: notas de compatibilidad (opcional).
+- `source`: origen del dato (`supplier`, `import`, `manual`).
+- `is_verified`: compatibilidad verificada.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### ProductImage
-- id                        : Identificador interno único de la imagen.
-- product                   : Producto al que pertenece la imagen.
-- image                     : Archivo o ruta de la imagen.
-- alt_text                  : Texto alternativo descriptivo para accesibilidad.
-- sort_order                : Orden de aparición de la imagen en galerías o listados.
-- is_primary                : Indica si esta es la imagen principal del producto.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### AttributeDefinition
+- `id`: identificador interno.
+- `name`: nombre del atributo.
+- `slug`: slug único del atributo.
+- `data_type`: tipo de dato (`text`, `number`, `boolean`).
+- `unit`: unidad del atributo (opcional).
+- `is_filterable`: usable como filtro en catálogo.
+- `is_visible_on_product`: visible en ficha de producto.
+- `allows_multiple_values`: admite múltiples valores por producto.
+- `sort_order`: orden de visualización.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### Inquiry / QuoteRequest
-- id                        : Identificador interno único de la solicitud.
-- reference_code            : Código de referencia visible para localizar la solicitud fácilmente.
-- user                      : Usuario registrado que hizo la solicitud, si existe.
-- guest_email               : Email del solicitante cuando hace la solicitud como invitado.
-- guest_name                : Nombre del solicitante invitado.
-- guest_phone               : Teléfono del solicitante invitado.
-- company_name              : Nombre de la empresa, si el solicitante actúa como profesional o empresa.
-- tax_id                    : Identificación fiscal, si se desea almacenar.
-- language                  : Idioma en el que se ha realizado la solicitud.
-- status                    : Estado actual de la solicitud; por ejemplo enviada, en revisión o respondida.
-- notes_from_customer       : Observaciones aportadas por el cliente.
-- internal_notes            : Notas internas del equipo, no visibles para el cliente.
-- created_at                : Fecha y hora de creación de la solicitud.
-- updated_at                : Fecha y hora de la última modificación de la solicitud.
-- response_due_at           : Fecha objetivo o límite interna para responder a la solicitud.
-- supplier_feedback_at      : Fecha y hora en que se recibió respuesta o confirmación del proveedor.
+### ProductAttributeValue
+- `id`: identificador interno.
+- `product`: producto asociado.
+- `attribute_definition`: definición del atributo.
+- `value_text`: valor textual (opcional).
+- `value_number`: valor numérico (opcional).
+- `value_boolean`: valor booleano (opcional).
+- `value_normalized`: valor normalizado para filtros/búsquedas.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### InquiryItem / QuoteRequestItem
-- id                        : Identificador interno único de la línea de solicitud.
-- inquiry                   : Solicitud a la que pertenece esta línea.
-- product                   : Producto solicitado.
-- requested_quantity        : Cantidad solicitada de ese producto.
-- customer_note             : Nota específica del cliente para esa línea concreta.
-- last_known_price_snapshot : Último precio conocido copiado en el momento de la solicitud, a modo informativo.
-- created_at                : Fecha y hora de creación del registro.
-- updated_at                : Fecha y hora de la última modificación del registro.
+### ProductImage
+- `id`: identificador interno.
+- `product`: producto asociado.
+- `image`: imagen del producto.
+- `alt_text`: texto alternativo.
+- `sort_order`: orden de la imagen.
+- `is_primary`: imagen principal.
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### SupplierImport
-- id                        : Identificador interno único de la importación.
-- supplier                  : Proveedor al que pertenece la importación.
-- uploaded_by               : Usuario que subió o lanzó la importación.
-- original_file             : Archivo original importado.
-- import_status             : Estado general de la importación; por ejemplo pendiente, procesando, completada o con errores.
-- total_rows                : Número total de filas detectadas en el archivo.
-- successful_rows           : Número de filas procesadas correctamente.
-- failed_rows               : Número de filas que fallaron.
-- started_at                : Fecha y hora de inicio del proceso de importación.
-- finished_at               : Fecha y hora de finalización del proceso de importación.
-- created_at                : Fecha y hora de creación del registro de importación.
-- updated_at                : Fecha y hora de la última modificación del registro de importación.
+### Inquiry
+- `id`: identificador interno.
+- `reference_code`: código de referencia único.
+- `user`: usuario registrado (opcional).
+- `guest_name`: nombre de invitado (opcional).
+- `guest_email`: email de invitado (opcional).
+- `guest_phone`: teléfono de invitado (opcional).
+- `company_name`: empresa (opcional).
+- `tax_id`: identificador fiscal (opcional).
+- `language`: idioma (`es`, `en`).
+- `status`: estado de la consulta (`draft`, `submitted`, `in_review`, `supplier_pending`, `responded`, `accepted`, `rejected`, `closed`).
+- `notes_from_customer`: notas del cliente.
+- `internal_notes`: notas internas.
+- `response_due_at`: fecha objetivo de respuesta (opcional).
+- `supplier_feedback_at`: fecha de respuesta del proveedor (opcional).
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-#### SupplierImportRow
-- id                        : Identificador interno único de la fila importada.
-- supplier_import           : Importación a la que pertenece esta fila.
-- row_number                : Número de fila dentro del archivo original.
-- raw_payload               : Datos originales de la fila antes de transformarse.
-- processing_status         : Estado del procesamiento de esta fila; por ejemplo correcta, omitida o con error.
-- linked_product            : Producto enlazado o creado a partir de esta fila, si existe.
-- error_message             : Mensaje de error asociado a la fila, si falló el procesamiento.
-- created_at                : Fecha y hora de creación del registro.
+### InquiryItem
+- `id`: identificador interno.
+- `inquiry`: consulta asociada.
+- `product`: producto solicitado.
+- `requested_quantity`: cantidad solicitada (entero, por defecto `1`).
+- `customer_note`: nota del cliente (opcional).
+- `last_known_price_snapshot`: snapshot del último precio conocido (opcional).
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
+### SupplierImport
+- `id`: identificador interno.
+- `supplier`: proveedor de la importación.
+- `uploaded_by`: usuario que subió el fichero (opcional).
+- `original_file`: fichero original importado (opcional).
+- `import_status`: estado (`pending`, `processing`, `completed`, `completed_with_errors`, `failed`).
+- `total_rows`: total de filas leídas.
+- `successful_rows`: filas procesadas correctamente.
+- `failed_rows`: filas con error.
+- `processing_notes`: notas del proceso (incluye advertencias/resumen).
+- `started_at`: fecha/hora de inicio (opcional).
+- `finished_at`: fecha/hora de fin (opcional).
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-==========================================
+### SupplierImportRow
+- `id`: identificador interno.
+- `supplier_import`: importación asociada.
+- `row_number`: número de fila original.
+- `raw_payload`: contenido crudo de la fila.
+- `processing_status`: estado de fila (`pending`, `success`, `skipped`, `error`).
+- `linked_product`: producto enlazado/creado (opcional).
+- `error_message`: mensaje de error (opcional).
+- `created_at`: fecha de creación.
+- `updated_at`: fecha de actualización.
 
-### Directrices clave para la creación de productos
-
-* nunca meter referencias múltiples en un solo campo de `Product`
-* nunca meter compatibilidades complejas en texto libre dentro de `Product`
-* usar `PartNumber` y `ProductVehicleFitment` como tablas fuertes desde el principio
+## Directrices clave para creación de producto
+- No meter múltiples referencias en un campo de `Product`.
+- No modelar compatibilidades complejas como texto libre en `Product`.
+- Usar `PartNumber` y `ProductVehicleFitment` como entidades de relación fuertes.
+- Mantener separada la identidad del producto, sus referencias y su compatibilidad vehicular.

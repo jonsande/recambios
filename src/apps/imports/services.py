@@ -288,6 +288,8 @@ def _process_data_row(
     featured = _parse_bool(raw_payload.get("featured"), field_name="featured")
     currency = _clean_text(raw_payload.get("currency")).upper()
     unit_of_sale = _clean_text(raw_payload.get("unit_of_sale"))
+    quantity = _parse_positive_integer(raw_payload.get("quantity"), field_name="quantity")
+    unit_of_quantity = _clean_text(raw_payload.get("unit_of_quantity"))
     short_description = _clean_text(raw_payload.get("short_description"))
     long_description = _clean_text(raw_payload.get("long_description"))
 
@@ -309,6 +311,8 @@ def _process_data_row(
             last_known_price=last_known_price,
             currency=currency or "EUR",
             unit_of_sale=unit_of_sale or "unit",
+            quantity=quantity or 1,
+            unit_of_quantity=unit_of_quantity or "Pcs",
             is_active=True if is_active is None else is_active,
             featured=False if featured is None else featured,
         )
@@ -342,6 +346,10 @@ def _process_data_row(
             product.currency = currency
         if unit_of_sale:
             product.unit_of_sale = unit_of_sale
+        if quantity is not None:
+            product.quantity = quantity
+        if unit_of_quantity:
+            product.unit_of_quantity = unit_of_quantity
         if is_active is not None:
             product.is_active = is_active
         if featured is not None:
@@ -468,6 +476,34 @@ def _parse_decimal(value: Any, *, field_name: str) -> Decimal | None:
         raise ImportProcessingError(
             f"Invalid decimal value for {field_name}: '{text_value}'."
         ) from exc
+
+
+def _parse_positive_integer(value: Any, *, field_name: str) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ImportProcessingError(f"Invalid integer value for {field_name}: '{value}'.")
+
+    text_value = _clean_text(value)
+    if not text_value:
+        return None
+
+    try:
+        parsed_value = Decimal(text_value)
+    except (InvalidOperation, ValueError) as exc:
+        raise ImportProcessingError(
+            f"Invalid integer value for {field_name}: '{text_value}'."
+        ) from exc
+
+    if parsed_value != parsed_value.to_integral_value():
+        raise ImportProcessingError(
+            f"Invalid integer value for {field_name}: '{text_value}'."
+        )
+
+    int_value = int(parsed_value)
+    if int_value < 1:
+        raise ImportProcessingError(f"{field_name} must be greater than or equal to 1.")
+    return int_value
 
 
 def _parse_bool(value: Any, *, field_name: str) -> bool | None:

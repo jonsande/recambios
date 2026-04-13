@@ -18,6 +18,8 @@ OPTIONAL_IMPORT_COLUMNS: tuple[str, ...] = (
     "last_known_price",
     "currency",
     "unit_of_sale",
+    "quantity",
+    "unit_of_quantity",
     "is_active",
     "featured",
 )
@@ -35,6 +37,8 @@ CANONICAL_IMPORT_COLUMNS: tuple[str, ...] = (
     "last_known_price",
     "currency",
     "unit_of_sale",
+    "quantity",
+    "unit_of_quantity",
     "is_active",
     "featured",
 )

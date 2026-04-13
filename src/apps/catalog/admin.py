@@ -258,7 +258,18 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             "Classification",
             {"fields": ("brand", "category", "condition", "is_active", "featured")},
         ),
-        ("Pricing", {"fields": ("last_known_price", "currency", "unit_of_sale")}),
+        (
+            "Pricing",
+            {
+                "fields": (
+                    "last_known_price",
+                    "currency",
+                    "unit_of_sale",
+                    "quantity",
+                    "unit_of_quantity",
+                )
+            },
+        ),
         ("Dimensions", {"fields": ("weight", "length", "width", "height")}),
         (
             "Publication",
