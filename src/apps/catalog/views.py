@@ -150,6 +150,7 @@ def _build_product_filter_options(
     option_scope_queryset,
     *,
     include_categories: bool,
+    selected_vehicle_brand_slug: str,
     selected_attribute_filters: dict[str, list[str]],
 ) -> dict[str, list]:
     scope_queryset = option_scope_queryset.order_by()
@@ -172,9 +173,14 @@ def _build_product_filter_options(
         if row["fitments__vehicle__brand__slug"]
     ]
 
+    model_queryset = scope_queryset.filter(fitments__vehicle__is_active=True)
+    if selected_vehicle_brand_slug:
+        model_queryset = model_queryset.filter(
+            fitments__vehicle__brand__slug=selected_vehicle_brand_slug,
+            fitments__vehicle__brand__is_active=True,
+        )
     model_options = list(
-        scope_queryset.filter(fitments__vehicle__is_active=True)
-        .exclude(fitments__vehicle__model="")
+        model_queryset.exclude(fitments__vehicle__model="")
         .values_list("fitments__vehicle__model", flat=True)
         .distinct()
         .order_by("fitments__vehicle__model")
@@ -379,6 +385,7 @@ class ProductListView(ListView):
         filter_options = _build_product_filter_options(
             option_scope_queryset,
             include_categories=not self.current_category,
+            selected_vehicle_brand_slug=self.selected_vehicle_brand_slug,
             selected_attribute_filters=self.selected_attribute_filters,
         )
         context.update(filter_options)
