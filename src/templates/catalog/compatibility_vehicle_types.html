@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
+
+{% block content %}
+  <section>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ page_title }}</h1>
+    <p class="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
+      {% trans "Inicia la búsqueda por tipo de vehículo y continúa por marca, modelo y año para ver productos compatibles publicados." %}
+    </p>
+  </section>
+
+  <section class="mt-6 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5">
+    <h2 class="text-base font-semibold text-slate-950">{% trans "Selecciona tipo de vehículo" %}</h2>
+
+    {% if vehicle_type_options %}
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {% for option in vehicle_type_options %}
+          <li>
+            <a
+              href="{{ option.browse_url }}"
+              class="block rounded-md border border-slate-300 bg-slate-50 p-4 hover:border-slate-500 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+            >
+              <p class="text-sm font-semibold text-slate-900">{{ option.label }}</p>
+              <p class="mt-1 text-xs text-slate-600">
+                {% blocktrans count total=option.public_product_count %}
+                  1 producto publicado con compatibilidad
+                {% plural %}
+                  {{ total }} productos publicados con compatibilidad
+                {% endblocktrans %}
+              </p>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      {% trans "No hay compatibilidades públicas disponibles todavía." as empty_message %}
+      {% trans "Publica productos con relaciones de compatibilidad activas para habilitar esta navegación." as empty_help %}
+      {% include "components/empty_state.html" with title=empty_message message=empty_help %}
+    {% endif %}
+  </section>
+{% endblock %}

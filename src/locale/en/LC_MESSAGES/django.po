@@ -479,3 +479,143 @@ msgstr "Published references and descriptions are reviewed continuously, but sup
 #: src/templates/pages/legal.html:29
 msgid "Para cualquier consulta comercial o legal, utiliza la página de contacto."
 msgstr "For any commercial or legal inquiry, use the contact page."
+
+#: src/apps/catalog/urls.py:20
+msgid "compatibilidad/"
+msgstr "compatibility/"
+
+#: src/apps/catalog/urls.py:25
+msgid "compatibilidad/<slug:vehicle_type>/"
+msgstr "compatibility/<slug:vehicle_type>/"
+
+#: src/apps/catalog/urls.py:30
+msgid "compatibilidad/<slug:vehicle_type>/<slug:brand_slug>/"
+msgstr "compatibility/<slug:vehicle_type>/<slug:brand_slug>/"
+
+#: src/templates/base.html:48
+msgid "Compatibilidad"
+msgstr "Compatibility"
+
+#: src/templates/pages/home.html:34
+msgid "Buscar por vehículo compatible"
+msgstr "Search by compatible vehicle"
+
+#: src/templates/catalog/product_list.html:22
+msgid "Explorar por compatibilidad de vehículo"
+msgstr "Browse by vehicle compatibility"
+
+#: src/templates/catalog/product_list.html:29
+msgid "Compatibilidad seleccionada"
+msgstr "Selected compatibility"
+
+#: src/templates/catalog/product_list.html:32
+msgid "Los resultados mostrados aplican este contexto de vehículo sobre productos públicos."
+msgstr "The shown results apply this vehicle context over public products."
+
+#: src/templates/catalog/product_list.html:61
+msgid "Tipo de vehículo"
+msgstr "Vehicle type"
+
+#: src/templates/catalog/product_list.html:68
+msgid "Todos los tipos"
+msgstr "All types"
+
+#: src/apps/catalog/views.py:163
+msgid "Coche"
+msgstr "Car"
+
+#: src/apps/catalog/views.py:164
+msgid "Moto"
+msgstr "Motorcycle"
+
+#: src/apps/catalog/views.py:165
+msgid "Camión"
+msgstr "Truck"
+
+#: src/apps/catalog/views.py:166
+msgid "Furgoneta"
+msgstr "Van"
+
+#: src/apps/catalog/views.py:167
+msgid "Otros vehículos"
+msgstr "Other vehicles"
+
+#: src/apps/catalog/views.py:357 src/templates/catalog/product_detail.html:118
+msgid "Compatibilidad por vehículo"
+msgstr "Vehicle compatibility"
+
+#: src/apps/catalog/views.py:411
+msgid "Compatibilidad por marca"
+msgstr "Compatibility by brand"
+
+#: src/apps/catalog/views.py:494
+msgid "Compatibilidad por modelo y año"
+msgstr "Compatibility by model and year"
+
+#: src/apps/catalog/views.py:763
+msgid "Configuración base"
+msgstr "Base configuration"
+
+#: src/templates/catalog/compatibility_vehicle_types.html:10
+msgid "Inicia la búsqueda por tipo de vehículo y continúa por marca, modelo y año para ver productos compatibles publicados."
+msgstr "Start by vehicle type and continue by brand, model, and year to view compatible published products."
+
+#: src/templates/catalog/compatibility_vehicle_types.html:15
+msgid "Selecciona tipo de vehículo"
+msgstr "Select vehicle type"
+
+#: src/templates/catalog/compatibility_vehicle_types.html:38
+msgid "No hay compatibilidades públicas disponibles todavía."
+msgstr "No public compatibility data is available yet."
+
+#: src/templates/catalog/compatibility_vehicle_types.html:39
+msgid "Publica productos con relaciones de compatibilidad activas para habilitar esta navegación."
+msgstr "Publish products with active compatibility relations to enable this browsing flow."
+
+#: src/templates/catalog/compatibility_brands.html:13
+msgid "Volver a tipos de vehículo"
+msgstr "Back to vehicle types"
+
+#: src/templates/catalog/compatibility_brands.html:25
+msgid "Selecciona marca de vehículo"
+msgstr "Select vehicle brand"
+
+#: src/templates/catalog/compatibility_model_year.html:13
+msgid "Volver a marcas"
+msgstr "Back to brands"
+
+#: src/templates/catalog/compatibility_model_year.html:25
+msgid "Modelo y año"
+msgstr "Model and year"
+
+#: src/templates/catalog/compatibility_model_year.html:30
+msgid "Modelo"
+msgstr "Model"
+
+#: src/templates/catalog/compatibility_model_year.html:38
+msgid "Selecciona modelo"
+msgstr "Select model"
+
+#: src/templates/catalog/compatibility_model_year.html:73
+msgid "Si no indicas año, se mostrarán resultados de todas las compatibilidades del modelo."
+msgstr "If no year is provided, results for all model compatibilities will be shown."
+
+#: src/templates/catalog/compatibility_model_year.html:80
+msgid "El modelo indicado no está disponible para este contexto de compatibilidad."
+msgstr "The selected model is not available for this compatibility context."
+
+#: src/templates/catalog/compatibility_model_year.html:86
+msgid "El año debe estar entre 1900 y 2100."
+msgstr "Year must be between 1900 and 2100."
+
+#: src/templates/catalog/compatibility_model_year.html:95
+msgid "Preparar productos compatibles"
+msgstr "Prepare compatible products"
+
+#: src/templates/catalog/compatibility_model_year.html:103
+msgid "La búsqueda compatible está lista. Se abrirá el catálogo con el contexto de compatibilidad aplicado."
+msgstr "The compatibility search is ready. The catalog will open with the selected compatibility context applied."
+
+#: src/templates/catalog/compatibility_model_year.html:109
+msgid "Ver productos compatibles"
+msgstr "View compatible products"

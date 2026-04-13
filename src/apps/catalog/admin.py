@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 
@@ -239,6 +239,11 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     inlines = (PartNumberInline, ProductVehicleFitmentInline, ProductImageInline)
     readonly_fields = ("slug", "created_at", "updated_at")
     date_hierarchy = "updated_at"
+    actions = (
+        "mark_selected_as_draft",
+        "mark_selected_as_in_review",
+        "mark_selected_as_published",
+    )
     fieldsets = (
         (
             "Product Identity",
@@ -320,6 +325,98 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         if is_restricted_supplier_user(request.user):
             readonly_fields.append("published_at")
         return tuple(dict.fromkeys(readonly_fields))
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        can_publish = request.user.is_superuser or request.user.has_perm(
+            "catalog.can_publish_product"
+        )
+        if is_restricted_supplier_user(request.user) or not can_publish:
+            actions.pop("mark_selected_as_published", None)
+        return actions
+
+    def _change_publication_status(self, request, queryset, target_status, action_label):
+        is_restricted_supplier = is_restricted_supplier_user(request.user)
+        total_selected = queryset.count()
+
+        if is_restricted_supplier:
+            allowed_statuses = {
+                Product.PublicationStatus.DRAFT,
+                Product.PublicationStatus.REVIEW,
+            }
+            if target_status not in allowed_statuses:
+                self.message_user(
+                    request,
+                    "Supplier users cannot publish products.",
+                    level=messages.ERROR,
+                )
+                return
+            queryset = queryset.filter(publication_status=Product.PublicationStatus.DRAFT)
+
+        if (
+            target_status == Product.PublicationStatus.PUBLISHED
+            and not request.user.is_superuser
+            and not request.user.has_perm("catalog.can_publish_product")
+        ):
+            self.message_user(
+                request,
+                "You do not have permission to publish products.",
+                level=messages.ERROR,
+            )
+            return
+
+        queryset = queryset.exclude(publication_status=target_status)
+        if target_status == Product.PublicationStatus.PUBLISHED:
+            updated_count = queryset.update(
+                publication_status=target_status,
+                published_at=timezone.now(),
+            )
+        else:
+            updated_count = queryset.update(publication_status=target_status, published_at=None)
+
+        skipped_count = total_selected - updated_count
+        if updated_count:
+            self.message_user(
+                request,
+                f"{action_label} applied to {updated_count} product(s).",
+                level=messages.SUCCESS,
+            )
+        if skipped_count:
+            self.message_user(
+                request,
+                (
+                    f"Skipped {skipped_count} product(s) due to permission/status "
+                    "constraints or no changes."
+                ),
+                level=messages.WARNING,
+            )
+
+    @admin.action(description="Set publication status to Draft")
+    def mark_selected_as_draft(self, request, queryset):
+        self._change_publication_status(
+            request=request,
+            queryset=queryset,
+            target_status=Product.PublicationStatus.DRAFT,
+            action_label="Draft status",
+        )
+
+    @admin.action(description="Set publication status to In Review")
+    def mark_selected_as_in_review(self, request, queryset):
+        self._change_publication_status(
+            request=request,
+            queryset=queryset,
+            target_status=Product.PublicationStatus.REVIEW,
+            action_label="In review status",
+        )
+
+    @admin.action(description="Set publication status to Published")
+    def mark_selected_as_published(self, request, queryset):
+        self._change_publication_status(
+            request=request,
+            queryset=queryset,
+            target_status=Product.PublicationStatus.PUBLISHED,
+            action_label="Published status",
+        )
 
     def save_model(self, request, obj, form, change):
         is_restricted_supplier = is_restricted_supplier_user(request.user)

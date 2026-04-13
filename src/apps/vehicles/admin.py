@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 
 from apps.catalog.models import Product
@@ -55,6 +55,13 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
     autocomplete_fields = ("product", "vehicle")
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "updated_at"
+    actions = (
+        "mark_selected_as_verified",
+        "mark_selected_as_unverified",
+        "set_source_supplier",
+        "set_source_import",
+        "set_source_manual",
+    )
 
     def supplier_ids_for_request(self, request) -> list[int]:
         return get_active_supplier_ids_for_user(request.user)
@@ -116,6 +123,115 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
         if is_restricted_supplier_user(request.user):
             readonly_fields.extend(("source", "is_verified"))
         return tuple(dict.fromkeys(readonly_fields))
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if is_restricted_supplier_user(request.user):
+            actions.pop("mark_selected_as_verified", None)
+            actions.pop("mark_selected_as_unverified", None)
+            actions.pop("set_source_supplier", None)
+            actions.pop("set_source_import", None)
+            actions.pop("set_source_manual", None)
+        return actions
+
+    def _bulk_update_is_verified(self, request, queryset, is_verified, label):
+        if is_restricted_supplier_user(request.user):
+            self.message_user(
+                request,
+                "Supplier users cannot bulk-edit verification fields.",
+                level=messages.ERROR,
+            )
+            return
+
+        total_selected = queryset.count()
+        queryset = queryset.exclude(is_verified=is_verified)
+        updated_count = queryset.update(is_verified=is_verified)
+        skipped_count = total_selected - updated_count
+
+        if updated_count:
+            self.message_user(
+                request,
+                f"{label} applied to {updated_count} fitment(s).",
+                level=messages.SUCCESS,
+            )
+        if skipped_count:
+            self.message_user(
+                request,
+                f"Skipped {skipped_count} fitment(s) because no change was needed.",
+                level=messages.WARNING,
+            )
+
+    def _bulk_update_source(self, request, queryset, source, label):
+        if is_restricted_supplier_user(request.user):
+            self.message_user(
+                request,
+                "Supplier users cannot bulk-edit source fields.",
+                level=messages.ERROR,
+            )
+            return
+
+        total_selected = queryset.count()
+        queryset = queryset.exclude(source=source)
+        updated_count = queryset.update(source=source)
+        skipped_count = total_selected - updated_count
+
+        if updated_count:
+            self.message_user(
+                request,
+                f"{label} applied to {updated_count} fitment(s).",
+                level=messages.SUCCESS,
+            )
+        if skipped_count:
+            self.message_user(
+                request,
+                f"Skipped {skipped_count} fitment(s) because no change was needed.",
+                level=messages.WARNING,
+            )
+
+    @admin.action(description="Set selected fitments as verified")
+    def mark_selected_as_verified(self, request, queryset):
+        self._bulk_update_is_verified(
+            request=request,
+            queryset=queryset,
+            is_verified=True,
+            label="Verified status",
+        )
+
+    @admin.action(description="Set selected fitments as not verified")
+    def mark_selected_as_unverified(self, request, queryset):
+        self._bulk_update_is_verified(
+            request=request,
+            queryset=queryset,
+            is_verified=False,
+            label="Not verified status",
+        )
+
+    @admin.action(description="Set source to Supplier")
+    def set_source_supplier(self, request, queryset):
+        self._bulk_update_source(
+            request=request,
+            queryset=queryset,
+            source=ProductVehicleFitment.FitmentSource.SUPPLIER,
+            label="Supplier source",
+        )
+
+    @admin.action(description="Set source to Import")
+    def set_source_import(self, request, queryset):
+        self._bulk_update_source(
+            request=request,
+            queryset=queryset,
+            source=ProductVehicleFitment.FitmentSource.IMPORT,
+            label="Import source",
+        )
+
+    @admin.action(description="Set source to Manual")
+    def set_source_manual(self, request, queryset):
+        self._bulk_update_source(
+            request=request,
+            queryset=queryset,
+            source=ProductVehicleFitment.FitmentSource.MANUAL,
+            label="Manual source",
+        )
 
     def save_model(self, request, obj, form, change):
         if is_restricted_supplier_user(request.user):

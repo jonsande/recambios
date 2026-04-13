@@ -583,17 +583,25 @@ Dejar la web preparada para indexación y uso real.
 - base ES/EN
 - contenido traducible
 - optimización razonable de imágenes y estáticos
+- selector manual de idioma visible en la web pública
+- estrategia de selección inicial de idioma para usuarios nuevos
+- política clara para `/es/` y `/en/`
 
 ### Reglas
 - español por defecto
 - inglés adicional
 - no abrir más idiomas en v1
+- priorizar URLs explícitas por idioma (`/es/` y `/en/`)
+- preferir detección inicial por `Accept-Language` del navegador antes que geolocalización agresiva por país
+- evitar duplicación innecesaria de URLs públicas sin prefijo de idioma
 
 ### Verificación
 - HTML con metas correctas
 - sitemap accesible
 - robots.txt correcto
 - páginas principales listas en ES y EN
+- selector manual de idioma operativo
+- estrategia inicial de idioma documentada e implementada de forma coherente
 
 ---
 
@@ -685,11 +693,24 @@ Preparar despliegue en servidor contratado.
 - SEO técnico base está implementado
 - ES/EN están operativos en estructura y contenido base
 - rendimiento es razonable para una primera versión pública
+- existe una estrategia clara de idioma público
 
 ### Fase 12
 - producción está documentada y configurada
 - el despliegue es reproducible
 - existe checklist de release y rollback básico
+
+---
+
+## Mejoras operativas posteriores
+
+### Idioma del panel de administración
+- definir política de idioma del panel de administración
+- decidir si el admin debe usar español por defecto o respetar preferencia de usuario/navegador
+- revisar si la internacionalización estándar de Django admin es suficiente para el backoffice del proyecto
+
+### Nota
+Estas mejoras no reabren la Fase 2; se consideran refinamientos operativos posteriores sobre una fase ya completada.
 
 ## 📌 Resumen de alcance v1
 

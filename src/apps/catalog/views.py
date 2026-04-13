@@ -1,15 +1,20 @@
 from collections import OrderedDict
+from urllib.parse import urlencode
 
-from django.db.models import Q
+from django.db.models import Count, Max, Min, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
+
+from apps.vehicles.models import Vehicle
 
 from .models import AttributeDefinition, ProductAttributeValue, normalize_part_number
 from .public import get_public_categories_queryset, get_public_products_queryset
 
 PRODUCTS_PER_PAGE = 12
+VEHICLE_TYPE_ORDER = tuple(choice for choice, _label in Vehicle.VehicleType.choices)
 
 
 def _format_decimal_value(value) -> str:
@@ -146,21 +151,63 @@ def _build_attribute_filter_options(
     return attribute_options
 
 
+def _clean_vehicle_type_value(raw_value: str) -> str:
+    value = (raw_value or "").strip().lower()
+    if value in VEHICLE_TYPE_ORDER:
+        return value
+    return ""
+
+
+def _vehicle_type_label(vehicle_type: str) -> str:
+    labels = {
+        Vehicle.VehicleType.CAR: _("Coche"),
+        Vehicle.VehicleType.MOTORCYCLE: _("Moto"),
+        Vehicle.VehicleType.TRUCK: _("Camión"),
+        Vehicle.VehicleType.VAN: _("Furgoneta"),
+        Vehicle.VehicleType.OTHER: _("Otros vehículos"),
+    }
+    return labels.get(vehicle_type, vehicle_type)
+
+
 def _build_product_filter_options(
     option_scope_queryset,
     *,
     include_categories: bool,
+    selected_vehicle_type: str,
     selected_vehicle_brand_slug: str,
     selected_attribute_filters: dict[str, list[str]],
 ) -> dict[str, list]:
     scope_queryset = option_scope_queryset.order_by()
+    fitment_scope_queryset = scope_queryset.filter(
+        fitments__vehicle__is_active=True,
+        fitments__vehicle__brand__is_active=True,
+    )
+
+    available_vehicle_types = set(
+        fitment_scope_queryset.values_list("fitments__vehicle__vehicle_type", flat=True)
+        .distinct()
+        .order_by()
+    )
+    vehicle_type_options = [
+        {
+            "value": vehicle_type,
+            "label": _vehicle_type_label(vehicle_type),
+        }
+        for vehicle_type in VEHICLE_TYPE_ORDER
+        if vehicle_type in available_vehicle_types
+    ]
+
+    vehicle_brand_queryset = fitment_scope_queryset
+    if selected_vehicle_type:
+        vehicle_brand_queryset = vehicle_brand_queryset.filter(
+            fitments__vehicle__vehicle_type=selected_vehicle_type
+        )
 
     vehicle_brand_rows = list(
-        scope_queryset.filter(
-            fitments__vehicle__is_active=True,
-            fitments__vehicle__brand__is_active=True,
+        vehicle_brand_queryset.values(
+            "fitments__vehicle__brand__slug",
+            "fitments__vehicle__brand__name",
         )
-        .values("fitments__vehicle__brand__slug", "fitments__vehicle__brand__name")
         .distinct()
         .order_by("fitments__vehicle__brand__name")
     )
@@ -173,12 +220,16 @@ def _build_product_filter_options(
         if row["fitments__vehicle__brand__slug"]
     ]
 
-    model_queryset = scope_queryset.filter(fitments__vehicle__is_active=True)
+    model_queryset = fitment_scope_queryset
+    if selected_vehicle_type:
+        model_queryset = model_queryset.filter(
+            fitments__vehicle__vehicle_type=selected_vehicle_type
+        )
     if selected_vehicle_brand_slug:
         model_queryset = model_queryset.filter(
             fitments__vehicle__brand__slug=selected_vehicle_brand_slug,
-            fitments__vehicle__brand__is_active=True,
         )
+
     model_options = list(
         model_queryset.exclude(fitments__vehicle__model="")
         .values_list("fitments__vehicle__model", flat=True)
@@ -215,6 +266,7 @@ def _build_product_filter_options(
         ]
 
     return {
+        "vehicle_type_options": vehicle_type_options,
         "vehicle_brand_options": vehicle_brand_options,
         "model_options": model_options,
         "condition_options": condition_options,
@@ -226,15 +278,240 @@ def _build_product_filter_options(
     }
 
 
+def _build_compatibility_context_parts(
+    *,
+    selected_vehicle_type: str,
+    selected_vehicle_brand_slug: str,
+    selected_vehicle_model: str,
+    selected_year_input: str,
+    vehicle_brand_options: list[dict],
+) -> list[str]:
+    context_parts: list[str] = []
+
+    if selected_vehicle_type:
+        context_parts.append(_vehicle_type_label(selected_vehicle_type))
+
+    if selected_vehicle_brand_slug:
+        selected_brand_name = selected_vehicle_brand_slug
+        for option in vehicle_brand_options:
+            if option["slug"] == selected_vehicle_brand_slug:
+                selected_brand_name = option["name"]
+                break
+        context_parts.append(selected_brand_name)
+
+    if selected_vehicle_model:
+        context_parts.append(selected_vehicle_model)
+
+    parsed_year = _parse_year_value(selected_year_input)
+    if parsed_year is not None:
+        context_parts.append(str(parsed_year))
+
+    return context_parts
+
+
 class CategoryListView(ListView):
     template_name = "catalog/category_list.html"
     context_object_name = "categories"
 
     def get_queryset(self):
-        return (
-            get_public_categories_queryset(with_counts=True)
-            .filter(public_product_count__gt=0)
+        return get_public_categories_queryset(with_counts=True).filter(public_product_count__gt=0)
+
+
+class CompatibilityVehicleTypeListView(TemplateView):
+    template_name = "catalog/compatibility_vehicle_types.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        scope_queryset = get_public_products_queryset().filter(
+            fitments__vehicle__is_active=True,
+            fitments__vehicle__brand__is_active=True,
         )
+        type_rows = list(
+            scope_queryset.values("fitments__vehicle__vehicle_type")
+            .annotate(public_product_count=Count("id", distinct=True))
+            .order_by()
+        )
+
+        count_by_type = {
+            row["fitments__vehicle__vehicle_type"]: row["public_product_count"]
+            for row in type_rows
+            if row["fitments__vehicle__vehicle_type"]
+        }
+        type_options = [
+            {
+                "value": vehicle_type,
+                "label": _vehicle_type_label(vehicle_type),
+                "public_product_count": count_by_type[vehicle_type],
+                "browse_url": reverse(
+                    "catalog:compatibility_vehicle_brands",
+                    kwargs={"vehicle_type": vehicle_type},
+                ),
+            }
+            for vehicle_type in VEHICLE_TYPE_ORDER
+            if count_by_type.get(vehicle_type)
+        ]
+
+        context.update(
+            {
+                "page_title": _("Compatibilidad por vehículo"),
+                "vehicle_type_options": type_options,
+            }
+        )
+        return context
+
+
+class CompatibilityBrandListView(TemplateView):
+    template_name = "catalog/compatibility_brands.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        selected_vehicle_type = _clean_vehicle_type_value(self.kwargs.get("vehicle_type", ""))
+        if not selected_vehicle_type:
+            raise Http404
+
+        scope_queryset = get_public_products_queryset().filter(
+            fitments__vehicle__is_active=True,
+            fitments__vehicle__brand__is_active=True,
+            fitments__vehicle__vehicle_type=selected_vehicle_type,
+        )
+        brand_rows = list(
+            scope_queryset.values(
+                "fitments__vehicle__brand__slug",
+                "fitments__vehicle__brand__name",
+            )
+            .annotate(public_product_count=Count("id", distinct=True))
+            .distinct()
+            .order_by("fitments__vehicle__brand__name")
+        )
+
+        brand_options = [
+            {
+                "slug": row["fitments__vehicle__brand__slug"],
+                "name": row["fitments__vehicle__brand__name"],
+                "public_product_count": row["public_product_count"],
+                "browse_url": reverse(
+                    "catalog:compatibility_vehicle_models",
+                    kwargs={
+                        "vehicle_type": selected_vehicle_type,
+                        "brand_slug": row["fitments__vehicle__brand__slug"],
+                    },
+                ),
+            }
+            for row in brand_rows
+            if row["fitments__vehicle__brand__slug"]
+        ]
+
+        if not brand_options:
+            raise Http404
+
+        context.update(
+            {
+                "page_title": _("Compatibilidad por marca"),
+                "selected_vehicle_type": selected_vehicle_type,
+                "selected_vehicle_type_label": _vehicle_type_label(selected_vehicle_type),
+                "brand_options": brand_options,
+                "vehicle_types_url": reverse("catalog:compatibility_vehicle_types"),
+            }
+        )
+        return context
+
+
+class CompatibilityModelYearView(TemplateView):
+    template_name = "catalog/compatibility_model_year.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        selected_vehicle_type = _clean_vehicle_type_value(self.kwargs.get("vehicle_type", ""))
+        if not selected_vehicle_type:
+            raise Http404
+
+        brand_slug = (self.kwargs.get("brand_slug") or "").strip()
+        if not brand_slug:
+            raise Http404
+
+        scope_queryset = get_public_products_queryset().filter(
+            fitments__vehicle__is_active=True,
+            fitments__vehicle__brand__is_active=True,
+            fitments__vehicle__vehicle_type=selected_vehicle_type,
+        )
+        brand_queryset = scope_queryset.filter(fitments__vehicle__brand__slug=brand_slug)
+
+        selected_brand = brand_queryset.values(
+            "fitments__vehicle__brand__slug",
+            "fitments__vehicle__brand__name",
+        ).first()
+        if not selected_brand:
+            raise Http404
+
+        model_options = list(
+            brand_queryset.exclude(fitments__vehicle__model="")
+            .values_list("fitments__vehicle__model", flat=True)
+            .distinct()
+            .order_by("fitments__vehicle__model")
+        )
+        if not model_options:
+            raise Http404
+
+        selected_model_raw = (self.request.GET.get("model") or "").strip()
+        selected_model = ""
+        for model_option in model_options:
+            if model_option.casefold() == selected_model_raw.casefold():
+                selected_model = model_option
+                break
+
+        selected_year_input = (self.request.GET.get("year") or "").strip()
+        selected_year = _parse_year_value(selected_year_input)
+
+        year_scope_queryset = brand_queryset
+        if selected_model:
+            year_scope_queryset = year_scope_queryset.filter(
+                fitments__vehicle__model__iexact=selected_model
+            )
+
+        year_limits = year_scope_queryset.aggregate(
+            min_year=Min("fitments__vehicle__year_start"),
+            max_year=Max("fitments__vehicle__year_end"),
+        )
+
+        catalog_results_url = ""
+        if selected_model:
+            query_params = {
+                "vehicle_type": selected_vehicle_type,
+                "brand": brand_slug,
+                "model": selected_model,
+            }
+            if selected_year is not None:
+                query_params["year"] = str(selected_year)
+            catalog_results_url = (
+                f"{reverse('catalog:product_list')}?{urlencode(query_params)}"
+            )
+
+        context.update(
+            {
+                "page_title": _("Compatibilidad por modelo y año"),
+                "selected_vehicle_type": selected_vehicle_type,
+                "selected_vehicle_type_label": _vehicle_type_label(selected_vehicle_type),
+                "selected_brand_slug": selected_brand["fitments__vehicle__brand__slug"],
+                "selected_brand_name": selected_brand["fitments__vehicle__brand__name"],
+                "model_options": model_options,
+                "selected_model": selected_model,
+                "selected_year_input": selected_year_input,
+                "year_input_invalid": bool(selected_year_input) and selected_year is None,
+                "model_selection_invalid": bool(selected_model_raw) and not selected_model,
+                "year_hint_start": year_limits["min_year"],
+                "year_hint_end": year_limits["max_year"],
+                "catalog_results_url": catalog_results_url,
+                "can_view_results": bool(selected_model),
+                "brand_list_url": reverse(
+                    "catalog:compatibility_vehicle_brands",
+                    kwargs={"vehicle_type": selected_vehicle_type},
+                ),
+            }
+        )
+        return context
 
 
 class ProductListView(ListView):
@@ -243,6 +520,7 @@ class ProductListView(ListView):
     paginate_by = PRODUCTS_PER_PAGE
     current_category = None
     search_query = ""
+    selected_vehicle_type = ""
     selected_vehicle_brand_slug = ""
     selected_vehicle_model = ""
     selected_year_input = ""
@@ -265,6 +543,9 @@ class ProductListView(ListView):
             queryset = queryset.filter(category=self.current_category)
 
         self.search_query = (self.request.GET.get("q") or "").strip()
+        self.selected_vehicle_type = _clean_vehicle_type_value(
+            self.request.GET.get("vehicle_type") or ""
+        )
         self.selected_vehicle_brand_slug = (self.request.GET.get("brand") or "").strip()
         self.selected_vehicle_model = (self.request.GET.get("model") or "").strip()
         self.selected_year_input = (self.request.GET.get("year") or "").strip()
@@ -294,6 +575,10 @@ class ProductListView(ListView):
 
         vehicle_filter = Q()
         has_vehicle_filter = False
+        if self.selected_vehicle_type:
+            has_vehicle_filter = True
+            vehicle_filter &= Q(fitments__vehicle__vehicle_type=self.selected_vehicle_type)
+
         if self.selected_vehicle_brand_slug:
             has_vehicle_filter = True
             vehicle_filter &= Q(
@@ -348,6 +633,7 @@ class ProductListView(ListView):
         self.has_active_filters = any(
             [
                 self.search_query,
+                self.selected_vehicle_type,
                 self.selected_vehicle_brand_slug,
                 self.selected_vehicle_model,
                 self.selected_year_input,
@@ -363,6 +649,7 @@ class ProductListView(ListView):
         context = super().get_context_data(**kwargs)
         context["current_category"] = self.current_category
         context["search_query"] = self.search_query
+        context["selected_vehicle_type"] = self.selected_vehicle_type
         context["selected_vehicle_brand_slug"] = self.selected_vehicle_brand_slug
         context["selected_vehicle_model"] = self.selected_vehicle_model
         context["selected_year_input"] = self.selected_year_input
@@ -385,10 +672,22 @@ class ProductListView(ListView):
         filter_options = _build_product_filter_options(
             option_scope_queryset,
             include_categories=not self.current_category,
+            selected_vehicle_type=self.selected_vehicle_type,
             selected_vehicle_brand_slug=self.selected_vehicle_brand_slug,
             selected_attribute_filters=self.selected_attribute_filters,
         )
         context.update(filter_options)
+
+        compatibility_context_parts = _build_compatibility_context_parts(
+            selected_vehicle_type=self.selected_vehicle_type,
+            selected_vehicle_brand_slug=self.selected_vehicle_brand_slug,
+            selected_vehicle_model=self.selected_vehicle_model,
+            selected_year_input=self.selected_year_input,
+            vehicle_brand_options=context["vehicle_brand_options"],
+        )
+        context["has_compatibility_context"] = bool(compatibility_context_parts)
+        context["compatibility_context_label"] = " · ".join(compatibility_context_parts)
+        context["compatibility_browse_url"] = reverse("catalog:compatibility_vehicle_types")
 
         query_params_without_page = self.request.GET.copy()
         query_params_without_page.pop("page", None)
@@ -433,29 +732,46 @@ class ProductDetailView(DetailView):
 
         fitments = product.fitments.select_related("vehicle__brand").filter(
             vehicle__is_active=True
-        ).order_by("-is_verified", "vehicle__brand__name", "vehicle__model", "vehicle__year_start")
-        context["fitments"] = [
-            {
-                "vehicle_name": " ".join(
-                    part
-                    for part in [
-                        fitment.vehicle.brand.name,
-                        fitment.vehicle.model,
-                        fitment.vehicle.generation,
-                        fitment.vehicle.variant,
-                    ]
-                    if part
-                ),
-                "year_range": _render_year_range(
-                    fitment.vehicle.year_start,
-                    fitment.vehicle.year_end,
-                ),
-                "engine_code": fitment.vehicle.engine_code,
-                "fitment_notes": fitment.fitment_notes,
-                "is_verified": fitment.is_verified,
-            }
-            for fitment in fitments
-        ]
+        ).order_by(
+            "-is_verified",
+            "vehicle__vehicle_type",
+            "vehicle__brand__name",
+            "vehicle__model",
+            "vehicle__generation",
+            "vehicle__variant",
+            "vehicle__year_start",
+        )
+
+        fitment_groups_map: OrderedDict[tuple[str, str, str], dict] = OrderedDict()
+        for fitment in fitments:
+            vehicle = fitment.vehicle
+            group_key = (vehicle.vehicle_type, vehicle.brand.name, vehicle.model)
+            fitment_group = fitment_groups_map.setdefault(
+                group_key,
+                {
+                    "vehicle_type": vehicle.vehicle_type,
+                    "vehicle_type_label": _vehicle_type_label(vehicle.vehicle_type),
+                    "brand_name": vehicle.brand.name,
+                    "model": vehicle.model,
+                    "applications": [],
+                },
+            )
+            application_parts = [part for part in [vehicle.generation, vehicle.variant] if part]
+            if application_parts:
+                application_label = " ".join(application_parts)
+            else:
+                application_label = _("Configuración base")
+            fitment_group["applications"].append(
+                {
+                    "application_label": application_label,
+                    "year_range": _render_year_range(vehicle.year_start, vehicle.year_end),
+                    "engine_code": vehicle.engine_code,
+                    "fitment_notes": fitment.fitment_notes,
+                    "is_verified": fitment.is_verified,
+                }
+            )
+
+        context["fitment_groups"] = list(fitment_groups_map.values())
 
         raw_attribute_values = product.attribute_values.select_related(
             "attribute_definition"

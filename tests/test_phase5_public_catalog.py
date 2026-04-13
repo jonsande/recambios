@@ -336,8 +336,9 @@ def test_product_detail_renders_fitment_applications(client) -> None:
     content = response.content.decode()
 
     assert response.status_code == 200
-    assert "Aplicaciones del producto" in content
-    assert "Seat P5 Fit Leon III 1.6 TDI" in content
+    assert "Compatibilidad por vehículo" in content
+    assert "Coche · Seat P5 Fit Leon" in content
+    assert "III 1.6 TDI" in content
     assert "Años: 2014-2020" in content
     assert "Motor: CAYC" in content
     assert "Compatibilidad verificada" in content

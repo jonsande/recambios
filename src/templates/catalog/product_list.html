@@ -13,7 +13,26 @@
         {% trans "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial." %}
       </p>
     {% endif %}
+
+    <div class="mt-4">
+      <a
+        href="{{ compatibility_browse_url }}"
+        class="inline-flex rounded-md border border-slate-400 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      >
+        {% trans "Explorar por compatibilidad de vehículo" %}
+      </a>
+    </div>
   </section>
+
+  {% if has_compatibility_context %}
+    <section class="mt-6 rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm sm:p-5" aria-label="{% trans 'Contexto de compatibilidad activo' %}">
+      <h2 class="text-base font-semibold text-emerald-900">{% trans "Compatibilidad seleccionada" %}</h2>
+      <p class="mt-2 text-sm text-emerald-900">{{ compatibility_context_label }}</p>
+      <p class="mt-2 text-sm text-emerald-900">
+        {% trans "Los resultados mostrados aplican este contexto de vehículo sobre productos públicos." %}
+      </p>
+    </section>
+  {% endif %}
 
   <section class="mt-6 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5">
     <h2 class="text-base font-semibold text-slate-950">{% trans "Búsqueda técnica y filtros" %}</h2>
@@ -37,6 +56,22 @@
       </div>
 
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label for="catalog-vehicle-type" class="block text-sm font-medium text-slate-900">
+            {% trans "Tipo de vehículo" %}
+          </label>
+          <select
+            id="catalog-vehicle-type"
+            name="vehicle_type"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+            <option value="">{% trans "Todos los tipos" %}</option>
+            {% for option in vehicle_type_options %}
+              <option value="{{ option.value }}" {% if option.value == selected_vehicle_type %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
         <div>
           <label for="catalog-brand" class="block text-sm font-medium text-slate-900">
             {% trans "Marca de vehículo" %}

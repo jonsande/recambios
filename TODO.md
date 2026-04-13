@@ -1,5 +1,3 @@
-# TODO.md
-
 # Plan de implementación — Tienda de recambios v1
 
 ## Progreso general
@@ -78,10 +76,10 @@
   - [x] filtros por condición
   - [x] filtros por atributos técnicos
 
-- [ ] **Fase 7** — Compatibilidad por vehículo
-  - [ ] consulta por vehículo
-  - [ ] visualización en ficha
-  - [ ] soporte para diferentes tipos de vehículo
+- [x] **Fase 7** — Compatibilidad por vehículo
+  - [x] consulta por vehículo
+  - [x] visualización en ficha
+  - [x] soporte para diferentes tipos de vehículo
 
 - [ ] **Fase 8** — Emails transaccionales y comunicaciones
   - [ ] confirmación interna de nueva solicitud
@@ -109,6 +107,9 @@
   - [ ] contenidos traducibles
   - [ ] base ES/EN operativa
   - [ ] optimización razonable de imágenes
+  - [ ] selector manual de idioma visible
+  - [ ] estrategia de selección inicial de idioma
+  - [ ] política estable para `/es/` y `/en/`
 
 - [ ] **Fase 12** — Producción y despliegue
   - [ ] settings de producción
@@ -116,3 +117,9 @@
   - [ ] gunicorn
   - [ ] checklist de release
   - [ ] despliegue al servidor
+
+## Mejoras operativas posteriores
+
+- [ ] definir política de idioma del panel de administración
+- [ ] decidir si el admin debe usar español por defecto o respetar preferencia de usuario/navegador
+- [ ] revisar si la internacionalización estándar de Django admin es suficiente para el backoffice del proyecto
