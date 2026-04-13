@@ -367,6 +367,10 @@ def test_product_filter_form_uses_htmx_for_dependent_vehicle_select_updates(clie
     assert response.status_code == 200
     assert 'hx-get="/es/productos/filtros/vehiculo/marca/"' in content
     assert 'hx-get="/es/productos/filtros/vehiculo/modelo/"' in content
+    assert 'data-vehicle-filter-htmx="1"' in content
+    assert 'id="vehicle-filter-loading"' in content
+    assert "setTimeout(function () {" in content
+    assert "}, 150);" in content
     assert "requestSubmit()" not in content
 
 

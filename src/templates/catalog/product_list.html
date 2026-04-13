@@ -69,6 +69,7 @@
             hx-swap="outerHTML"
             hx-include="#catalog-filter-form [name='vehicle_type']"
             hx-vals='{"scope_category":"{{ scope_category_slug }}"}'
+            data-vehicle-filter-htmx="1"
             class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
           >
             <option value="">{% trans "Todos los tipos" %}</option>
@@ -80,6 +81,22 @@
 
         {% include "catalog/partials/filter_vehicle_brand_field.html" with scope_category_slug=scope_category_slug %}
         {% include "catalog/partials/filter_vehicle_model_field.html" %}
+
+        <div class="sm:col-span-2 lg:col-span-3">
+          <p
+            id="vehicle-filter-loading"
+            class="hidden mt-1 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span
+              class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent"
+              aria-hidden="true"
+            ></span>
+            <span>{% trans "Actualizando opciones de vehículo..." %}</span>
+          </p>
+        </div>
 
         <div>
           <label for="catalog-year" class="block text-sm font-medium text-slate-900">
@@ -174,6 +191,69 @@
         </a>
       </div>
     </form>
+    <script>
+      (function () {
+        const indicator = document.getElementById("vehicle-filter-loading");
+        if (!indicator) {
+          return;
+        }
+
+        let pendingVehicleFilterRequests = 0;
+        let showIndicatorTimerId = null;
+        const triggerSelector = '[data-vehicle-filter-htmx="1"]';
+
+        function showIndicator() {
+          indicator.classList.remove("hidden");
+          indicator.classList.add("inline-flex");
+        }
+
+        function hideIndicator() {
+          indicator.classList.add("hidden");
+          indicator.classList.remove("inline-flex");
+        }
+
+        function isVehicleFilterTrigger(eventDetail) {
+          return Boolean(eventDetail?.elt?.matches?.(triggerSelector));
+        }
+
+        document.body.addEventListener("htmx:beforeRequest", function (event) {
+          if (!isVehicleFilterTrigger(event.detail)) {
+            return;
+          }
+
+          pendingVehicleFilterRequests += 1;
+          if (pendingVehicleFilterRequests > 1) {
+            return;
+          }
+
+          hideIndicator();
+          if (showIndicatorTimerId !== null) {
+            window.clearTimeout(showIndicatorTimerId);
+          }
+          showIndicatorTimerId = window.setTimeout(function () {
+            showIndicator();
+            showIndicatorTimerId = null;
+          }, 150);
+        });
+
+        document.body.addEventListener("htmx:afterRequest", function (event) {
+          if (!isVehicleFilterTrigger(event.detail)) {
+            return;
+          }
+
+          pendingVehicleFilterRequests = Math.max(0, pendingVehicleFilterRequests - 1);
+          if (pendingVehicleFilterRequests > 0) {
+            return;
+          }
+
+          if (showIndicatorTimerId !== null) {
+            window.clearTimeout(showIndicatorTimerId);
+            showIndicatorTimerId = null;
+          }
+          hideIndicator();
+        });
+      })();
+    </script>
   </section>
 
   <section class="mt-6">
