@@ -213,7 +213,18 @@ class Command(BaseCommand):
     }
 
     VEHICLE_SERIES = {
-        "Volkswagen": ["Golf", "Polo", "Passat", "Jetta", "Tiguan", "Touareg", "Up", "Fox", "Scirocco", "Beetle"],
+        "Volkswagen": [
+            "Golf",
+            "Polo",
+            "Passat",
+            "Jetta",
+            "Tiguan",
+            "Touareg",
+            "Up",
+            "Fox",
+            "Scirocco",
+            "Beetle",
+        ],
         "Audi": ["A1", "A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "TT", "R8"],
         "BMW": ["Serie 1", "Serie 3", "Serie 5", "X1", "X3", "X5", "Z4", "M3"],
         "Mercedes-Benz": ["Clase A", "Clase C", "Clase E", "Clase S", "GLA", "GLC", "GLE", "ML"],
@@ -233,7 +244,23 @@ class Command(BaseCommand):
     }
 
     YEARS = list(range(2000, 2026))
-    FLOW_RATES = ["150", "180", "200", "220", "250", "280", "300", "350", "400", "500", "600", "750", "1000", "1200", "1500"]
+    FLOW_RATES = [
+        "150",
+        "180",
+        "200",
+        "220",
+        "250",
+        "280",
+        "300",
+        "350",
+        "400",
+        "500",
+        "600",
+        "750",
+        "1000",
+        "1200",
+        "1500",
+    ]
     POWER_KW = ["1.4", "2.0", "2.2", "2.5", "3.0", "3.5", "4.0", "5.0", "6.0", "7.0", "8.0"]
     TEMPS = ["80", "85", "88", "90", "92", "95"]
     HEAT_RANGES = ["Cold", "Medium", "Hot", "Super Hot"]
@@ -291,7 +318,9 @@ class Command(BaseCommand):
 
         supplier = Supplier.objects.first()
         if not supplier:
-            self.stderr.write(self.style.ERROR("No supplier found. Please run populate_rg_data first."))
+            self.stderr.write(
+                self.style.ERROR("No supplier found. Please run populate_rg_data first.")
+            )
             return created
 
         condition = Condition.objects.filter(code="NEW").first()
@@ -426,8 +455,14 @@ class Command(BaseCommand):
         title_template = random.choice(template["templates"])
 
         title = title_template.replace("{brand}", brand)
-        title = title.replace("{series}", f"{random.randint(1, 9)}{random.choice(['A', 'B', 'C', 'S', 'X'])}")
-        title = title.replace("{model}", f"{random.randint(1, 6)}{random.choice(['.0', '.5', 'S', 'T'])}")
+        title = title.replace(
+            "{series}",
+            f"{random.randint(1, 9)}{random.choice(['A', 'B', 'C', 'S', 'X'])}",
+        )
+        title = title.replace(
+            "{model}",
+            f"{random.randint(1, 6)}{random.choice(['.0', '.5', 'S', 'T'])}",
+        )
         title = title.replace("{amp}A", f"{random.choice([90, 110, 120, 140, 150])}A")
         title = title.replace("{power}KW", f"{random.choice([1.4, 1.8, 2.0, 2.2, 3.0])}KW")
         title = title.replace("{flow}cc", f"{random.choice(self.FLOW_RATES)}cc")
@@ -436,9 +471,15 @@ class Command(BaseCommand):
         title = title.replace("{heat}", random.choice(self.HEAT_RANGES))
         title = title.replace("{position}", random.choice(self.POSITIONS))
         title = title.replace("{size}\"", f"{random.choice(self.TIRE_SIZES)}\"")
-        title = title.replace("{size}", random.choice(["25x52x25", "30x62x20", "35x72x25", "40x80x30"]))
+        title = title.replace(
+            "{size}",
+            random.choice(["25x52x25", "30x62x20", "35x72x25", "40x80x30"]),
+        )
         title = title.replace("{finish}", random.choice(self.FINISHES))
-        title = title.replace("{specs}", f"{random.choice([5, 6, 8])}x{random.choice([100, 112, 114, 120])}")
+        title = title.replace(
+            "{specs}",
+            f"{random.choice([5, 6, 8])}x{random.choice([100, 112, 114, 120])}",
+        )
 
         if "{sensor_type}" in title:
             title = title.replace("{sensor_type}", random.choice(self.SENSOR_TYPES))
@@ -500,10 +541,15 @@ class Command(BaseCommand):
         return f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="400" fill="{color}" opacity="0.2"/>
-  <rect x="20" y="20" width="360" height="360" fill="white" rx="10" ry="10" stroke="{color}" stroke-width="2"/>
-  <text x="200" y="180" font-family="Arial, sans-serif" font-size="24" fill="#333" text-anchor="middle">{product.brand.name}</text>
-  <text x="200" y="220" font-family="Arial, sans-serif" font-size="18" fill="#666" text-anchor="middle">{product.sku}</text>
-  <text x="200" y="260" font-family="Arial, sans-serif" font-size="14" fill="#999" text-anchor="middle">{product.category.name}</text>
+  <rect x="20" y="20" width="360" height="360" fill="white"
+        rx="10" ry="10" stroke="{color}" stroke-width="2"/>
+  <text x="200" y="180" font-family="Arial, sans-serif" font-size="24"
+        fill="#333" text-anchor="middle">{product.brand.name}</text>
+  <text x="200" y="220" font-family="Arial, sans-serif" font-size="18"
+        fill="#666" text-anchor="middle">{product.sku}</text>
+  <text x="200" y="260" font-family="Arial, sans-serif" font-size="14"
+        fill="#999" text-anchor="middle">{product.category.name}</text>
   <circle cx="200" cy="320" r="40" fill="{color}" opacity="0.5"/>
-  <text x="200" y="328" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">IMG</text>
+  <text x="200" y="328" font-family="Arial, sans-serif" font-size="24"
+        fill="white" text-anchor="middle">IMG</text>
 </svg>'''

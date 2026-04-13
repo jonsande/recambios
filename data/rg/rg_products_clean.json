@@ -1,0 +1,2523 @@
+[
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-denso-neu-take-off-te438000-4913.html",
+    "category_slug": "starter",
+    "supplier_product_code": "TE438000-4913",
+    "sku": "RG-TE438000-4913",
+    "title": "Starter Denso (new - take off) TE438000-4913",
+    "condition_code": "take_off",
+    "part_numbers": [
+      {
+        "number_raw": "8687064",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "12418687064",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "438000-4913",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW 7 (G11, G12), Bj. 2021-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "G11, G12",
+        "variant": "",
+        "year_start": 2021,
+        "year_end": null,
+        "source_text": "BMW 7 (G11, G12), Bj. 2021-"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "TE438000-4913",
+      "Description": "Starter Denso (new - take off)",
+      "Matchcode": "8687064",
+      "Unit": "pcs",
+      "Weight": "3.500000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 7 (G11, G12), Bj. 2021-",
+      "comparison numbers": "BMW Nr.: 8687064, 12418687064, 438000-4913"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-bosch-instandgesetzt-0001107528.html",
+    "category_slug": "starter",
+    "supplier_product_code": "0001107528",
+    "sku": "RG-0001107528",
+    "title": "Starter Bosch (rebuilt) 0001107528",
+    "condition_code": "refurbished",
+    "part_numbers": [
+      {
+        "number_raw": "20250611",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "7610350",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "12417610350",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "12412354701",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "12417521116",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "12417521123",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW 1 (E81), Bj. 2007-2012; BMW 1 (E87), Bj. 2006-2011; BMW 1 (F20), Bj. 2012-2015; BMW 1 (E88), Bj. 2007-2013; BMW 1 (E82), Bj. 2007-2013; BMW 3 (E90), Bj. 2007-2011; BMW 3 (E92), Bj. 2007-2013; BMW 3 (E91), Bj. 2006-2012; BMW 5 (E60), Bj. 2006-2010; BMW 5 (F10), Bj. 2011-2016; BMW 5 (F07), Bj. 2009-2017; BMW 5 (E61), Bj. 2004-2010; BMW 5 (F11), Bj. 2009-2017; BMW 6 (E63), Bj. 2004-2010; BMW 6 (E64), Bj. 2004-2010; BMW 7 (E65, E66, E67), Bj. 2005-2008; BMW 7 (F01, F02, F03, F04), Bj. 2008-2015; X1 (E84), Bj. 2011-2015; X3 (E83), Bj. 2006-2010; X3 (F25), Bj. 2011-2017; X5 (E70), Bj. 2008-2013; X6 (E71, E72), Bj. 2007-2014; Z4 (E86), Bj. 2006-2008; Z4 (E85), Bj. 2005-2009; Z4 (E89), Bj. 2011-2016",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "1",
+        "generation": "E81",
+        "variant": "",
+        "year_start": 2007,
+        "year_end": 2012,
+        "source_text": "BMW 1 (E81), Bj. 2007-2012"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "1",
+        "generation": "E87",
+        "variant": "",
+        "year_start": 2006,
+        "year_end": 2011,
+        "source_text": "BMW 1 (E87), Bj. 2006-2011"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "1",
+        "generation": "F20",
+        "variant": "",
+        "year_start": 2012,
+        "year_end": 2015,
+        "source_text": "BMW 1 (F20), Bj. 2012-2015"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "1",
+        "generation": "E88",
+        "variant": "",
+        "year_start": 2007,
+        "year_end": 2013,
+        "source_text": "BMW 1 (E88), Bj. 2007-2013"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "1",
+        "generation": "E82",
+        "variant": "",
+        "year_start": 2007,
+        "year_end": 2013,
+        "source_text": "BMW 1 (E82), Bj. 2007-2013"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "E90",
+        "variant": "",
+        "year_start": 2007,
+        "year_end": 2011,
+        "source_text": "BMW 3 (E90), Bj. 2007-2011"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "E92",
+        "variant": "",
+        "year_start": 2007,
+        "year_end": 2013,
+        "source_text": "BMW 3 (E92), Bj. 2007-2013"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "E91",
+        "variant": "",
+        "year_start": 2006,
+        "year_end": 2012,
+        "source_text": "BMW 3 (E91), Bj. 2006-2012"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "E60",
+        "variant": "",
+        "year_start": 2006,
+        "year_end": 2010,
+        "source_text": "BMW 5 (E60), Bj. 2006-2010"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "F10",
+        "variant": "",
+        "year_start": 2011,
+        "year_end": 2016,
+        "source_text": "BMW 5 (F10), Bj. 2011-2016"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "F07",
+        "variant": "",
+        "year_start": 2009,
+        "year_end": 2017,
+        "source_text": "BMW 5 (F07), Bj. 2009-2017"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "E61",
+        "variant": "",
+        "year_start": 2004,
+        "year_end": 2010,
+        "source_text": "BMW 5 (E61), Bj. 2004-2010"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "F11",
+        "variant": "",
+        "year_start": 2009,
+        "year_end": 2017,
+        "source_text": "BMW 5 (F11), Bj. 2009-2017"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "6",
+        "generation": "E63",
+        "variant": "",
+        "year_start": 2004,
+        "year_end": 2010,
+        "source_text": "BMW 6 (E63), Bj. 2004-2010"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "6",
+        "generation": "E64",
+        "variant": "",
+        "year_start": 2004,
+        "year_end": 2010,
+        "source_text": "BMW 6 (E64), Bj. 2004-2010"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "E65, E66, E67",
+        "variant": "",
+        "year_start": 2005,
+        "year_end": 2008,
+        "source_text": "BMW 7 (E65, E66, E67), Bj. 2005-2008"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "F01, F02, F03, F04",
+        "variant": "",
+        "year_start": 2008,
+        "year_end": 2015,
+        "source_text": "BMW 7 (F01, F02, F03, F04), Bj. 2008-2015"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "X1 (E84), Bj. 2011-2015",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "X3 (E83), Bj. 2006-2010",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "X3 (F25), Bj. 2011-2017",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "X5 (E70), Bj. 2008-2013",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "X6 (E71, E72), Bj. 2007-2014",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Z4 (E86), Bj. 2006-2008",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Z4 (E85), Bj. 2005-2009",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Z4 (E89), Bj. 2011-2016",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0001107528",
+      "Description": "Starter Bosch (rebuilt)",
+      "Matchcode": "20250611",
+      "Unit": "pcs",
+      "Weight": "2.730000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 1 (E81), Bj. 2007-2012; BMW 1 (E87), Bj. 2006-2011; BMW 1 (F20), Bj. 2012-2015; BMW 1 (E88), Bj. 2007-2013; BMW 1 (E82), Bj. 2007-2013; BMW 3 (E90), Bj. 2007-2011; BMW 3 (E92), Bj. 2007-2013; BMW 3 (E91), Bj. 2006-2012; BMW 5 (E60), Bj. 2006-2010; BMW 5 (F10), Bj. 2011-2016; BMW 5 (F07), Bj. 2009-2017; BMW 5 (E61), Bj. 2004-2010; BMW 5 (F11), Bj. 2009-2017; BMW 6 (E63), Bj. 2004-2010; BMW 6 (E64), Bj. 2004-2010; BMW 7 (E65, E66, E67), Bj. 2005-2008; BMW 7 (F01, F02, F03, F04), Bj. 2008-2015; X1 (E84), Bj. 2011-2015; X3 (E83), Bj. 2006-2010; X3 (F25), Bj. 2011-2017; X5 (E70), Bj. 2008-2013; X6 (E71, E72), Bj. 2007-2014; Z4 (E86), Bj. 2006-2008; Z4 (E85), Bj. 2005-2009; Z4 (E89), Bj. 2011-2016",
+      "comparison numbers": "BMW Nr. 7610350, 12417610350, 12412354701, 12417521116, 12417521123"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-seg-neu-take-off-0001148515.html",
+    "category_slug": "starter",
+    "supplier_product_code": "0001148515",
+    "sku": "RG-0001148515",
+    "title": "Starter SEG (new - take off) 0001148515",
+    "condition_code": "take_off",
+    "part_numbers": [
+      {
+        "number_raw": "8589891",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2019-; BMW 5 (G30, F90), Bj. 2016-2020; BMW 5 (G31), Bj. 2017-; BMW 6 (G32), Bj. 2017-2020; BMW 7 (G11, G12), Bj. 2015-2020; BMW 8 (G14, F91, G15, F92), Bj. 2018-2020; BMW 8 (G16, F93), Bj. 2019-2020; BMW X3 (G01, F97, G08), Bj. 2017-2020; BMW X4 (G02, F98), Bj. 2018-2020; BMW X5 (G05, F95), Bj. 2018-2023; BMW X6 (G06, F96), Bj. 2019-2023; BMW X7 (G07), Bj. 2019-2020-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "G20, G80, G28, G21, G81",
+        "variant": "",
+        "year_start": 2019,
+        "year_end": null,
+        "source_text": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2019-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "G30, F90",
+        "variant": "",
+        "year_start": 2016,
+        "year_end": 2020,
+        "source_text": "BMW 5 (G30, F90), Bj. 2016-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "G31",
+        "variant": "",
+        "year_start": 2017,
+        "year_end": null,
+        "source_text": "BMW 5 (G31), Bj. 2017-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "6",
+        "generation": "G32",
+        "variant": "",
+        "year_start": 2017,
+        "year_end": 2020,
+        "source_text": "BMW 6 (G32), Bj. 2017-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "G11, G12",
+        "variant": "",
+        "year_start": 2015,
+        "year_end": 2020,
+        "source_text": "BMW 7 (G11, G12), Bj. 2015-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "8",
+        "generation": "G14, F91, G15, F92",
+        "variant": "",
+        "year_start": 2018,
+        "year_end": 2020,
+        "source_text": "BMW 8 (G14, F91, G15, F92), Bj. 2018-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "8",
+        "generation": "G16, F93",
+        "variant": "",
+        "year_start": 2019,
+        "year_end": 2020,
+        "source_text": "BMW 8 (G16, F93), Bj. 2019-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X3",
+        "generation": "G01, F97, G08",
+        "variant": "",
+        "year_start": 2017,
+        "year_end": 2020,
+        "source_text": "BMW X3 (G01, F97, G08), Bj. 2017-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X4",
+        "generation": "G02, F98",
+        "variant": "",
+        "year_start": 2018,
+        "year_end": 2020,
+        "source_text": "BMW X4 (G02, F98), Bj. 2018-2020"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X5",
+        "generation": "G05, F95",
+        "variant": "",
+        "year_start": 2018,
+        "year_end": 2023,
+        "source_text": "BMW X5 (G05, F95), Bj. 2018-2023"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X6",
+        "generation": "G06, F96",
+        "variant": "",
+        "year_start": 2019,
+        "year_end": 2023,
+        "source_text": "BMW X6 (G06, F96), Bj. 2019-2023"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X7",
+        "generation": "G07",
+        "variant": "",
+        "year_start": 2019,
+        "year_end": 2020,
+        "source_text": "BMW X7 (G07), Bj. 2019-2020-"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "0001148515",
+      "Description": "Starter SEG (new - take off)",
+      "Matchcode": "8589891",
+      "Unit": "pcs",
+      "Weight": "3.910000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2019-; BMW 5 (G30, F90), Bj. 2016-2020; BMW 5 (G31), Bj. 2017-; BMW 6 (G32), Bj. 2017-2020; BMW 7 (G11, G12), Bj. 2015-2020; BMW 8 (G14, F91, G15, F92), Bj. 2018-2020; BMW 8 (G16, F93), Bj. 2019-2020; BMW X3 (G01, F97, G08), Bj. 2017-2020; BMW X4 (G02, F98), Bj. 2018-2020; BMW X5 (G05, F95), Bj. 2018-2023; BMW X6 (G06, F96), Bj. 2019-2023; BMW X7 (G07), Bj. 2019-2020-",
+      "comparison numbers": "BMW Nr.: 8589891"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-seg-neu-take-off-0001200004.html",
+    "category_slug": "starter",
+    "supplier_product_code": "0001200004",
+    "sku": "RG-0001200004",
+    "title": "Starter SEG (new - take off) 0001200004",
+    "condition_code": "take_off",
+    "part_numbers": [
+      {
+        "number_raw": "8490093",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "12418490093",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2020-; BMW 4 (G23, G83, G22, G82), Bj. 2021-; BMW 5 (G30, F90), Bj. 2020-2023; BMW 5 (G31), Bj. 2020-; BMW 6 (G32), Bj. 2020-; BMW 7 (G11, G12), Bj. 2020-2022; BMW 8 (G14, F91, G15, F92, G16, F93), Bj. 2020-; BMW X3 (G01, F97, G08), Bj. 2020-; BMW X4 (G02, F98), Bj. 2020-; BMW X5 (G05, F95), Bj. 2020-; BMW X6 (G06, F96), Bj. 2020-2023; BMW X7 (G07), Bj. 2020-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "G20, G80, G28, G21, G81",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "4",
+        "generation": "G23, G83, G22, G82",
+        "variant": "",
+        "year_start": 2021,
+        "year_end": null,
+        "source_text": "BMW 4 (G23, G83, G22, G82), Bj. 2021-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "G30, F90",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": 2023,
+        "source_text": "BMW 5 (G30, F90), Bj. 2020-2023"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "G31",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW 5 (G31), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "6",
+        "generation": "G32",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW 6 (G32), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "G11, G12",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": 2022,
+        "source_text": "BMW 7 (G11, G12), Bj. 2020-2022"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "8",
+        "generation": "G14, F91, G15, F92, G16, F93",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW 8 (G14, F91, G15, F92, G16, F93), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X3",
+        "generation": "G01, F97, G08",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW X3 (G01, F97, G08), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X4",
+        "generation": "G02, F98",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW X4 (G02, F98), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X5",
+        "generation": "G05, F95",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW X5 (G05, F95), Bj. 2020-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X6",
+        "generation": "G06, F96",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": 2023,
+        "source_text": "BMW X6 (G06, F96), Bj. 2020-2023"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X7",
+        "generation": "G07",
+        "variant": "",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "BMW X7 (G07), Bj. 2020-"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "0001200004",
+      "Description": "Starter SEG (new - take off)",
+      "Matchcode": "8490093",
+      "Unit": "pcs",
+      "Weight": "3.790000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 3 (G20, G80, G28, G21, G81), Bj. 2020-; BMW 4 (G23, G83, G22, G82), Bj. 2021-; BMW 5 (G30, F90), Bj. 2020-2023; BMW 5 (G31), Bj. 2020-; BMW 6 (G32), Bj. 2020-; BMW 7 (G11, G12), Bj. 2020-2022; BMW 8 (G14, F91, G15, F92, G16, F93), Bj. 2020-; BMW X3 (G01, F97, G08), Bj. 2020-; BMW X4 (G02, F98), Bj. 2020-; BMW X5 (G05, F95), Bj. 2020-; BMW X6 (G06, F96), Bj. 2020-2023; BMW X7 (G07), Bj. 2020-",
+      "comparison numbers": "BMW Nr.: 8490093, 12418490093"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-valeo-neuteil-made-in-poland-rsm18.html",
+    "category_slug": "starter",
+    "supplier_product_code": "RSM18",
+    "sku": "RG-RSM18",
+    "title": "Starter Valeo (new) 12V RSM18",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "8621648",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "12418621648",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW 7 (G11, G12) M 760 Li xDrive, Bj. 2016-2022",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "7",
+        "generation": "G11, G12",
+        "variant": "M 760 Li xDrive",
+        "year_start": 2016,
+        "year_end": 2022,
+        "source_text": "BMW 7 (G11, G12) M 760 Li xDrive, Bj. 2016-2022"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "RSM18",
+      "Description": "Starter Valeo (new) 12V",
+      "Matchcode": "8621648",
+      "Unit": "pcs",
+      "Weight": "3.250000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 7 (G11, G12) M 760 Li xDrive, Bj. 2016-2022",
+      "comparison numbers": "BMW Nr. 8621648, 12418621648"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/startergenerator-hybrid-valeo-neuteil-60ah-rexa-2714486.html",
+    "category_slug": "starter",
+    "supplier_product_code": "2714486",
+    "sku": "RG-2714486",
+    "title": "Starter / Generator Akku Hybrid Valeo (new) 60Ah RexA 2714486",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "12318682498",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "8682498",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "12317625712",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "7625712",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW i3 I01, Bj. 2015-:BMW i3 I01 LCI, Bj. 2017-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "i3",
+        "generation": "",
+        "variant": "I01",
+        "year_start": 2015,
+        "year_end": null,
+        "source_text": "BMW i3 I01, Bj. 2015-:"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "i3",
+        "generation": "",
+        "variant": "I01 LCI",
+        "year_start": 2017,
+        "year_end": null,
+        "source_text": "BMW i3 I01 LCI, Bj. 2017-"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "2714486",
+      "Description": "Starter / Generator Akku Hybrid Valeo (new) 60Ah RexA",
+      "Matchcode": "12318682498",
+      "Unit": "pcs",
+      "Weight": "35.000000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW i3 I01, Bj. 2015-:BMW i3 I01 LCI, Bj. 2017-",
+      "comparison numbers": "BMW Nr. 12318682498; 8682498, Valeo Nr. 2714486 ersetzt 12317625712, 7625712"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-bosch-neuteil-take-off-made-in-germany-0001108445.html",
+    "category_slug": "starter",
+    "supplier_product_code": "0001108445",
+    "sku": "RG-0001108445",
+    "title": "Starter Bosch (new - Take off) 0001108445",
+    "condition_code": "take_off",
+    "part_numbers": [
+      {
+        "number_raw": "079911021D",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "AUDI A4 (3.2 Ltr.), Bj. 2008-; A5 (3.2 Ltr.), Bj. 2007-; A6 (2.8/3.0 Ltr.), Bj. 2011-AUDI A7 (2.8/3.0 Ltr.), Bj. 2010-; A8 (3.0/4.2 Ltr.), Bj. 2009-; Q5 (3.2 Ltr.), Bj. 2008-; Q7 (3.0 Ltr.), Bj. 2010-; S4 (3.0 Ltr.), Bj. 2008-; S5 (4.2 Ltr.), Bj. 2007-",
+    "fitments_confident": [
+      {
+        "brand_name": "Audi",
+        "model": "A4",
+        "generation": "3.2 Ltr.",
+        "variant": "",
+        "year_start": 2008,
+        "year_end": null,
+        "source_text": "AUDI A4 (3.2 Ltr.), Bj. 2008-"
+      },
+      {
+        "brand_name": "Audi",
+        "model": "A7",
+        "generation": "2.8/3.0 Ltr.",
+        "variant": "",
+        "year_start": 2010,
+        "year_end": null,
+        "source_text": "AUDI A7 (2.8/3.0 Ltr.), Bj. 2010-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "A5 (3.2 Ltr.), Bj. 2007-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "A6 (2.8/3.0 Ltr.), Bj. 2011-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "A8 (3.0/4.2 Ltr.), Bj. 2009-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Q5 (3.2 Ltr.), Bj. 2008-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Q7 (3.0 Ltr.), Bj. 2010-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "S4 (3.0 Ltr.), Bj. 2008-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "S5 (4.2 Ltr.), Bj. 2007-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0001108445",
+      "Description": "Starter Bosch (new - Take off)",
+      "Matchcode": "079911021D",
+      "Unit": "pcs",
+      "Weight": "3.100000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "AUDI A4 (3.2 Ltr.), Bj. 2008-; A5 (3.2 Ltr.), Bj. 2007-; A6 (2.8/3.0 Ltr.), Bj. 2011-AUDI A7 (2.8/3.0 Ltr.), Bj. 2010-; A8 (3.0/4.2 Ltr.), Bj. 2009-; Q5 (3.2 Ltr.), Bj. 2008-; Q7 (3.0 Ltr.), Bj. 2010-; S4 (3.0 Ltr.), Bj. 2008-; S5 (4.2 Ltr.), Bj. 2007-"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-bosch-neuteil-ii-wahl-0001123018.html",
+    "category_slug": "starter",
+    "supplier_product_code": "0001123018",
+    "sku": "RG-0001123018",
+    "title": "Starter Bosch (new) II. choice 0001123018",
+    "condition_code": "second_quality",
+    "part_numbers": [
+      {
+        "number_raw": "0986020300",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "VW Polo 1.4 TDI, Bj. 2005-2009; Polo 1.9 SDI, Bj. 2001-2009; Golf V 2.0 SDI, Bj. 2004-2008SKODA Fabia I 1.4 TDI, Bj. 2005-2008; Fabia I 1.9 SDI, Bj. 1999-2008; Fabia II 1.4 TDI, Bj. 2007-2010; Roomster 1.4 TDI, Bj. 2006-2010SEAT Cordoba 1.4 TDI, Bj. 2005-2009; Cordoba 1.9 SDI, Bj. 2002-2009; Ibiza III 1.4 TDI, Bj. 2005-2009; Ibiza III 1.9 SDI, Bj. 2002-2005",
+    "fitments_confident": [
+      {
+        "brand_name": "Volkswagen",
+        "model": "Polo",
+        "generation": "",
+        "variant": "1.4 TDI",
+        "year_start": 2005,
+        "year_end": 2009,
+        "source_text": "VW Polo 1.4 TDI, Bj. 2005-2009"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Polo 1.9 SDI, Bj. 2001-2009",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Golf V 2.0 SDI, Bj. 2004-2008SKODA Fabia I 1.4 TDI, Bj. 2005-2008",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Fabia I 1.9 SDI, Bj. 1999-2008",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Fabia II 1.4 TDI, Bj. 2007-2010",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Roomster 1.4 TDI, Bj. 2006-2010SEAT Cordoba 1.4 TDI, Bj. 2005-2009",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Cordoba 1.9 SDI, Bj. 2002-2009",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Ibiza III 1.4 TDI, Bj. 2005-2009",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Ibiza III 1.9 SDI, Bj. 2002-2005",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0001123018",
+      "Description": "Starter Bosch (new) II. choice",
+      "Matchcode": "0986020300",
+      "Unit": "pcs",
+      "Weight": "3.000000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "VW Polo 1.4 TDI, Bj. 2005-2009; Polo 1.9 SDI, Bj. 2001-2009; Golf V 2.0 SDI, Bj. 2004-2008SKODA Fabia I 1.4 TDI, Bj. 2005-2008; Fabia I 1.9 SDI, Bj. 1999-2008; Fabia II 1.4 TDI, Bj. 2007-2010; Roomster 1.4 TDI, Bj. 2006-2010SEAT Cordoba 1.4 TDI, Bj. 2005-2009; Cordoba 1.9 SDI, Bj. 2002-2009; Ibiza III 1.4 TDI, Bj. 2005-2009; Ibiza III 1.9 SDI, Bj. 2002-2005"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-nippondenso-neuteil-438000-3490.html",
+    "category_slug": "starter",
+    "supplier_product_code": "438000-3490",
+    "sku": "RG-438000-3490",
+    "title": "Starter Nippondenso (new) 438000-3490",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "A2649060400",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "MERCEDES BENZ C-Klasse C 160, C 180, Bj. 2019-; C 300, Bj. 2018-; E-Klasse E 350 EQ, Bj. 2017-",
+    "fitments_confident": [
+      {
+        "brand_name": "Mercedes-Benz",
+        "model": "C-Klasse C",
+        "generation": "",
+        "variant": "160, C 180",
+        "year_start": 2019,
+        "year_end": null,
+        "source_text": "MERCEDES BENZ C-Klasse C 160, C 180, Bj. 2019-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "C 300, Bj. 2018-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "E-Klasse E 350 EQ, Bj. 2017-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "438000-3490",
+      "Description": "Starter Nippondenso (new)",
+      "Matchcode": "A2649060400",
+      "Unit": "pcs",
+      "Weight": "4.000000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "MERCEDES BENZ C-Klasse C 160, C 180, Bj. 2019-; C 300, Bj. 2018-; E-Klasse E 350 EQ, Bj. 2017-"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/anlasser-nippondenso-neuteil-438000-4430.html",
+    "category_slug": "starter",
+    "supplier_product_code": "438000-4430",
+    "sku": "RG-438000-4430",
+    "title": "Starter Nippondenso (new) 438000-4430",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "A2609060100",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "MERCEDES BENZ Sprinter 3-T, 3,5-t, 4-t, (B907, B910), Bj. 2020-; A-Klasse (W177, V177), Bj. 2018-; B-Klasse (W247), Bj. 2018-; CLA (C118, X118), Bj. 2019-; GLA (H247), Bj. 2020-; GLB (X247), Bj. 2019-",
+    "fitments_confident": [
+      {
+        "brand_name": "Mercedes-Benz",
+        "model": "Sprinter",
+        "generation": "B907, B910",
+        "variant": "3-T, 3,5-t, 4-t",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "MERCEDES BENZ Sprinter 3-T, 3,5-t, 4-t, (B907, B910), Bj. 2020-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "A-Klasse (W177, V177), Bj. 2018-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "B-Klasse (W247), Bj. 2018-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "CLA (C118, X118), Bj. 2019-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "GLA (H247), Bj. 2020-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "GLB (X247), Bj. 2019-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "438000-4430",
+      "Description": "Starter Nippondenso (new)",
+      "Matchcode": "A2609060100",
+      "Unit": "pcs",
+      "Weight": "3.320000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "MERCEDES BENZ Sprinter 3-T, 3,5-t, 4-t, (B907, B910), Bj. 2020-; A-Klasse (W177, V177), Bj. 2018-; B-Klasse (W247), Bj. 2018-; CLA (C118, X118), Bj. 2019-; GLA (H247), Bj. 2020-; GLB (X247), Bj. 2019-",
+      "comparison numbers": "MB Nr. A2609060100"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-delphi-common-rail-neuteil-28232251.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "28232251",
+    "sku": "RG-28232251",
+    "title": "injector Delphi Common Rail (new) 28232251",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "8200421897",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "K94",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "K9K724",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "K9K766",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "K9K830",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "K9K796",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "K9KDACIA",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "166001137R",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "8200421359",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "8200676774",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "8200815416",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "H8200421897",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "HRD339",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "EJBR03101D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "EJBR05101D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "EJBR05102D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "R03101D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "R05101D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "R05102D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "RENAULT Captur I 1.5 dCi, Bj. 2013-; Clio II, Modus 1.5 dCi, Bj. 2004-; Clio III, Thalia I 1.5 dCi, Bj. 2005-; Clio IV 1.5 dCi, Bj. 2012-; Fluence 1.5 dCi, Bj. 2010-RENAULT Kangoo, Megane II, Scenic II 1.5 dCi, Bj. 2005-; Lodgy 1.5 dCi, Bj. 2015-; Scenic III 1.5 dCi, Bj. 2009-; Thalia II 1.5 dCi, Bj. 2008-; Twingo II 1.5 dCi, Bj. 2007-2014MERCEDES BENZ Citan 109 CDI, Bj. 2012-2021DACIA Duster, Logan, SanderoNISSAN Micra III, Note, Evalia, NV200SUZUKI Jimny",
+    "fitments_confident": [
+      {
+        "brand_name": "Renault",
+        "model": "Captur I",
+        "generation": "",
+        "variant": "1.5 dCi",
+        "year_start": 2013,
+        "year_end": null,
+        "source_text": "RENAULT Captur I 1.5 dCi, Bj. 2013-"
+      },
+      {
+        "brand_name": "Renault",
+        "model": "Kangoo,",
+        "generation": "",
+        "variant": "Megane II, Scenic II 1.5 dCi",
+        "year_start": 2005,
+        "year_end": null,
+        "source_text": "RENAULT Kangoo, Megane II, Scenic II 1.5 dCi, Bj. 2005-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Clio II, Modus 1.5 dCi, Bj. 2004-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Clio III, Thalia I 1.5 dCi, Bj. 2005-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Clio IV 1.5 dCi, Bj. 2012-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Fluence 1.5 dCi, Bj. 2010-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Lodgy 1.5 dCi, Bj. 2015-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Scenic III 1.5 dCi, Bj. 2009-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Thalia II 1.5 dCi, Bj. 2008-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Twingo II 1.5 dCi, Bj. 2007-2014MERCEDES BENZ Citan 109 CDI, Bj. 2012-2021DACIA Duster, Logan, SanderoNISSAN Micra III, Note, Evalia, NV200SUZUKI Jimny",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "28232251",
+      "Description": "injector Delphi Common Rail (new)",
+      "Matchcode": "8200421897",
+      "Unit": "pcs",
+      "Weight": "0.200000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "RENAULT Captur I 1.5 dCi, Bj. 2013-; Clio II, Modus 1.5 dCi, Bj. 2004-; Clio III, Thalia I 1.5 dCi, Bj. 2005-; Clio IV 1.5 dCi, Bj. 2012-; Fluence 1.5 dCi, Bj. 2010-RENAULT Kangoo, Megane II, Scenic II 1.5 dCi, Bj. 2005-; Lodgy 1.5 dCi, Bj. 2015-; Scenic III 1.5 dCi, Bj. 2009-; Thalia II 1.5 dCi, Bj. 2008-; Twingo II 1.5 dCi, Bj. 2007-2014MERCEDES BENZ Citan 109 CDI, Bj. 2012-2021DACIA Duster, Logan, SanderoNISSAN Micra III, Note, Evalia, NV200SUZUKI Jimny",
+      "comparison numbers": "Type : K94 Euro 4 / K9K724 / K9K766 / K9K830 / K9K796 / K9KDacia Nr.: 166001137R, 8200421359, 8200676774, 8200815416, H8200421897, Delphi-Nr. HRD339, EJBR03101D, EJBR05101D, EJBR05102D, R03101D, R05101D, R05102D"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzleiste-verteilerrohr-hornlein-neuteil-bestehend-aus-4-einspritzventilen-0280158457-8483304-kraftstoffverteiler-12529798753-9798753-adapterkabel-bm4b475145-9844534-steckverbindung-9291135-8489600.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "8489600",
+    "sku": "RG-8489600",
+    "title": "Injection rail manifold Hörnlein (new), Consisting of 4 Injection valves 0280158457/ 8483304, fuel rail 12529798753, 9798753, Adaptercable BM4B475145/ 9844534, Plug connection 9291135 8489600",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "990988-10",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "BMW 2 (U06), BMW 5 (G60), BMW 5 (G68), BMW 7 (G70), X1 (U11, U12); X2 (U10); X5 (G05, G18); X6 (G06); X7 (G07); XM (G09) MINI Countyman (U25)",
+    "fitments_confident": [],
+    "fitments_unparsed": [
+      {
+        "source_text": "BMW 2 (U06)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "BMW 5 (G60)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "BMW 5 (G68)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "BMW 7 (G70), X1 (U11, U12)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "X2 (U10)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "X5 (G05, G18)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "X6 (G06)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "X7 (G07)",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "XM (G09) MINI Countyman (U25)",
+        "reason": "missing_year_marker"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "8489600",
+      "Description": "Injection rail manifold Hörnlein (new), Consisting of 4 Injection valves 0280158457/ 8483304, fuel rail 12529798753, 9798753, Adaptercable BM4B475145/ 9844534, Plug connection 9291135",
+      "Matchcode": "990988-10",
+      "Unit": "pcs",
+      "Weight": "0.500000",
+      "delivery time": "2-3 Tage",
+      "EAN": "Nicht zutreffend",
+      "Vehicle use": "BMW 2 (U06), BMW 5 (G60), BMW 5 (G68), BMW 7 (G70), X1 (U11, U12); X2 (U10); X5 (G05, G18); X6 (G06); X7 (G07); XM (G09) MINI Countyman (U25)",
+      "comparison numbers": "BMW Nr. 8489600, 13538489600 Hörnlein Nr. 990988-10"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-bosch-common-rail-neuteil-0445110248.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0445110248",
+    "sku": "RG-0445110248",
+    "title": "injector Bosch Common Rail (new) 0445110248",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "504088823",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "504380117",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0445110247",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0986435163",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "4047024094338",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "IVECO Daily IV Kasten, Pritsche, Kipper, Bj. 2006-2011 65 C 18 CC 4350 FIAT Ducato Bus, Kasten, Pritshe 3.0 D, Bj. 2006-2014 CITROEN Jumper III 3.0 HDi, Bj. 2006- PEUGEOT Boxer 3.0 HDi, Bj. 2006-2015",
+    "fitments_confident": [
+      {
+        "brand_name": "Fiat",
+        "model": "Ducato",
+        "generation": "",
+        "variant": "Bus, Kasten, Pritshe 3.0 D",
+        "year_start": 2006,
+        "year_end": 2014,
+        "source_text": "FIAT Ducato Bus, Kasten, Pritshe 3.0 D, Bj. 2006-2014"
+      },
+      {
+        "brand_name": "Citroen",
+        "model": "Jumper III",
+        "generation": "",
+        "variant": "3.0 HDi",
+        "year_start": 2006,
+        "year_end": null,
+        "source_text": "CITROEN Jumper III 3.0 HDi, Bj. 2006-"
+      },
+      {
+        "brand_name": "Peugeot",
+        "model": "Boxer",
+        "generation": "",
+        "variant": "3.0 HDi",
+        "year_start": 2006,
+        "year_end": 2015,
+        "source_text": "PEUGEOT Boxer 3.0 HDi, Bj. 2006-2015"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "0445110248",
+      "Description": "injector Bosch Common Rail (new)",
+      "Matchcode": "504088823",
+      "Unit": "pcs",
+      "Weight": "0.560000",
+      "delivery time": "2-3 Tage",
+      "EAN": "4047024094338",
+      "Vehicle use": "IVECO Daily IV Kasten, Pritsche, Kipper, Bj. 2006-2011 65 C 18 CC 4350 FIAT Ducato Bus, Kasten, Pritshe 3.0 D, Bj. 2006-2014 CITROEN Jumper III 3.0 HDi, Bj. 2006- PEUGEOT Boxer 3.0 HDi, Bj. 2006-2015",
+      "comparison numbers": "Iveco Nr.: 504088823, PSA-Nr. 1984 G8, New Holland: 504380117, Bosch-Nr. 0445110247, 0986435163"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-bosch-common-rail-neuteil-0445110419.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0445110419",
+    "sku": "RG-0445110419",
+    "title": "injector Bosch Common Rail (new) 0445110419",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "55233955",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "71795163",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0986435213",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "4047024707412",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "OPEL Combo 2.0 CDTI, Bj. 2012- FIAT 500X 2.0 D multijet, Bj. 2014-2020; Doblol 2.0 D Multijet, Bj. 2010-2023; Ducato 2.0 D Multijet, Bj. 2011-; Freemont 2.0 JTD, Bj. 2011-2015 JEEP Renegade 2.0 CRDi, Bj. 2014- ALFA ROMEO Giulietta 2.0 JTDM, Bj. 2010-2020",
+    "fitments_confident": [
+      {
+        "brand_name": "Opel",
+        "model": "Combo",
+        "generation": "",
+        "variant": "2.0 CDTI",
+        "year_start": 2012,
+        "year_end": null,
+        "source_text": "OPEL Combo 2.0 CDTI, Bj. 2012-"
+      },
+      {
+        "brand_name": "Fiat",
+        "model": "500X",
+        "generation": "",
+        "variant": "2.0 D multijet",
+        "year_start": 2014,
+        "year_end": 2020,
+        "source_text": "FIAT 500X 2.0 D multijet, Bj. 2014-2020"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Doblol 2.0 D Multijet, Bj. 2010-2023",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Ducato 2.0 D Multijet, Bj. 2011-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Freemont 2.0 JTD, Bj. 2011-2015 JEEP Renegade 2.0 CRDi, Bj. 2014- ALFA ROMEO Giulietta 2.0 JTDM, Bj. 2010-2020",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0445110419",
+      "Description": "injector Bosch Common Rail (new)",
+      "Matchcode": "55233955",
+      "Unit": "pcs",
+      "Weight": "0.450000",
+      "delivery time": "2-3 Tage",
+      "EAN": "4047024707412",
+      "Vehicle use": "OPEL Combo 2.0 CDTI, Bj. 2012- FIAT 500X 2.0 D multijet, Bj. 2014-2020; Doblol 2.0 D Multijet, Bj. 2010-2023; Ducato 2.0 D Multijet, Bj. 2011-; Freemont 2.0 JTD, Bj. 2011-2015 JEEP Renegade 2.0 CRDi, Bj. 2014- ALFA ROMEO Giulietta 2.0 JTDM, Bj. 2010-2020",
+      "comparison numbers": "Fiat Nr.: 55233955, 71795163, Bosch-Nr. 0986435213"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-bosch-common-rail-neuteil-0445110657.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0445110657",
+    "sku": "RG-0445110657",
+    "title": "injector Bosch Common Rail (new) 0445110657",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "5801790338",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "CRI2-20",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "4047025955867",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "IVECO, JOHN DEERE, NEW HOLLAND, CASE",
+    "fitments_confident": [],
+    "fitments_unparsed": [
+      {
+        "source_text": "IVECO, JOHN DEERE, NEW HOLLAND, CASE",
+        "reason": "missing_year_marker"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0445110657",
+      "Description": "injector Bosch Common Rail (new)",
+      "Matchcode": "5801790338",
+      "Unit": "pcs",
+      "Weight": "0.540000",
+      "delivery time": "2-3 Tage",
+      "EAN": "4047025955867",
+      "Vehicle use": "IVECO, JOHN DEERE, NEW HOLLAND, CASE",
+      "comparison numbers": "Iveco No.: 5801790338, CRI2-20 OHW"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/dusenstock-bosch-neuteil.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0986430451",
+    "sku": "RG-0986430451",
+    "title": "Nozzle bar Bosch (new) 0986430451",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "KDEL82P12",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "51.10100-7374",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0432131760",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "3165141982954",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "MAN F 2000, Bj. 1994-",
+    "fitments_confident": [],
+    "fitments_unparsed": [
+      {
+        "source_text": "MAN F 2000, Bj. 1994-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0986430451",
+      "Description": "Nozzle bar Bosch (new)",
+      "Matchcode": "KDEL82P12",
+      "Unit": "pcs",
+      "Weight": "0.320000",
+      "delivery time": "2-3 Tage",
+      "EAN": "3165141982954",
+      "Vehicle use": "MAN F 2000, Bj. 1994-",
+      "comparison numbers": "MAN-Nr. 51.10100-7374, Bosch-Nr. KDEL82P12, 0432131760"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-bosch-common-rail-neuteil-0445110572.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0445110572",
+    "sku": "RG-0445110572",
+    "title": "injector Bosch Common Rail (new) 0445110572",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "A6510703687",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "MERCEDES BENZ V-Klasse V 200 CDI/ 220 CDI/ V250 BlueTec, Bj. 2014-; Vito 114 CDI/ 116 CDI/ 119 CDI, Bj. 2014-",
+    "fitments_confident": [
+      {
+        "brand_name": "Mercedes-Benz",
+        "model": "V-Klasse V",
+        "generation": "",
+        "variant": "200 CDI/ 220 CDI/ V250 BlueTec",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "MERCEDES BENZ V-Klasse V 200 CDI/ 220 CDI/ V250 BlueTec, Bj. 2014-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Vito 114 CDI/ 116 CDI/ 119 CDI, Bj. 2014-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0445110572",
+      "Description": "injector Bosch Common Rail (new)",
+      "Matchcode": "A6510703687",
+      "Unit": "pcs",
+      "Weight": "0.500000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "MERCEDES BENZ V-Klasse V 200 CDI/ 220 CDI/ V250 BlueTec, Bj. 2014-; Vito 114 CDI/ 116 CDI/ 119 CDI, Bj. 2014-",
+      "comparison numbers": "MB Nr. A6510703687"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzventil-bosch-neuteil-0261500491.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0261500491",
+    "sku": "RG-0261500491",
+    "title": "injection valve Bosch (new) 0261500491",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "07P906036H",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "VW Teramont, AUDI, SEAT, SKODABENTLEY Bentayga 6.0 (W12), Bj. 2017-",
+    "fitments_confident": [],
+    "fitments_unparsed": [
+      {
+        "source_text": "VW Teramont",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "AUDI",
+        "reason": "missing_year_marker"
+      },
+      {
+        "source_text": "SEAT, SKODABENTLEY Bentayga 6.0 (W12), Bj. 2017-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0261500491",
+      "Description": "injection valve Bosch (new)",
+      "Matchcode": "07P906036H",
+      "Unit": "pcs",
+      "Weight": "0.100000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "VW Teramont, AUDI, SEAT, SKODABENTLEY Bentayga 6.0 (W12), Bj. 2017-",
+      "comparison numbers": "VW Nr. 07P906036H"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-bosch-neuteil-0445110101.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "0445110101",
+    "sku": "RG-0445110101",
+    "title": "injector Bosch (new) 0445110101",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "33800-27010",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "33800-27000",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0986435147",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0445110064",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0445110731",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "3165143571040",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "KIA Carens II 2.0 CRDi, Bj. 2002- 2006 HYUNDAY Accent II 1.5 CRDi, Bj. 2002-2005; Elantra III 2.0 CRDI, Bj. 2001-2006; Matrix 1.5 CRDi, Bj. 2001-2010; Santa FE, Trajet 2.0 CRDi, Bj. 2001-",
+    "fitments_confident": [
+      {
+        "brand_name": "Kia",
+        "model": "Carens II",
+        "generation": "",
+        "variant": "2.0 CRDi",
+        "year_start": 2002,
+        "year_end": 2006,
+        "source_text": "KIA Carens II 2.0 CRDi, Bj. 2002- 2006 HYUNDAY Accent II 1.5 CRDi, Bj. 2002-2005"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Elantra III 2.0 CRDI, Bj. 2001-2006",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Matrix 1.5 CRDi, Bj. 2001-2010",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Santa FE, Trajet 2.0 CRDi, Bj. 2001-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0445110101",
+      "Description": "injector Bosch (new)",
+      "Matchcode": "33800-27010",
+      "Unit": "pcs",
+      "Packaging": "Original Bosch Box",
+      "Weight": "0.520000",
+      "delivery time": "2-3 Tage",
+      "EAN": "3165143571040",
+      "Vehicle use": "KIA Carens II 2.0 CRDi, Bj. 2002- 2006 HYUNDAY Accent II 1.5 CRDi, Bj. 2002-2005; Elantra III 2.0 CRDI, Bj. 2001-2006; Matrix 1.5 CRDi, Bj. 2001-2010; Santa FE, Trajet 2.0 CRDi, Bj. 2001-",
+      "comparison numbers": "Vergleichs-No. 33800-27000, 33800-27010, 0986435147, 0445110064, 0445110731"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/einspritzduse-delphi-instandgesetzt-instandgesetzt-von-delphi-keine-altteilruckgabe-28565330.html",
+    "category_slug": "injectors",
+    "supplier_product_code": "28565330",
+    "sku": "RG-28565330",
+    "title": "injector Delphi (rebuilt); rebuilt by Delphi - no core charge! 28565330",
+    "condition_code": "refurbished",
+    "part_numbers": [
+      {
+        "number_raw": "04L130277BC",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "04L130277D",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "28370681",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "HRD365",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "AUDI A3 1.6 TDI, Bj. 2013-VW Golf Alltrack VII 1.6 TDI, Bj. 2014-; Golf Sportsvan 1.6 TDI, Bj. 2014-; Golf VII 1.6 TDI, Bj. 2013-SKODA Octavia III 1.6 TDI, Bj. 2012-SEAT Leon 1.6 TDI, Bj. 2012-",
+    "fitments_confident": [
+      {
+        "brand_name": "Audi",
+        "model": "A3",
+        "generation": "",
+        "variant": "1.6 TDI",
+        "year_start": 2013,
+        "year_end": null,
+        "source_text": "AUDI A3 1.6 TDI, Bj. 2013-"
+      },
+      {
+        "brand_name": "Volkswagen",
+        "model": "Golf",
+        "generation": "",
+        "variant": "Alltrack VII 1.6 TDI",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "VW Golf Alltrack VII 1.6 TDI, Bj. 2014-"
+      },
+      {
+        "brand_name": "Skoda",
+        "model": "Octavia III",
+        "generation": "",
+        "variant": "1.6 TDI",
+        "year_start": 2012,
+        "year_end": null,
+        "source_text": "SKODA Octavia III 1.6 TDI, Bj. 2012-"
+      },
+      {
+        "brand_name": "Seat",
+        "model": "Leon",
+        "generation": "",
+        "variant": "1.6 TDI",
+        "year_start": 2012,
+        "year_end": null,
+        "source_text": "SEAT Leon 1.6 TDI, Bj. 2012-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Golf Sportsvan 1.6 TDI, Bj. 2014-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Golf VII 1.6 TDI, Bj. 2013-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "28565330",
+      "Description": "injector Delphi (rebuilt); rebuilt by Delphi - no core charge!",
+      "Matchcode": "04L130277BC",
+      "Unit": "pcs",
+      "Packaging": "Original Delphi Box",
+      "Weight": "0.450000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "AUDI A3 1.6 TDI, Bj. 2013-VW Golf Alltrack VII 1.6 TDI, Bj. 2014-; Golf Sportsvan 1.6 TDI, Bj. 2014-; Golf VII 1.6 TDI, Bj. 2013-SKODA Octavia III 1.6 TDI, Bj. 2012-SEAT Leon 1.6 TDI, Bj. 2012-",
+      "comparison numbers": "VW Nr.: 04L130277BC, 04L130277D, 28370681, HRD365"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-jakoparts-neuteil-100a-14v-j5113053.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "J5113053",
+    "sku": "RG-J5113053",
+    "title": "Alternator Jakoparts (new) 100A/14V J5113053",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "A3TB0991",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "FS1E18300B",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "FS1E18300C",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "10442325",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "002M417",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "218019",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "2M417",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "9051353",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "119953",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "ALM417",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "145533100130",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "A5401S",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "LRA01168",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "WG2150956",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "145533100138",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "274806",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "MAZDA MPV II 2.0, Bj. 1999-2002",
+    "fitments_confident": [
+      {
+        "brand_name": "Mazda",
+        "model": "MPV II",
+        "generation": "",
+        "variant": "2.0",
+        "year_start": 1999,
+        "year_end": 2002,
+        "source_text": "MAZDA MPV II 2.0, Bj. 1999-2002"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "J5113053",
+      "Description": "Alternator Jakoparts (new) 100A/14V",
+      "Matchcode": "A3TB0991",
+      "Unit": "pcs",
+      "Packaging": "Original Jakoparts Box",
+      "Weight": "6.000000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "MAZDA MPV II 2.0, Bj. 1999-2002",
+      "comparison numbers": "MITSUBISHI : A3TB0991, MAZDA : FS1E18300B, MAZDA : FS1E18300C,ALANKO: 10442325, ASHIKA: 002M417, ERA: 218019, JAPKO: 2M417, FRIESEN: 9051353, FARCOM: 119953, JAPANPARTS: ALM417, BV PSH: 145533100130, AS-PL: A5401S, LUCAS: LRA01168, WILMINK GROUP: WG2150956, BV PSH: 145533100138, ELSTOCK: 274806"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-nippondenso-kurz-gelaufen-105a-made-in-italy-102211-8642.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "102211-8642",
+    "sku": "RG-102211-8642",
+    "title": "Alternator Nippondenso (short running) 105A, 102211-8642",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "93169257",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "OPEL Vectra C, Signum (1.9 Ltr.) Turbo Diesel CDTI, Bj. 2004-; Zafira B (1.9 Ltr.) CDTI, Bj. 2005-FIAT Stilo (1.9 Ltr.) D, Bj. 2005-",
+    "fitments_confident": [
+      {
+        "brand_name": "Opel",
+        "model": "Vectra",
+        "generation": "1.9 Ltr.",
+        "variant": "C, Signum Turbo Diesel CDTI",
+        "year_start": 2004,
+        "year_end": null,
+        "source_text": "OPEL Vectra C, Signum (1.9 Ltr.) Turbo Diesel CDTI, Bj. 2004-"
+      },
+      {
+        "brand_name": "Fiat",
+        "model": "Stilo D",
+        "generation": "1.9 Ltr.",
+        "variant": "",
+        "year_start": 2005,
+        "year_end": null,
+        "source_text": "FIAT Stilo (1.9 Ltr.) D, Bj. 2005-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Zafira B (1.9 Ltr.) CDTI, Bj. 2005-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "102211-8642",
+      "Description": "Alternator Nippondenso (short running) 105A,",
+      "Matchcode": "93169257",
+      "Unit": "pcs",
+      "Weight": "6.500000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "OPEL Vectra C, Signum (1.9 Ltr.) Turbo Diesel CDTI, Bj. 2004-; Zafira B (1.9 Ltr.) CDTI, Bj. 2005-FIAT Stilo (1.9 Ltr.) D, Bj. 2005-",
+      "comparison numbers": "Opel Nr.: 93169257"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-nippondenso-neuteil-150a-made-in-japan-104211-8183.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "104211-8183",
+    "sku": "RG-104211-8183",
+    "title": "Alternator Denso (new) 14V 150A 104211-8183",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "7640131",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "12317640131",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW1 118d, 120d, 125d, 2.0, Bj. 2015-; BMW 2 214d, 1.5, Bj. 2015-BMW 2 216d, 216i, 1.5, Bj. 2014-; 218d, 220d, 220i, 225d, 225i, 2.0, Bj. 2014-; 218i 1.5, Bj. 2014-BMW 3 316d 2.0, Bj. 2014-; 318d, 320d, 325d, 2.0, Bj. 2015-; BMW 4 418d, 420d, 425d, Bj. 2015-BMW 5 518d, 520d, Bj. 2014-; BMW X1 1.5/2.0 sDrive 18i/20i/25i, Bj. 2015-BMW X3 2.0 sDrive 18d, 20d, Bj. 2014-; X4 2.0 xDrive 20d, Bj. 2014-MINI Cooper 1.5, Bj. 2013-; Cooper 2.0 SD, Diesel Bj. 2014-; One 1.2, Bj.2014-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "2",
+        "generation": "",
+        "variant": "214d, 1.5",
+        "year_start": 2015,
+        "year_end": null,
+        "source_text": "BMW 2 214d, 1.5, Bj. 2015-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "2",
+        "generation": "",
+        "variant": "216d, 216i, 1.5",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "BMW 2 216d, 216i, 1.5, Bj. 2014-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "3",
+        "generation": "",
+        "variant": "316d 2.0",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "BMW 3 316d 2.0, Bj. 2014-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "4",
+        "generation": "",
+        "variant": "418d, 420d, 425d",
+        "year_start": 2015,
+        "year_end": null,
+        "source_text": "BMW 4 418d, 420d, 425d, Bj. 2015-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "5",
+        "generation": "",
+        "variant": "518d, 520d",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "BMW 5 518d, 520d, Bj. 2014-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X1",
+        "generation": "",
+        "variant": "1.5/2.0 sDrive 18i/20i/25i",
+        "year_start": 2015,
+        "year_end": null,
+        "source_text": "BMW X1 1.5/2.0 sDrive 18i/20i/25i, Bj. 2015-"
+      },
+      {
+        "brand_name": "BMW",
+        "model": "X3",
+        "generation": "",
+        "variant": "2.0 sDrive 18d, 20d",
+        "year_start": 2014,
+        "year_end": null,
+        "source_text": "BMW X3 2.0 sDrive 18d, 20d, Bj. 2014-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "BMW1 118d, 120d, 125d, 2.0, Bj. 2015-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "218d, 220d, 220i, 225d, 225i, 2.0, Bj. 2014-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "218i 1.5, Bj. 2014-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "318d, 320d, 325d, 2.0, Bj. 2015-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "X4 2.0 xDrive 20d, Bj. 2014-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "MINI Cooper 1.5, Bj. 2013-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Cooper 2.0 SD, Diesel Bj. 2014-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "One 1.2, Bj.2014-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "104211-8183",
+      "Description": "Alternator Denso (new) 14V 150A",
+      "Matchcode": "7640131",
+      "Unit": "pcs",
+      "Weight": "5.900000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW1 118d, 120d, 125d, 2.0, Bj. 2015-; BMW 2 214d, 1.5, Bj. 2015-BMW 2 216d, 216i, 1.5, Bj. 2014-; 218d, 220d, 220i, 225d, 225i, 2.0, Bj. 2014-; 218i 1.5, Bj. 2014-BMW 3 316d 2.0, Bj. 2014-; 318d, 320d, 325d, 2.0, Bj. 2015-; BMW 4 418d, 420d, 425d, Bj. 2015-BMW 5 518d, 520d, Bj. 2014-; BMW X1 1.5/2.0 sDrive 18i/20i/25i, Bj. 2015-BMW X3 2.0 sDrive 18d, 20d, Bj. 2014-; X4 2.0 xDrive 20d, Bj. 2014-MINI Cooper 1.5, Bj. 2013-; Cooper 2.0 SD, Diesel Bj. 2014-; One 1.2, Bj.2014-",
+      "comparison numbers": "BMW Nr. 12317640131, 7640131"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-seg-bosch-neuteil-14v-90a-made-in-india-f000bl04l8.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "F000BL04L8",
+    "sku": "RG-F000BL04L8",
+    "title": "Alternator SEG/Bosch (new) 14V, 90A F000BL04L8",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "231006005R",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "5704651573320",
+        "part_number_type": "EAN",
+        "source_field": "ean"
+      }
+    ],
+    "vehicle_use_raw": "",
+    "fitments_confident": [],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "F000BL04L8",
+      "Description": "Alternator SEG/Bosch (new) 14V, 90A",
+      "Matchcode": "231006005R",
+      "Unit": "pcs",
+      "Weight": "5.080000",
+      "delivery time": "2-3 Tage",
+      "EAN": "5704651573320",
+      "comparison numbers": "Renault-Nr.: 231006005R"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-valeo-neuteil-140a-made-in-mexico-kurz-gelaufen-tg12c065.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "TG12C065",
+    "sku": "RG-TG12C065",
+    "title": "Alternator Valeo (short running) 140A, TG12C065",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "13500332",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "OPEL Antara (2.4 Ltr.), Bj. 2010-; Astra J (2.0 Ltr.) GTC, Bj. 2012-; Insignia (2.0 Ltr.) T, Bj. 2011-SAAB 9-3 II (2.0 Ltr.) T, Bj. 2011-2011; 9-3X (2.0 Ltr.) T XWD, Bj. 2011-2012; 9-5 II (2.0 Ltr.) T, Bj. 2010-2012CHEVROLET Captiva (2.4 Ltr.), Bj. 2011-; Malibu (2.4 Ltr.), Bj. 2012-",
+    "fitments_confident": [
+      {
+        "brand_name": "Opel",
+        "model": "Antara",
+        "generation": "2.4 Ltr.",
+        "variant": "",
+        "year_start": 2010,
+        "year_end": null,
+        "source_text": "OPEL Antara (2.4 Ltr.), Bj. 2010-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Astra J (2.0 Ltr.) GTC, Bj. 2012-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Insignia (2.0 Ltr.) T, Bj. 2011-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "SAAB 9-3 II (2.0 Ltr.) T, Bj. 2011-2011",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "9-3X (2.0 Ltr.) T XWD, Bj. 2011-2012",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "9-5 II (2.0 Ltr.) T, Bj. 2010-2012CHEVROLET Captiva (2.4 Ltr.), Bj. 2011-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Malibu (2.4 Ltr.), Bj. 2012-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "TG12C065",
+      "Description": "Alternator Valeo (short running) 140A,",
+      "Matchcode": "13500332",
+      "Unit": "pcs",
+      "Weight": "6.290000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "OPEL Antara (2.4 Ltr.), Bj. 2010-; Astra J (2.0 Ltr.) GTC, Bj. 2012-; Insignia (2.0 Ltr.) T, Bj. 2011-SAAB 9-3 II (2.0 Ltr.) T, Bj. 2011-2011; 9-3X (2.0 Ltr.) T XWD, Bj. 2011-2012; 9-5 II (2.0 Ltr.) T, Bj. 2010-2012CHEVROLET Captiva (2.4 Ltr.), Bj. 2011-; Malibu (2.4 Ltr.), Bj. 2012-",
+      "comparison numbers": "Opel Nr.: 13500332"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-valeo-2723760c-neuteil-180a-made-in-france-eg18s030.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "EG18S030",
+    "sku": "RG-EG18S030",
+    "title": "Alternator Valeo 2723760C (new) 180A EG18S030",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "9895651",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "12319895651",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "BMW 2 Active Tourer 218 d, Bj. 2021-",
+    "fitments_confident": [
+      {
+        "brand_name": "BMW",
+        "model": "2",
+        "generation": "",
+        "variant": "Active Tourer 218 d",
+        "year_start": 2021,
+        "year_end": null,
+        "source_text": "BMW 2 Active Tourer 218 d, Bj. 2021-"
+      }
+    ],
+    "fitments_unparsed": [],
+    "raw_attributes": {
+      "SKU": "EG18S030",
+      "Description": "Alternator Valeo 2723760C (new) 180A",
+      "Matchcode": "9895651",
+      "Unit": "pcs",
+      "Weight": "6.850000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "BMW 2 Active Tourer 218 d, Bj. 2021-",
+      "comparison numbers": "BMW Nr. 12319895651, 9895651"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-nippondenso-neuteil-150a-3m5t-10300-xc.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "3M5T-10300-XC",
+    "sku": "RG-3M5T-10300-XC",
+    "title": "Alternator Nippondenso (new) 150A 3M5T-10300-XC",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "104210-3542",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007; Focus II (2.0 Ltr.), Bj. 2005-; Focus II (2.0 Ltr.) LPG, Bj. 2008-2011",
+    "fitments_confident": [
+      {
+        "brand_name": "Ford",
+        "model": "Focus",
+        "generation": "2.0 Ltrf.",
+        "variant": "C-Max",
+        "year_start": 2005,
+        "year_end": 2007,
+        "source_text": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Focus II (2.0 Ltr.), Bj. 2005-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Focus II (2.0 Ltr.) LPG, Bj. 2008-2011",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "3M5T-10300-XC",
+      "Description": "Alternator Nippondenso (new) 150A",
+      "Matchcode": "104210-3542",
+      "Unit": "pcs",
+      "Weight": "6.040000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007; Focus II (2.0 Ltr.), Bj. 2005-; Focus II (2.0 Ltr.) LPG, Bj. 2008-2011",
+      "comparison numbers": "3M5T-10300-XC"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-nippondenso-neuteil-120a-3m5t-10300-xc-xd.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "3M5T-10300-XC-XD",
+    "sku": "RG-3M5T-10300-XC-XD",
+    "title": "Alternator Nippondenso (new) 120A 3M5T-10300-XC-XD",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "104210-3542",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      }
+    ],
+    "vehicle_use_raw": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007; Focus II (2.0 Ltr.), Bj. 2005-; Focus II (2.0 Ltr.) LPG, Bj. 2008-2011",
+    "fitments_confident": [
+      {
+        "brand_name": "Ford",
+        "model": "Focus",
+        "generation": "2.0 Ltrf.",
+        "variant": "C-Max",
+        "year_start": 2005,
+        "year_end": 2007,
+        "source_text": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Focus II (2.0 Ltr.), Bj. 2005-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Focus II (2.0 Ltr.) LPG, Bj. 2008-2011",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "3M5T-10300-XC-XD",
+      "Description": "Alternator Nippondenso (new) 120A",
+      "Matchcode": "104210-3542",
+      "Unit": "pcs",
+      "Weight": "6.040000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "FORD Focus C-Max (2.0 Ltrf.), Bj. 2005-2007; Focus II (2.0 Ltr.), Bj. 2005-; Focus II (2.0 Ltr.) LPG, Bj. 2008-2011"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-bosch-neuteil-14v-90a-made-in-brasilien-0124325064.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "0124325064",
+    "sku": "RG-0124325064",
+    "title": "Alternator Bosch (new) 14V/ 90A 0124325064",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "A0088818925",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "1C3510300AA",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "1C3510300AB",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "9949099",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "038903221A",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "06F903193B",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "9948483",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "2TB903221B",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "2312069T05",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "2992372",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "038903351",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "51934100138",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0089818425",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "A0001547625",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "7701047244",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "9117940",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0088818925",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "2991637",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "5001850105",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "7701048233",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0001547625",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "5725G9",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0089818625",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "V836679144",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "06F903193A",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "51934100139",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "8981902930",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "0289032212",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "A0089818425",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "1450804",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "A0089818625",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "1450796",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "9951249",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "00M",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "196",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "012",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "120",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "107",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "144",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "183",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "A46",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "007",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "990",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "417",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      },
+      {
+        "number_raw": "405",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "MERCEDES BENZ C-Klasse C 30 CDI, Bj. 2003-2007; Sprinter 2-t, 3-t, 4-t, Bj. 2000-2006FORD Mondeo III 2.0, Bj. 2000-2007; Mondeo II 1.6 i/ 1.8 i/ 2.0 i, Bj. 1996-2000",
+    "fitments_confident": [
+      {
+        "brand_name": "Mercedes-Benz",
+        "model": "C-Klasse C",
+        "generation": "",
+        "variant": "30 CDI",
+        "year_start": 2003,
+        "year_end": 2007,
+        "source_text": "MERCEDES BENZ C-Klasse C 30 CDI, Bj. 2003-2007"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Sprinter 2-t, 3-t, 4-t, Bj. 2000-2006FORD Mondeo III 2.0, Bj. 2000-2007",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Mondeo II 1.6 i/ 1.8 i/ 2.0 i, Bj. 1996-2000",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "0124325064",
+      "Description": "Alternator Bosch (new) 14V/ 90A",
+      "Matchcode": "A0088818925",
+      "Unit": "pcs",
+      "Packaging": "original Bosch Box",
+      "Weight": "5.780000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "MERCEDES BENZ C-Klasse C 30 CDI, Bj. 2003-2007; Sprinter 2-t, 3-t, 4-t, Bj. 2000-2006FORD Mondeo III 2.0, Bj. 2000-2007; Mondeo II 1.6 i/ 1.8 i/ 2.0 i, Bj. 1996-2000",
+      "comparison numbers": "0124325064 1C3510300AA, 1C3510300AB 9949099 038903221A 06F903193B 9948483, 2TB903221B A0088818925 2312069T05 2992372, 038903351 51934100138 0089818425 A0001547625, 7701047244 9117940 0088818925 2991637 5001850105, 7701048233 0001547625 5725G9 0089818625 V836679144, 06F903193A 51934100139 8981902930 0289032212, A0089818425 1450804 A0089818625 1450796 9951249, F 00M 196 012 F 00M 120 107 F 00M 144 183, F 00M A46 007 F 00M 990 417 F 00M 990 405,"
+    }
+  },
+  {
+    "source_url": "https://www.rg-gmbh.de/en/lichtmaschine-seg-neuteil-150a-made-in-hungary-f000bl08t2.html",
+    "category_slug": "alternators",
+    "supplier_product_code": "F000BL08T2",
+    "sku": "RG-F000BL08T2",
+    "title": "Alternator SEG (new) 150A F000BL08T2",
+    "condition_code": "new",
+    "part_numbers": [
+      {
+        "number_raw": "231001993R",
+        "part_number_type": "XREF",
+        "source_field": "matchcode"
+      },
+      {
+        "number_raw": "A4209064600",
+        "part_number_type": "XREF",
+        "source_field": "comparison_numbers"
+      }
+    ],
+    "vehicle_use_raw": "RENAULT Clio V 1.3 TCe, Bj. 2020-; Kadjar 1.3 TCe, Bj. 2018-; Kangoo III 1.3 TCe, Bj. 2021-; Talisman 1.3 TCe, Bj. 2019-DACIA Duster 1.3 TCe, Bj. 2019-; Lodgy 1.3 TCe, Bj. 2019-",
+    "fitments_confident": [
+      {
+        "brand_name": "Renault",
+        "model": "Clio V",
+        "generation": "",
+        "variant": "1.3 TCe",
+        "year_start": 2020,
+        "year_end": null,
+        "source_text": "RENAULT Clio V 1.3 TCe, Bj. 2020-"
+      },
+      {
+        "brand_name": "Dacia",
+        "model": "Duster",
+        "generation": "",
+        "variant": "1.3 TCe",
+        "year_start": 2019,
+        "year_end": null,
+        "source_text": "DACIA Duster 1.3 TCe, Bj. 2019-"
+      }
+    ],
+    "fitments_unparsed": [
+      {
+        "source_text": "Kadjar 1.3 TCe, Bj. 2018-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Kangoo III 1.3 TCe, Bj. 2021-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Talisman 1.3 TCe, Bj. 2019-",
+        "reason": "missing_brand"
+      },
+      {
+        "source_text": "Lodgy 1.3 TCe, Bj. 2019-",
+        "reason": "missing_brand"
+      }
+    ],
+    "raw_attributes": {
+      "SKU": "F000BL08T2",
+      "Description": "Alternator SEG (new) 150A",
+      "Matchcode": "231001993R",
+      "Unit": "pcs",
+      "Weight": "6.720000",
+      "delivery time": "2-3 Tage",
+      "Vehicle use": "RENAULT Clio V 1.3 TCe, Bj. 2020-; Kadjar 1.3 TCe, Bj. 2018-; Kangoo III 1.3 TCe, Bj. 2021-; Talisman 1.3 TCe, Bj. 2019-DACIA Duster 1.3 TCe, Bj. 2019-; Lodgy 1.3 TCe, Bj. 2019-",
+      "comparison numbers": "Renault Nr.: 231001993R; MB Nr.: A4209064600"
+    }
+  }
+]

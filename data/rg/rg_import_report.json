@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-04-13T10:49:42.537716+00:00",
+  "base_url": "https://www.rg-gmbh.de/en",
+  "sample_limit": 30,
+  "selected_categories": [
+    {
+      "slug": "starter",
+      "name": "Starter",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/starter.html"
+    },
+    {
+      "slug": "injectors",
+      "name": "Injectors",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/injectors.html"
+    },
+    {
+      "slug": "alternators",
+      "name": "Alternators",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/alternators.html"
+    },
+    {
+      "slug": "high-pressure-pumps-injection-pumps",
+      "name": "High pressure pumps / Injection pumps",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/high-pressure-pumps-injection-pumps.html"
+    },
+    {
+      "slug": "transmission",
+      "name": "Transmission",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/transmission.html"
+    },
+    {
+      "slug": "flywheels-clutches",
+      "name": "Flywheels / clutches",
+      "product_count": 0,
+      "url": "https://www.rg-gmbh.de/en/flywheels-clutches.html"
+    }
+  ],
+  "products": {
+    "collected_urls": 30,
+    "clean_records": 30,
+    "raw_html_dir": "data/rg/raw_html"
+  },
+  "cleaning": {
+    "part_numbers": {
+      "EAN": 6,
+      "XREF": 137,
+      "UNK": 0
+    },
+    "fitments": {
+      "confident": 80,
+      "unparsed": 86
+    }
+  },
+  "errors": [],
+  "import": {
+    "processed": 30,
+    "created_products": 28,
+    "updated_products": 2,
+    "skipped": 0,
+    "created_part_numbers": 134,
+    "created_fitments": 62,
+    "errors": [],
+    "generated_at": "2026-04-13T10:52:42.163461+00:00"
+  }
+}
