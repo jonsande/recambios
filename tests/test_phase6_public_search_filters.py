@@ -95,13 +95,14 @@ def add_fitment(
     product: Product,
     vehicle_brand: Brand,
     model: str,
+    vehicle_type: str = Vehicle.VehicleType.CAR,
     generation: str = "",
     variant: str = "",
     year_start: int | None = None,
     year_end: int | None = None,
 ) -> ProductVehicleFitment:
     vehicle = Vehicle.objects.create(
-        vehicle_type=Vehicle.VehicleType.CAR,
+        vehicle_type=vehicle_type,
         brand=vehicle_brand,
         model=model,
         generation=generation,
@@ -334,6 +335,318 @@ def test_combined_filters_apply_with_attribute_filtering(client) -> None:
 
     assert response.status_code == 200
     assert product_ids_from_response(response) == [matching.id]
+
+
+@pytest.mark.django_db
+def test_product_filter_form_uses_htmx_for_dependent_vehicle_select_updates(client) -> None:
+    supplier = make_supplier("P6-HTMX-FORM")
+    category = make_category("HTMX Form", "htmx-form-p6")
+    condition = make_condition("p6-htmx-form-new", "Nuevo HTMX Form", "p6-htmx-form-new")
+    vehicle_brand = make_brand(
+        "HTMX Brand P6",
+        "htmx-brand-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-HTMX-FORM",
+        title="HTMX Form Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=product,
+        vehicle_brand=vehicle_brand,
+        model="Model H",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+
+    response = client.get("/es/productos/")
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'hx-get="/es/productos/filtros/vehiculo/marca/"' in content
+    assert 'hx-get="/es/productos/filtros/vehiculo/modelo/"' in content
+    assert "requestSubmit()" not in content
+
+
+@pytest.mark.django_db
+def test_vehicle_brand_partial_endpoint_returns_narrowed_options_and_model_oob(client) -> None:
+    supplier = make_supplier("P6-HTMX-BRAND")
+    category = make_category("HTMX Brand", "htmx-brand-p6")
+    condition = make_condition("p6-htmx-brand-new", "Nuevo HTMX Brand", "p6-htmx-brand-new")
+    truck_brand = make_brand(
+        "Volvo Trucks HTMX",
+        "volvo-trucks-htmx",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    car_brand = make_brand(
+        "Audi Cars HTMX",
+        "audi-cars-htmx",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+
+    mixed_product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-HTMX-BRAND",
+        title="HTMX Brand Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=truck_brand,
+        model="FH",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=car_brand,
+        model="A4",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+
+    response = client.get(
+        "/es/productos/filtros/vehiculo/marca/",
+        {"vehicle_type": Vehicle.VehicleType.TRUCK},
+    )
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'id="catalog-brand-field"' in content
+    assert 'id="catalog-model-field"' in content
+    assert 'hx-swap-oob="outerHTML"' in content
+    assert "Volvo Trucks HTMX" in content
+    assert "Audi Cars HTMX" not in content
+    assert ">FH<" in content
+    assert ">A4<" not in content
+
+
+@pytest.mark.django_db
+def test_vehicle_model_partial_endpoint_returns_narrowed_options(client) -> None:
+    supplier = make_supplier("P6-HTMX-MODEL")
+    category = make_category("HTMX Model", "htmx-model-p6")
+    condition = make_condition("p6-htmx-model-new", "Nuevo HTMX Model", "p6-htmx-model-new")
+    vehicle_brand = make_brand(
+        "Volvo Mixed HTMX",
+        "volvo-mixed-htmx",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    other_brand = make_brand(
+        "Iveco Mixed HTMX",
+        "iveco-mixed-htmx",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+
+    mixed_product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-HTMX-MODEL",
+        title="HTMX Model Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=vehicle_brand,
+        model="FH",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=vehicle_brand,
+        model="XC60",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=other_brand,
+        model="Daily",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+
+    response = client.get(
+        "/es/productos/filtros/vehiculo/modelo/",
+        {
+            "vehicle_type": Vehicle.VehicleType.TRUCK,
+            "brand": vehicle_brand.slug,
+        },
+    )
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'id="catalog-model-field"' in content
+    assert ">FH<" in content
+    assert ">XC60<" not in content
+    assert ">Daily<" not in content
+
+
+@pytest.mark.django_db
+def test_vehicle_brand_options_are_narrowed_by_selected_vehicle_type(client) -> None:
+    supplier = make_supplier("P6-OPT-BRAND")
+    category = make_category("Vehicle Filters", "vehicle-filters-p6")
+    condition = make_condition("p6-opt-brand-new", "Nuevo Opt Brand", "p6-opt-brand-new")
+    truck_brand = make_brand(
+        "Volvo Trucks P6",
+        "volvo-trucks-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    second_truck_brand = make_brand(
+        "MAN Trucks P6",
+        "man-trucks-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    car_brand = make_brand(
+        "Audi Cars P6",
+        "audi-cars-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+
+    mixed_product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-OPT-MIXED",
+        title="Mixed Vehicle Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=truck_brand,
+        model="FH",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=car_brand,
+        model="A3",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+
+    truck_product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-OPT-TRUCK",
+        title="Truck Vehicle Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=truck_product,
+        vehicle_brand=second_truck_brand,
+        model="TGX",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+
+    response = client.get("/es/productos/?vehicle_type=truck")
+
+    brand_slugs = {
+        option["slug"] for option in response.context["vehicle_brand_options"]
+    }
+
+    assert response.status_code == 200
+    assert brand_slugs == {truck_brand.slug, second_truck_brand.slug}
+    assert car_brand.slug not in brand_slugs
+
+
+@pytest.mark.django_db
+def test_vehicle_model_options_are_narrowed_by_selected_vehicle_type_and_brand(client) -> None:
+    supplier = make_supplier("P6-OPT-MODEL")
+    category = make_category("Vehicle Model Filters", "vehicle-model-filters-p6")
+    condition = make_condition("p6-opt-model-new", "Nuevo Opt Model", "p6-opt-model-new")
+    vehicle_brand = make_brand(
+        "Volvo Mixed P6",
+        "volvo-mixed-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+    other_brand = make_brand(
+        "Iveco Mixed P6",
+        "iveco-mixed-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+
+    mixed_product = make_product(
+        supplier=supplier,
+        sku="SKU-P6-OPT-MODEL",
+        title="Mixed Model Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=vehicle_brand,
+        model="FH",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=vehicle_brand,
+        model="XC60",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+    add_fitment(
+        product=mixed_product,
+        vehicle_brand=other_brand,
+        model="Daily",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+
+    response = client.get(f"/es/productos/?vehicle_type=truck&brand={vehicle_brand.slug}")
+
+    assert response.status_code == 200
+    assert response.context["model_options"] == ["FH"]
+
+
+@pytest.mark.django_db
+def test_vehicle_option_narrowing_preserves_filtered_results(client) -> None:
+    supplier = make_supplier("P6-OPT-RESULT")
+    category = make_category("Vehicle Results", "vehicle-results-p6")
+    condition = make_condition("p6-opt-result-new", "Nuevo Opt Result", "p6-opt-result-new")
+    vehicle_brand = make_brand(
+        "Scania P6",
+        "scania-p6",
+        brand_type=Brand.BrandType.VEHICLE,
+    )
+
+    matching = make_product(
+        supplier=supplier,
+        sku="SKU-P6-OPT-MATCH",
+        title="Matching Vehicle Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=matching,
+        vehicle_brand=vehicle_brand,
+        model="R450",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+    add_fitment(
+        product=matching,
+        vehicle_brand=vehicle_brand,
+        model="A1",
+        vehicle_type=Vehicle.VehicleType.CAR,
+    )
+
+    wrong_model = make_product(
+        supplier=supplier,
+        sku="SKU-P6-OPT-WRONG",
+        title="Wrong Model Product",
+        category=category,
+        condition=condition,
+    )
+    add_fitment(
+        product=wrong_model,
+        vehicle_brand=vehicle_brand,
+        model="R500",
+        vehicle_type=Vehicle.VehicleType.TRUCK,
+    )
+
+    response = client.get(
+        "/es/productos/?vehicle_type=truck&brand=scania-p6&model=R450"
+    )
+    ids = product_ids_from_response(response)
+
+    assert response.status_code == 200
+    assert ids == [matching.id]
+    assert len(ids) == len(set(ids))
 
 
 @pytest.mark.django_db

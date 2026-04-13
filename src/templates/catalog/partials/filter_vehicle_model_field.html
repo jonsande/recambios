@@ -1,0 +1,16 @@
+{% load i18n %}
+<div id="catalog-model-field" aria-live="polite"{% if model_swap_oob %} hx-swap-oob="outerHTML"{% endif %}>
+  <label for="catalog-model" class="block text-sm font-medium text-slate-900">
+    {% trans "Modelo de vehículo" %}
+  </label>
+  <select
+    id="catalog-model"
+    name="model"
+    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+  >
+    <option value="">{% trans "Todos los modelos" %}</option>
+    {% for option in model_options %}
+      <option value="{{ option }}" {% if option == selected_vehicle_model %}selected{% endif %}>{{ option }}</option>
+    {% endfor %}
+  </select>
+</div>

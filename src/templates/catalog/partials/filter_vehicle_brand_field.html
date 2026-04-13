@@ -1,0 +1,25 @@
+{% load i18n %}
+<div id="catalog-brand-field" aria-live="polite">
+  <label for="catalog-brand" class="block text-sm font-medium text-slate-900">
+    {% trans "Marca de vehículo" %}
+  </label>
+  <select
+    id="catalog-brand"
+    name="brand"
+    hx-get="{% url 'catalog:product_filter_vehicle_models_partial' %}"
+    hx-trigger="change"
+    hx-target="#catalog-model-field"
+    hx-swap="outerHTML"
+    hx-include="#catalog-filter-form [name='vehicle_type'], #catalog-filter-form [name='brand']"
+    hx-vals='{"scope_category":"{{ scope_category_slug|default_if_none:"" }}"}'
+    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+  >
+    <option value="">{% trans "Todas las marcas" %}</option>
+    {% for option in vehicle_brand_options %}
+      <option value="{{ option.slug }}" {% if option.slug == selected_vehicle_brand_slug %}selected{% endif %}>{{ option.name }}</option>
+    {% endfor %}
+  </select>
+</div>
+{% if include_model_oob %}
+  {% include "catalog/partials/filter_vehicle_model_field.html" %}
+{% endif %}

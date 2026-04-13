@@ -169,6 +169,87 @@ def _vehicle_type_label(vehicle_type: str) -> str:
     return labels.get(vehicle_type, vehicle_type)
 
 
+def _build_vehicle_option_scope_queryset(option_scope_queryset):
+    return Vehicle.objects.filter(
+        is_active=True,
+        brand__is_active=True,
+        fitments__product_id__in=option_scope_queryset.order_by().values("id"),
+    ).order_by()
+
+
+def _build_vehicle_type_options(vehicle_option_scope_queryset) -> list[dict]:
+    available_vehicle_types = set(
+        vehicle_option_scope_queryset.values_list("vehicle_type", flat=True)
+        .distinct()
+        .order_by()
+    )
+    return [
+        {
+            "value": vehicle_type,
+            "label": _vehicle_type_label(vehicle_type),
+        }
+        for vehicle_type in VEHICLE_TYPE_ORDER
+        if vehicle_type in available_vehicle_types
+    ]
+
+
+def _build_vehicle_brand_options(
+    vehicle_option_scope_queryset,
+    *,
+    selected_vehicle_type: str,
+) -> list[dict]:
+    vehicle_brand_queryset = vehicle_option_scope_queryset
+    if selected_vehicle_type:
+        vehicle_brand_queryset = vehicle_brand_queryset.filter(vehicle_type=selected_vehicle_type)
+
+    vehicle_brand_rows = list(
+        vehicle_brand_queryset.values("brand__slug", "brand__name")
+        .distinct()
+        .order_by("brand__name")
+    )
+    return [
+        {
+            "slug": row["brand__slug"],
+            "name": row["brand__name"],
+        }
+        for row in vehicle_brand_rows
+        if row["brand__slug"]
+    ]
+
+
+def _build_vehicle_model_options(
+    vehicle_option_scope_queryset,
+    *,
+    selected_vehicle_type: str,
+    selected_vehicle_brand_slug: str,
+) -> list[str]:
+    model_queryset = vehicle_option_scope_queryset
+    if selected_vehicle_type:
+        model_queryset = model_queryset.filter(vehicle_type=selected_vehicle_type)
+    if selected_vehicle_brand_slug:
+        model_queryset = model_queryset.filter(brand__slug=selected_vehicle_brand_slug)
+
+    return list(
+        model_queryset.exclude(model="")
+        .values_list("model", flat=True)
+        .distinct()
+        .order_by("model")
+    )
+
+
+def _build_catalog_filter_option_scope_queryset(*, scope_category_slug: str):
+    option_scope_queryset = get_public_products_queryset()
+    cleaned_scope_category_slug = (scope_category_slug or "").strip()
+    if not cleaned_scope_category_slug:
+        return option_scope_queryset
+
+    scoped_category = get_object_or_404(
+        get_public_categories_queryset(with_counts=True).filter(public_product_count__gt=0),
+        slug=cleaned_scope_category_slug,
+    )
+    return option_scope_queryset.filter(category=scoped_category)
+
+
 def _build_product_filter_options(
     option_scope_queryset,
     *,
@@ -178,63 +259,16 @@ def _build_product_filter_options(
     selected_attribute_filters: dict[str, list[str]],
 ) -> dict[str, list]:
     scope_queryset = option_scope_queryset.order_by()
-    fitment_scope_queryset = scope_queryset.filter(
-        fitments__vehicle__is_active=True,
-        fitments__vehicle__brand__is_active=True,
+    vehicle_option_scope_queryset = _build_vehicle_option_scope_queryset(scope_queryset)
+    vehicle_type_options = _build_vehicle_type_options(vehicle_option_scope_queryset)
+    vehicle_brand_options = _build_vehicle_brand_options(
+        vehicle_option_scope_queryset,
+        selected_vehicle_type=selected_vehicle_type,
     )
-
-    available_vehicle_types = set(
-        fitment_scope_queryset.values_list("fitments__vehicle__vehicle_type", flat=True)
-        .distinct()
-        .order_by()
-    )
-    vehicle_type_options = [
-        {
-            "value": vehicle_type,
-            "label": _vehicle_type_label(vehicle_type),
-        }
-        for vehicle_type in VEHICLE_TYPE_ORDER
-        if vehicle_type in available_vehicle_types
-    ]
-
-    vehicle_brand_queryset = fitment_scope_queryset
-    if selected_vehicle_type:
-        vehicle_brand_queryset = vehicle_brand_queryset.filter(
-            fitments__vehicle__vehicle_type=selected_vehicle_type
-        )
-
-    vehicle_brand_rows = list(
-        vehicle_brand_queryset.values(
-            "fitments__vehicle__brand__slug",
-            "fitments__vehicle__brand__name",
-        )
-        .distinct()
-        .order_by("fitments__vehicle__brand__name")
-    )
-    vehicle_brand_options = [
-        {
-            "slug": row["fitments__vehicle__brand__slug"],
-            "name": row["fitments__vehicle__brand__name"],
-        }
-        for row in vehicle_brand_rows
-        if row["fitments__vehicle__brand__slug"]
-    ]
-
-    model_queryset = fitment_scope_queryset
-    if selected_vehicle_type:
-        model_queryset = model_queryset.filter(
-            fitments__vehicle__vehicle_type=selected_vehicle_type
-        )
-    if selected_vehicle_brand_slug:
-        model_queryset = model_queryset.filter(
-            fitments__vehicle__brand__slug=selected_vehicle_brand_slug,
-        )
-
-    model_options = list(
-        model_queryset.exclude(fitments__vehicle__model="")
-        .values_list("fitments__vehicle__model", flat=True)
-        .distinct()
-        .order_by("fitments__vehicle__model")
+    model_options = _build_vehicle_model_options(
+        vehicle_option_scope_queryset,
+        selected_vehicle_type=selected_vehicle_type,
+        selected_vehicle_brand_slug=selected_vehicle_brand_slug,
     )
 
     condition_rows = list(
@@ -514,6 +548,69 @@ class CompatibilityModelYearView(TemplateView):
         return context
 
 
+class ProductFilterVehicleBrandFieldView(TemplateView):
+    template_name = "catalog/partials/filter_vehicle_brand_field.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        selected_vehicle_type = _clean_vehicle_type_value(
+            self.request.GET.get("vehicle_type") or ""
+        )
+        scope_category_slug = self.request.GET.get("scope_category") or ""
+
+        vehicle_option_scope_queryset = _build_vehicle_option_scope_queryset(
+            _build_catalog_filter_option_scope_queryset(scope_category_slug=scope_category_slug)
+        )
+        context.update(
+            {
+                "vehicle_brand_options": _build_vehicle_brand_options(
+                    vehicle_option_scope_queryset,
+                    selected_vehicle_type=selected_vehicle_type,
+                ),
+                "selected_vehicle_brand_slug": "",
+                "model_options": _build_vehicle_model_options(
+                    vehicle_option_scope_queryset,
+                    selected_vehicle_type=selected_vehicle_type,
+                    selected_vehicle_brand_slug="",
+                ),
+                "selected_vehicle_model": "",
+                "model_swap_oob": True,
+                "include_model_oob": True,
+                "scope_category_slug": scope_category_slug.strip(),
+            }
+        )
+        return context
+
+
+class ProductFilterVehicleModelFieldView(TemplateView):
+    template_name = "catalog/partials/filter_vehicle_model_field.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        selected_vehicle_type = _clean_vehicle_type_value(
+            self.request.GET.get("vehicle_type") or ""
+        )
+        selected_vehicle_brand_slug = (self.request.GET.get("brand") or "").strip()
+        scope_category_slug = self.request.GET.get("scope_category") or ""
+
+        vehicle_option_scope_queryset = _build_vehicle_option_scope_queryset(
+            _build_catalog_filter_option_scope_queryset(scope_category_slug=scope_category_slug)
+        )
+        context.update(
+            {
+                "model_options": _build_vehicle_model_options(
+                    vehicle_option_scope_queryset,
+                    selected_vehicle_type=selected_vehicle_type,
+                    selected_vehicle_brand_slug=selected_vehicle_brand_slug,
+                ),
+                "selected_vehicle_model": "",
+            }
+        )
+        return context
+
+
 class ProductListView(ListView):
     template_name = "catalog/product_list.html"
     context_object_name = "products"
@@ -648,6 +745,7 @@ class ProductListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["current_category"] = self.current_category
+        context["scope_category_slug"] = self.current_category.slug if self.current_category else ""
         context["search_query"] = self.search_query
         context["selected_vehicle_type"] = self.selected_vehicle_type
         context["selected_vehicle_brand_slug"] = self.selected_vehicle_brand_slug

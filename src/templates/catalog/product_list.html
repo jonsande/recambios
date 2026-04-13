@@ -40,7 +40,7 @@
       {% trans "Usa SKU, referencias o términos de vehículo para encontrar recambios publicados." %}
     </p>
 
-    <form method="get" action="" class="mt-4 space-y-4" aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}">
+    <form id="catalog-filter-form" method="get" action="" class="mt-4 space-y-4" aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}">
       <div>
         <label for="catalog-q" class="block text-sm font-medium text-slate-900">
           {% trans "Buscar por SKU o referencia" %}
@@ -63,6 +63,12 @@
           <select
             id="catalog-vehicle-type"
             name="vehicle_type"
+            hx-get="{% url 'catalog:product_filter_vehicle_brands_partial' %}"
+            hx-trigger="change"
+            hx-target="#catalog-brand-field"
+            hx-swap="outerHTML"
+            hx-include="#catalog-filter-form [name='vehicle_type']"
+            hx-vals='{"scope_category":"{{ scope_category_slug }}"}'
             class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
           >
             <option value="">{% trans "Todos los tipos" %}</option>
@@ -72,37 +78,8 @@
           </select>
         </div>
 
-        <div>
-          <label for="catalog-brand" class="block text-sm font-medium text-slate-900">
-            {% trans "Marca de vehículo" %}
-          </label>
-          <select
-            id="catalog-brand"
-            name="brand"
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-          >
-            <option value="">{% trans "Todas las marcas" %}</option>
-            {% for option in vehicle_brand_options %}
-              <option value="{{ option.slug }}" {% if option.slug == selected_vehicle_brand_slug %}selected{% endif %}>{{ option.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div>
-          <label for="catalog-model" class="block text-sm font-medium text-slate-900">
-            {% trans "Modelo de vehículo" %}
-          </label>
-          <select
-            id="catalog-model"
-            name="model"
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-          >
-            <option value="">{% trans "Todos los modelos" %}</option>
-            {% for option in model_options %}
-              <option value="{{ option }}" {% if option == selected_vehicle_model %}selected{% endif %}>{{ option }}</option>
-            {% endfor %}
-          </select>
-        </div>
+        {% include "catalog/partials/filter_vehicle_brand_field.html" with scope_category_slug=scope_category_slug %}
+        {% include "catalog/partials/filter_vehicle_model_field.html" %}
 
         <div>
           <label for="catalog-year" class="block text-sm font-medium text-slate-900">
