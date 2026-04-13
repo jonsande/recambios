@@ -161,8 +161,16 @@ msgstr "Categories will appear once products are published."
 
 #: src/templates/catalog/partials/product_card.html:19
 #: src/templates/catalog/product_detail.html:24
-msgid "SKU"
-msgstr "SKU"
+msgid "Referencia (OEM)"
+msgstr "Reference (OEM)"
+
+#: src/apps/catalog/models.py:160
+msgid "Referencia OEM principal del producto."
+msgstr "Primary OEM reference of the product."
+
+#: src/apps/catalog/models.py:172
+msgid "Marca fabricante asociada a la referencia OEM principal (no la marca del vehículo)."
+msgstr "Manufacturer brand associated with the primary OEM reference (not the vehicle brand)."
 
 #: src/templates/catalog/partials/product_card.html:23
 #: src/templates/catalog/product_detail.html:28
@@ -264,20 +272,20 @@ msgid "Búsqueda técnica y filtros"
 msgstr "Technical search and filters"
 
 #: src/templates/catalog/product_list.html:22
-msgid "Usa SKU, referencias o términos de vehículo para encontrar recambios publicados."
-msgstr "Use SKU, references, or vehicle terms to find published spare parts."
+msgid "Usa referencia OEM, referencias cruzadas o términos de vehículo para encontrar recambios publicados."
+msgstr "Use OEM references, cross references, or vehicle terms to find published spare parts."
 
 #: src/templates/catalog/product_list.html:26
 msgid "Formulario de búsqueda y filtros de catálogo"
 msgstr "Catalog search and filter form"
 
 #: src/templates/catalog/product_list.html:29
-msgid "Buscar por SKU o referencia"
-msgstr "Search by SKU or reference"
+msgid "Buscar por referencia OEM o referencia"
+msgstr "Search by OEM reference or reference"
 
 #: src/templates/catalog/product_list.html:36
-msgid "Ej.: SKU-1234, 06A145710N, A3 8P"
-msgstr "Example: SKU-1234, 06A145710N, A3 8P"
+msgid "Ej.: 06A145710N, 038145209A, A3 8P"
+msgstr "Example: 06A145710N, 038145209A, A3 8P"
 
 #: src/templates/catalog/product_list.html:44
 msgid "Marca de vehículo"

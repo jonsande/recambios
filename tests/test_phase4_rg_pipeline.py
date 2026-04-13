@@ -146,7 +146,13 @@ def test_import_rg_clean_dataset_upserts_by_supplier_product_code(tmp_path) -> N
 
     category = Category.objects.get(slug="starter")
     assert product.category_id == category.id
-    assert PartNumber.objects.filter(product=product).count() == 2
+    assert PartNumber.objects.filter(product=product).count() == 3
+    assert PartNumber.objects.filter(
+        product=product,
+        part_number_type__code="OEM",
+        number_raw="RG-TE438000-4913",
+        is_primary=True,
+    ).exists()
 
     records[0]["title"] = "Starter Denso UPDATED"
     clean_path.write_text(json.dumps(records), encoding="utf-8")

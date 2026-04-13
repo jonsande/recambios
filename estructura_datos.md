@@ -89,12 +89,12 @@
 - `id`: identificador interno.
 - `supplier`: proveedor propietario del producto.
 - `supplier_product_code`: código de proveedor (opcional).
-- `sku`: SKU único global.
+- `sku`: referencia OEM principal única global (`Referencia (OEM)` en ES / `Reference (OEM)` en EN).
+- `brand`: marca fabricante asociada a la referencia OEM principal (`Marca` en ES / `Brand` en EN).
 - `slug`: slug único autogenerado desde `sku`.
 - `title`: título del producto.
 - `short_description`: descripción corta.
 - `long_description`: descripción larga.
-- `brand`: marca del producto (opcional).
 - `category`: categoría principal.
 - `condition`: condición del producto.
 - `publication_status`: estado editorial (`draft`, `review`, `published`).
@@ -248,3 +248,9 @@
 - No modelar compatibilidades complejas como texto libre en `Product`.
 - Usar `PartNumber` y `ProductVehicleFitment` como entidades de relación fuertes.
 - Mantener separada la identidad del producto, sus referencias y su compatibilidad vehicular.
+- La identidad OEM del producto se captura en `sku` + `brand`.
+- Al crear o actualizar un `Product`, el sistema sincroniza automáticamente `PART NUMBERS` para garantizar que exista una referencia primaria OEM:
+  - `part_number_type = OEM`
+  - `number_raw = sku`
+  - `brand = brand` (campo de marca del producto)
+  - `is_primary = True`

@@ -212,9 +212,9 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     supplier_lookup = "supplier_id"
     list_display = (
         "sku",
+        "brand",
         "title",
         "supplier",
-        "brand",
         "category",
         "publication_status",
         "price_visibility_mode",
@@ -232,7 +232,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         "category",
         "condition",
     )
-    search_fields = ("sku", "slug", "title", "supplier_product_code")
+    search_fields = ("sku", "slug", "title", "supplier_product_code", "brand__name")
     ordering = ("-updated_at",)
     list_select_related = ("supplier", "brand", "category", "condition")
     autocomplete_fields = ("supplier", "brand", "category", "condition")
@@ -249,11 +249,12 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             "Product Identity",
             {
                 "fields": (
-                    "supplier",
                     "sku",
+                    "brand",
+                    "slug",
+                    "supplier",
                     "supplier_product_code",
                     "title",
-                    "slug",
                     "short_description",
                     "long_description",
                 )
@@ -261,7 +262,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         ),
         (
             "Classification",
-            {"fields": ("brand", "category", "condition", "is_active", "featured")},
+            {"fields": ("category", "condition", "is_active", "featured")},
         ),
         (
             "Pricing",
@@ -294,6 +295,14 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         if not is_restricted_supplier_user(request.user) or obj is None:
             return allowed
         return allowed and obj.publication_status == Product.PublicationStatus.DRAFT
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "brand":
+            kwargs["queryset"] = Brand.objects.filter(
+                is_active=True,
+                brand_type__in=(Brand.BrandType.PARTS, Brand.BrandType.BOTH),
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
@@ -453,6 +462,10 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 obj.published_at = None
 
         super().save_model(request, obj, form, change)
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.sync_primary_oem_part_number()
 
     def save_formset(self, request, form, formset, change):
         if formset.model is ProductVehicleFitment and is_restricted_supplier_user(request.user):

@@ -37,20 +37,20 @@
   <section class="mt-6 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5">
     <h2 class="text-base font-semibold text-slate-950">{% trans "Búsqueda técnica y filtros" %}</h2>
     <p class="mt-2 text-sm text-slate-700">
-      {% trans "Usa SKU, referencias o términos de vehículo para encontrar recambios publicados." %}
+      {% trans "Usa referencia OEM, referencias cruzadas o términos de vehículo para encontrar recambios publicados." %}
     </p>
 
     <form id="catalog-filter-form" method="get" action="" class="mt-4 space-y-4" aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}">
       <div>
         <label for="catalog-q" class="block text-sm font-medium text-slate-900">
-          {% trans "Buscar por SKU o referencia" %}
+          {% trans "Buscar por referencia OEM o referencia" %}
         </label>
         <input
           id="catalog-q"
           name="q"
           type="text"
           value="{{ search_query }}"
-          placeholder="{% trans 'Ej.: SKU-1234, 06A145710N, A3 8P' %}"
+          placeholder="{% trans 'Ej.: 06A145710N, 038145209A, A3 8P' %}"
           class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
         >
       </div>

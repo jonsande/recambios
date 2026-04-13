@@ -2,9 +2,10 @@ import hashlib
 import re
 from decimal import Decimal
 
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 PART_NUMBER_NORMALIZER_RE = re.compile(r"[^A-Z0-9]+")
 ATTRIBUTE_SPACES_RE = re.compile(r"\s+")
@@ -151,7 +152,12 @@ class Product(models.Model):
         related_name="products",
     )
     supplier_product_code = models.CharField(max_length=64, null=True, blank=True)
-    sku = models.CharField(max_length=64, unique=True)
+    sku = models.CharField(
+        max_length=64,
+        unique=True,
+        verbose_name=_("Referencia (OEM)"),
+        help_text=_("Referencia OEM principal del producto."),
+    )
     slug = models.SlugField(max_length=180, unique=True, editable=False)
     title = models.CharField(max_length=220)
     short_description = models.CharField(max_length=280, blank=True)
@@ -162,6 +168,10 @@ class Product(models.Model):
         related_name="products",
         null=True,
         blank=True,
+        verbose_name=_("Marca"),
+        help_text=_(
+            "Marca fabricante asociada a la referencia OEM principal (no la marca del vehículo)."
+        ),
     )
     category = models.ForeignKey(
         "catalog.Category",
@@ -251,9 +261,60 @@ class Product(models.Model):
         trimmed_base = base_slug[:trimmed_length].rstrip("-") or "product"
         return f"{trimmed_base}-{suffix}"
 
+    def sync_primary_oem_part_number(self) -> None:
+        reference_value = (self.sku or "").strip()
+        if not reference_value:
+            return
+
+        with transaction.atomic():
+            oem_part_number_type, _ = PartNumberType.objects.get_or_create(
+                code="OEM",
+                defaults={"name": "OEM", "sort_order": 1, "is_active": True},
+            )
+            normalized_reference = normalize_part_number(reference_value)
+
+            matching_oem_part_number = (
+                self.part_numbers.filter(
+                    part_number_type=oem_part_number_type,
+                    number_normalized=normalized_reference,
+                )
+                .order_by("pk")
+                .first()
+            )
+            primary_oem_part_number = (
+                self.part_numbers.filter(
+                    part_number_type=oem_part_number_type,
+                    is_primary=True,
+                )
+                .order_by("pk")
+                .first()
+            )
+            target_part_number = matching_oem_part_number or primary_oem_part_number
+
+            self.part_numbers.exclude(pk=getattr(target_part_number, "pk", None)).filter(
+                is_primary=True
+            ).update(is_primary=False)
+
+            if target_part_number is None:
+                PartNumber.objects.create(
+                    product=self,
+                    brand=self.brand,
+                    number_raw=reference_value,
+                    part_number_type=oem_part_number_type,
+                    is_primary=True,
+                )
+                return
+
+            target_part_number.number_raw = reference_value
+            target_part_number.brand = self.brand
+            target_part_number.part_number_type = oem_part_number_type
+            target_part_number.is_primary = True
+            target_part_number.save()
+
     def save(self, *args, **kwargs) -> None:
         self.slug = self._build_slug_from_sku()
         super().save(*args, **kwargs)
+        self.sync_primary_oem_part_number()
 
 
 class PartNumber(models.Model):

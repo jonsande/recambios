@@ -219,6 +219,19 @@ def test_product_admin_layout_order_and_slug_readonly(django_user_model) -> None
         "PRODUCT VEHICLE FITMENTS",
         "PRODUCT IMAGES",
     ]
+    assert product_admin.fieldsets[0][1]["fields"] == (
+        "sku",
+        "brand",
+        "slug",
+        "supplier",
+        "supplier_product_code",
+        "title",
+        "short_description",
+        "long_description",
+    )
+    form = product_admin.get_form(request)
+    assert form.base_fields["sku"].label == "Referencia (OEM)"
+    assert form.base_fields["brand"].label == "Marca"
     assert "slug" in product_admin.get_readonly_fields(request)
 
 

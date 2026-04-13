@@ -10,6 +10,7 @@ from apps.catalog.models import (
     PartNumberType,
     Product,
     ProductImage,
+    normalize_part_number,
 )
 from apps.suppliers.models import Supplier
 from apps.vehicles.models import ProductVehicleFitment, Vehicle
@@ -95,6 +96,15 @@ def test_product_brand_can_be_empty_when_not_required() -> None:
 
 
 @pytest.mark.django_db
+def test_product_identity_fields_use_oem_reference_labels() -> None:
+    sku_field = Product._meta.get_field("sku")
+    brand_field = Product._meta.get_field("brand")
+
+    assert str(sku_field.verbose_name) == "Referencia (OEM)"
+    assert str(brand_field.verbose_name) == "Marca"
+
+
+@pytest.mark.django_db
 def test_product_quantity_defaults_are_applied() -> None:
     product = make_product(sku="SKU-QTY-DEFAULT")
 
@@ -127,18 +137,12 @@ def test_part_number_is_normalized_for_lookup() -> None:
 @pytest.mark.django_db
 def test_only_one_primary_part_number_per_product() -> None:
     product = make_product(sku="SKU-PRIMARY-PN")
-    PartNumber.objects.create(
-        product=product,
-        number_raw="A-100",
-        part_number_type=get_part_number_type("AIM"),
-        is_primary=True,
-    )
 
     with pytest.raises(IntegrityError), transaction.atomic():
         PartNumber.objects.create(
             product=product,
-            number_raw="B-200",
-            part_number_type=get_part_number_type("OEM"),
+            number_raw="A-100",
+            part_number_type=get_part_number_type("AIM"),
             is_primary=True,
         )
 
@@ -168,6 +172,78 @@ def test_part_number_uses_part_number_type_relation() -> None:
 
     assert part_number.part_number_type_id == custom_type.id
     assert part_number.part_number_type.code == "XREF"
+
+
+@pytest.mark.django_db
+def test_primary_oem_part_number_is_created_from_product_identity() -> None:
+    product = make_product(sku="OEM-AB1234")
+
+    part_number = PartNumber.objects.get(product=product, is_primary=True)
+
+    assert part_number.part_number_type.code == "OEM"
+    assert part_number.number_raw == "OEM-AB1234"
+    assert part_number.brand_id == product.brand_id
+
+
+@pytest.mark.django_db
+def test_primary_oem_part_number_is_synchronized_when_identity_changes() -> None:
+    supplier = make_supplier(code="SUP-OEM-SYNC")
+    brand_initial = make_brand(name="Bosch Sync", slug="bosch-sync")
+    brand_updated = make_brand(name="Valeo Sync", slug="valeo-sync")
+    category = make_category(name="Sync Category", slug="sync-category")
+    condition = make_condition(code="sync-new", name="Sync New", slug="sync-new")
+    product = Product.objects.create(
+        supplier=supplier,
+        supplier_product_code="SUP-OEM-SYNC-1",
+        sku="OEM-OLD-100",
+        title="OEM Sync Product",
+        brand=brand_initial,
+        category=category,
+        condition=condition,
+    )
+    original_primary = PartNumber.objects.get(product=product, is_primary=True)
+
+    old_oem_type = get_part_number_type("OEM")
+    existing_new_reference = PartNumber.objects.create(
+        product=product,
+        brand=brand_updated,
+        number_raw="OEM-NEW-200",
+        part_number_type=old_oem_type,
+        is_primary=False,
+    )
+
+    product.sku = "OEM-NEW-200"
+    product.brand = brand_updated
+    product.save()
+
+    primary = PartNumber.objects.get(product=product, is_primary=True)
+    original_primary.refresh_from_db()
+
+    assert primary.id == existing_new_reference.id
+    assert primary.number_raw == "OEM-NEW-200"
+    assert primary.part_number_type.code == "OEM"
+    assert primary.brand_id == brand_updated.id
+    assert original_primary.is_primary is False
+    assert PartNumber.objects.filter(product=product, is_primary=True).count() == 1
+
+
+@pytest.mark.django_db
+def test_sync_does_not_duplicate_primary_oem_part_number_for_same_reference() -> None:
+    product = make_product(sku="OEM-DUP-100")
+
+    product.save()
+    product.save()
+
+    normalized_reference = normalize_part_number(product.sku)
+    assert (
+        PartNumber.objects.filter(
+            product=product,
+            part_number_type__code="OEM",
+            number_normalized=normalized_reference,
+        ).count()
+        == 1
+    )
+    assert PartNumber.objects.filter(product=product, is_primary=True).count() == 1
 
 
 @pytest.mark.django_db
