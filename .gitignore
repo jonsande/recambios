@@ -21,6 +21,7 @@ htmlcov/
 
 staticfiles/
 media/
+tmp/
 node_modules/
 *.log
 

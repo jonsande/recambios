@@ -81,11 +81,11 @@
   - [x] visualización en ficha
   - [x] soporte para diferentes tipos de vehículo
 
-- [ ] **Fase 8** — Emails transaccionales y comunicaciones
-  - [ ] confirmación interna de nueva solicitud
-  - [ ] confirmación al cliente de recepción
-  - [ ] plantillas base ES/EN
-  - [ ] configuración de email para desarrollo y producción
+- [x] **Fase 8** — Emails transaccionales y comunicaciones
+  - [x] confirmación interna de nueva solicitud
+  - [x] confirmación al cliente de recepción
+  - [x] plantillas base ES/EN
+  - [x] configuración de email para desarrollo y producción
 
 - [ ] **Fase 9** — Frontend refinado y sistema visual
   - [ ] componentes reutilizables

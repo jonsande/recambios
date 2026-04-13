@@ -1,0 +1,23 @@
+{% load i18n %}
+{% trans "Se ha enviado una nueva solicitud de recambios." %}
+
+{% blocktrans with reference=inquiry.reference_code %}Referencia: {{ reference }}{% endblocktrans %}
+{% blocktrans with language_code=inquiry.language %}Idioma de la solicitud: {{ language_code }}{% endblocktrans %}
+
+{% trans "Datos de contacto del cliente:" %}
+{% blocktrans with requester=requester_name %}Nombre: {{ requester }}{% endblocktrans %}
+{% blocktrans with email=requester_email %}Email: {{ email }}{% endblocktrans %}
+{% if requester_phone %}{% blocktrans with phone=requester_phone %}Teléfono: {{ phone }}{% endblocktrans %}
+{% endif %}{% if company_name %}{% blocktrans with company=company_name %}Empresa: {{ company }}{% endblocktrans %}
+{% endif %}{% if tax_id %}{% blocktrans with tax=tax_id %}NIF/CIF: {{ tax }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Resumen de artículos:" %}
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | {% blocktrans with quantity=item.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}
+{% empty %}{% trans "No hay artículos registrados." %}
+{% endfor %}
+
+{% if inquiry.notes_from_customer %}
+{% trans "Notas del cliente:" %}
+{{ inquiry.notes_from_customer }}
+{% endif %}

@@ -627,3 +627,104 @@ msgstr "The compatibility search is ready. The catalog will open with the select
 #: src/templates/catalog/compatibility_model_year.html:109
 msgid "Ver productos compatibles"
 msgstr "View compatible products"
+
+#: src/templates/inquiries/emails/internal_submission_subject.txt:1
+#, python-format
+msgid "Nueva solicitud recibida: %(reference)s"
+msgstr "New inquiry received: %(reference)s"
+
+#: src/templates/inquiries/emails/customer_submission_subject.txt:1
+#, python-format
+msgid "Hemos recibido tu solicitud %(reference)s"
+msgstr "We have received your inquiry %(reference)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:2
+msgid "Se ha enviado una nueva solicitud de recambios."
+msgstr "A new spare parts inquiry has been submitted."
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:4
+#, python-format
+msgid "Referencia: %(reference)s"
+msgstr "Reference: %(reference)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:5
+#, python-format
+msgid "Idioma de la solicitud: %(language_code)s"
+msgstr "Inquiry language: %(language_code)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:7
+msgid "Datos de contacto del cliente:"
+msgstr "Customer contact details:"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:8
+#, python-format
+msgid "Nombre: %(requester)s"
+msgstr "Name: %(requester)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:9
+#, python-format
+msgid "Email: %(email)s"
+msgstr "Email: %(email)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:10
+#, python-format
+msgid "Teléfono: %(phone)s"
+msgstr "Phone: %(phone)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:11
+#, python-format
+msgid "Empresa: %(company)s"
+msgstr "Company: %(company)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:12
+#, python-format
+msgid "NIF/CIF: %(tax)s"
+msgstr "Tax ID: %(tax)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:15
+msgid "Resumen de artículos:"
+msgstr "Item summary:"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:16
+#, python-format
+msgid "Cantidad: %(quantity)s"
+msgstr "Quantity: %(quantity)s"
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:17
+msgid "No hay artículos registrados."
+msgstr "No items are recorded."
+
+#: src/templates/inquiries/emails/internal_submission_body.txt:21
+msgid "Notas del cliente:"
+msgstr "Customer notes:"
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:2
+#, python-format
+msgid "Hemos recibido tu solicitud %(reference)s."
+msgstr "We have received your inquiry %(reference)s."
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:4
+msgid "Gracias por tu consulta. Nuestro equipo revisará disponibilidad, precio final y plazo de entrega antes de responderte."
+msgstr "Thank you for your request. Our team will review availability, final price, and lead time before replying."
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:5
+#, python-format
+msgid "Referencia de la solicitud: %(reference)s"
+msgstr "Inquiry reference: %(reference)s"
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:7
+msgid "Resumen de artículos enviados:"
+msgstr "Submitted item summary:"
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:11
+msgid "Este correo confirma la recepción de tu solicitud; no constituye confirmación de stock, precio final ni plazo final."
+msgstr "This email confirms we received your inquiry; it is not a confirmation of stock, final price, or final lead time."
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:12
+msgid "Te contactaremos en cuanto validemos la información con nuestro equipo interno/proveedor."
+msgstr "We will contact you as soon as we validate the information with our internal team/supplier."
+
+#: src/templates/inquiries/emails/customer_submission_body.txt:15
+#, python-format
+msgid "Si necesitas ampliar datos, responde a %(reply_to)s indicando tu referencia."
+msgstr "If you need to add details, reply to %(reply_to)s and include your reference."

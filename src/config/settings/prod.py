@@ -23,3 +23,27 @@ SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True, cast=bool)
 SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", default=True, cast=bool)
 SECURE_REFERRER_POLICY = "same-origin"
+
+# Email and transactional inquiry recipients are explicitly environment-driven in production.
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
+EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=10, cast=int)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = config("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+INQUIRY_INTERNAL_NOTIFICATION_EMAILS = config(
+    "INQUIRY_INTERNAL_NOTIFICATION_EMAILS",
+    default="",
+    cast=csv_list,
+)
+INQUIRY_CUSTOMER_REPLY_TO_EMAIL = config(
+    "INQUIRY_CUSTOMER_REPLY_TO_EMAIL",
+    default=DEFAULT_FROM_EMAIL,
+)

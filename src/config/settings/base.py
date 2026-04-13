@@ -6,13 +6,18 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parents[3]
 APPS_DIR = BASE_DIR / "src"
 
+
+def csv_list(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 # Security
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="127.0.0.1,localhost",
-    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
+    cast=csv_list,
 )
 
 # Application definition
@@ -115,6 +120,34 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Email
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
+EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=10, cast=int)
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="Recambios Tecnicos <noreply@recambiostecnicos.local>",
+)
+SERVER_EMAIL = config("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+
+INQUIRY_INTERNAL_NOTIFICATION_EMAILS = config(
+    "INQUIRY_INTERNAL_NOTIFICATION_EMAILS",
+    default="",
+    cast=csv_list,
+)
+INQUIRY_CUSTOMER_REPLY_TO_EMAIL = config(
+    "INQUIRY_CUSTOMER_REPLY_TO_EMAIL",
+    default=DEFAULT_FROM_EMAIL,
+)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
