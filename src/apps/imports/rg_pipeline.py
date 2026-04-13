@@ -6,7 +6,7 @@ import re
 import time
 from collections import Counter
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
 from apps.catalog.models import Brand, Category, Condition, PartNumber, PartNumberType, Product
@@ -672,7 +672,7 @@ def scrape_rg_products_sample(
     _json_dump(clean_path, clean_rows)
 
     report_payload: dict[str, Any] = {
-        "generated_at": datetime.now(tz=UTC).isoformat(),
+        "generated_at": datetime.now(tz=timezone.utc).isoformat(),
         "base_url": RG_EN_BASE_URL,
         "sample_limit": limit,
         "selected_categories": selected_categories,
@@ -713,16 +713,56 @@ def _build_unique_slug(model_class, value: str, *, max_length: int, fallback_pre
 
 
 def _ensure_supplier() -> Supplier:
-    supplier, _created = Supplier.objects.get_or_create(
-        code="RG-GMBH",
-        defaults={
-            "name": "RG GmbH",
-            "slug": "rg-gmbh",
-            "country": "Germany",
-            "website": "https://www.rg-gmbh.de/en/",
-            "is_active": True,
-        },
-    )
+    supplier_defaults = {
+        "name": "RG GmbH",
+        "slug": "rg-gmbh",
+        "code": "RG-GMBH",
+        "country": "Germany",
+        "website": "https://www.rg-gmbh.de/en/",
+        "is_active": True,
+    }
+
+    supplier = Supplier.objects.filter(code=supplier_defaults["code"]).first()
+    if supplier is None:
+        supplier = Supplier.objects.filter(slug=supplier_defaults["slug"]).first()
+    if supplier is None:
+        supplier = Supplier.objects.filter(name__iexact=supplier_defaults["name"]).first()
+
+    if supplier is None:
+        try:
+            return Supplier.objects.create(**supplier_defaults)
+        except IntegrityError:
+            # Another process may have created a matching supplier concurrently.
+            supplier = Supplier.objects.filter(code=supplier_defaults["code"]).first()
+            if supplier is None:
+                supplier = Supplier.objects.filter(slug=supplier_defaults["slug"]).first()
+            if supplier is None:
+                supplier = Supplier.objects.filter(name__iexact=supplier_defaults["name"]).first()
+            if supplier is None:
+                raise
+            return supplier
+
+    update_fields: list[str] = []
+    if (
+        supplier.code != supplier_defaults["code"]
+        and not Supplier.objects.exclude(pk=supplier.pk)
+        .filter(code=supplier_defaults["code"])
+        .exists()
+    ):
+        supplier.code = supplier_defaults["code"]
+        update_fields.append("code")
+    if not supplier.country:
+        supplier.country = supplier_defaults["country"]
+        update_fields.append("country")
+    if not supplier.website:
+        supplier.website = supplier_defaults["website"]
+        update_fields.append("website")
+    if not supplier.is_active:
+        supplier.is_active = True
+        update_fields.append("is_active")
+    if update_fields:
+        supplier.save(update_fields=[*update_fields, "updated_at"])
+
     return supplier
 
 
@@ -975,7 +1015,7 @@ def import_rg_clean_dataset(
                 if created_fitment:
                     summary["created_fitments"] += 1
 
-    summary["generated_at"] = datetime.now(tz=UTC).isoformat()
+    summary["generated_at"] = datetime.now(tz=timezone.utc).isoformat()
 
     if report_file is not None:
         report_path = Path(report_file)

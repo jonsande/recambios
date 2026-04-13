@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-13T10:49:42.537716+00:00",
+  "generated_at": "2026-04-13T11:06:56.402112+00:00",
   "base_url": "https://www.rg-gmbh.de/en",
   "sample_limit": 30,
   "selected_categories": [
@@ -59,12 +59,12 @@
   "errors": [],
   "import": {
     "processed": 30,
-    "created_products": 28,
-    "updated_products": 2,
+    "created_products": 0,
+    "updated_products": 30,
     "skipped": 0,
-    "created_part_numbers": 134,
-    "created_fitments": 62,
+    "created_part_numbers": 0,
+    "created_fitments": 0,
     "errors": [],
-    "generated_at": "2026-04-13T10:52:42.163461+00:00"
+    "generated_at": "2026-04-13T11:11:22.245622+00:00"
   }
 }
