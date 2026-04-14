@@ -15,7 +15,7 @@ from django.views.generic import FormView, TemplateView
 from apps.cart.services import clear_request_cart, get_request_cart_items
 
 from .forms import PublicInquirySubmissionForm
-from .models import Inquiry, InquiryItem
+from .models import Inquiry, InquiryItem, InquiryOffer
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +135,77 @@ class PublicInquirySuccessView(TemplateView):
             }
         )
         return context
+
+
+class PublicInquiryOfferDetailView(TemplateView):
+    template_name = "inquiries/public_offer_detail.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.access_token = kwargs.get("access_token")
+        if self.access_token is None:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_offer(self, *, for_update: bool = False) -> InquiryOffer:
+        queryset = InquiryOffer.objects.select_related("inquiry")
+        if for_update:
+            queryset = queryset.select_for_update()
+
+        offer = queryset.filter(access_token=self.access_token).first()
+        if offer is None:
+            raise Http404
+        return offer
+
+    def get(self, request, *args, **kwargs):
+        self.offer = self._get_offer()
+        return super().get(request, *args, **kwargs)
+
+    def get_template_names(self):
+        if self.offer.status == InquiryOffer.Status.DRAFT:
+            return ["inquiries/public_offer_unavailable.html"]
+        return [self.template_name]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.offer.status == InquiryOffer.Status.DRAFT:
+            context.update(
+                {
+                    "page_title": _("Oferta no disponible"),
+                }
+            )
+            return context
+
+        context.update(
+            {
+                "page_title": _("Oferta confirmada"),
+                "offer": self.offer,
+                "can_respond": self.offer.status == InquiryOffer.Status.SENT,
+                "is_accepted": self.offer.status == InquiryOffer.Status.ACCEPTED,
+                "is_rejected": self.offer.status == InquiryOffer.Status.REJECTED,
+            }
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        decision = (request.POST.get("decision") or "").strip().lower()
+        if decision not in {"accept", "reject"}:
+            messages.error(request, _("La respuesta seleccionada no es válida."))
+            return redirect(request.path)
+
+        with transaction.atomic():
+            offer = self._get_offer(for_update=True)
+            if offer.status != InquiryOffer.Status.SENT:
+                messages.error(request, _("Esta oferta ya no admite una nueva respuesta."))
+                return redirect(request.path)
+
+            if decision == "accept":
+                offer.mark_accepted(save=True)
+                messages.success(request, _("Has aceptado la oferta correctamente."))
+            else:
+                offer.mark_rejected(save=True)
+                messages.success(request, _("Has rechazado la oferta."))
+
+        return redirect(request.path)
 
 
 def _resolve_inquiry_language() -> str:

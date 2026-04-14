@@ -106,10 +106,19 @@
   - [ ] refinado de tablas y bloques técnicos
 
 - [ ] **Fase 11** — Oferta confirmada y pago posterior
-  - [ ] base de oferta confirmada
-  - [ ] aceptación o rechazo por el cliente
-  - [ ] trazabilidad del importe final confirmado
-  - [ ] base para pago posterior
+  - [x] base de oferta confirmada
+  - [x] aceptación o rechazo por el cliente
+  - [x] trazabilidad del importe final confirmado
+  - [x] base para pago posterior
+  - [x] modelo `InquiryOffer` (1:1 con `Inquiry`) con token público seguro y timestamps de ciclo de vida
+  - [x] flujo público tokenizado para ver oferta y responder (aceptar/rechazar)
+  - [x] reglas de transición seguras y prevención de doble respuesta
+  - [x] backoffice en Django admin para gestión y envío de ofertas
+  - [x] bloqueo en admin de campos comerciales tras envío (`confirmed_total`, `currency`, `lead_time_text`, `customer_message`)
+  - [x] validación explícita de “ready to send” antes de enviar la oferta
+  - [x] semántica explícita de `confirmed_total` como fuente de verdad para preparar pago posterior
+  - [x] tests específicos de integridad y flujo de Fase 11
+  - [ ] integración real de pasarela de pago (siguiente slice de Fase 11)
 
 - [ ] **Fase 12** — SEO, rendimiento y bilingüe ES/EN
   - [ ] meta tags dinámicos

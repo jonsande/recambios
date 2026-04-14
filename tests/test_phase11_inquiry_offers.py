@@ -1,0 +1,508 @@
+from __future__ import annotations
+
+import uuid
+from decimal import Decimal
+
+import pytest
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
+from django.test import RequestFactory
+from django.urls import reverse
+from django.utils import timezone
+
+from apps.catalog.models import Brand, Category, Condition, Product
+from apps.inquiries.admin import InquiryOfferAdmin
+from apps.inquiries.models import Inquiry, InquiryItem, InquiryOffer
+from apps.suppliers.models import Supplier
+from apps.users.roles import ROLE_INTERNAL_STAFF
+
+
+def make_supplier(code: str) -> Supplier:
+    return Supplier.objects.create(
+        name=f"Supplier {code}",
+        slug=f"supplier-{code.lower()}",
+        code=code,
+    )
+
+
+def make_brand(name: str, slug: str) -> Brand:
+    return Brand.objects.create(name=name, slug=slug, brand_type=Brand.BrandType.PARTS)
+
+
+def make_category(name: str, slug: str) -> Category:
+    return Category.objects.create(name=name, slug=slug)
+
+
+def make_condition(code: str, name: str, slug: str) -> Condition:
+    return Condition.objects.create(code=code, name=name, slug=slug)
+
+
+def make_product(
+    sku: str,
+    *,
+    price: Decimal | None = Decimal("100.00"),
+) -> Product:
+    supplier = make_supplier(code=f"SUP-{sku}")
+    brand = make_brand(name=f"Brand {sku}", slug=f"brand-{sku.lower()}")
+    category = make_category(name=f"Category {sku}", slug=f"category-{sku.lower()}")
+    condition = make_condition(
+        code=f"cond-{sku.lower()}",
+        name=f"Cond {sku}",
+        slug=f"cond-{sku.lower()}",
+    )
+    return Product.objects.create(
+        supplier=supplier,
+        supplier_product_code=f"{supplier.code}-{sku}",
+        sku=sku,
+        slug=f"product-{sku.lower()}",
+        title=f"Product {sku}",
+        brand=brand,
+        category=category,
+        condition=condition,
+        publication_status=Product.PublicationStatus.PUBLISHED,
+        published_at=timezone.now(),
+        last_known_price=price,
+        currency="EUR",
+    )
+
+
+def make_inquiry(
+    django_user_model,
+    *,
+    username: str,
+    status: str = Inquiry.Status.SUBMITTED,
+) -> Inquiry:
+    user = django_user_model.objects.create_user(
+        username=username,
+        email=f"{username}@example.com",
+        password="pass1234",
+    )
+    return Inquiry.objects.create(user=user, status=status)
+
+
+@pytest.mark.django_db
+def test_offer_enforces_one_offer_per_inquiry(django_user_model) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_uq")
+    InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("350.00"),
+        currency="EUR",
+    )
+
+    with pytest.raises(ValidationError):
+        InquiryOffer.objects.create(
+            inquiry=inquiry,
+            confirmed_total=Decimal("360.00"),
+            currency="EUR",
+        )
+
+
+@pytest.mark.django_db
+def test_offer_rejects_negative_confirmed_total(django_user_model) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_negative_total")
+
+    with pytest.raises(ValidationError):
+        InquiryOffer.objects.create(
+            inquiry=inquiry,
+            confirmed_total=Decimal("-1.00"),
+            currency="EUR",
+        )
+
+
+@pytest.mark.django_db
+def test_confirmed_total_is_traceable_independent_from_last_known_price(
+    django_user_model,
+) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_traceability")
+    product = make_product("SKU-OFFER-TRACE", price=Decimal("120.00"))
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=2)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("479.99"),
+        currency="EUR",
+    )
+
+    product.last_known_price = Decimal("999.99")
+    product.save(update_fields=["last_known_price"])
+    offer.refresh_from_db()
+
+    assert offer.confirmed_total == Decimal("479.99")
+    assert offer.confirmed_total != product.last_known_price
+
+
+@pytest.mark.django_db
+def test_offer_transition_rules_and_timestamps_with_valid_inquiry_sync(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_transition_sync",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("220.00"),
+        currency="EUR",
+        lead_time_text="3-5 business days",
+    )
+    assert offer.is_ready_for_payment is False
+
+    offer.mark_sent(save=True)
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.SENT
+    assert offer.sent_at is not None
+    assert inquiry.status == Inquiry.Status.RESPONDED
+    assert offer.is_ready_for_payment is False
+
+    offer.mark_accepted(save=True)
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert offer.accepted_at is not None
+    assert offer.rejected_at is None
+    assert inquiry.status == Inquiry.Status.ACCEPTED
+    assert offer.is_ready_for_payment is True
+
+    with pytest.raises(ValueError):
+        offer.mark_rejected(save=True)
+
+
+@pytest.mark.django_db
+def test_mark_sent_requires_minimum_commercial_data(django_user_model) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_send_ready")
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("120.00"),
+        currency="EUR",
+        lead_time_text="",
+    )
+
+    with pytest.raises(ValidationError):
+        offer.mark_sent(save=True)
+
+    offer.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.DRAFT
+    assert offer.sent_at is None
+
+
+@pytest.mark.django_db
+def test_mark_sent_succeeds_with_minimum_commercial_data(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_send_ready_ok",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("120.00"),
+        currency="EUR",
+        lead_time_text="48-72h",
+    )
+
+    offer.mark_sent(save=True)
+    offer.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.SENT
+    assert offer.sent_at is not None
+
+
+@pytest.mark.django_db
+def test_offer_status_requires_consistent_timestamps(django_user_model) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_timestamp_integrity")
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("99.00"),
+        currency="EUR",
+    )
+    offer.status = InquiryOffer.Status.SENT
+    offer.sent_at = None
+
+    with pytest.raises(ValidationError):
+        offer.full_clean()
+
+
+@pytest.mark.django_db
+def test_offer_sync_is_conservative_when_inquiry_transition_is_invalid(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_conservative_sync",
+        status=Inquiry.Status.SUBMITTED,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("180.00"),
+        currency="EUR",
+        lead_time_text="1 week",
+    )
+
+    offer.mark_sent(save=True)
+    inquiry.refresh_from_db()
+    assert inquiry.status == Inquiry.Status.SUBMITTED
+
+    offer.mark_accepted(save=True)
+    inquiry.refresh_from_db()
+    assert inquiry.status == Inquiry.Status.SUBMITTED
+
+
+@pytest.mark.django_db
+def test_internal_staff_group_has_inquiry_offer_permissions() -> None:
+    internal_staff = Group.objects.get(name=ROLE_INTERNAL_STAFF)
+    for codename in (
+        "add_inquiryoffer",
+        "change_inquiryoffer",
+        "delete_inquiryoffer",
+        "view_inquiryoffer",
+    ):
+        assert internal_staff.permissions.filter(
+            content_type__app_label="inquiries",
+            codename=codename,
+        ).exists()
+
+
+@pytest.mark.django_db
+def test_admin_send_action_moves_draft_offer_to_sent(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_admin_send",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("700.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    admin_user = django_user_model.objects.create_superuser(
+        username="offer_admin",
+        email="offer_admin@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+    offer_admin.message_user = lambda *args, **kwargs: None
+    offer_admin.mark_selected_as_sent(request, InquiryOffer.objects.filter(pk=offer.pk))
+
+    offer.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.SENT
+    assert offer.sent_at is not None
+
+
+@pytest.mark.django_db
+def test_admin_locks_customer_facing_commercial_fields_after_send(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_admin_locking",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("325.00"),
+        currency="EUR",
+        lead_time_text="1 week",
+    )
+    admin_user = django_user_model.objects.create_superuser(
+        username="offer_admin_lock",
+        email="offer_admin_lock@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().get("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+
+    readonly_in_draft = set(offer_admin.get_readonly_fields(request, offer))
+    assert "confirmed_total" not in readonly_in_draft
+    assert "currency" not in readonly_in_draft
+    assert "lead_time_text" not in readonly_in_draft
+    assert "customer_message" not in readonly_in_draft
+
+    offer.mark_sent(save=True)
+    offer.refresh_from_db()
+
+    readonly_after_send = set(offer_admin.get_readonly_fields(request, offer))
+    assert {
+        "confirmed_total",
+        "currency",
+        "lead_time_text",
+        "customer_message",
+    } <= readonly_after_send
+    assert "internal_notes" not in readonly_after_send
+
+
+@pytest.mark.django_db
+def test_admin_send_action_reports_not_ready_offers(django_user_model) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_admin_not_ready")
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("400.00"),
+        currency="EUR",
+        lead_time_text="",
+    )
+    admin_user = django_user_model.objects.create_superuser(
+        username="offer_admin_not_ready_user",
+        email="offer_admin_not_ready@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+    captured_messages: list[str] = []
+    offer_admin.message_user = (
+        lambda _request, message, level=None: captured_messages.append(str(message))
+    )
+
+    offer_admin.mark_selected_as_sent(request, InquiryOffer.objects.filter(pk=offer.pk))
+    offer.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.DRAFT
+    assert any("not ready to send" in message for message in captured_messages)
+    assert any("lead_time_text" in message for message in captured_messages)
+
+
+@pytest.mark.django_db
+def test_confirmed_total_help_text_marks_payment_source_of_truth() -> None:
+    help_text = InquiryOffer._meta.get_field("confirmed_total").help_text.lower()
+    assert "source of truth" in help_text
+    assert "payment preparation" in help_text
+
+
+@pytest.mark.django_db
+def test_public_offer_token_invalid_returns_404(client) -> None:
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": uuid.uuid4()},
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_public_offer_draft_token_shows_unavailable_without_offer_data(
+    client,
+    django_user_model,
+) -> None:
+    inquiry = make_inquiry(django_user_model, username="offer_public_draft")
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("310.00"),
+        currency="EUR",
+        customer_message="Mensaje borrador interno",
+    )
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    response = client.get(url)
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    assert "Oferta no disponible" in content
+    assert str(offer.confirmed_total) not in content
+    assert offer.reference_code not in content
+    assert inquiry.reference_code not in content
+
+
+@pytest.mark.django_db
+def test_public_offer_sent_token_shows_offer_data_and_actions(client, django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_sent",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("410.00"),
+        currency="EUR",
+        lead_time_text="5-7 días laborables",
+        customer_message="Disponibilidad confirmada según consulta.",
+    )
+    offer.mark_sent(save=True)
+    offer.refresh_from_db()
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    response = client.get(url)
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    assert offer.reference_code in content
+    assert inquiry.reference_code in content
+    assert "410" in content
+    assert "EUR" in content
+    assert "Aceptar oferta" in content
+    assert "Rechazar oferta" in content
+
+
+@pytest.mark.django_db
+def test_customer_accept_flow_updates_offer_and_prevents_double_response(
+    client,
+    django_user_model,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_accept",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("990.00"),
+        currency="EUR",
+        lead_time_text="3 days",
+    )
+    offer.mark_sent(save=True)
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    first_response = client.post(url, data={"decision": "accept"})
+    assert first_response.status_code == 302
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert offer.accepted_at is not None
+    assert inquiry.status == Inquiry.Status.ACCEPTED
+
+    second_response = client.post(url, data={"decision": "reject"})
+    assert second_response.status_code == 302
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert offer.rejected_at is None
+    assert inquiry.status == Inquiry.Status.ACCEPTED
+
+
+@pytest.mark.django_db
+def test_customer_reject_flow_updates_offer(client, django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_reject",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("430.00"),
+        currency="EUR",
+        lead_time_text="7 days",
+    )
+    offer.mark_sent(save=True)
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    response = client.post(url, data={"decision": "reject"})
+    assert response.status_code == 302
+
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.REJECTED
+    assert offer.rejected_at is not None
+    assert offer.accepted_at is None
+    assert inquiry.status == Inquiry.Status.REJECTED

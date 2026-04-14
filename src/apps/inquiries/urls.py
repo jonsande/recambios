@@ -1,7 +1,11 @@
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
-from .views import PublicInquirySubmitView, PublicInquirySuccessView
+from .views import (
+    PublicInquiryOfferDetailView,
+    PublicInquirySubmitView,
+    PublicInquirySuccessView,
+)
 
 app_name = "inquiries"
 
@@ -11,5 +15,10 @@ urlpatterns = [
         _("solicitud/enviada/<str:reference_code>/"),
         PublicInquirySuccessView.as_view(),
         name="public_inquiry_success",
+    ),
+    path(
+        _("oferta/<uuid:access_token>/"),
+        PublicInquiryOfferDetailView.as_view(),
+        name="public_inquiry_offer_detail",
     ),
 ]
