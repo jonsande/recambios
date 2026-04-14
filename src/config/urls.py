@@ -12,5 +12,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path("", include(("apps.pages.urls", "pages"), namespace="pages")),
     path("", include(("apps.catalog.urls", "catalog"), namespace="catalog")),
+    path("", include(("apps.cart.urls", "cart"), namespace="cart")),
+    path("", include(("apps.inquiries.urls", "inquiries"), namespace="inquiries")),
     prefix_default_language=True,
 )

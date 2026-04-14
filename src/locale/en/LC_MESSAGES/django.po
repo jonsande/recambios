@@ -639,7 +639,7 @@ msgid "Hemos recibido tu solicitud %(reference)s"
 msgstr "We have received your inquiry %(reference)s"
 
 #: src/templates/inquiries/emails/internal_submission_body.txt:2
-msgid "Se ha enviado una nueva solicitud de recambios."
+msgid "Se ha generado una nueva solicitud."
 msgstr "A new spare parts inquiry has been submitted."
 
 #: src/templates/inquiries/emails/internal_submission_body.txt:4
@@ -728,3 +728,204 @@ msgstr "We will contact you as soon as we validate the information with our inte
 #, python-format
 msgid "Si necesitas ampliar datos, responde a %(reply_to)s indicando tu referencia."
 msgstr "If you need to add details, reply to %(reply_to)s and include your reference."
+
+#: src/apps/cart/urls.py:15
+msgid "solicitud/carrito/"
+msgstr "request/cart/"
+
+#: src/apps/cart/urls.py:17
+msgid "solicitud/carrito/anadir/<int:product_id>/"
+msgstr "request/cart/add/<int:product_id>/"
+
+#: src/apps/cart/urls.py:22
+msgid "solicitud/carrito/actualizar/<int:product_id>/"
+msgstr "request/cart/update/<int:product_id>/"
+
+#: src/apps/cart/urls.py:27
+msgid "solicitud/carrito/eliminar/<int:product_id>/"
+msgstr "request/cart/remove/<int:product_id>/"
+
+#: src/apps/cart/urls.py:31
+msgid "solicitud/carrito/vaciar/"
+msgstr "request/cart/clear/"
+
+#: src/apps/inquiries/urls.py:9
+msgid "solicitud/enviar/"
+msgstr "request/submit/"
+
+#: src/apps/inquiries/urls.py:11
+msgid "solicitud/enviada/<str:reference_code>/"
+msgstr "request/submitted/<str:reference_code>/"
+
+#: src/templates/base.html:63
+msgid "Solicitud"
+msgstr "Request"
+
+#: src/templates/base.html:98
+msgid "Mensajes del sistema"
+msgstr "System messages"
+
+#: src/apps/cart/views.py:32
+msgid "Carrito de solicitud"
+msgstr "Request cart"
+
+#: src/apps/cart/views.py:53
+msgid "Producto añadido al carrito de solicitud."
+msgstr "Product added to the request cart."
+
+#: src/apps/cart/views.py:62
+msgid "La cantidad debe ser un número válido."
+msgstr "Quantity must be a valid number."
+
+#: src/apps/cart/views.py:71
+msgid "Carrito de solicitud actualizado."
+msgstr "Request cart updated."
+
+#: src/apps/cart/views.py:78
+msgid "Producto eliminado del carrito de solicitud."
+msgstr "Product removed from the request cart."
+
+#: src/apps/cart/views.py:85
+msgid "Carrito de solicitud vaciado."
+msgstr "Request cart cleared."
+
+#: src/apps/inquiries/forms.py:141
+msgid "El email de contacto es obligatorio si tu cuenta no tiene email."
+msgstr "Contact email is required if your account has no email."
+
+#: src/apps/inquiries/forms.py:146
+msgid "El nombre de contacto es obligatorio."
+msgstr "Contact name is required."
+
+#: src/apps/inquiries/forms.py:148
+msgid "El email de contacto es obligatorio."
+msgstr "Contact email is required."
+
+#: src/apps/inquiries/views.py:25
+msgid "Tu carrito de solicitud está vacío. Añade al menos un producto para continuar."
+msgstr "Your request cart is empty. Add at least one product to continue."
+
+#: src/apps/inquiries/views.py:40 src/templates/inquiries/public_submit.html:109
+msgid "Enviar solicitud"
+msgstr "Submit request"
+
+#: src/apps/inquiries/views.py:52
+msgid "Tu carrito de solicitud está vacío. Añade productos antes de enviar."
+msgstr "Your request cart is empty. Add products before submitting."
+
+#: src/apps/inquiries/views.py:69
+msgid "No se ha podido registrar tu solicitud. Revisa los datos del carrito e inténtalo de nuevo."
+msgstr "We could not register your request. Check cart data and try again."
+
+#: src/apps/inquiries/views.py:77
+#, python-format
+msgid "Solicitud enviada correctamente. Referencia: %(reference)s"
+msgstr "Request submitted successfully. Reference: %(reference)s"
+
+#: src/apps/inquiries/views.py:115 src/templates/inquiries/public_success.html:9
+msgid "Solicitud enviada"
+msgstr "Request submitted"
+
+#: src/templates/catalog/partials/product_card.html:63
+msgid "Añadir a solicitud"
+msgstr "Add to request"
+
+#: src/templates/catalog/product_detail.html:70 src/templates/cart/request_cart.html:40
+msgid "Cantidad solicitada"
+msgstr "Requested quantity"
+
+#: src/templates/catalog/product_detail.html:86
+msgid "Nota para este artículo (opcional)"
+msgstr "Note for this item (optional)"
+
+#: src/templates/catalog/product_detail.html:101
+msgid "Añadir a carrito de solicitud"
+msgstr "Add to request cart"
+
+#: src/templates/catalog/product_detail.html:107 src/templates/inquiries/public_submit.html:36
+msgid "Ver carrito de solicitud"
+msgstr "View request cart"
+
+#: src/templates/cart/request_cart.html:10
+msgid "Este carrito es para solicitudes de disponibilidad, precio final y plazo. No es un proceso de compra directa."
+msgstr "This cart is for availability, final price, and lead-time requests. It is not a direct purchase checkout."
+
+#: src/templates/cart/request_cart.html:52
+msgid "Usa 0 para eliminar el artículo."
+msgstr "Use 0 to remove the item."
+
+#: src/templates/cart/request_cart.html:57
+msgid "Nota para este artículo"
+msgstr "Note for this item"
+
+#: src/templates/cart/request_cart.html:72
+msgid "Actualizar artículo"
+msgstr "Update item"
+
+#: src/templates/cart/request_cart.html:83
+msgid "Eliminar"
+msgstr "Remove"
+
+#: src/templates/cart/request_cart.html:91
+msgid "Resumen de solicitud"
+msgstr "Request summary"
+
+#: src/templates/cart/request_cart.html:94
+msgid "Líneas"
+msgstr "Lines"
+
+#: src/templates/cart/request_cart.html:98 src/templates/inquiries/public_submit.html:30
+msgid "Cantidad total"
+msgstr "Total quantity"
+
+#: src/templates/cart/request_cart.html:108
+msgid "Continuar con solicitud"
+msgstr "Continue request"
+
+#: src/templates/cart/request_cart.html:116
+msgid "Vaciar carrito"
+msgstr "Clear cart"
+
+#: src/templates/cart/request_cart.html:122
+msgid "Tu carrito de solicitud está vacío."
+msgstr "Your request cart is empty."
+
+#: src/templates/cart/request_cart.html:123
+msgid "Explora el catálogo y añade productos para preparar tu consulta comercial."
+msgstr "Browse the catalog and add products to prepare your commercial inquiry."
+
+#: src/templates/inquiries/public_submit.html:10
+msgid "Completa estos datos para que el equipo confirme disponibilidad, precio final y plazo de entrega."
+msgstr "Complete these details so our team can confirm availability, final price, and lead time."
+
+#: src/templates/inquiries/public_submit.html:16
+msgid "Resumen de artículos"
+msgstr "Item summary"
+
+#: src/templates/inquiries/public_submit.html:22
+msgid "Cantidad"
+msgstr "Quantity"
+
+#: src/templates/inquiries/public_submit.html:24
+msgid "Nota"
+msgstr "Note"
+
+#: src/templates/inquiries/public_submit.html:41
+msgid "Datos de contacto"
+msgstr "Contact details"
+
+#: src/templates/inquiries/public_submit.html:102
+msgid "Al enviar, se registra tu solicitud para revisión interna. Este envío no confirma stock, precio final ni plazo final."
+msgstr "By submitting, your request is recorded for internal review. This submission does not confirm stock, final price, or final lead time."
+
+#: src/templates/inquiries/public_success.html:10
+msgid "Hemos recibido tu solicitud correctamente."
+msgstr "We have received your request successfully."
+
+#: src/templates/inquiries/public_success.html:14
+msgid "Referencia"
+msgstr "Reference"
+
+#: src/templates/inquiries/public_success.html:19
+msgid "Nuestro equipo revisará disponibilidad, precio final y plazo y te responderá por los canales de contacto indicados."
+msgstr "Our team will review availability, final price, and lead time and reply through your provided contact channels."

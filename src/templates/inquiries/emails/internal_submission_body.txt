@@ -1,5 +1,5 @@
 {% load i18n %}
-{% trans "Se ha enviado una nueva solicitud de recambios." %}
+{% trans "Se ha generado una nueva solicitud." %}
 
 {% blocktrans with reference=inquiry.reference_code %}Referencia: {{ reference }}{% endblocktrans %}
 {% blocktrans with language_code=inquiry.language %}Idioma de la solicitud: {{ language_code }}{% endblocktrans %}

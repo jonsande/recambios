@@ -1,1 +1,144 @@
-# Create your views here.
+from __future__ import annotations
+
+import logging
+
+from django.conf import settings
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
+from django.http import Http404
+from django.shortcuts import redirect
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
+from django.views.generic import FormView, TemplateView
+
+from apps.cart.services import clear_request_cart, get_request_cart_items
+
+from .forms import PublicInquirySubmissionForm
+from .models import Inquiry, InquiryItem
+
+logger = logging.getLogger(__name__)
+
+
+class PublicInquirySubmitView(FormView):
+    template_name = "inquiries/public_submit.html"
+    form_class = PublicInquirySubmissionForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not get_request_cart_items(request.session):
+            messages.error(
+                request,
+                _("Tu carrito de solicitud está vacío. Añade al menos un producto para continuar."),
+            )
+            return redirect("cart:request_cart_detail")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart_items = get_request_cart_items(self.request.session)
+        context.update(
+            {
+                "page_title": _("Enviar solicitud"),
+                "cart_items": cart_items,
+                "total_quantity": sum(item.quantity for item in cart_items),
+            }
+        )
+        return context
+
+    def form_valid(self, form):
+        cart_items = get_request_cart_items(self.request.session)
+        if not cart_items:
+            form.add_error(
+                None,
+                _("Tu carrito de solicitud está vacío. Añade productos antes de enviar."),
+            )
+            return self.form_invalid(form)
+
+        try:
+            inquiry = self._create_submitted_inquiry(form.cleaned_data, cart_items)
+        except (ValidationError, IntegrityError, ValueError):
+            logger.exception("Public inquiry submission failed due to invalid payload.")
+            form.add_error(
+                None,
+                _(
+                    "No se ha podido registrar tu solicitud. "
+                    "Revisa los datos del carrito e inténtalo de nuevo."
+                ),
+            )
+            return self.form_invalid(form)
+
+        clear_request_cart(self.request.session)
+
+        messages.success(
+            self.request,
+            _("Solicitud enviada correctamente. Referencia: %(reference)s")
+            % {"reference": inquiry.reference_code},
+        )
+        return redirect(
+            "inquiries:public_inquiry_success",
+            reference_code=inquiry.reference_code,
+        )
+
+    def _create_submitted_inquiry(self, cleaned_data: dict, cart_items) -> Inquiry:
+        user = self.request.user if self.request.user.is_authenticated else None
+
+        with transaction.atomic():
+            inquiry = Inquiry.objects.create(
+                user=user,
+                guest_name=cleaned_data["contact_name"],
+                guest_email=cleaned_data["contact_email"],
+                guest_phone=cleaned_data["phone"],
+                company_name=cleaned_data["company_name"],
+                tax_id=cleaned_data["tax_id"],
+                language=_resolve_inquiry_language(),
+                status=Inquiry.Status.DRAFT,
+                notes_from_customer=cleaned_data["notes_from_customer"],
+            )
+
+            for cart_item in cart_items:
+                InquiryItem.objects.create(
+                    inquiry=inquiry,
+                    product=cart_item.product,
+                    requested_quantity=cart_item.quantity,
+                    customer_note=cart_item.note,
+                )
+
+            inquiry.transition_to(Inquiry.Status.SUBMITTED)
+            inquiry.save()
+
+        return inquiry
+
+
+class PublicInquirySuccessView(TemplateView):
+    template_name = "inquiries/public_success.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        reference_code = (self.kwargs.get("reference_code") or "").strip()
+        inquiry_exists = Inquiry.objects.filter(
+            reference_code=reference_code,
+            status=Inquiry.Status.SUBMITTED,
+        ).exists()
+        if not inquiry_exists:
+            raise Http404
+
+        context.update(
+            {
+                "page_title": _("Solicitud enviada"),
+                "inquiry_reference": reference_code,
+            }
+        )
+        return context
+
+
+def _resolve_inquiry_language() -> str:
+    current_language = (get_language() or settings.LANGUAGE_CODE).lower()
+    if current_language.startswith("en"):
+        return Inquiry.Language.ENGLISH
+    return Inquiry.Language.SPANISH

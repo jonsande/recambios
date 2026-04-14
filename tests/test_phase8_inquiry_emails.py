@@ -209,5 +209,5 @@ def test_spanish_templates_render_when_inquiry_language_is_es(
 
     assert len(mail.outbox) == 2
     assert "Nueva solicitud recibida:" in mail.outbox[0].subject
-    assert "Se ha enviado una nueva solicitud de recambios." in mail.outbox[0].body
+    assert "Se ha generado una nueva solicitud." in mail.outbox[0].body
     assert "Hemos recibido tu solicitud" in mail.outbox[1].subject

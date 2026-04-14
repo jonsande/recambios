@@ -1,6 +1,6 @@
 # Estructura de datos (estado actual)
 
-Última revisión: 2026-04-13
+Última revisión: 2026-04-14
 
 ## Entidades nucleares actuales
 - `Supplier`
@@ -90,7 +90,7 @@
 - `supplier`: proveedor propietario del producto.
 - `supplier_product_code`: código de proveedor (opcional).
 - `sku`: referencia OEM principal única global (`Referencia (OEM)` en ES / `Reference (OEM)` en EN).
-- `brand`: marca fabricante asociada a la referencia OEM principal (`Marca` en ES / `Brand` en EN).
+- `brand`: marca fabricante asociada a la referencia OEM principal (`Marca` en ES / `Brand` en EN), opcional.
 - `slug`: slug único autogenerado desde `sku`.
 - `title`: título del producto.
 - `short_description`: descripción corta.
@@ -183,7 +183,7 @@
 - `id`: identificador interno.
 - `product`: producto asociado.
 - `image`: imagen del producto.
-- `alt_text`: texto alternativo.
+- `alt_text`: texto alternativo (opcional).
 - `sort_order`: orden de la imagen.
 - `is_primary`: imagen principal.
 - `created_at`: fecha de creación.
@@ -193,13 +193,13 @@
 - `id`: identificador interno.
 - `reference_code`: código de referencia único.
 - `user`: usuario registrado (opcional).
-- `guest_name`: nombre de invitado (opcional).
-- `guest_email`: email de invitado (opcional).
+- `guest_name`: nombre de invitado (opcional si hay `user`; obligatorio si no hay `user`).
+- `guest_email`: email de invitado (opcional si hay `user`; obligatorio si no hay `user`).
 - `guest_phone`: teléfono de invitado (opcional).
 - `company_name`: empresa (opcional).
 - `tax_id`: identificador fiscal (opcional).
 - `language`: idioma (`es`, `en`).
-- `status`: estado de la consulta (`draft`, `submitted`, `in_review`, `supplier_pending`, `responded`, `accepted`, `rejected`, `closed`).
+- `status`: estado de la consulta (`draft`, `submitted`, `in_review`, `supplier_pending`, `responded`, `accepted`, `rejected`, `closed`), por defecto `submitted`.
 - `notes_from_customer`: notas del cliente.
 - `internal_notes`: notas internas.
 - `response_due_at`: fecha objetivo de respuesta (opcional).

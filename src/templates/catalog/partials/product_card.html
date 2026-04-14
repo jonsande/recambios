@@ -50,20 +50,19 @@
       <p class="mt-2 text-xs text-slate-600">
         {% trans "Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo." %}
       </p>
-      <a
-        href="{% url 'pages:contact' %}?product={{ product.sku|urlencode }}"
-        class="mt-3 inline-flex rounded-md border border-slate-400 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-      >
-        {% trans "Confirmar disponibilidad y plazo" %}
-      </a>
-    {% else %}
-      <a
-        href="{% url 'pages:contact' %}?product={{ product.sku|urlencode }}"
+    {% endif %}
+
+    <form method="post" action="{% url 'cart:request_cart_add' product_id=product.id %}" class="mt-3">
+      {% csrf_token %}
+      <input type="hidden" name="quantity" value="1">
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button
+        type="submit"
         class="inline-flex rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
       >
-        {% trans "Consultar precio y plazo" %}
-      </a>
-    {% endif %}
+        {% trans "Añadir a solicitud" %}
+      </button>
+    </form>
   </div>
 
   <div class="mt-4">

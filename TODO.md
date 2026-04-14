@@ -87,16 +87,16 @@
   - [x] plantillas base ES/EN
   - [x] configuración de email para desarrollo y producción
 
-- [ ] **Fase 9** — Formulario público de solicitud y carrito de solicitud
-  - [ ] botón de solicitud por producto
-  - [ ] carrito de solicitud multiartículo
-  - [ ] formulario público de solicitud
-  - [ ] solicitud como invitado
-  - [ ] solicitud como usuario registrado
-  - [ ] validación de datos del cliente
-  - [ ] creación de `Inquiry` e `InquiryItem` desde la web pública
-  - [ ] transición a `submitted` solo en el envío final real
-  - [ ] página de confirmación posterior al envío
+- [x] **Fase 9** — Formulario público de solicitud y carrito de solicitud
+  - [x] botón de solicitud por producto
+  - [x] carrito de solicitud multiartículo
+  - [x] formulario público de solicitud
+  - [x] solicitud como invitado
+  - [x] solicitud como usuario registrado
+  - [x] validación de datos del cliente
+  - [x] creación de `Inquiry` e `InquiryItem` desde la web pública
+  - [x] transición a `submitted` solo en el envío final real
+  - [x] página de confirmación posterior al envío
 
 - [ ] **Fase 10** — Frontend refinado y sistema visual
   - [ ] componentes reutilizables

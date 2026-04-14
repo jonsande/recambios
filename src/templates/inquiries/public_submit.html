@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
+
+{% block content %}
+  <section>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ page_title }}</h1>
+    <p class="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
+      {% trans "Completa estos datos para que el equipo confirme disponibilidad, precio final y plazo de entrega." %}
+    </p>
+  </section>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-5">
+    <section class="lg:col-span-2 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5" aria-label="{% trans 'Resumen del carrito de solicitud' %}">
+      <h2 class="text-base font-semibold text-slate-950">{% trans "Resumen de artículos" %}</h2>
+      <ul class="mt-3 space-y-3">
+        {% for item in cart_items %}
+          <li class="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+            <p class="font-semibold text-slate-900">{{ item.product.title }}</p>
+            <p>{% trans "Referencia (OEM)" %}: {{ item.product.sku }}</p>
+            <p>{% trans "Cantidad" %}: {{ item.quantity }}</p>
+            {% if item.note %}
+              <p class="mt-1">{% trans "Nota" %}: {{ item.note }}</p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="mt-3 text-sm text-slate-700">
+        {% trans "Cantidad total" %}: <strong>{{ total_quantity }}</strong>
+      </p>
+      <a
+        href="{% url 'cart:request_cart_detail' %}"
+        class="mt-4 inline-flex rounded-md border border-slate-400 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      >
+        {% trans "Volver al carrito" %}
+      </a>
+    </section>
+
+    <section class="lg:col-span-3 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5">
+      <h2 class="text-base font-semibold text-slate-950">{% trans "Datos de contacto" %}</h2>
+
+      <form method="post" class="mt-4 space-y-4" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            <ul class="list-disc pl-5">
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <div>
+          <label for="{{ form.contact_name.id_for_label }}" class="block text-sm font-medium text-slate-900">
+            {{ form.contact_name.label }}
+          </label>
+          {{ form.contact_name }}
+          {% if form.contact_name.errors %}<p id="contact_name-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.contact_name.errors|striptags }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-slate-900">
+            {{ form.contact_email.label }}
+          </label>
+          {{ form.contact_email }}
+          {% if form.contact_email.errors %}<p id="contact_email-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.contact_email.errors|striptags }}</p>{% endif %}
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-slate-900">
+              {{ form.phone.label }}
+            </label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<p id="phone-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.phone.errors|striptags }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.tax_id.id_for_label }}" class="block text-sm font-medium text-slate-900">
+              {{ form.tax_id.label }}
+            </label>
+            {{ form.tax_id }}
+            {% if form.tax_id.errors %}<p id="tax_id-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.tax_id.errors|striptags }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div>
+          <label for="{{ form.company_name.id_for_label }}" class="block text-sm font-medium text-slate-900">
+            {{ form.company_name.label }}
+          </label>
+          {{ form.company_name }}
+          {% if form.company_name.errors %}<p id="company_name-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.company_name.errors|striptags }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label for="{{ form.notes_from_customer.id_for_label }}" class="block text-sm font-medium text-slate-900">
+            {{ form.notes_from_customer.label }}
+          </label>
+          {{ form.notes_from_customer }}
+          {% if form.notes_from_customer.errors %}<p id="notes_from_customer-errors" class="mt-1 text-sm text-red-700" role="alert">{{ form.notes_from_customer.errors|striptags }}</p>{% endif %}
+        </div>
+
+        <p class="text-sm text-slate-700">
+          {% trans "Al enviar, se registra tu solicitud para revisión interna. Este envío no confirma stock, precio final ni plazo final." %}
+        </p>
+
+        <button
+          type="submit"
+          class="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+        >
+          {% trans "Enviar solicitud" %}
+        </button>
+      </form>
+    </section>
+  </div>
+{% endblock %}

@@ -59,6 +59,11 @@
               </a>
             </li>
             <li>
+              <a class="rounded-md px-3 py-2 hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2" href="{% url 'cart:request_cart_detail' %}">
+                {% trans "Solicitud" %}{% if request_cart_total_quantity %} ({{ request_cart_total_quantity }}){% endif %}
+              </a>
+            </li>
+            <li>
               <a class="rounded-md px-3 py-2 hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2" href="{% url 'pages:legal' %}">
                 {% trans "Legal" %}
               </a>
@@ -90,6 +95,19 @@
   </header>
 
   <main id="main-content" class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    {% if messages %}
+      <section class="mb-4 space-y-2" aria-label="{% trans 'Mensajes del sistema' %}">
+        {% for message in messages %}
+          <div
+            class="rounded-md border px-3 py-2 text-sm {% if message.tags == 'error' %}border-red-300 bg-red-50 text-red-800{% elif message.tags == 'success' %}border-emerald-300 bg-emerald-50 text-emerald-900{% else %}border-slate-300 bg-slate-100 text-slate-800{% endif %}"
+            role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
+            aria-live="{% if message.tags == 'error' %}assertive{% else %}polite{% endif %}"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      </section>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 

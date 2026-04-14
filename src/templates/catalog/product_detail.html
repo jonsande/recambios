@@ -55,23 +55,60 @@
         <p class="mt-3 text-sm text-slate-700">
           {% trans "Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo." %}
         </p>
-        <a
-          href="{% url 'pages:contact' %}?product={{ product.sku|urlencode }}"
-          class="mt-4 inline-flex rounded-md border border-slate-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-        >
-          {% trans "Confirmar disponibilidad y plazo" %}
-        </a>
       {% else %}
         <p class="mt-3 text-sm text-slate-700">
           {% trans "Este producto se gestiona bajo consulta previa." %}
         </p>
-        <a
-          href="{% url 'pages:contact' %}?product={{ product.sku|urlencode }}"
-          class="mt-4 inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-        >
-          {% trans "Consultar precio y plazo" %}
-        </a>
       {% endif %}
+
+      <form method="post" action="{% url 'cart:request_cart_add' product_id=product.id %}" class="mt-4 space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+        <div class="max-w-xs">
+          <label for="request-quantity" class="block text-sm font-medium text-slate-900">
+            {% trans "Cantidad solicitada" %}
+          </label>
+          <input
+            id="request-quantity"
+            name="quantity"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max="999"
+            value="1"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+        </div>
+
+        <div>
+          <label for="request-note" class="block text-sm font-medium text-slate-900">
+            {% trans "Nota para este artículo (opcional)" %}
+          </label>
+          <textarea
+            id="request-note"
+            name="note"
+            rows="3"
+            maxlength="500"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          ></textarea>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            class="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+            {% trans "Añadir a carrito de solicitud" %}
+          </button>
+          <a
+            href="{% url 'cart:request_cart_detail' %}"
+            class="inline-flex rounded-md border border-slate-400 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          >
+            {% trans "Ver carrito de solicitud" %}
+          </a>
+        </div>
+      </form>
     </section>
 
     {% if product.long_description %}
