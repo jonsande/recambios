@@ -26,6 +26,12 @@ class Inquiry(models.Model):
         REJECTED = "rejected", "Rejected by Customer"
         CLOSED = "closed", "Closed"
 
+    class NegativeResolutionReason(models.TextChoices):
+        UNAVAILABLE = "unavailable", "Unavailable"
+        SUPPLIER_CANNOT_CONFIRM = "supplier_cannot_confirm", "Supplier Cannot Confirm"
+        LOGISTICS_NOT_POSSIBLE = "logistics_not_possible", "Logistics Not Possible"
+        OTHER = "other", "Other"
+
     REFERENCE_PREFIX = "INQ"
     REFERENCE_RANDOM_LENGTH = 6
     REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
@@ -71,6 +77,15 @@ class Inquiry(models.Model):
     )
     notes_from_customer = models.TextField(blank=True)
     internal_notes = models.TextField(blank=True)
+    negative_resolution_reason = models.CharField(
+        max_length=40,
+        choices=NegativeResolutionReason.choices,
+        blank=True,
+        db_index=True,
+    )
+    negative_resolution_internal_notes = models.TextField(blank=True)
+    negative_resolution_customer_message = models.TextField(blank=True)
+    negative_resolved_at = models.DateTimeField(null=True, blank=True, db_index=True)
     response_due_at = models.DateTimeField(null=True, blank=True, db_index=True)
     supplier_feedback_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -119,6 +134,37 @@ class Inquiry(models.Model):
             )
         self.status = next_status
 
+    @property
+    def is_negatively_resolved(self) -> bool:
+        return self.negative_resolved_at is not None
+
+    def finalize_negative_resolution(self, *, save: bool = True) -> None:
+        errors = {}
+        if not self.negative_resolution_reason:
+            errors["negative_resolution_reason"] = (
+                "A negative resolution reason is required before finalizing."
+            )
+
+        if self.pk and InquiryOffer.objects.filter(inquiry_id=self.pk).exists():
+            errors["__all__"] = (
+                "Negative resolution cannot be finalized because this inquiry already has an offer."
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+        self.negative_resolved_at = timezone.now()
+        if self.status != self.Status.CLOSED:
+            if not self.can_transition_to(self.Status.CLOSED):
+                raise ValueError(
+                    "Status transition from "
+                    f"'{self.status}' to '{self.Status.CLOSED}' is not allowed."
+                )
+            self.transition_to(self.Status.CLOSED)
+
+        if save:
+            self.save()
+
     def clean(self) -> None:
         super().clean()
 
@@ -129,6 +175,20 @@ class Inquiry(models.Model):
             if not self.guest_email:
                 errors["guest_email"] = (
                     "Guest email is required when no registered user is attached."
+                )
+
+        if self.negative_resolved_at is not None:
+            if not self.negative_resolution_reason:
+                errors["negative_resolution_reason"] = (
+                    "Negative resolution reason is required when negative_resolved_at is set."
+                )
+            if self.status != self.Status.CLOSED:
+                errors["status"] = (
+                    "Negative resolution requires inquiry status to be 'closed'."
+                )
+            if self.pk and InquiryOffer.objects.filter(inquiry_id=self.pk).exists():
+                errors["negative_resolved_at"] = (
+                    "Negative resolution cannot be stored when an offer already exists."
                 )
 
         if errors:
@@ -148,7 +208,15 @@ class Inquiry(models.Model):
         raise RuntimeError("Unable to generate a unique inquiry reference code.")
 
     def save(self, *args, **kwargs) -> None:
-        string_fields = ("guest_name", "guest_email", "guest_phone", "company_name", "tax_id")
+        string_fields = (
+            "guest_name",
+            "guest_email",
+            "guest_phone",
+            "company_name",
+            "tax_id",
+            "negative_resolution_internal_notes",
+            "negative_resolution_customer_message",
+        )
         for field_name in string_fields:
             value = getattr(self, field_name)
             if isinstance(value, str):
@@ -349,6 +417,11 @@ class InquiryOffer(models.Model):
     def clean(self) -> None:
         super().clean()
         errors = {}
+
+        if self.inquiry_id and self.inquiry.is_negatively_resolved:
+            errors["inquiry"] = (
+                "Offers cannot be created or updated for an inquiry resolved as not offerable."
+            )
 
         if not self.currency:
             errors["currency"] = "Currency is required."

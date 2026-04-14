@@ -190,9 +190,17 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
 
 @admin.register(Inquiry)
 class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    NEGATIVE_RESOLUTION_FIELDS = (
+        "negative_resolution_reason",
+        "negative_resolution_internal_notes",
+        "negative_resolution_customer_message",
+    )
+
     list_display = (
         "reference_code",
         "status",
+        "negative_resolution_reason",
+        "negative_resolved_at",
         "requester",
         "item_count",
         "language",
@@ -203,7 +211,9 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     list_filter = (
         "status",
         "language",
+        "negative_resolution_reason",
         "created_at",
+        "negative_resolved_at",
         "response_due_at",
         "supplier_feedback_at",
     )
@@ -225,6 +235,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     readonly_fields = ("reference_code", "created_at", "updated_at")
     date_hierarchy = "created_at"
     inlines = (InquiryItemInline,)
+    actions = ("finalize_selected_as_not_offerable",)
     fieldsets = (
         (
             "Inquiry",
@@ -267,8 +278,79 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
+        (
+            "Negative Resolution",
+            {
+                "fields": (
+                    "negative_resolution_reason",
+                    "negative_resolution_internal_notes",
+                    "negative_resolution_customer_message",
+                    "negative_resolved_at",
+                )
+            },
+        ),
         ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        readonly_fields.append("negative_resolved_at")
+        if obj is not None and obj.negative_resolved_at is not None:
+            readonly_fields.extend(self.NEGATIVE_RESOLUTION_FIELDS)
+        return tuple(dict.fromkeys(readonly_fields))
+
+    @staticmethod
+    def _render_validation_error(error: ValidationError) -> str:
+        if hasattr(error, "message_dict"):
+            parts = []
+            for field_name, field_errors in error.message_dict.items():
+                parts.extend(f"{field_name}: {message}" for message in field_errors)
+            return "; ".join(parts)
+        return "; ".join(error.messages)
+
+    @admin.action(description="Finalize selected inquiries as Not Offerable")
+    def finalize_selected_as_not_offerable(self, request, queryset):
+        finalized_count = 0
+        skipped_count = 0
+
+        for inquiry in queryset:
+            try:
+                inquiry.finalize_negative_resolution(save=True)
+            except ValidationError as error:
+                skipped_count += 1
+                details = self._render_validation_error(error)
+                self.message_user(
+                    request,
+                    (
+                        f"Inquiry {inquiry.reference_code} could not be finalized "
+                        f"as not offerable ({details})."
+                    ),
+                    level=messages.ERROR,
+                )
+            except ValueError as error:
+                skipped_count += 1
+                self.message_user(
+                    request,
+                    (
+                        f"Inquiry {inquiry.reference_code} could not be finalized "
+                        f"as not offerable ({error})."
+                    ),
+                    level=messages.WARNING,
+                )
+            else:
+                finalized_count += 1
+
+        if finalized_count:
+            self.message_user(
+                request,
+                f"Finalized {finalized_count} inquiry(ies) as not offerable.",
+            )
+        if skipped_count and not finalized_count:
+            self.message_user(
+                request,
+                "No inquiries were finalized as not offerable.",
+                level=messages.WARNING,
+            )
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)

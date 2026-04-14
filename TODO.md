@@ -106,17 +106,26 @@
   - [ ] refinado de tablas y bloques técnicos
 
 - [ ] **Fase 11** — Oferta confirmada y pago posterior
-  - [x] base de oferta confirmada
-  - [x] aceptación o rechazo por el cliente
-  - [x] trazabilidad del importe final confirmado
-  - [x] base para pago posterior
-  - [x] modelo `InquiryOffer` (1:1 con `Inquiry`) con token público seguro y timestamps de ciclo de vida
-  - [x] flujo público tokenizado para ver oferta y responder (aceptar/rechazar)
-  - [x] reglas de transición seguras y prevención de doble respuesta
-  - [x] backoffice en Django admin para gestión y envío de ofertas
-  - [x] bloqueo en admin de campos comerciales tras envío (`confirmed_total`, `currency`, `lead_time_text`, `customer_message`)
-  - [x] validación explícita de “ready to send” antes de enviar la oferta
-  - [x] semántica explícita de `confirmed_total` como fuente de verdad para preparar pago posterior
+  - [x] **Bloque A — Oferta confirmada (flujo positivo)**
+    - [x] modelo `InquiryOffer` (1:1 con `Inquiry`) con token público seguro y timestamps de ciclo de vida
+    - [x] base de oferta confirmada
+    - [x] aceptación o rechazo por el cliente
+    - [x] trazabilidad del importe final confirmado
+    - [x] semántica explícita de `confirmed_total` como fuente de verdad para preparar pago posterior
+    - [x] base para pago posterior
+    - [x] flujo público tokenizado para ver oferta y responder (aceptar/rechazar)
+    - [x] reglas de transición seguras y prevención de doble respuesta
+    - [x] backoffice en Django admin para gestión y envío de ofertas
+    - [x] bloqueo en admin de campos comerciales tras envío (`confirmed_total`, `currency`, `lead_time_text`, `customer_message`)
+    - [x] validación explícita de “ready to send” antes de enviar la oferta
+  - [x] **Bloque B — No ofertable (resolución negativa)**
+    - [x] resolución negativa “no ofertable” en `Inquiry` con razón estructurada, mensaje cliente, notas internas y timestamp de cierre
+    - [x] acción de admin para finalizar consultas como no ofertables con validaciones de integridad
+    - [x] regla de conflicto entre dominios: una `Inquiry` negativamente resuelta no puede convivir con `InquiryOffer`
+  - [x] **Bloque C — Notificaciones transaccionales de oferta**
+    - [x] email transaccional al cliente al entrar una oferta en estado `sent`, con enlace público tokenizado para aceptar/rechazar
+    - [x] trigger de email por transición real `draft -> sent` (sin reenvío en ediciones posteriores)
+    - [x] manejo robusto de incidencias de envío de email (logs claros sin revertir el estado comercial `sent`)
   - [x] tests específicos de integridad y flujo de Fase 11
   - [ ] integración real de pasarela de pago (siguiente slice de Fase 11)
 

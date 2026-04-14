@@ -729,6 +729,57 @@ msgstr "We will contact you as soon as we validate the information with our inte
 msgid "Si necesitas ampliar datos, responde a %(reply_to)s indicando tu referencia."
 msgstr "If you need to add details, reply to %(reply_to)s and include your reference."
 
+#: src/templates/inquiries/emails/customer_offer_sent_subject.txt:1
+#, python-format
+msgid "Oferta confirmada disponible: %(reference)s"
+msgstr "Confirmed offer available: %(reference)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:2
+#, python-format
+msgid "Tu solicitud %(reference)s ya tiene una oferta confirmada."
+msgstr "Your inquiry %(reference)s now has a confirmed offer."
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:4
+msgid "Resumen de la oferta:"
+msgstr "Offer summary:"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:5
+#, python-format
+msgid "Referencia de oferta: %(offer_reference)s"
+msgstr "Offer reference: %(offer_reference)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:6
+#, python-format
+msgid "Referencia de solicitud: %(inquiry_reference)s"
+msgstr "Inquiry reference: %(inquiry_reference)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:7
+#, python-format
+msgid "Importe total confirmado: %(total)s %(currency)s"
+msgstr "Confirmed total amount: %(total)s %(currency)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:8
+#, python-format
+msgid "Plazo estimado: %(lead_time)s"
+msgstr "Estimated lead time: %(lead_time)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:11
+msgid "Mensaje comercial:"
+msgstr "Commercial message:"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:15
+msgid "Revisa la oferta y responde (aceptar o rechazar) desde este enlace seguro:"
+msgstr "Review the offer and respond (accept or reject) using this secure link:"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:18
+msgid "Este correo no incluye pago online en esta fase. Tras tu aceptación, te guiaremos con el siguiente paso."
+msgstr "This email does not include online payment at this stage. After acceptance, we will guide you through the next step."
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:21
+#, python-format
+msgid "Si necesitas ayuda, responde a %(reply_to)s indicando tus referencias."
+msgstr "If you need help, reply to %(reply_to)s and include your references."
+
 #: src/apps/cart/urls.py:15
 msgid "solicitud/carrito/"
 msgstr "request/cart/"

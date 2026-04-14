@@ -149,6 +149,10 @@ INQUIRY_CUSTOMER_REPLY_TO_EMAIL = config(
     "INQUIRY_CUSTOMER_REPLY_TO_EMAIL",
     default=DEFAULT_FROM_EMAIL,
 )
+PUBLIC_BASE_URL = config(
+    "PUBLIC_BASE_URL",
+    default="http://127.0.0.1:8000",
+)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
