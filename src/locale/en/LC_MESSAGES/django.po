@@ -742,10 +742,14 @@ msgid "solicitud/carrito/actualizar/<int:product_id>/"
 msgstr "request/cart/update/<int:product_id>/"
 
 #: src/apps/cart/urls.py:27
+msgid "solicitud/carrito/solicitar/<int:product_id>/"
+msgstr "request/cart/request/<int:product_id>/"
+
+#: src/apps/cart/urls.py:32
 msgid "solicitud/carrito/eliminar/<int:product_id>/"
 msgstr "request/cart/remove/<int:product_id>/"
 
-#: src/apps/cart/urls.py:31
+#: src/apps/cart/urls.py:36
 msgid "solicitud/carrito/vaciar/"
 msgstr "request/cart/clear/"
 
@@ -838,12 +842,16 @@ msgstr "Requested quantity"
 msgid "Nota para este artículo (opcional)"
 msgstr "Note for this item (optional)"
 
-#: src/templates/catalog/product_detail.html:101
-msgid "Añadir a carrito de solicitud"
+#: src/templates/catalog/product_detail.html:70
+msgid "Solicitar precio y plazo"
+msgstr "Request price and lead time"
+
+#: src/templates/catalog/product_detail.html:112
+msgid "Añadir a carrito de solicitudes"
 msgstr "Add to request cart"
 
-#: src/templates/catalog/product_detail.html:107 src/templates/inquiries/public_submit.html:36
-msgid "Ver carrito de solicitud"
+#: src/templates/catalog/product_detail.html:118 src/templates/inquiries/public_submit.html:36
+msgid "Ver carrito de solicitudes"
 msgstr "View request cart"
 
 #: src/templates/cart/request_cart.html:10

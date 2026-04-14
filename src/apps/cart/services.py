@@ -94,6 +94,30 @@ def add_product_to_request_cart(
     return True
 
 
+def ensure_product_in_request_cart(
+    session: SessionBase,
+    *,
+    product: Product,
+    quantity: int = 1,
+    note: str = "",
+) -> bool:
+    cart = _get_normalized_cart(session)
+    key = str(product.id)
+    if key in cart:
+        return False
+
+    quantity_to_set = _normalize_quantity(quantity)
+    if quantity_to_set <= 0:
+        return False
+
+    cart[key] = {
+        "quantity": quantity_to_set,
+        "note": _normalize_note(note),
+    }
+    _write_cart(session, cart)
+    return True
+
+
 def update_request_cart_item(
     session: SessionBase,
     *,

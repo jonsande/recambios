@@ -13,6 +13,7 @@ from apps.catalog.public import get_public_products_queryset
 from .services import (
     add_product_to_request_cart,
     clear_request_cart,
+    ensure_product_in_request_cart,
     get_request_cart_items,
     remove_product_from_request_cart,
     update_request_cart_item,
@@ -91,6 +92,13 @@ class RequestCartClearView(View):
         clear_request_cart(request.session)
         messages.success(request, _("Carrito de solicitud vaciado."))
         return redirect("cart:request_cart_detail")
+
+
+class RequestCartDirectInquiryView(View):
+    def post(self, request, *args, **kwargs):
+        product = get_object_or_404(get_public_products_queryset(), pk=kwargs["product_id"])
+        ensure_product_in_request_cart(request.session, product=product, quantity=1)
+        return redirect("inquiries:public_inquiry_submit")
 
 
 def _resolve_next_url(request) -> str:

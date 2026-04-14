@@ -5,6 +5,7 @@ from .views import (
     RequestCartAddView,
     RequestCartClearView,
     RequestCartDetailView,
+    RequestCartDirectInquiryView,
     RequestCartRemoveView,
     RequestCartUpdateView,
 )
@@ -22,6 +23,11 @@ urlpatterns = [
         _("solicitud/carrito/actualizar/<int:product_id>/"),
         RequestCartUpdateView.as_view(),
         name="request_cart_update",
+    ),
+    path(
+        _("solicitud/carrito/solicitar/<int:product_id>/"),
+        RequestCartDirectInquiryView.as_view(),
+        name="request_cart_direct_inquiry",
     ),
     path(
         _("solicitud/carrito/eliminar/<int:product_id>/"),

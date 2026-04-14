@@ -294,8 +294,10 @@ def test_price_visibility_messages_follow_business_rules(client) -> None:
     hidden_content = hidden_response.content.decode()
 
     assert "Último precio conocido" in visible_content
-    assert "Añadir a carrito de solicitud" in visible_content
-    assert "Añadir a carrito de solicitud" in hidden_content
+    assert "Solicitar precio y plazo" in visible_content
+    assert "Añadir a carrito de solicitudes" in visible_content
+    assert "Solicitar precio y plazo" in hidden_content
+    assert "Añadir a carrito de solicitudes" in hidden_content
     assert "Este producto se gestiona bajo consulta previa." in hidden_content
 
 

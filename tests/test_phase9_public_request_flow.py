@@ -74,6 +74,38 @@ def test_add_product_to_request_cart_and_keep_current_page(client) -> None:
 
 
 @pytest.mark.usefixtures("email_settings")
+def test_direct_cta_adds_product_if_missing_and_redirects_to_submit(client) -> None:
+    product = make_public_product(sku="SKU-P9-DIRECT")
+
+    response = client.post(f"/es/solicitud/carrito/solicitar/{product.id}/")
+
+    assert response.status_code == 302
+    assert response.url == "/es/solicitud/enviar/"
+    assert Inquiry.objects.count() == 0
+    assert len(mail.outbox) == 0
+
+    cart = client.session.get("request_cart_v1", {})
+    assert cart[str(product.id)]["quantity"] == 1
+    assert cart[str(product.id)]["note"] == ""
+
+
+@pytest.mark.usefixtures("email_settings")
+def test_direct_cta_keeps_existing_cart_quantity_unchanged(client) -> None:
+    product = make_public_product(sku="SKU-P9-DIRECT-EXISTS")
+    session = client.session
+    session["request_cart_v1"] = {str(product.id): {"quantity": 4, "note": "Mantener"}}
+    session.save()
+
+    response = client.post(f"/es/solicitud/carrito/solicitar/{product.id}/")
+
+    assert response.status_code == 302
+    assert response.url == "/es/solicitud/enviar/"
+    cart = client.session.get("request_cart_v1", {})
+    assert cart[str(product.id)]["quantity"] == 4
+    assert cart[str(product.id)]["note"] == "Mantener"
+
+
+@pytest.mark.usefixtures("email_settings")
 def test_update_and_remove_request_cart_item(client) -> None:
     product = make_public_product(sku="SKU-P9-UPD")
     session = client.session
@@ -440,3 +472,18 @@ def test_public_request_routes_work_in_es_and_en(client) -> None:
     assert en_add.status_code == 302
     assert client.get("/en/request/cart/").status_code == 200
     assert client.get("/en/request/submit/").status_code == 200
+
+
+@pytest.mark.usefixtures("email_settings")
+def test_product_detail_cta_copy_matches_es_and_en_requirements(client) -> None:
+    product = make_public_product(sku="SKU-P9-CTA-COPY")
+
+    es_content = client.get(f"/es/productos/{product.slug}/").content.decode()
+    assert "Solicitar precio y plazo" in es_content
+    assert "Añadir a carrito de solicitudes" in es_content
+    assert "Ver carrito de solicitudes" in es_content
+
+    en_content = client.get(f"/en/products/{product.slug}/").content.decode()
+    assert "Request price and lead time" in en_content
+    assert "Add to request cart" in en_content
+    assert "View request cart" in en_content
