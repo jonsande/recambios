@@ -5,7 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{% trans "Recambios de Automoción" %}{% endblock %}</title>
+  <title>{% block title %}{{ site_brand_name }}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon.png' %}">
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body class="min-h-screen">
@@ -23,12 +25,13 @@
       <div class="site-header-row">
         <a href="{% url 'pages:home' %}" class="site-brand" aria-label="{% trans 'Ir al inicio' %}">
           <img
-            src="{% static 'img/plantilla_logo.png' %}"
-            alt="{% trans 'Autosande' %}"
-            class="site-brand-logo"
-            width="521"
+            src="{% static 'img/logo_min_alfa.png' %}"
+            alt=""
+            class="site-brand-icon"
+            width="149"
             height="151"
           >
+          <span class="site-brand-name">{{ site_brand_name }}</span>
         </a>
 
         <div class="site-header-controls">
@@ -205,7 +208,7 @@
     <div class="layout-shell">
       <div class="footer-grid">
         <section>
-          <h2 class="subsection-title">{% trans "Recambios Técnicos" %}</h2>
+          <h2 class="subsection-title">{{ site_brand_name }}</h2>
           <p class="mt-2 text-sm">
             {% trans "Plataforma de recambios con búsqueda por referencias y validación comercial previa de disponibilidad, precio final y plazo." %}
           </p>
@@ -225,7 +228,7 @@
             <a class="link-inline text-sm" href="{% url 'pages:contact' %}">{% trans "Contacto" %}</a>
             <a class="link-inline text-sm" href="{% url 'pages:legal' %}">{% trans "Aviso legal" %}</a>
           </div>
-          <p class="mt-3 text-xs text-text-muted">© {% now "Y" %} {% trans "Recambios Técnicos" %}</p>
+          <p class="mt-3 text-xs text-text-muted">© {% now "Y" %} {{ site_brand_name }}</p>
         </section>
       </div>
     </div>

@@ -68,6 +68,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.cart.context_processors.request_cart_summary",
+                "apps.common.context_processors.site_brand",
             ],
         },
     },
@@ -153,6 +154,19 @@ INQUIRY_CUSTOMER_REPLY_TO_EMAIL = config(
 PUBLIC_BASE_URL = config(
     "PUBLIC_BASE_URL",
     default="http://127.0.0.1:8000",
+)
+
+SITE_BRAND_NAME = config(
+    "SITE_BRAND_NAME",
+    default="Recambios Técnicos",
+)
+SITE_BRAND_NAME_ES = config(
+    "SITE_BRAND_NAME_ES",
+    default=SITE_BRAND_NAME,
+)
+SITE_BRAND_NAME_EN = config(
+    "SITE_BRAND_NAME_EN",
+    default=SITE_BRAND_NAME,
 )
 
 # Default primary key field type

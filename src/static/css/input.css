@@ -121,11 +121,15 @@
   }
 
   .site-brand {
-    @apply inline-flex max-w-[78vw] shrink-0 items-center rounded-lg border border-border bg-surface-elevated px-2 py-1 no-underline transition-colors hover:border-accent sm:max-w-none;
+    @apply inline-flex max-w-[78vw] min-w-0 shrink-0 items-center gap-0 rounded-lg border border-border bg-surface-elevated px-2 py-1.5 no-underline transition-colors hover:border-accent sm:max-w-none;
   }
 
-  .site-brand-logo {
-    @apply block h-[4.5rem] w-auto sm:h-20 lg:h-24;
+  .site-brand-icon {
+    @apply block h-12 w-auto shrink-0 sm:h-14 lg:h-16;
+  }
+
+  .site-brand-name {
+    @apply ml-0.5 block truncate text-xl font-semibold leading-none tracking-tight text-primary-strong sm:ml-1 sm:text-2xl lg:text-[1.75rem];
   }
 
   .site-nav-list {
