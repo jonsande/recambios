@@ -881,9 +881,9 @@ msgstr "Request submitted successfully. Reference: %(reference)s"
 msgid "Solicitud enviada"
 msgstr "Request submitted"
 
-#: src/templates/catalog/partials/product_card.html:63
-msgid "Añadir a solicitud"
-msgstr "Add to request"
+#: src/templates/catalog/partials/product_card.html:76
+msgid "Añadir a carrito"
+msgstr "Add to cart"
 
 #: src/templates/catalog/product_detail.html:70 src/templates/cart/request_cart.html:40
 msgid "Cantidad solicitada"
