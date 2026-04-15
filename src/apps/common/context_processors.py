@@ -12,7 +12,18 @@ def site_brand(request) -> dict[str, str]:
         "en": settings.SITE_BRAND_NAME_EN,
     }.get(language, settings.SITE_BRAND_NAME)
 
+    chrome_variant = settings.SITE_CHROME_VARIANT
+    brand_logo = (
+        settings.SITE_BRAND_LOGO_DARK
+        if chrome_variant == "dark"
+        else settings.SITE_BRAND_LOGO_LIGHT
+    )
+
     return {
         "site_brand_name": localized_name,
+        "site_brand_logo": brand_logo,
+        "site_chrome_variant": chrome_variant,
+        "site_chrome_class": f"site-chrome-{chrome_variant}",
+        "site_chrome_bg_light": settings.SITE_CHROME_BG_LIGHT,
+        "site_chrome_bg_dark": settings.SITE_CHROME_BG_DARK,
     }
-

@@ -10,7 +10,10 @@
   <link rel="apple-touch-icon" href="{% static 'img/favicon.png' %}">
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
-<body class="min-h-screen">
+<body
+  class="min-h-screen {{ site_chrome_class }}"
+  style="--site-chrome-bg-light: {{ site_chrome_bg_light }}; --site-chrome-bg-dark: {{ site_chrome_bg_dark }};"
+>
   <a
     href="#main-content"
     class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
@@ -25,7 +28,7 @@
       <div class="site-header-row">
         <a href="{% url 'pages:home' %}" class="site-brand" aria-label="{% trans 'Ir al inicio' %}">
           <img
-            src="{% static 'img/logo_min_alfa.png' %}"
+            src="{% static site_brand_logo %}"
             alt=""
             class="site-brand-icon"
             width="149"
@@ -208,7 +211,16 @@
     <div class="layout-shell">
       <div class="footer-grid">
         <section>
-          <h2 class="subsection-title">{{ site_brand_name }}</h2>
+          <div class="footer-brand">
+            <img
+              src="{% static site_brand_logo %}"
+              alt=""
+              class="site-brand-icon site-brand-icon-footer"
+              width="149"
+              height="151"
+            >
+            <h2 class="subsection-title">{{ site_brand_name }}</h2>
+          </div>
           <p class="mt-2 text-sm">
             {% trans "Plataforma de recambios con búsqueda por referencias y validación comercial previa de disponibilidad, precio final y plazo." %}
           </p>

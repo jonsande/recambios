@@ -168,6 +168,28 @@ SITE_BRAND_NAME_EN = config(
     "SITE_BRAND_NAME_EN",
     default=SITE_BRAND_NAME,
 )
+SITE_BRAND_LOGO_LIGHT = config(
+    "SITE_BRAND_LOGO_LIGHT",
+    default="img/logo_min_alfa.png",
+)
+SITE_BRAND_LOGO_DARK = config(
+    "SITE_BRAND_LOGO_DARK",
+    default="img/logo_min_alfa_white.png",
+)
+SITE_CHROME_VARIANT = config(
+    "SITE_CHROME_VARIANT",
+    default="light",
+).strip().lower()
+if SITE_CHROME_VARIANT not in {"light", "dark"}:
+    SITE_CHROME_VARIANT = "light"
+SITE_CHROME_BG_LIGHT = config(
+    "SITE_CHROME_BG_LIGHT",
+    default="#ffffff",
+)
+SITE_CHROME_BG_DARK = config(
+    "SITE_CHROME_BG_DARK",
+    default="#557873",
+)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
