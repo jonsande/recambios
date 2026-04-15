@@ -6,6 +6,7 @@
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
+{% trans "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar." %}
 
 {% if offer.customer_message %}
 {% trans "Mensaje comercial:" %}

@@ -1,0 +1,28 @@
+{% load i18n %}
+{% blocktrans with reference=inquiry.reference_code %}Hemos finalizado la revisión de tu solicitud {{ reference }}.{% endblocktrans %}
+
+{% trans "En esta ocasión no podemos confirmar una oferta para los artículos solicitados." %}
+
+{% if inquiry.negative_resolution_reason %}
+{% trans "Motivo principal:" %}
+{% if inquiry.negative_resolution_reason == "unavailable" %}
+{% trans "Sin disponibilidad confirmada en este momento." %}
+{% elif inquiry.negative_resolution_reason == "supplier_cannot_confirm" %}
+{% trans "No hemos podido obtener una confirmación firme del proveedor." %}
+{% elif inquiry.negative_resolution_reason == "logistics_not_possible" %}
+{% trans "No es posible garantizar una logística adecuada para esta solicitud." %}
+{% else %}
+{% trans "La solicitud no es ofertable en las condiciones actuales." %}
+{% endif %}
+{% endif %}
+
+{% if inquiry.negative_resolution_customer_message %}
+{% trans "Mensaje de nuestro equipo:" %}
+{{ inquiry.negative_resolution_customer_message }}
+{% endif %}
+
+{% trans "Si quieres que revisemos alternativas, responde a este correo indicando la referencia de tu solicitud." %}
+
+{% if customer_reply_to_email %}
+{% blocktrans with reply_to=customer_reply_to_email %}También puedes escribirnos a {{ reply_to }} para ampliar detalles.{% endblocktrans %}
+{% endif %}

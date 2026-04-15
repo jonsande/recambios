@@ -1,0 +1,14 @@
+{% load i18n %}
+{% trans "El cliente ha rechazado una oferta." %}
+
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe confirmado: {{ total }} {{ currency }}{% endblocktrans %}
+{% blocktrans with rejected_at=offer.rejected_at %}Fecha de rechazo: {{ rejected_at }}{% endblocktrans %}
+{% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Enlace público de la oferta:" %}
+{{ offer_public_url }}
+
+{% trans "Recomendación: revisar alternativas comerciales o contactar al cliente para seguimiento." %}

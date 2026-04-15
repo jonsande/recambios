@@ -120,6 +120,81 @@ def send_customer_offer_sent_email(offer: InquiryOffer) -> bool:
     return True
 
 
+def send_internal_offer_response_notification_email(
+    offer: InquiryOffer,
+    *,
+    response_status: str,
+) -> bool:
+    recipients = list(getattr(settings, "INQUIRY_INTERNAL_NOTIFICATION_EMAILS", []))
+    if not recipients:
+        return False
+
+    if response_status not in {InquiryOffer.Status.ACCEPTED, InquiryOffer.Status.REJECTED}:
+        raise ValueError("Offer response notification supports only accepted or rejected status.")
+
+    context = _build_internal_offer_response_email_context(offer)
+    language = _resolve_language(offer.inquiry.language)
+    template_suffix = (
+        "accepted" if response_status == InquiryOffer.Status.ACCEPTED else "rejected"
+    )
+    subject = _render_subject(
+        f"inquiries/emails/internal_offer_{template_suffix}_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        f"inquiries/emails/internal_offer_{template_suffix}_body.txt",
+        context,
+        language,
+    )
+    customer_email = context.get("requester_email")
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.SERVER_EMAIL,
+        to=recipients,
+        reply_to=[customer_email] if customer_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
+def send_customer_negative_resolution_email(inquiry: Inquiry) -> bool:
+    context = _build_negative_resolution_email_context(inquiry)
+    customer_email = context.get("requester_email")
+    if not customer_email:
+        logger.warning(
+            (
+                "Customer negative-resolution email skipped due to "
+                "missing recipient email (inquiry=%s)."
+            ),
+            inquiry.reference_code,
+        )
+        return False
+
+    language = _resolve_language(inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/customer_negative_resolution_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/customer_negative_resolution_body.txt",
+        context,
+        language,
+    )
+    reply_to_email = (settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL or "").strip()
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=[reply_to_email] if reply_to_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
 def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
     requester_name = inquiry.requester_display
     if inquiry.user_id and inquiry.user:
@@ -157,6 +232,25 @@ def _build_offer_sent_email_context(offer: InquiryOffer) -> dict:
         "requester_email": requester_email,
         "offer_public_url": _build_offer_public_url(offer),
         "customer_reply_to_email": settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL,
+    }
+
+
+def _build_negative_resolution_email_context(inquiry: Inquiry) -> dict:
+    requester_email = _resolve_requester_email(inquiry)
+    return {
+        "inquiry": inquiry,
+        "requester_email": requester_email,
+        "customer_reply_to_email": settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL,
+    }
+
+
+def _build_internal_offer_response_email_context(offer: InquiryOffer) -> dict:
+    requester_email = _resolve_requester_email(offer.inquiry)
+    return {
+        "inquiry": offer.inquiry,
+        "offer": offer,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(offer),
     }
 
 

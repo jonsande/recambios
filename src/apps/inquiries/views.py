@@ -15,7 +15,7 @@ from django.views.generic import FormView, TemplateView
 from apps.cart.services import clear_request_cart, get_request_cart_items
 
 from .forms import PublicInquirySubmissionForm
-from .models import Inquiry, InquiryItem, InquiryOffer
+from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
 
 logger = logging.getLogger(__name__)
 
@@ -175,9 +175,22 @@ class PublicInquiryOfferDetailView(TemplateView):
             )
             return context
 
+        page_title = _("Oferta confirmada")
+        page_intro = _("Revisa el importe confirmado y el plazo estimado antes de responder.")
+        if self.offer.status == InquiryOffer.Status.ACCEPTED:
+            page_title = _("Oferta aceptada")
+            page_intro = _("Has aceptado esta oferta. El siguiente paso es la gestión del pago.")
+        elif self.offer.status == InquiryOffer.Status.REJECTED:
+            page_title = _("Oferta rechazada")
+            page_intro = _(
+                "Has rechazado esta oferta. Si necesitas revisar alternativas, "
+                "puedes contactar con nuestro equipo."
+            )
+
         context.update(
             {
-                "page_title": _("Oferta confirmada"),
+                "page_title": page_title,
+                "page_intro": page_intro,
                 "offer": self.offer,
                 "can_respond": self.offer.status == InquiryOffer.Status.SENT,
                 "is_accepted": self.offer.status == InquiryOffer.Status.ACCEPTED,
@@ -195,17 +208,94 @@ class PublicInquiryOfferDetailView(TemplateView):
         with transaction.atomic():
             offer = self._get_offer(for_update=True)
             if offer.status != InquiryOffer.Status.SENT:
-                messages.error(request, _("Esta oferta ya no admite una nueva respuesta."))
+                messages.info(
+                    request,
+                    _(
+                        "Esta oferta ya tiene una respuesta registrada. "
+                        "Puedes revisar su estado actual."
+                    ),
+                )
                 return redirect(request.path)
 
             if decision == "accept":
                 offer.mark_accepted(save=True)
-                messages.success(request, _("Has aceptado la oferta correctamente."))
+                InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+                messages.success(
+                    request,
+                    _("Oferta aceptada. A continuación verás el siguiente paso para el pago."),
+                )
+                return redirect(
+                    "inquiries:public_inquiry_offer_payment_placeholder",
+                    access_token=offer.access_token,
+                )
             else:
                 offer.mark_rejected(save=True)
                 messages.success(request, _("Has rechazado la oferta."))
 
         return redirect(request.path)
+
+
+class PublicInquiryOfferPaymentPlaceholderView(TemplateView):
+    template_name = "inquiries/public_offer_payment_placeholder.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.access_token = kwargs.get("access_token")
+        if self.access_token is None:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_offer(self) -> InquiryOffer:
+        offer = (
+            InquiryOffer.objects.select_related("inquiry")
+            .filter(access_token=self.access_token)
+            .first()
+        )
+        if offer is None:
+            raise Http404
+        return offer
+
+    def get(self, request, *args, **kwargs):
+        self.offer = self._get_offer()
+        if self.offer.status != InquiryOffer.Status.ACCEPTED:
+            if self.offer.status == InquiryOffer.Status.SENT:
+                messages.info(
+                    request,
+                    _(
+                        "Esta oferta aún está pendiente de tu respuesta. "
+                        "Acepta la oferta para avanzar al pago."
+                    ),
+                )
+            elif self.offer.status == InquiryOffer.Status.REJECTED:
+                messages.info(
+                    request,
+                    _(
+                        "Esta oferta fue rechazada. Si necesitas revisar "
+                        "alternativas, contacta con nuestro equipo."
+                    ),
+                )
+            else:
+                messages.info(
+                    request,
+                    _("Esta oferta todavía no está disponible para continuar al paso de pago."),
+                )
+            return redirect(
+                "inquiries:public_inquiry_offer_detail",
+                access_token=self.offer.access_token,
+            )
+
+        self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": _("Paso de pago"),
+                "offer": self.offer,
+                "payment": self.payment,
+            }
+        )
+        return context
 
 
 def _resolve_inquiry_language() -> str:

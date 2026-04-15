@@ -6,10 +6,16 @@ from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .emails import send_customer_offer_sent_email, send_inquiry_submitted_emails
+from .emails import (
+    send_customer_negative_resolution_email,
+    send_customer_offer_sent_email,
+    send_inquiry_submitted_emails,
+    send_internal_offer_response_notification_email,
+)
 from .models import Inquiry, InquiryOffer
 
 STATUS_BEFORE_SAVE_ATTR = "_status_before_save"
+NEGATIVE_RESOLVED_AT_BEFORE_SAVE_ATTR = "_negative_resolved_at_before_save"
 OFFER_STATUS_BEFORE_SAVE_ATTR = "_offer_status_before_save"
 logger = logging.getLogger(__name__)
 
@@ -18,10 +24,25 @@ logger = logging.getLogger(__name__)
 def cache_inquiry_status_before_save(sender, instance: Inquiry, **kwargs) -> None:
     if instance._state.adding or not instance.pk:
         setattr(instance, STATUS_BEFORE_SAVE_ATTR, None)
+        setattr(instance, NEGATIVE_RESOLVED_AT_BEFORE_SAVE_ATTR, None)
         return
 
-    previous_status = sender.objects.filter(pk=instance.pk).values_list("status", flat=True).first()
+    previous_state = (
+        sender.objects.filter(pk=instance.pk)
+        .values_list("status", "negative_resolved_at")
+        .first()
+    )
+    if previous_state is None:
+        previous_status = None
+        previous_negative_resolved_at = None
+    else:
+        previous_status, previous_negative_resolved_at = previous_state
     setattr(instance, STATUS_BEFORE_SAVE_ATTR, previous_status)
+    setattr(
+        instance,
+        NEGATIVE_RESOLVED_AT_BEFORE_SAVE_ATTR,
+        previous_negative_resolved_at,
+    )
 
 
 @receiver(post_save, sender=Inquiry)
@@ -55,6 +76,41 @@ def send_submission_emails_on_status_entry(
         send_inquiry_submitted_emails(inquiry)
 
     transaction.on_commit(_send_after_commit)
+
+
+@receiver(post_save, sender=Inquiry)
+def send_negative_resolution_email_on_true_finalization(
+    sender,
+    instance: Inquiry,
+    created: bool,
+    **kwargs,
+) -> None:
+    previous_negative_resolved_at = getattr(instance, NEGATIVE_RESOLVED_AT_BEFORE_SAVE_ATTR, None)
+    entered_negative_resolution = instance.negative_resolved_at is not None and (
+        created or previous_negative_resolved_at is None
+    )
+    if not entered_negative_resolution:
+        return
+
+    inquiry_id = instance.pk
+
+    def _send_after_commit() -> None:
+        if inquiry_id is None:
+            return
+
+        inquiry = Inquiry.objects.select_related("user").filter(pk=inquiry_id).first()
+        if inquiry is None:
+            return
+
+        try:
+            send_customer_negative_resolution_email(inquiry)
+        except Exception:
+            logger.exception(
+                "Failed to send customer negative-resolution email (inquiry=%s).",
+                inquiry.reference_code,
+            )
+
+    transaction.on_commit(_send_after_commit, robust=True)
 
 
 @receiver(pre_save, sender=InquiryOffer)
@@ -102,6 +158,55 @@ def send_customer_offer_email_on_status_entry(
                 "Failed to send customer offer email (offer=%s inquiry=%s).",
                 offer.reference_code,
                 offer.inquiry.reference_code,
+            )
+
+    transaction.on_commit(_send_after_commit, robust=True)
+
+
+@receiver(post_save, sender=InquiryOffer)
+def send_internal_offer_response_email_on_status_entry(
+    sender,
+    instance: InquiryOffer,
+    created: bool,
+    **kwargs,
+) -> None:
+    previous_status = getattr(instance, OFFER_STATUS_BEFORE_SAVE_ATTR, None)
+    entered_response_status = instance.status in {
+        InquiryOffer.Status.ACCEPTED,
+        InquiryOffer.Status.REJECTED,
+    } and (created or previous_status != instance.status)
+    if not entered_response_status:
+        return
+
+    offer_id = instance.pk
+    response_status = instance.status
+
+    def _send_after_commit() -> None:
+        if offer_id is None:
+            return
+
+        offer = (
+            InquiryOffer.objects.select_related("inquiry", "inquiry__user")
+            .filter(pk=offer_id)
+            .first()
+        )
+        if offer is None:
+            return
+
+        try:
+            send_internal_offer_response_notification_email(
+                offer,
+                response_status=response_status,
+            )
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to send internal offer-response notification email "
+                    "(offer=%s inquiry=%s status=%s)."
+                ),
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                response_status,
             )
 
     transaction.on_commit(_send_after_commit, robust=True)

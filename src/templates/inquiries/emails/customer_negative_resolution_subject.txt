@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with reference=inquiry.reference_code %}Actualización de tu solicitud: {{ reference }}{% endblocktrans %}

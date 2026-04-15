@@ -11,7 +11,7 @@ from django.core import mail
 from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from apps.catalog.models import Brand, Category, Condition, Product
 from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin, InquiryOfferPaymentAdmin
@@ -258,6 +258,24 @@ def test_payment_initiation_from_accepted_offer_snapshots_amount_and_currency(
 
 
 @pytest.mark.django_db
+def test_payment_ensure_from_accepted_offer_is_idempotent(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_ensure_idempotent",
+        confirmed_total=Decimal("499.90"),
+    )
+
+    first_payment = InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+    second_payment = InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+
+    assert first_payment.pk == second_payment.pk
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
+    assert second_payment.status == InquiryOfferPayment.Status.PENDING
+    assert second_payment.payable_amount == Decimal("499.90")
+    assert second_payment.currency == "EUR"
+
+
+@pytest.mark.django_db
 def test_offer_with_payment_record_must_stay_accepted(django_user_model) -> None:
     offer = make_accepted_offer(
         django_user_model,
@@ -372,10 +390,12 @@ def test_offer_status_requires_consistent_timestamps(django_user_model) -> None:
 
 
 @pytest.mark.django_db
-def test_offer_sync_is_conservative_when_inquiry_transition_is_invalid(django_user_model) -> None:
+def test_mark_sent_is_blocked_when_inquiry_cannot_transition_to_responded(
+    django_user_model,
+) -> None:
     inquiry = make_inquiry(
         django_user_model,
-        username="offer_conservative_sync",
+        username="offer_send_requires_inquiry_transition",
         status=Inquiry.Status.SUBMITTED,
     )
     offer = InquiryOffer.objects.create(
@@ -385,12 +405,13 @@ def test_offer_sync_is_conservative_when_inquiry_transition_is_invalid(django_us
         lead_time_text="1 week",
     )
 
-    offer.mark_sent(save=True)
-    inquiry.refresh_from_db()
-    assert inquiry.status == Inquiry.Status.SUBMITTED
+    with pytest.raises(ValidationError):
+        offer.mark_sent(save=True)
 
-    offer.mark_accepted(save=True)
+    offer.refresh_from_db()
     inquiry.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.DRAFT
+    assert offer.sent_at is None
     assert inquiry.status == Inquiry.Status.SUBMITTED
 
 
@@ -496,6 +517,83 @@ def test_offer_creation_is_blocked_for_negatively_resolved_inquiry(django_user_m
         )
 
 
+@pytest.mark.django_db(transaction=True)
+def test_negative_resolution_email_is_sent_once_on_true_finalization(
+    django_user_model,
+    offer_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="negative_email_once",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    inquiry.negative_resolution_reason = Inquiry.NegativeResolutionReason.UNAVAILABLE
+    inquiry.negative_resolution_customer_message = "No podemos confirmar disponibilidad."
+
+    mail.outbox.clear()
+    inquiry.finalize_negative_resolution(save=True)
+    assert len(mail.outbox) == 1
+
+    inquiry.internal_notes = "Seguimiento interno"
+    inquiry.save(update_fields=["internal_notes"])
+    assert len(mail.outbox) == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_negative_resolution_email_supports_english_content(
+    django_user_model,
+    offer_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="negative_email_en",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    inquiry.language = Inquiry.Language.ENGLISH
+    inquiry.negative_resolution_reason = Inquiry.NegativeResolutionReason.SUPPLIER_CANNOT_CONFIRM
+    inquiry.negative_resolution_customer_message = (
+        "We cannot secure a firm supplier confirmation right now."
+    )
+    inquiry.save(update_fields=["language"])
+
+    mail.outbox.clear()
+    inquiry.finalize_negative_resolution(save=True)
+
+    assert len(mail.outbox) == 1
+    email = mail.outbox[0]
+    assert "Inquiry update:" in email.subject
+    assert "We have completed the review of your inquiry" in email.body
+    assert "We could not obtain a firm confirmation from the supplier." in email.body
+    assert "We cannot secure a firm supplier confirmation right now." in email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_negative_resolution_email_failure_is_logged_and_state_is_kept(
+    django_user_model,
+    offer_email_settings,
+    caplog,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="negative_email_send_failure",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    inquiry.negative_resolution_reason = Inquiry.NegativeResolutionReason.OTHER
+    inquiry.negative_resolution_customer_message = "No es posible ofrecer en este momento."
+
+    with patch("apps.inquiries.emails.EmailMessage.send", side_effect=RuntimeError("smtp down")):
+        with caplog.at_level("ERROR", logger="apps.inquiries.signals"):
+            inquiry.finalize_negative_resolution(save=True)
+
+    inquiry.refresh_from_db()
+    assert inquiry.status == Inquiry.Status.CLOSED
+    assert inquiry.negative_resolved_at is not None
+    assert any(
+        "Failed to send customer negative-resolution email" in record.getMessage()
+        for record in caplog.records
+    )
+
+
 @pytest.mark.django_db
 def test_internal_staff_group_has_inquiry_offer_permissions() -> None:
     internal_staff = Group.objects.get(name=ROLE_INTERNAL_STAFF)
@@ -554,6 +652,107 @@ def test_admin_send_action_moves_draft_offer_to_sent(django_user_model) -> None:
     offer.refresh_from_db()
     assert offer.status == InquiryOffer.Status.SENT
     assert offer.sent_at is not None
+
+
+@pytest.mark.django_db
+def test_admin_send_action_uses_business_friendly_label() -> None:
+    assert InquiryOfferAdmin.mark_selected_as_sent.short_description == (
+        "Send selected offers to customers"
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_admin_manual_resend_action_sends_only_for_sent_or_accepted_without_state_change(
+    django_user_model,
+    offer_email_settings,
+) -> None:
+    sent_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_resend_sent",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    accepted_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_resend_accepted",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    draft_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_resend_draft",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    rejected_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_resend_rejected",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    sent_offer = InquiryOffer.objects.create(
+        inquiry=sent_inquiry,
+        confirmed_total=Decimal("500.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    accepted_offer = InquiryOffer.objects.create(
+        inquiry=accepted_inquiry,
+        confirmed_total=Decimal("610.00"),
+        currency="EUR",
+        lead_time_text="3 days",
+    )
+    draft_offer = InquiryOffer.objects.create(
+        inquiry=draft_inquiry,
+        confirmed_total=Decimal("450.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    rejected_offer = InquiryOffer.objects.create(
+        inquiry=rejected_inquiry,
+        confirmed_total=Decimal("390.00"),
+        currency="EUR",
+        lead_time_text="8 days",
+    )
+    sent_offer.mark_sent(save=True)
+    accepted_offer.mark_sent(save=True)
+    accepted_offer.mark_accepted(save=True)
+    rejected_offer.mark_sent(save=True)
+    rejected_offer.mark_rejected(save=True)
+
+    admin_user = django_user_model.objects.create_superuser(
+        username="offer_resend_admin",
+        email="offer_resend_admin@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+
+    captured_messages: list[str] = []
+    offer_admin.message_user = (
+        lambda _request, message, level=None: captured_messages.append(str(message))
+    )
+
+    mail.outbox.clear()
+    offer_admin.resend_offer_email_to_customer(
+        request,
+        InquiryOffer.objects.filter(
+            pk__in=[sent_offer.pk, accepted_offer.pk, draft_offer.pk, rejected_offer.pk]
+        ),
+    )
+
+    sent_offer.refresh_from_db()
+    accepted_offer.refresh_from_db()
+    draft_offer.refresh_from_db()
+    rejected_offer.refresh_from_db()
+
+    assert sent_offer.status == InquiryOffer.Status.SENT
+    assert accepted_offer.status == InquiryOffer.Status.ACCEPTED
+    assert draft_offer.status == InquiryOffer.Status.DRAFT
+    assert rejected_offer.status == InquiryOffer.Status.REJECTED
+    assert len(mail.outbox) == 2
+    assert any("Re-sent 2 offer email(s)." in message for message in captured_messages)
+    assert any(
+        "manual re-send is only available for sent or accepted offers" in message
+        for message in captured_messages
+    )
 
 
 @pytest.mark.django_db
@@ -900,12 +1099,19 @@ def test_public_offer_sent_token_shows_offer_data_and_actions(client, django_use
     assert inquiry.reference_code in content
     assert "410" in content
     assert "EUR" in content
-    assert "Aceptar oferta" in content
+    assert "Responder a la oferta" in content
+    assert "Aceptar oferta y proceder al pago" in content
     assert "Rechazar oferta" in content
+    assert "bg-slate-900" in content
+    assert "border-slate-400" in content
+    assert (
+        "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago."
+        in content
+    )
 
 
 @pytest.mark.django_db
-def test_customer_accept_flow_updates_offer_and_prevents_double_response(
+def test_customer_accept_flow_redirects_to_payment_placeholder_and_prevents_duplicates(
     client,
     django_user_model,
 ) -> None:
@@ -925,14 +1131,20 @@ def test_customer_accept_flow_updates_offer_and_prevents_double_response(
         "inquiries:public_inquiry_offer_detail",
         kwargs={"access_token": offer.access_token},
     )
+    payment_url = reverse(
+        "inquiries:public_inquiry_offer_payment_placeholder",
+        kwargs={"access_token": offer.access_token},
+    )
 
     first_response = client.post(url, data={"decision": "accept"})
     assert first_response.status_code == 302
+    assert first_response.url == payment_url
     offer.refresh_from_db()
     inquiry.refresh_from_db()
     assert offer.status == InquiryOffer.Status.ACCEPTED
     assert offer.accepted_at is not None
     assert inquiry.status == Inquiry.Status.ACCEPTED
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
 
     second_response = client.post(url, data={"decision": "reject"})
     assert second_response.status_code == 302
@@ -941,6 +1153,7 @@ def test_customer_accept_flow_updates_offer_and_prevents_double_response(
     assert offer.status == InquiryOffer.Status.ACCEPTED
     assert offer.rejected_at is None
     assert inquiry.status == Inquiry.Status.ACCEPTED
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
 
 
 @pytest.mark.django_db
@@ -973,12 +1186,178 @@ def test_customer_reject_flow_updates_offer(client, django_user_model) -> None:
     assert inquiry.status == Inquiry.Status.REJECTED
 
 
+@pytest.mark.django_db
+def test_public_offer_state_specific_copy_for_accepted_and_rejected(
+    client,
+    django_user_model,
+) -> None:
+    accepted_offer = make_accepted_offer(
+        django_user_model,
+        username="offer_public_copy_accepted",
+        confirmed_total=Decimal("880.00"),
+    )
+    rejected_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_copy_rejected",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    rejected_offer = InquiryOffer.objects.create(
+        inquiry=rejected_inquiry,
+        confirmed_total=Decimal("640.00"),
+        currency="EUR",
+        lead_time_text="7 days",
+    )
+    rejected_offer.mark_sent(save=True)
+    rejected_offer.mark_rejected(save=True)
+
+    accepted_url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": accepted_offer.access_token},
+    )
+    rejected_url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": rejected_offer.access_token},
+    )
+
+    accepted_response = client.get(accepted_url)
+    rejected_response = client.get(rejected_url)
+    accepted_content = accepted_response.content.decode()
+    rejected_content = rejected_response.content.decode()
+
+    assert accepted_response.status_code == 200
+    assert rejected_response.status_code == 200
+    assert "Oferta aceptada" in accepted_content
+    assert "Continuar al paso de pago" in accepted_content
+    assert "Oferta rechazada" in rejected_content
+    assert "Si necesitas revisar alternativas" in rejected_content
+    assert "Responder a la oferta" not in accepted_content
+    assert "Responder a la oferta" not in rejected_content
+
+
+@pytest.mark.django_db
+def test_public_offer_state_specific_copy_supports_english(client, django_user_model) -> None:
+    sent_inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_copy_en",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    sent_offer = InquiryOffer.objects.create(
+        inquiry=sent_inquiry,
+        confirmed_total=Decimal("715.00"),
+        currency="EUR",
+        lead_time_text="3 business days",
+    )
+    sent_offer.mark_sent(save=True)
+
+    try:
+        with translation.override("en"):
+            sent_url = reverse(
+                "inquiries:public_inquiry_offer_detail",
+                kwargs={"access_token": sent_offer.access_token},
+            )
+            sent_response = client.get(sent_url)
+        sent_content = sent_response.content.decode()
+
+        assert sent_response.status_code == 200
+        assert "Confirmed offer" in sent_content
+        assert "Respond to this offer" in sent_content
+        assert "Accept offer and proceed to payment" in sent_content
+        assert "Reject offer" in sent_content
+        assert (
+            "The offer remains subject to effective availability at the time of payment processing."
+            in sent_content
+        )
+    finally:
+        translation.activate("es")
+
+
+@pytest.mark.django_db
+def test_public_payment_placeholder_renders_for_accepted_offer(client, django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="offer_public_payment_placeholder",
+        confirmed_total=Decimal("555.20"),
+    )
+    InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+    with translation.override("es"):
+        payment_url = reverse(
+            "inquiries:public_inquiry_offer_payment_placeholder",
+            kwargs={"access_token": offer.access_token},
+        )
+
+    response = client.get(payment_url)
+    content = response.content.decode()
+    payment = InquiryOfferPayment.objects.get(offer=offer)
+
+    assert response.status_code == 200
+    assert "Paso de pago" in content
+    assert payment.reference_code in content
+    assert "555" in content
+    assert payment.currency in content
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
+
+    second_response = client.get(payment_url)
+    assert second_response.status_code == 200
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "starting_status",
+    (
+        InquiryOffer.Status.SENT,
+        InquiryOffer.Status.REJECTED,
+    ),
+)
+def test_public_payment_placeholder_redirects_non_accepted_offers_to_detail(
+    client,
+    django_user_model,
+    starting_status: str,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username=f"offer_public_payment_redirect_{starting_status}",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("601.00"),
+        currency="EUR",
+        lead_time_text="6 days",
+    )
+    if starting_status == InquiryOffer.Status.SENT:
+        offer.mark_sent(save=True)
+    elif starting_status == InquiryOffer.Status.REJECTED:
+        offer.mark_sent(save=True)
+        offer.mark_rejected(save=True)
+
+    payment_url = reverse(
+        "inquiries:public_inquiry_offer_payment_placeholder",
+        kwargs={"access_token": offer.access_token},
+    )
+    offer_url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+    response = client.get(payment_url)
+
+    assert response.status_code == 302
+    assert response.url == offer_url
+    assert not InquiryOfferPayment.objects.filter(offer=offer).exists()
+
+
 @pytest.fixture
 def offer_email_settings(settings):
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
     settings.DEFAULT_FROM_EMAIL = "Recambios <noreply@example.com>"
     settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL = "atencion@example.com"
     settings.PUBLIC_BASE_URL = "https://recambios.example"
+
+
+@pytest.fixture
+def internal_offer_response_email_settings(offer_email_settings, settings):
+    settings.SERVER_EMAIL = "notifications@example.com"
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1046,6 +1425,10 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
     assert "EUR" in email.body
     assert "5-7 dias laborables" in email.body
     assert "Disponibilidad confirmada para el lote solicitado." in email.body
+    assert (
+        "La disponibilidad final se confirma en el momento de tramitación del pago."
+        in email.body
+    )
     assert expected_url in email.body
 
 
@@ -1243,5 +1626,126 @@ def test_offer_sent_email_failure_is_logged_and_offer_state_is_kept_as_sent(
     assert offer.status == InquiryOffer.Status.SENT
     assert any(
         "Failed to send customer offer email" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_internal_offer_response_email_is_sent_once_on_true_accept_entry(
+    django_user_model,
+    internal_offer_response_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_internal_accept_once",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("470.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    offer.mark_sent(save=True)
+
+    mail.outbox.clear()
+    offer.mark_accepted(save=True)
+    assert len(mail.outbox) == 1
+    internal_email = mail.outbox[0]
+    assert internal_email.to == ["ops@example.com"]
+    assert "Oferta aceptada por cliente:" in internal_email.subject
+
+    offer.internal_notes = "Seguimiento interno"
+    offer.save(update_fields=["internal_notes"])
+    assert len(mail.outbox) == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_internal_offer_response_email_is_sent_once_on_true_reject_entry(
+    django_user_model,
+    internal_offer_response_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_internal_reject_once",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("520.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    offer.mark_sent(save=True)
+
+    mail.outbox.clear()
+    offer.mark_rejected(save=True)
+    assert len(mail.outbox) == 1
+    internal_email = mail.outbox[0]
+    assert internal_email.to == ["ops@example.com"]
+    assert "Oferta rechazada por cliente:" in internal_email.subject
+
+    offer.internal_notes = "Sin cambios comerciales"
+    offer.save(update_fields=["internal_notes"])
+    assert len(mail.outbox) == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_internal_offer_response_email_renders_english_content(
+    django_user_model,
+    internal_offer_response_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_internal_email_en",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    inquiry.language = Inquiry.Language.ENGLISH
+    inquiry.save(update_fields=["language"])
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("399.99"),
+        currency="EUR",
+        lead_time_text="3 business days",
+    )
+    offer.mark_sent(save=True)
+
+    mail.outbox.clear()
+    offer.mark_accepted(save=True)
+
+    assert len(mail.outbox) == 1
+    internal_email = mail.outbox[0]
+    assert "Offer accepted by customer:" in internal_email.subject
+    assert "The customer has accepted an offer." in internal_email.body
+    assert "Expected next step: payment management with the customer." in internal_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_internal_offer_response_email_failure_is_logged_and_state_is_kept(
+    django_user_model,
+    internal_offer_response_email_settings,
+    caplog,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_internal_email_failure",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("580.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    offer.mark_sent(save=True)
+
+    with patch("apps.inquiries.emails.EmailMessage.send", side_effect=RuntimeError("smtp down")):
+        with caplog.at_level("ERROR", logger="apps.inquiries.signals"):
+            offer.mark_accepted(save=True)
+
+    offer.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert any(
+        "Failed to send internal offer-response notification email" in record.getMessage()
         for record in caplog.records
     )

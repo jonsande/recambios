@@ -988,3 +988,237 @@ msgstr "Reference"
 #: src/templates/inquiries/public_success.html:19
 msgid "Nuestro equipo revisará disponibilidad, precio final y plazo y te responderá por los canales de contacto indicados."
 msgstr "Our team will review availability, final price, and lead time and reply through your provided contact channels."
+
+#: src/apps/inquiries/urls.py:21
+msgid "oferta/<uuid:access_token>/"
+msgstr "offer/<uuid:access_token>/"
+
+#: src/apps/inquiries/urls.py:26
+msgid "oferta/<uuid:access_token>/pago/"
+msgstr "offer/<uuid:access_token>/payment/"
+
+#: src/apps/inquiries/views.py:178
+msgid "Oferta confirmada"
+msgstr "Confirmed offer"
+
+#: src/apps/inquiries/views.py:179
+msgid "Revisa el importe confirmado y el plazo estimado antes de responder."
+msgstr "Review the confirmed amount and estimated lead time before responding."
+
+#: src/apps/inquiries/views.py:181
+msgid "Oferta aceptada"
+msgstr "Offer accepted"
+
+#: src/apps/inquiries/views.py:182
+msgid "Has aceptado esta oferta. El siguiente paso es la gestión del pago."
+msgstr "You have accepted this offer. The next step is payment processing."
+
+#: src/apps/inquiries/views.py:184
+msgid "Oferta rechazada"
+msgstr "Offer rejected"
+
+#: src/apps/inquiries/views.py:185
+msgid "Has rechazado esta oferta. Si necesitas revisar alternativas, puedes contactar con nuestro equipo."
+msgstr "You have rejected this offer. If you need to review alternatives, you can contact our team."
+
+#: src/apps/inquiries/views.py:204
+msgid "La respuesta seleccionada no es válida."
+msgstr "The selected response is not valid."
+
+#: src/apps/inquiries/views.py:212
+msgid "Esta oferta ya tiene una respuesta registrada. Puedes revisar su estado actual."
+msgstr "This offer already has a registered response. You can review its current status."
+
+#: src/apps/inquiries/views.py:221
+msgid "Oferta aceptada. A continuación verás el siguiente paso para el pago."
+msgstr "Offer accepted. You will now see the next payment step."
+
+#: src/apps/inquiries/views.py:229
+msgid "Has rechazado la oferta."
+msgstr "You have rejected the offer."
+
+#: src/apps/inquiries/views.py:259
+msgid "Esta oferta aún está pendiente de tu respuesta. Acepta la oferta para avanzar al pago."
+msgstr "This offer is still awaiting your response. Accept the offer to proceed to payment."
+
+#: src/apps/inquiries/views.py:267
+msgid "Esta oferta fue rechazada. Si necesitas revisar alternativas, contacta con nuestro equipo."
+msgstr "This offer was rejected. If you need to review alternatives, contact our team."
+
+#: src/apps/inquiries/views.py:273
+msgid "Esta oferta todavía no está disponible para continuar al paso de pago."
+msgstr "This offer is not yet available to continue to the payment step."
+
+#: src/apps/inquiries/views.py:287
+msgid "Paso de pago"
+msgstr "Payment step"
+
+#: src/templates/inquiries/public_offer_detail.html:16
+msgid "Tu aceptación está registrada y el siguiente paso es completar el pago."
+msgstr "Your acceptance is recorded and the next step is to complete payment."
+
+#: src/templates/inquiries/public_offer_detail.html:22
+msgid "Continuar al paso de pago"
+msgstr "Continue to payment step"
+
+#: src/templates/inquiries/public_offer_detail.html:28
+msgid "Esta oferta figura como rechazada. Si necesitas revisar alternativas, puedes contactar con nuestro equipo."
+msgstr "This offer is marked as rejected. If you need to review alternatives, you can contact our team."
+
+#: src/templates/inquiries/public_offer_detail.html:61
+msgid "Mensaje de nuestro equipo"
+msgstr "Message from our team"
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:20
+msgid "Mensaje de nuestro equipo:"
+msgstr "Message from our team:"
+
+#: src/templates/inquiries/public_offer_detail.html:67
+msgid "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar."
+msgstr "The offer remains subject to effective availability at the time of payment processing. If there is any relevant change, we will contact you before continuing."
+
+#: src/templates/inquiries/public_offer_detail.html:72
+msgid "Responder a la oferta"
+msgstr "Respond to this offer"
+
+#: src/templates/inquiries/public_offer_detail.html:74
+msgid "Revisa los datos y selecciona la opción que corresponda. Si aceptas, pasarás al siguiente paso de pago."
+msgstr "Review the details and select the corresponding option. If you accept, you will proceed to the payment step."
+
+#: src/templates/inquiries/public_offer_detail.html:84
+msgid "Aceptar oferta y proceder al pago"
+msgstr "Accept offer and proceed to payment"
+
+#: src/templates/inquiries/public_offer_detail.html:92
+msgid "Rechazar oferta"
+msgstr "Reject offer"
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:10
+msgid "Tu oferta está aceptada y este será el siguiente paso para completar el pago."
+msgstr "Your offer is accepted and this will be the next step to complete payment."
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:15
+msgid "Hemos registrado tu aceptación correctamente."
+msgstr "We have recorded your acceptance successfully."
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:25
+msgid "Referencia de pago"
+msgstr "Payment reference"
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:29
+msgid "Importe pendiente"
+msgstr "Amount pending"
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:33
+msgid "Estado"
+msgstr "Status"
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:40
+msgid "La pasarela de pago online todavía no está disponible en esta fase."
+msgstr "The online payment gateway is not yet available in this phase."
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:42
+msgid "Nuestro equipo activará este paso en una siguiente iteración y te informará por los canales habituales."
+msgstr "Our team will enable this step in a following iteration and will inform you through the usual channels."
+
+#: src/templates/inquiries/public_offer_payment_placeholder.html:51
+msgid "Volver al detalle de la oferta"
+msgstr "Back to the offer detail"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:9
+msgid "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar."
+msgstr "Final availability is confirmed at the time of payment processing. If there is any relevant change, we will contact you before continuing."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_subject.txt:1
+#, python-format
+msgid "Actualización de tu solicitud: %(reference)s"
+msgstr "Inquiry update: %(reference)s"
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:2
+#, python-format
+msgid "Hemos finalizado la revisión de tu solicitud %(reference)s."
+msgstr "We have completed the review of your inquiry %(reference)s."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:4
+msgid "En esta ocasión no podemos confirmar una oferta para los artículos solicitados."
+msgstr "At this time, we cannot confirm an offer for the requested items."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:7
+msgid "Motivo principal:"
+msgstr "Main reason:"
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:9
+msgid "Sin disponibilidad confirmada en este momento."
+msgstr "No confirmed availability at this time."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:11
+msgid "No hemos podido obtener una confirmación firme del proveedor."
+msgstr "We could not obtain a firm confirmation from the supplier."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:13
+msgid "No es posible garantizar una logística adecuada para esta solicitud."
+msgstr "It is not possible to guarantee suitable logistics for this inquiry."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:15
+msgid "La solicitud no es ofertable en las condiciones actuales."
+msgstr "This inquiry is not offerable under current conditions."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:24
+msgid "Si quieres que revisemos alternativas, responde a este correo indicando la referencia de tu solicitud."
+msgstr "If you want us to review alternatives, reply to this email and include your inquiry reference."
+
+#: src/templates/inquiries/emails/customer_negative_resolution_body.txt:27
+#, python-format
+msgid "También puedes escribirnos a %(reply_to)s para ampliar detalles."
+msgstr "You can also write to %(reply_to)s to provide more details."
+
+#: src/templates/inquiries/emails/internal_offer_accepted_subject.txt:1
+#, python-format
+msgid "Oferta aceptada por cliente: %(reference)s"
+msgstr "Offer accepted by customer: %(reference)s"
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:2
+msgid "El cliente ha aceptado una oferta."
+msgstr "The customer has accepted an offer."
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:6
+#, python-format
+msgid "Importe confirmado: %(total)s %(currency)s"
+msgstr "Confirmed amount: %(total)s %(currency)s"
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:7
+#, python-format
+msgid "Fecha de aceptación: %(accepted_at)s"
+msgstr "Acceptance date: %(accepted_at)s"
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:8
+#, python-format
+msgid "Email del cliente: %(email)s"
+msgstr "Customer email: %(email)s"
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:11
+#: src/templates/inquiries/emails/internal_offer_rejected_body.txt:11
+msgid "Enlace público de la oferta:"
+msgstr "Public offer link:"
+
+#: src/templates/inquiries/emails/internal_offer_accepted_body.txt:14
+msgid "Siguiente paso esperado: gestión de pago con el cliente."
+msgstr "Expected next step: payment management with the customer."
+
+#: src/templates/inquiries/emails/internal_offer_rejected_subject.txt:1
+#, python-format
+msgid "Oferta rechazada por cliente: %(reference)s"
+msgstr "Offer rejected by customer: %(reference)s"
+
+#: src/templates/inquiries/emails/internal_offer_rejected_body.txt:2
+msgid "El cliente ha rechazado una oferta."
+msgstr "The customer has rejected an offer."
+
+#: src/templates/inquiries/emails/internal_offer_rejected_body.txt:7
+#, python-format
+msgid "Fecha de rechazo: %(rejected_at)s"
+msgstr "Rejection date: %(rejected_at)s"
+
+#: src/templates/inquiries/emails/internal_offer_rejected_body.txt:14
+msgid "Recomendación: revisar alternativas comerciales o contactar al cliente para seguimiento."
+msgstr "Recommendation: review commercial alternatives or contact the customer for follow-up."

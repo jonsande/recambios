@@ -1,10 +1,15 @@
+import logging
+
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Count
 
 from apps.users.roles import is_restricted_supplier_user
 
+from .emails import send_customer_offer_sent_email
 from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
+
+logger = logging.getLogger(__name__)
 
 
 class InternalInquiryAccessMixin:
@@ -100,7 +105,11 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "updated_at",
     )
     date_hierarchy = "created_at"
-    actions = ("mark_selected_as_sent", "initiate_payment_for_selected_offers")
+    actions = (
+        "mark_selected_as_sent",
+        "resend_offer_email_to_customer",
+        "initiate_payment_for_selected_offers",
+    )
     fieldsets = (
         (
             "Offer",
@@ -163,7 +172,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             return "; ".join(parts)
         return "; ".join(error.messages)
 
-    @admin.action(description="Mark selected offers as Sent")
+    @admin.action(description="Send selected offers to customers")
     def mark_selected_as_sent(self, request, queryset):
         sent_count = 0
         skipped_count = 0
@@ -193,6 +202,76 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             self.message_user(request, f"Sent {sent_count} offer(s).")
         if skipped_count and not sent_count:
             self.message_user(request, "No offers were sent.", level=messages.WARNING)
+
+    @admin.action(description="Re-send offer email to customers")
+    def resend_offer_email_to_customer(self, request, queryset):
+        resent_count = 0
+        skipped_count = 0
+        failed_count = 0
+
+        for offer in queryset.select_related("inquiry", "inquiry__user"):
+            if offer.status not in {
+                InquiryOffer.Status.SENT,
+                InquiryOffer.Status.ACCEPTED,
+            }:
+                skipped_count += 1
+                self.message_user(
+                    request,
+                    (
+                        f"Offer {offer.reference_code} was skipped because "
+                        "manual re-send is only available for sent or accepted offers."
+                    ),
+                    level=messages.WARNING,
+                )
+                continue
+
+            try:
+                email_sent = send_customer_offer_sent_email(offer)
+            except Exception:
+                failed_count += 1
+                logger.exception(
+                    "Failed to manually re-send customer offer email (offer=%s inquiry=%s).",
+                    offer.reference_code,
+                    offer.inquiry.reference_code,
+                )
+                self.message_user(
+                    request,
+                    (
+                        f"Offer {offer.reference_code} email could not be re-sent "
+                        "due to an email delivery error."
+                    ),
+                    level=messages.ERROR,
+                )
+                continue
+
+            if not email_sent:
+                skipped_count += 1
+                self.message_user(
+                    request,
+                    (
+                        f"Offer {offer.reference_code} email could not be re-sent "
+                        "because the customer email is missing."
+                    ),
+                    level=messages.WARNING,
+                )
+                continue
+
+            resent_count += 1
+
+        if resent_count:
+            self.message_user(request, f"Re-sent {resent_count} offer email(s).")
+        if failed_count and not resent_count:
+            self.message_user(
+                request,
+                "No offer emails were re-sent due to delivery errors.",
+                level=messages.ERROR,
+            )
+        elif skipped_count and not resent_count and not failed_count:
+            self.message_user(
+                request,
+                "No offer emails were re-sent.",
+                level=messages.WARNING,
+            )
 
     @admin.action(description="Initiate payment for selected offers")
     def initiate_payment_for_selected_offers(self, request, queryset):

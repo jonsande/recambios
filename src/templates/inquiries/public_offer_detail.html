@@ -7,17 +7,25 @@
   <section>
     <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{{ page_title }}</h1>
     <p class="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
-      {% trans "Revisa el importe confirmado y el plazo estimado antes de responder." %}
+      {{ page_intro }}
     </p>
   </section>
 
   {% if is_accepted %}
     <section class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" aria-live="polite">
-      {% trans "Esta oferta ya fue aceptada. No se admiten respuestas adicionales." %}
+      <p>{% trans "Tu aceptación está registrada y el siguiente paso es completar el pago." %}</p>
+      <div class="mt-3">
+        <a
+          href="{% url 'inquiries:public_inquiry_offer_payment_placeholder' access_token=offer.access_token %}"
+          class="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+        >
+          {% trans "Continuar al paso de pago" %}
+        </a>
+      </div>
     </section>
   {% elif is_rejected %}
-    <section class="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900" aria-live="polite">
-      {% trans "Esta oferta ya fue rechazada. No se admiten respuestas adicionales." %}
+    <section class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" aria-live="polite">
+      {% trans "Esta oferta figura como rechazada. Si necesitas revisar alternativas, puedes contactar con nuestro equipo." %}
     </section>
   {% endif %}
 
@@ -50,16 +58,20 @@
 
   {% if offer.customer_message %}
     <section class="mt-4 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5" aria-label="{% trans 'Mensaje comercial' %}">
-      <h2 class="text-base font-semibold text-slate-950">{% trans "Mensaje para el cliente" %}</h2>
+      <h2 class="text-base font-semibold text-slate-950">{% trans "Mensaje de nuestro equipo" %}</h2>
       <p class="mt-2 whitespace-pre-line text-sm text-slate-700 sm:text-base">{{ offer.customer_message }}</p>
     </section>
   {% endif %}
 
+  <section class="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 shadow-sm sm:p-5" aria-label="{% trans 'Aviso de disponibilidad' %}">
+    {% trans "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar." %}
+  </section>
+
   {% if can_respond %}
     <section class="mt-4 rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5" aria-label="{% trans 'Respuesta de oferta' %}">
-      <h2 class="text-base font-semibold text-slate-950">{% trans "Respuesta de la oferta" %}</h2>
+      <h2 class="text-base font-semibold text-slate-950">{% trans "Responder a la oferta" %}</h2>
       <p class="mt-2 text-sm text-slate-700">
-        {% trans "Selecciona una opción para confirmar tu decisión. Después de responder, la oferta no podrá volver a enviarse." %}
+        {% trans "Revisa los datos y selecciona la opción que corresponda. Si aceptas, pasarás al siguiente paso de pago." %}
       </p>
       <form method="post" class="mt-4 flex flex-wrap gap-3">
         {% csrf_token %}
@@ -67,15 +79,15 @@
           type="submit"
           name="decision"
           value="accept"
-          class="inline-flex rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+          class="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
         >
-          {% trans "Aceptar oferta" %}
+          {% trans "Aceptar oferta y proceder al pago" %}
         </button>
         <button
           type="submit"
           name="decision"
           value="reject"
-          class="inline-flex rounded-md border border-red-500 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          class="inline-flex rounded-md border border-slate-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
         >
           {% trans "Rechazar oferta" %}
         </button>

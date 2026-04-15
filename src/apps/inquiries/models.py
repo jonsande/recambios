@@ -5,7 +5,7 @@ import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -342,6 +342,17 @@ class InquiryOffer(models.Model):
 
         return errors
 
+    def _build_send_validation_errors(self) -> dict[str, str]:
+        errors = self._build_send_readiness_errors()
+        inquiry_ready = self.inquiry.status == Inquiry.Status.RESPONDED
+        if not inquiry_ready:
+            inquiry_ready = self.inquiry.can_transition_to(Inquiry.Status.RESPONDED)
+        if not inquiry_ready:
+            errors["inquiry"] = (
+                "Inquiry must be in review or supplier pending before sending the offer."
+            )
+        return errors
+
     def ensure_ready_to_send(self) -> None:
         errors = self._build_send_readiness_errors()
         if errors:
@@ -378,7 +389,9 @@ class InquiryOffer(models.Model):
     def mark_sent(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.SENT):
             raise ValueError("Only draft offers can be sent to the customer.")
-        self.ensure_ready_to_send()
+        errors = self._build_send_validation_errors()
+        if errors:
+            raise ValidationError(errors)
 
         self.status = self.Status.SENT
         self.sent_at = timezone.now()
@@ -612,6 +625,51 @@ class InquiryOfferPayment(models.Model):
                 payment.save()
         else:
             payment.full_clean()
+        return payment
+
+    @classmethod
+    def ensure_pending_from_offer(
+        cls,
+        offer: InquiryOffer,
+        *,
+        provider: str = "manual",
+        provider_reference: str = "",
+        internal_notes: str = "",
+        save: bool = True,
+    ) -> InquiryOfferPayment:
+        if offer.status != InquiryOffer.Status.ACCEPTED:
+            raise ValueError("Payment can only be initiated for accepted offers.")
+
+        if offer.pk is None:
+            raise ValueError("Accepted offer must be persisted before preparing payment.")
+
+        existing_payment = cls.objects.filter(offer_id=offer.pk).first()
+        if existing_payment is not None:
+            return existing_payment
+
+        payment = cls(
+            offer=offer,
+            payable_amount=offer.confirmed_total,
+            currency=offer.currency,
+            status=cls.Status.PENDING,
+            provider=provider,
+            provider_reference=provider_reference,
+            internal_notes=internal_notes,
+            initiated_at=timezone.now(),
+        )
+        if not save:
+            payment.full_clean()
+            return payment
+
+        with transaction.atomic():
+            existing_payment = cls.objects.select_for_update().filter(offer_id=offer.pk).first()
+            if existing_payment is not None:
+                return existing_payment
+
+            try:
+                payment.save()
+            except IntegrityError:
+                return cls.objects.get(offer_id=offer.pk)
         return payment
 
     def mark_paid(self, *, save: bool = True) -> None:

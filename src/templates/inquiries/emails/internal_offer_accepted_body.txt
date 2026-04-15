@@ -1,0 +1,14 @@
+{% load i18n %}
+{% trans "El cliente ha aceptado una oferta." %}
+
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe confirmado: {{ total }} {{ currency }}{% endblocktrans %}
+{% blocktrans with accepted_at=offer.accepted_at %}Fecha de aceptación: {{ accepted_at }}{% endblocktrans %}
+{% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Enlace público de la oferta:" %}
+{{ offer_public_url }}
+
+{% trans "Siguiente paso esperado: gestión de pago con el cliente." %}
