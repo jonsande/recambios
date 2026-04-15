@@ -313,6 +313,12 @@ class InquiryOffer(models.Model):
         # Semantic alias kept intentionally for the future payment phase bridge.
         return self.status == self.Status.ACCEPTED
 
+    @property
+    def has_payment_record(self) -> bool:
+        if not self.pk:
+            return False
+        return InquiryOfferPayment.objects.filter(offer_id=self.pk).exists()
+
     def _build_send_readiness_errors(self) -> dict[str, str]:
         errors: dict[str, str] = {}
         confirmed_total = self.confirmed_total
@@ -428,6 +434,15 @@ class InquiryOffer(models.Model):
         elif len(self.currency) != 3:
             errors["currency"] = "Currency must be a 3-letter code."
 
+        if (
+            self.pk
+            and self.status != self.Status.ACCEPTED
+            and InquiryOfferPayment.objects.filter(offer_id=self.pk).exists()
+        ):
+            errors["status"] = (
+                "Offers with an initiated payment record must stay in accepted status."
+            )
+
         if self.status == self.Status.DRAFT:
             if self.sent_at is not None:
                 errors["sent_at"] = "Draft offers cannot have sent_at."
@@ -465,6 +480,242 @@ class InquiryOffer(models.Model):
             self.currency = self.currency.strip().upper()
 
         for field_name in ("lead_time_text", "internal_notes", "customer_message"):
+            value = getattr(self, field_name)
+            if isinstance(value, str):
+                setattr(self, field_name, value.strip())
+
+        if not self.reference_code:
+            self.reference_code = self.generate_reference_code()
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class InquiryOfferPayment(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PAID = "paid", "Paid"
+        FAILED = "failed", "Failed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    REFERENCE_PREFIX = "PAY"
+    REFERENCE_RANDOM_LENGTH = 6
+    REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
+    STATUS_TRANSITIONS = {
+        Status.PENDING: (Status.PAID, Status.FAILED, Status.CANCELLED),
+        Status.PAID: (),
+        Status.FAILED: (),
+        Status.CANCELLED: (),
+    }
+
+    offer = models.OneToOneField(
+        "inquiries.InquiryOffer",
+        on_delete=models.CASCADE,
+        related_name="payment",
+    )
+    reference_code = models.CharField(
+        max_length=32,
+        unique=True,
+        db_index=True,
+        editable=False,
+    )
+    payable_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default="EUR")
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+    provider = models.CharField(max_length=24, default="manual")
+    provider_reference = models.CharField(max_length=128, blank=True)
+    internal_notes = models.TextField(blank=True)
+    initiated_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    paid_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    failed_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(payable_amount__gt=0),
+                name="inq_offer_payment_amount_gt_0_ck",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=["status", "initiated_at"],
+                name="inq_pay_status_init_idx",
+            ),
+            models.Index(
+                fields=["status", "created_at"],
+                name="inq_pay_status_created_idx",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.reference_code
+
+    @classmethod
+    def allowed_next_statuses(cls, current_status: str) -> tuple[str, ...]:
+        return cls.STATUS_TRANSITIONS.get(current_status, ())
+
+    def can_transition_to(self, next_status: str) -> bool:
+        return next_status in self.allowed_next_statuses(self.status)
+
+    @classmethod
+    def generate_reference_code(cls) -> str:
+        date_part = timezone.localdate().strftime("%Y%m%d")
+        for _ in range(50):
+            suffix = get_random_string(
+                cls.REFERENCE_RANDOM_LENGTH,
+                allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
+            )
+            reference_code = f"{cls.REFERENCE_PREFIX}-{date_part}-{suffix}"
+            if not cls.objects.filter(reference_code=reference_code).exists():
+                return reference_code
+        raise RuntimeError("Unable to generate a unique inquiry offer payment reference code.")
+
+    @classmethod
+    def initiate_from_offer(
+        cls,
+        offer: InquiryOffer,
+        *,
+        provider: str = "manual",
+        provider_reference: str = "",
+        internal_notes: str = "",
+        save: bool = True,
+    ) -> InquiryOfferPayment:
+        if offer.status != InquiryOffer.Status.ACCEPTED:
+            raise ValueError("Payment can only be initiated for accepted offers.")
+
+        if cls.objects.filter(offer_id=offer.pk).exists():
+            raise ValidationError(
+                {"offer": "A payment record already exists for this offer."}
+            )
+
+        payment = cls(
+            offer=offer,
+            payable_amount=offer.confirmed_total,
+            currency=offer.currency,
+            status=cls.Status.PENDING,
+            provider=provider,
+            provider_reference=provider_reference,
+            internal_notes=internal_notes,
+            initiated_at=timezone.now(),
+        )
+        if save:
+            with transaction.atomic():
+                payment.save()
+        else:
+            payment.full_clean()
+        return payment
+
+    def mark_paid(self, *, save: bool = True) -> None:
+        if not self.can_transition_to(self.Status.PAID):
+            raise ValueError("Only pending payments can transition to paid.")
+
+        now = timezone.now()
+        self.status = self.Status.PAID
+        self.initiated_at = self.initiated_at or now
+        self.paid_at = now
+        self.failed_at = None
+        self.cancelled_at = None
+
+        if save:
+            with transaction.atomic():
+                self.save()
+
+    def mark_failed(self, *, save: bool = True) -> None:
+        if not self.can_transition_to(self.Status.FAILED):
+            raise ValueError("Only pending payments can transition to failed.")
+
+        now = timezone.now()
+        self.status = self.Status.FAILED
+        self.initiated_at = self.initiated_at or now
+        self.failed_at = now
+        self.paid_at = None
+        self.cancelled_at = None
+
+        if save:
+            with transaction.atomic():
+                self.save()
+
+    def mark_cancelled(self, *, save: bool = True) -> None:
+        if not self.can_transition_to(self.Status.CANCELLED):
+            raise ValueError("Only pending payments can transition to cancelled.")
+
+        now = timezone.now()
+        self.status = self.Status.CANCELLED
+        self.initiated_at = self.initiated_at or now
+        self.cancelled_at = now
+        self.paid_at = None
+        self.failed_at = None
+
+        if save:
+            with transaction.atomic():
+                self.save()
+
+    def clean(self) -> None:
+        super().clean()
+        errors = {}
+
+        if self.offer_id and self.offer.status != InquiryOffer.Status.ACCEPTED:
+            errors["offer"] = "Payment records can only be created from accepted offers."
+
+        if not self.currency:
+            errors["currency"] = "Currency is required."
+        elif len(self.currency) != 3:
+            errors["currency"] = "Currency must be a 3-letter code."
+
+        if self.status == self.Status.PENDING:
+            if self.initiated_at is None:
+                errors["initiated_at"] = "Pending payments must define initiated_at."
+            if self.paid_at is not None:
+                errors["paid_at"] = "Pending payments cannot define paid_at."
+            if self.failed_at is not None:
+                errors["failed_at"] = "Pending payments cannot define failed_at."
+            if self.cancelled_at is not None:
+                errors["cancelled_at"] = "Pending payments cannot define cancelled_at."
+        elif self.status == self.Status.PAID:
+            if self.initiated_at is None:
+                errors["initiated_at"] = "Paid payments must define initiated_at."
+            if self.paid_at is None:
+                errors["paid_at"] = "Paid payments must define paid_at."
+            if self.failed_at is not None:
+                errors["failed_at"] = "Paid payments cannot define failed_at."
+            if self.cancelled_at is not None:
+                errors["cancelled_at"] = "Paid payments cannot define cancelled_at."
+        elif self.status == self.Status.FAILED:
+            if self.initiated_at is None:
+                errors["initiated_at"] = "Failed payments must define initiated_at."
+            if self.failed_at is None:
+                errors["failed_at"] = "Failed payments must define failed_at."
+            if self.paid_at is not None:
+                errors["paid_at"] = "Failed payments cannot define paid_at."
+            if self.cancelled_at is not None:
+                errors["cancelled_at"] = "Failed payments cannot define cancelled_at."
+        elif self.status == self.Status.CANCELLED:
+            if self.initiated_at is None:
+                errors["initiated_at"] = "Cancelled payments must define initiated_at."
+            if self.cancelled_at is None:
+                errors["cancelled_at"] = "Cancelled payments must define cancelled_at."
+            if self.paid_at is not None:
+                errors["paid_at"] = "Cancelled payments cannot define paid_at."
+            if self.failed_at is not None:
+                errors["failed_at"] = "Cancelled payments cannot define failed_at."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs) -> None:
+        if isinstance(self.currency, str):
+            self.currency = self.currency.strip().upper()
+
+        for field_name in ("provider", "provider_reference", "internal_notes"):
             value = getattr(self, field_name)
             if isinstance(value, str):
                 setattr(self, field_name, value.strip())

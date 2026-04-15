@@ -4,7 +4,7 @@ from django.db.models import Count
 
 from apps.users.roles import is_restricted_supplier_user
 
-from .models import Inquiry, InquiryItem, InquiryOffer
+from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
 
 
 class InternalInquiryAccessMixin:
@@ -64,6 +64,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "status",
         "confirmed_total",
         "currency",
+        "payment_reference",
         "sent_at",
         "accepted_at",
         "rejected_at",
@@ -99,7 +100,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "updated_at",
     )
     date_hierarchy = "created_at"
-    actions = ("mark_selected_as_sent",)
+    actions = ("mark_selected_as_sent", "initiate_payment_for_selected_offers")
     fieldsets = (
         (
             "Offer",
@@ -147,6 +148,12 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     def inquiry_reference(self, obj: InquiryOffer) -> str:
         return obj.inquiry.reference_code
 
+    @admin.display(description="Payment")
+    def payment_reference(self, obj: InquiryOffer) -> str:
+        if not obj.has_payment_record:
+            return "-"
+        return obj.payment.reference_code
+
     @staticmethod
     def _render_validation_error(error: ValidationError) -> str:
         if hasattr(error, "message_dict"):
@@ -186,6 +193,229 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             self.message_user(request, f"Sent {sent_count} offer(s).")
         if skipped_count and not sent_count:
             self.message_user(request, "No offers were sent.", level=messages.WARNING)
+
+    @admin.action(description="Initiate payment for selected offers")
+    def initiate_payment_for_selected_offers(self, request, queryset):
+        initiated_count = 0
+        skipped_count = 0
+
+        for offer in queryset.select_related("inquiry"):
+            try:
+                InquiryOfferPayment.initiate_from_offer(offer, save=True)
+            except ValidationError as error:
+                skipped_count += 1
+                details = self._render_validation_error(error)
+                self.message_user(
+                    request,
+                    (
+                        f"Payment for offer {offer.reference_code} could not be initiated "
+                        f"({details})."
+                    ),
+                    level=messages.ERROR,
+                )
+            except ValueError as error:
+                skipped_count += 1
+                self.message_user(
+                    request,
+                    (
+                        f"Payment for offer {offer.reference_code} could not be initiated "
+                        f"({error})."
+                    ),
+                    level=messages.WARNING,
+                )
+            else:
+                initiated_count += 1
+
+        if initiated_count:
+            self.message_user(request, f"Initiated {initiated_count} payment record(s).")
+        if skipped_count and not initiated_count:
+            self.message_user(
+                request,
+                "No payment records were initiated.",
+                level=messages.WARNING,
+            )
+
+
+@admin.register(InquiryOfferPayment)
+class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    list_display = (
+        "reference_code",
+        "offer_reference",
+        "inquiry_reference",
+        "status",
+        "payable_amount",
+        "currency",
+        "provider",
+        "provider_reference",
+        "initiated_at",
+        "paid_at",
+        "failed_at",
+        "cancelled_at",
+        "updated_at",
+    )
+    list_filter = (
+        "status",
+        "currency",
+        "provider",
+        "initiated_at",
+        "paid_at",
+        "failed_at",
+        "cancelled_at",
+        "created_at",
+    )
+    search_fields = (
+        "reference_code",
+        "offer__reference_code",
+        "offer__inquiry__reference_code",
+        "provider_reference",
+    )
+    ordering = ("-created_at",)
+    list_select_related = ("offer", "offer__inquiry")
+    autocomplete_fields = ("offer",)
+    readonly_fields = (
+        "reference_code",
+        "offer",
+        "status",
+        "payable_amount",
+        "currency",
+        "initiated_at",
+        "paid_at",
+        "failed_at",
+        "cancelled_at",
+        "created_at",
+        "updated_at",
+    )
+    date_hierarchy = "created_at"
+    actions = (
+        "mark_selected_as_paid",
+        "mark_selected_as_failed",
+        "mark_selected_as_cancelled",
+    )
+    fieldsets = (
+        (
+            "Payment",
+            {
+                "fields": (
+                    "reference_code",
+                    "offer",
+                    "status",
+                    "payable_amount",
+                    "currency",
+                )
+            },
+        ),
+        (
+            "Provider",
+            {
+                "fields": (
+                    "provider",
+                    "provider_reference",
+                    "internal_notes",
+                )
+            },
+        ),
+        (
+            "Lifecycle",
+            {
+                "fields": (
+                    "initiated_at",
+                    "paid_at",
+                    "failed_at",
+                    "cancelled_at",
+                )
+            },
+        ),
+        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.display(ordering="offer__reference_code", description="Offer")
+    def offer_reference(self, obj: InquiryOfferPayment) -> str:
+        return obj.offer.reference_code
+
+    @admin.display(ordering="offer__inquiry__reference_code", description="Inquiry")
+    def inquiry_reference(self, obj: InquiryOfferPayment) -> str:
+        return obj.offer.inquiry.reference_code
+
+    def _transition_selected(
+        self,
+        request,
+        queryset,
+        *,
+        transition_method: str,
+        transition_label: str,
+    ) -> None:
+        transitioned_count = 0
+        skipped_count = 0
+
+        for payment in queryset.select_related("offer", "offer__inquiry"):
+            transition = getattr(payment, transition_method)
+            try:
+                transition(save=True)
+            except ValidationError as error:
+                skipped_count += 1
+                details = InquiryOfferAdmin._render_validation_error(error)
+                self.message_user(
+                    request,
+                    (
+                        f"Payment {payment.reference_code} could not transition to "
+                        f"{transition_label} ({details})."
+                    ),
+                    level=messages.ERROR,
+                )
+            except ValueError as error:
+                skipped_count += 1
+                self.message_user(
+                    request,
+                    (
+                        f"Payment {payment.reference_code} could not transition to "
+                        f"{transition_label} ({error})."
+                    ),
+                    level=messages.WARNING,
+                )
+            else:
+                transitioned_count += 1
+
+        if transitioned_count:
+            self.message_user(
+                request,
+                f"Transitioned {transitioned_count} payment record(s) to {transition_label}.",
+            )
+        if skipped_count and not transitioned_count:
+            self.message_user(
+                request,
+                f"No payment records were transitioned to {transition_label}.",
+                level=messages.WARNING,
+            )
+
+    @admin.action(description="Mark selected payments as Paid")
+    def mark_selected_as_paid(self, request, queryset):
+        self._transition_selected(
+            request,
+            queryset,
+            transition_method="mark_paid",
+            transition_label="paid",
+        )
+
+    @admin.action(description="Mark selected payments as Failed")
+    def mark_selected_as_failed(self, request, queryset):
+        self._transition_selected(
+            request,
+            queryset,
+            transition_method="mark_failed",
+            transition_label="failed",
+        )
+
+    @admin.action(description="Mark selected payments as Cancelled")
+    def mark_selected_as_cancelled(self, request, queryset):
+        self._transition_selected(
+            request,
+            queryset,
+            transition_method="mark_cancelled",
+            transition_label="cancelled",
+        )
 
 
 @admin.register(Inquiry)

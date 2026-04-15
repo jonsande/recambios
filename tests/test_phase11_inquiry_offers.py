@@ -14,8 +14,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.catalog.models import Brand, Category, Condition, Product
-from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin
-from apps.inquiries.models import Inquiry, InquiryItem, InquiryOffer
+from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin, InquiryOfferPaymentAdmin
+from apps.inquiries.models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
 from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF
 
@@ -81,6 +81,30 @@ def make_inquiry(
         password="pass1234",
     )
     return Inquiry.objects.create(user=user, status=status)
+
+
+def make_accepted_offer(
+    django_user_model,
+    *,
+    username: str,
+    confirmed_total: Decimal = Decimal("250.00"),
+    currency: str = "EUR",
+) -> InquiryOffer:
+    inquiry = make_inquiry(
+        django_user_model,
+        username=username,
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=confirmed_total,
+        currency=currency,
+        lead_time_text="5 days",
+    )
+    offer.mark_sent(save=True)
+    offer.mark_accepted(save=True)
+    offer.refresh_from_db()
+    return offer
 
 
 @pytest.mark.django_db
@@ -169,6 +193,128 @@ def test_offer_transition_rules_and_timestamps_with_valid_inquiry_sync(django_us
 
     with pytest.raises(ValueError):
         offer.mark_rejected(save=True)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "offer_status",
+    (
+        InquiryOffer.Status.DRAFT,
+        InquiryOffer.Status.SENT,
+        InquiryOffer.Status.REJECTED,
+    ),
+)
+def test_payment_initiation_is_blocked_for_non_accepted_offers(
+    django_user_model,
+    offer_status: str,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username=f"payment_blocked_{offer_status}",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("450.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    if offer_status == InquiryOffer.Status.SENT:
+        offer.mark_sent(save=True)
+    elif offer_status == InquiryOffer.Status.REJECTED:
+        offer.mark_sent(save=True)
+        offer.mark_rejected(save=True)
+
+    with pytest.raises(ValueError):
+        InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    assert not InquiryOfferPayment.objects.filter(offer=offer).exists()
+
+
+@pytest.mark.django_db
+def test_payment_initiation_from_accepted_offer_snapshots_amount_and_currency(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_snapshot_offer",
+        confirmed_total=Decimal("680.55"),
+        currency="eur",
+    )
+    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+    assert payment.initiated_at is not None
+    assert payment.payable_amount == Decimal("680.55")
+    assert payment.currency == "EUR"
+
+    offer.confirmed_total = Decimal("999.00")
+    offer.currency = "USD"
+    offer.save(update_fields=["confirmed_total", "currency"])
+
+    payment.refresh_from_db()
+    assert payment.payable_amount == Decimal("680.55")
+    assert payment.currency == "EUR"
+
+
+@pytest.mark.django_db
+def test_offer_with_payment_record_must_stay_accepted(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_offer_stays_accepted",
+    )
+    InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    offer.status = InquiryOffer.Status.REJECTED
+    offer.rejected_at = timezone.now()
+    offer.accepted_at = None
+
+    with pytest.raises(ValidationError):
+        offer.full_clean()
+
+
+@pytest.mark.django_db
+def test_one_payment_record_per_offer_is_enforced(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_one_per_offer",
+    )
+    InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    with pytest.raises(ValidationError):
+        InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+
+@pytest.mark.django_db
+def test_payment_transition_rules_and_timestamps(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_transition_rules",
+    )
+    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    payment.mark_paid(save=True)
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert payment.paid_at is not None
+    assert payment.failed_at is None
+    assert payment.cancelled_at is None
+
+    with pytest.raises(ValueError):
+        payment.mark_failed(save=True)
+
+
+@pytest.mark.django_db
+def test_payment_status_requires_consistent_timestamps(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="payment_timestamp_integrity",
+    )
+    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    payment.paid_at = timezone.now()
+
+    with pytest.raises(ValidationError):
+        payment.full_clean()
 
 
 @pytest.mark.django_db
@@ -366,6 +512,21 @@ def test_internal_staff_group_has_inquiry_offer_permissions() -> None:
 
 
 @pytest.mark.django_db
+def test_internal_staff_group_has_inquiry_offer_payment_permissions() -> None:
+    internal_staff = Group.objects.get(name=ROLE_INTERNAL_STAFF)
+    for codename in (
+        "add_inquiryofferpayment",
+        "change_inquiryofferpayment",
+        "delete_inquiryofferpayment",
+        "view_inquiryofferpayment",
+    ):
+        assert internal_staff.permissions.filter(
+            content_type__app_label="inquiries",
+            codename=codename,
+        ).exists()
+
+
+@pytest.mark.django_db
 def test_admin_send_action_moves_draft_offer_to_sent(django_user_model) -> None:
     inquiry = make_inquiry(
         django_user_model,
@@ -393,6 +554,113 @@ def test_admin_send_action_moves_draft_offer_to_sent(django_user_model) -> None:
     offer.refresh_from_db()
     assert offer.status == InquiryOffer.Status.SENT
     assert offer.sent_at is not None
+
+
+@pytest.mark.django_db
+def test_admin_action_initiates_payment_for_accepted_offer(django_user_model) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="admin_payment_init_ok",
+        confirmed_total=Decimal("730.00"),
+    )
+    admin_user = django_user_model.objects.create_superuser(
+        username="admin_payment_init_user",
+        email="admin_payment_init_user@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+    offer_admin.message_user = lambda *args, **kwargs: None
+    offer_admin.initiate_payment_for_selected_offers(
+        request,
+        InquiryOffer.objects.filter(pk=offer.pk),
+    )
+
+    payment = InquiryOfferPayment.objects.get(offer=offer)
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+    assert payment.initiated_at is not None
+    assert payment.payable_amount == Decimal("730.00")
+    assert payment.currency == "EUR"
+
+
+@pytest.mark.django_db
+def test_admin_action_reports_invalid_payment_initiation_cases(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="admin_payment_init_invalid",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    sent_offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("540.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    sent_offer.mark_sent(save=True)
+    admin_user = django_user_model.objects.create_superuser(
+        username="admin_payment_init_invalid_user",
+        email="admin_payment_init_invalid_user@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryoffer/")
+    request.user = admin_user
+
+    offer_admin = InquiryOfferAdmin(InquiryOffer, AdminSite())
+    captured_messages: list[str] = []
+    offer_admin.message_user = (
+        lambda _request, message, level=None: captured_messages.append(str(message))
+    )
+    offer_admin.initiate_payment_for_selected_offers(
+        request,
+        InquiryOffer.objects.filter(pk=sent_offer.pk),
+    )
+
+    assert not InquiryOfferPayment.objects.filter(offer=sent_offer).exists()
+    assert any(
+        "could not be initiated" in message
+        for message in captured_messages
+    )
+
+
+@pytest.mark.django_db
+def test_payment_admin_actions_apply_and_block_invalid_transitions(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(
+        django_user_model,
+        username="admin_payment_transition",
+    )
+    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    admin_user = django_user_model.objects.create_superuser(
+        username="admin_payment_transition_user",
+        email="admin_payment_transition_user@example.com",
+        password="pass1234",
+    )
+    request = RequestFactory().post("/admin/inquiries/inquiryofferpayment/")
+    request.user = admin_user
+    payment_admin = InquiryOfferPaymentAdmin(InquiryOfferPayment, AdminSite())
+    captured_messages: list[str] = []
+    payment_admin.message_user = (
+        lambda _request, message, level=None: captured_messages.append(str(message))
+    )
+
+    payment_admin.mark_selected_as_paid(
+        request,
+        InquiryOfferPayment.objects.filter(pk=payment.pk),
+    )
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert payment.paid_at is not None
+
+    payment_admin.mark_selected_as_failed(
+        request,
+        InquiryOfferPayment.objects.filter(pk=payment.pk),
+    )
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert any("could not transition to failed" in message for message in captured_messages)
 
 
 @pytest.mark.django_db
