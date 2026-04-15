@@ -93,6 +93,41 @@ def test_sends_internal_and_customer_emails_on_draft_to_submitted_transition(
 
 
 @pytest.mark.django_db(transaction=True)
+def test_customer_submission_email_supports_multiple_reply_to_addresses(
+    django_user_model,
+    email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL = "atencion@example.com, ventas@example.com"
+    user = django_user_model.objects.create_user(
+        username="phase8multi",
+        email="phase8multi@example.com",
+        password="pass1234",
+    )
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.DRAFT,
+        language=Inquiry.Language.SPANISH,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-INQ-EMAIL-MULTI"),
+        requested_quantity=1,
+    )
+
+    mail.outbox.clear()
+    inquiry.status = Inquiry.Status.SUBMITTED
+    inquiry.save(update_fields=["status"])
+
+    customer_email = mail.outbox[1]
+    assert customer_email.reply_to == ["atencion@example.com", "ventas@example.com"]
+    assert (
+        "responde a atencion@example.com, ventas@example.com indicando tu referencia"
+        in customer_email.body
+    )
+
+
+@pytest.mark.django_db(transaction=True)
 def test_sends_on_create_when_inquiry_starts_in_submitted_state(email_settings) -> None:
     inquiry = Inquiry.objects.create(
         guest_name="Invitado",

@@ -1,0 +1,15 @@
+Supplier notification could not be completed.
+
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+Issue: {{ failure_reason_label }}
+{% if failure_detail %}Delivery error detail: {{ failure_detail }}
+{% endif %}
+Supplier operational email configured: {% if supplier.orders_email %}{{ supplier.orders_email }}{% else %}[missing]{% endif %}
+General supplier contact email: {% if supplier.contact_email %}{{ supplier.contact_email }}{% else %}[missing]{% endif %}
+
+Affected supplier items:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}

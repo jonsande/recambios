@@ -9,6 +9,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Group
 from django.core import mail
 from django.core.exceptions import ValidationError
+from django.core.mail import EmailMessage
 from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone, translation
@@ -20,11 +21,20 @@ from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF
 
 
-def make_supplier(code: str) -> Supplier:
+def make_supplier(
+    code: str,
+    *,
+    contact_email: str = "",
+    orders_email: str = "",
+    auto_send_offer_sent_notification: bool = False,
+) -> Supplier:
     return Supplier.objects.create(
         name=f"Supplier {code}",
         slug=f"supplier-{code.lower()}",
         code=code,
+        contact_email=contact_email,
+        orders_email=orders_email,
+        auto_send_offer_sent_notification=auto_send_offer_sent_notification,
     )
 
 
@@ -44,8 +54,9 @@ def make_product(
     sku: str,
     *,
     price: Decimal | None = Decimal("100.00"),
+    supplier: Supplier | None = None,
 ) -> Product:
-    supplier = make_supplier(code=f"SUP-{sku}")
+    supplier = supplier or make_supplier(code=f"SUP-{sku}")
     brand = make_brand(name=f"Brand {sku}", slug=f"brand-{sku.lower()}")
     category = make_category(name=f"Category {sku}", slug=f"category-{sku.lower()}")
     condition = make_condition(
@@ -1360,6 +1371,12 @@ def internal_offer_response_email_settings(offer_email_settings, settings):
     settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
 
 
+@pytest.fixture
+def supplier_notification_email_settings(offer_email_settings, settings):
+    settings.SERVER_EMAIL = "notifications@example.com"
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+
+
 @pytest.mark.django_db(transaction=True)
 def test_offer_sent_email_is_sent_once_on_true_status_entry(
     django_user_model,
@@ -1628,6 +1645,311 @@ def test_offer_sent_email_failure_is_logged_and_offer_state_is_kept_as_sent(
         "Failed to send customer offer email" in record.getMessage()
         for record in caplog.records
     )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_is_sent_to_orders_email_on_true_sent_entry(
+    django_user_model,
+    supplier_notification_email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_CUSTOMER_REPLY_TO_EMAIL = "atencion@example.com, operaciones@example.com"
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-NOTIFY",
+        contact_email="general@supplier.example",
+        orders_email="orders@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_notify",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product(
+        "SKU-SUPPLIER-NOTIFY",
+        supplier=supplier,
+    )
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=3)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("190.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    assert len(mail.outbox) == 2
+    assert any(email.to == ["offer_supplier_notify@example.com"] for email in mail.outbox)
+    supplier_email = next(email for email in mail.outbox if email.to == ["orders@supplier.example"])
+    assert "Offer sent to customer - availability follow-up:" in supplier_email.subject
+    assert offer.reference_code in supplier_email.subject
+    assert inquiry.reference_code in supplier_email.body
+    assert "A customer-facing offer has already been sent" in supplier_email.body
+    assert "SKU-SUPPLIER-NOTIFY" in supplier_email.body
+    assert "Qty: 3" in supplier_email.body
+    assert supplier_email.reply_to == ["atencion@example.com", "operaciones@example.com"]
+    assert supplier_email.bcc == ["ops@example.com"]
+    assert not any(email.to == ["general@supplier.example"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_is_sent_once_on_true_sent_entry_only(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-ONCE",
+        orders_email="orders.once@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_once",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-ONCE", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=2)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("220.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+    assert len(mail.outbox) == 2
+
+    offer.internal_notes = "Supplier follow-up metadata"
+    offer.save(update_fields=["internal_notes"])
+    assert len(mail.outbox) == 2
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_sends_internal_copy_to_all_configured_recipients(
+    django_user_model,
+    supplier_notification_email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = [
+        "ops@example.com",
+        "sales@example.com",
+    ]
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-BCC",
+        orders_email="orders.bcc@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_bcc",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-BCC", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("205.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.bcc@supplier.example"]
+    )
+    assert supplier_email.bcc == ["ops@example.com", "sales@example.com"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_is_not_sent_when_automatic_supplier_notifications_are_disabled(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-DISABLED",
+        orders_email="orders.disabled@supplier.example",
+        auto_send_offer_sent_notification=False,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_disabled",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-DISABLED", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=2)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("280.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["offer_supplier_disabled@example.com"]
+    assert not any(email.to == ["orders.disabled@supplier.example"] for email in mail.outbox)
+    assert not any(email.to == ["ops@example.com"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_missing_supplier_orders_email_triggers_internal_failure_notification(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-MISSING-ORDERS",
+        contact_email="general.missing@supplier.example",
+        orders_email="",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_missing_orders",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-MISSING-ORDERS", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("330.00"),
+        currency="EUR",
+        lead_time_text="6 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    assert len(mail.outbox) == 2
+    assert any(email.to == ["offer_supplier_missing_orders@example.com"] for email in mail.outbox)
+    assert not any(
+        email.to == ["general.missing@supplier.example"] for email in mail.outbox
+    )
+
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert "Supplier notification issue:" in internal_email.subject
+    assert offer.reference_code in internal_email.body
+    assert inquiry.reference_code in internal_email.body
+    assert supplier.code in internal_email.body
+    assert "Missing supplier operational orders email." in internal_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_failure_sends_internal_alert_and_keeps_offer_sent_state(
+    django_user_model,
+    supplier_notification_email_settings,
+    caplog,
+) -> None:
+    supplier_failing = make_supplier(
+        code="SUP-SUPPLIER-FAIL",
+        orders_email="orders.fail@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    supplier_ok = make_supplier(
+        code="SUP-SUPPLIER-OK",
+        orders_email="orders.ok@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_send_failure",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    failing_product = make_product("SKU-SUPPLIER-FAIL", supplier=supplier_failing)
+    ok_product = make_product("SKU-SUPPLIER-OK", supplier=supplier_ok)
+    InquiryItem.objects.create(inquiry=inquiry, product=failing_product, requested_quantity=1)
+    InquiryItem.objects.create(inquiry=inquiry, product=ok_product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("400.00"),
+        currency="EUR",
+        lead_time_text="7 days",
+    )
+
+    original_send = EmailMessage.send
+
+    def fail_supplier_send(self, fail_silently=False):
+        if self.to == ["orders.fail@supplier.example"]:
+            raise RuntimeError("smtp supplier down")
+        return original_send(self, fail_silently=fail_silently)
+
+    mail.outbox.clear()
+    with patch("apps.inquiries.emails.EmailMessage.send", new=fail_supplier_send):
+        with caplog.at_level("ERROR", logger="apps.inquiries.emails"):
+            offer.mark_sent(save=True)
+
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.SENT
+    assert inquiry.status == Inquiry.Status.RESPONDED
+    assert len(mail.outbox) == 3
+    assert any(email.to == ["offer_supplier_send_failure@example.com"] for email in mail.outbox)
+    assert any(email.to == ["orders.ok@supplier.example"] for email in mail.outbox)
+    assert not any(email.to == ["orders.fail@supplier.example"] for email in mail.outbox)
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert "Supplier notification delivery failed." in internal_email.body
+    assert "smtp supplier down" in internal_email.body
+    assert any(
+        "Failed to send supplier offer notification email" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_mixed_supplier_inquiry_sends_one_supplier_email_per_supplier_with_scoped_items(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier_a = make_supplier(
+        code="SUP-MIXED-A",
+        orders_email="orders.a@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    supplier_b = make_supplier(
+        code="SUP-MIXED-B",
+        orders_email="orders.b@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_mixed",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product_a1 = make_product("SKU-MIXED-A1", supplier=supplier_a)
+    product_a2 = make_product("SKU-MIXED-A2", supplier=supplier_a)
+    product_b1 = make_product("SKU-MIXED-B1", supplier=supplier_b)
+    InquiryItem.objects.create(inquiry=inquiry, product=product_a1, requested_quantity=1)
+    InquiryItem.objects.create(inquiry=inquiry, product=product_a2, requested_quantity=2)
+    InquiryItem.objects.create(inquiry=inquiry, product=product_b1, requested_quantity=4)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("980.00"),
+        currency="EUR",
+        lead_time_text="9 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    assert len(mail.outbox) == 3
+    supplier_a_email = next(
+        email for email in mail.outbox if email.to == ["orders.a@supplier.example"]
+    )
+    supplier_b_email = next(
+        email for email in mail.outbox if email.to == ["orders.b@supplier.example"]
+    )
+
+    assert "SKU-MIXED-A1" in supplier_a_email.body
+    assert "SKU-MIXED-A2" in supplier_a_email.body
+    assert "SKU-MIXED-B1" not in supplier_a_email.body
+    assert "SKU-MIXED-B1" in supplier_b_email.body
+    assert "SKU-MIXED-A1" not in supplier_b_email.body
 
 
 @pytest.mark.django_db(transaction=True)

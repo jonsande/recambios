@@ -10,6 +10,18 @@ class Supplier(models.Model):
     website = models.URLField(blank=True)
     contact_name = models.CharField(max_length=150, blank=True)
     contact_email = models.EmailField(blank=True)
+    orders_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Operational mailbox for orders, confirmed offers, and availability updates."
+        ),
+    )
+    auto_send_offer_sent_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when a customer-facing offer is sent."
+        ),
+    )
     contact_phone = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)

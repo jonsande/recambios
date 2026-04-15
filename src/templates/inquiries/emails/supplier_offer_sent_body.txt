@@ -1,0 +1,15 @@
+Supplier notification regarding customer offer
+
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+
+A customer-facing offer has already been sent and is currently pending customer decision.
+Please inform us immediately if availability changes before the customer responds, so we can invalidate or update the offer if needed.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with any availability update.

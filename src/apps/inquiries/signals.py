@@ -11,6 +11,7 @@ from .emails import (
     send_customer_offer_sent_email,
     send_inquiry_submitted_emails,
     send_internal_offer_response_notification_email,
+    send_supplier_offer_sent_notifications,
 )
 from .models import Inquiry, InquiryOffer
 
@@ -156,6 +157,18 @@ def send_customer_offer_email_on_status_entry(
         except Exception:
             logger.exception(
                 "Failed to send customer offer email (offer=%s inquiry=%s).",
+                offer.reference_code,
+                offer.inquiry.reference_code,
+            )
+
+        try:
+            send_supplier_offer_sent_notifications(offer)
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to process supplier offer notifications "
+                    "(offer=%s inquiry=%s)."
+                ),
                 offer.reference_code,
                 offer.inquiry.reference_code,
             )

@@ -21,12 +21,14 @@ class SupplierAdmin(admin.ModelAdmin):
         "name",
         "code",
         "country",
+        "orders_email",
+        "auto_send_offer_sent_notification",
         "is_active",
         "active_assignments_count",
         "updated_at",
     )
     list_filter = ("is_active", "country")
-    search_fields = ("name", "code", "slug", "contact_email")
+    search_fields = ("name", "code", "slug", "contact_email", "orders_email")
     ordering = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at", "updated_at")

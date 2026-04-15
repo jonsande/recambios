@@ -1,0 +1,1 @@
+Supplier notification issue: {{ offer.reference_code }} / {{ supplier.code }}

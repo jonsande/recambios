@@ -126,6 +126,9 @@
     - [x] email transaccional al cliente al entrar una oferta en estado `sent`, con enlace público tokenizado para aceptar/rechazar
     - [x] trigger de email por transición real `draft -> sent` (sin reenvío en ediciones posteriores)
     - [x] manejo robusto de incidencias de envío de email (logs claros sin revertir el estado comercial `sent`)
+    - [x] notificación operativa al proveedor al entrar una oferta en `sent` usando `Supplier.orders_email`
+    - [x] agrupación por proveedor en consultas mixtas (un email por proveedor con solo sus líneas)
+    - [x] notificación interna cuando falla o falta el email operativo de proveedor, sin revertir estado comercial
   - [x] tests específicos de integridad y flujo de Fase 11
   - [ ] integración real de pasarela de pago (siguiente slice de Fase 11)
 
