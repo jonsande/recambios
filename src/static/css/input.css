@@ -117,31 +117,74 @@
   }
 
   .site-header-row {
-    @apply flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between;
+    @apply flex flex-wrap items-center justify-between gap-3;
   }
 
   .site-brand {
-    @apply inline-flex items-start gap-3 rounded-xl border border-border bg-surface px-3 py-2 no-underline transition-colors hover:border-accent;
+    @apply inline-flex max-w-[78vw] shrink-0 items-center rounded-lg border border-border bg-surface-elevated px-2 py-1 no-underline transition-colors hover:border-accent sm:max-w-none;
   }
 
-  .site-brand-mark {
-    @apply mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold tracking-wide text-white;
-  }
-
-  .site-brand-title {
-    @apply text-base font-semibold tracking-tight text-primary-strong sm:text-lg;
-  }
-
-  .site-brand-subtitle {
-    @apply text-xs font-medium text-text-muted;
+  .site-brand-logo {
+    @apply block h-[4.5rem] w-auto sm:h-20 lg:h-24;
   }
 
   .site-nav-list {
-    @apply flex flex-wrap items-center gap-1 text-sm font-medium;
+    @apply flex items-center gap-1 text-sm font-medium whitespace-nowrap;
+  }
+
+  .site-header-controls {
+    @apply ml-auto flex items-center gap-2;
+  }
+
+  .site-claim {
+    @apply basis-full pl-5 sm:pl-8;
+  }
+
+  .site-menu {
+    @apply relative min-[1280px]:hidden;
+  }
+
+  .site-menu-toggle {
+    @apply inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-elevated px-3 py-2 text-sm font-medium text-text transition-colors hover:bg-surface;
+  }
+
+  .site-menu-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .site-menu[open] .site-menu-toggle {
+    @apply bg-surface-muted;
+  }
+
+  .site-menu-panel {
+    @apply absolute right-1 z-40 mt-2 w-72 rounded-2xl border border-border-strong bg-surface-elevated p-3 shadow-[0_18px_38px_-24px_rgba(15,23,42,0.75)];
+    max-width: calc(100vw - 2rem);
+  }
+
+  .site-nav-list-mobile {
+    @apply grid gap-1 text-sm font-medium;
+  }
+
+  .site-nav-link-mobile {
+    @apply block rounded-md px-3 py-2 text-text transition-colors hover:bg-surface-muted;
+  }
+
+  @media (max-width: 560px) {
+    .site-claim {
+      order: 2;
+    }
+
+    .site-header-controls {
+      order: 3;
+      margin-left: 0;
+      width: 100%;
+      justify-content: flex-end;
+      padding-right: 0.25rem;
+    }
   }
 
   .language-switch {
-    @apply mt-4 flex items-center gap-2 border-t border-border pt-3 text-sm lg:mt-3;
+    @apply flex items-center gap-2 text-sm;
   }
 
   .flash-list {

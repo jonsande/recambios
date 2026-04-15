@@ -18,89 +18,157 @@
 
   <header class="site-header">
     <div class="layout-shell site-header-inner">
+      {% language "es" %}{% url 'pages:home' as home_es %}{% endlanguage %}
+      {% language "en" %}{% url 'pages:home' as home_en %}{% endlanguage %}
       <div class="site-header-row">
-        <div class="space-y-3">
-          <a href="{% url 'pages:home' %}" class="site-brand">
-            <span class="site-brand-mark" aria-hidden="true">RT</span>
-            <span>
-              <span class="site-brand-title">{% trans "Recambios Técnicos" %}</span>
-              <span class="site-brand-subtitle">{% trans "Consulta profesional de disponibilidad, precio y plazo" %}</span>
-            </span>
-          </a>
-          <p class="technical-copy">
-            {% trans "Catálogo técnico para particulares, talleres y empresas" %}
-          </p>
+        <a href="{% url 'pages:home' %}" class="site-brand" aria-label="{% trans 'Ir al inicio' %}">
+          <img
+            src="{% static 'img/plantilla_logo.png' %}"
+            alt="{% trans 'Autosande' %}"
+            class="site-brand-logo"
+            width="521"
+            height="151"
+          >
+        </a>
+
+        <div class="site-header-controls">
+          <nav class="hidden min-[1280px]:block" aria-label="{% trans 'Navegación principal' %}">
+            <ul class="site-nav-list">
+              <li>
+                <a class="link-nav" href="{% url 'catalog:category_list' %}">
+                  {% trans "Categorías" %}
+                </a>
+              </li>
+              <li>
+                <a class="link-nav" href="{% url 'catalog:product_list' %}">
+                  {% trans "Productos" %}
+                </a>
+              </li>
+              <li>
+                <a class="link-nav" href="{% url 'catalog:compatibility_vehicle_types' %}">
+                  {% trans "Compatibilidad" %}
+                </a>
+              </li>
+              <li>
+                <a class="link-nav" href="{% url 'pages:about' %}">
+                  {% trans "Nosotros" %}
+                </a>
+              </li>
+              <li>
+                <a class="link-nav" href="{% url 'pages:contact' %}">
+                  {% trans "Contacto" %}
+                </a>
+              </li>
+              <li>
+                <a class="link-nav" href="{% url 'cart:request_cart_detail' %}">
+                  {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+                    {% trans "Cart" %}
+                  {% else %}
+                    {% trans "Carrito" %}
+                  {% endif %}
+                  {% if request_cart_total_quantity %}
+                    <span class="ml-1 badge badge-neutral">{{ request_cart_total_quantity }}</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="language-switch hidden min-[1280px]:flex" aria-label="{% trans 'Selector de idioma' %}">
+            <a
+              href="{{ home_es }}"
+              lang="es"
+              aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
+              class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+            >
+              ES
+            </a>
+            <a
+              href="{{ home_en }}"
+              lang="en"
+              aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
+              class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+            >
+              EN
+            </a>
+          </div>
+
+          <details class="site-menu">
+            <summary class="site-menu-toggle">
+              <span>{% trans "Menú" %}</span>
+              <span aria-hidden="true">☰</span>
+            </summary>
+            <div class="site-menu-panel">
+              <nav aria-label="{% trans 'Navegación principal móvil' %}">
+                <ul class="site-nav-list-mobile">
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'catalog:category_list' %}">
+                      {% trans "Categorías" %}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'catalog:product_list' %}">
+                      {% trans "Productos" %}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'catalog:compatibility_vehicle_types' %}">
+                      {% trans "Compatibilidad" %}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'pages:about' %}">
+                      {% trans "Nosotros" %}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'pages:contact' %}">
+                      {% trans "Contacto" %}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="site-nav-link-mobile" href="{% url 'cart:request_cart_detail' %}">
+                      {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+                        {% trans "Cart" %}
+                      {% else %}
+                        {% trans "Carrito" %}
+                      {% endif %}
+                      {% if request_cart_total_quantity %}
+                        ({{ request_cart_total_quantity }})
+                      {% endif %}
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+
+              <div class="language-switch mt-3 border-t border-border pt-3" aria-label="{% trans 'Selector de idioma' %}">
+                <a
+                  href="{{ home_es }}"
+                  lang="es"
+                  aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
+                  class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                >
+                  ES
+                </a>
+                <a
+                  href="{{ home_en }}"
+                  lang="en"
+                  aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
+                  class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                >
+                  EN
+                </a>
+              </div>
+            </div>
+          </details>
         </div>
-
-        <nav aria-label="{% trans 'Navegación principal' %}">
-          <ul class="site-nav-list">
-            <li>
-              <a class="link-nav" href="{% url 'pages:home' %}">
-                {% trans "Inicio" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'catalog:category_list' %}">
-                {% trans "Categorías" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'catalog:product_list' %}">
-                {% trans "Productos" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'catalog:compatibility_vehicle_types' %}">
-                {% trans "Compatibilidad" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'pages:about' %}">
-                {% trans "Nosotros" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'pages:contact' %}">
-                {% trans "Contacto" %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'cart:request_cart_detail' %}">
-                {% trans "Solicitud" %}
-                {% if request_cart_total_quantity %}
-                  <span class="ml-1 badge badge-neutral">{{ request_cart_total_quantity }}</span>
-                {% endif %}
-              </a>
-            </li>
-            <li>
-              <a class="link-nav" href="{% url 'pages:legal' %}">
-                {% trans "Legal" %}
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-
-      <div class="language-switch">
-        <span class="meta-copy">{% trans "Idioma de navegación" %}</span>
-        {% language "es" %}{% url 'pages:home' as home_es %}{% endlanguage %}
-        {% language "en" %}{% url 'pages:home' as home_en %}{% endlanguage %}
-        <a
-          href="{{ home_es }}"
-          lang="es"
-          aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
-          class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
-        >
-          ES
-        </a>
-        <a
-          href="{{ home_en }}"
-          lang="en"
-          aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
-          class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
-        >
-          EN
-        </a>
+        <p class="site-claim technical-copy">
+          {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+            Independent agent specialized in sourcing original and equivalent parts at the best price
+          {% else %}
+            Agente independiente especializado en localizar originales y equivalentes al mejor precio
+          {% endif %}
+        </p>
       </div>
     </div>
   </header>
