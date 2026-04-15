@@ -4,115 +4,123 @@
 {% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
 
 {% block content %}
-  <section>
-    <h1 class="page-title">{{ page_title }}</h1>
-    <p class="mt-3 max-w-3xl text-sm text-text-muted sm:text-base">
-      {% trans "Completa estos datos para que el equipo confirme disponibilidad, precio final y plazo de entrega." %}
-    </p>
-  </section>
-
-  <div class="mt-6 grid gap-6 lg:grid-cols-5">
-    <section class="lg:col-span-2 section-shell" aria-label="{% trans 'Resumen del carrito de solicitud' %}">
-      <h2 class="subsection-title">{% trans "Resumen de artículos" %}</h2>
-      <ul class="mt-3 space-y-3">
-        {% for item in cart_items %}
-          <li class="panel-muted text-sm text-text-muted">
-            <p class="font-semibold text-text">{{ item.product.title }}</p>
-            <p>{% trans "Referencia (OEM)" %}: {{ item.product.sku }}</p>
-            <p>{% trans "Cantidad" %}: {{ item.quantity }}</p>
-            {% if item.note %}
-              <p class="mt-1">{% trans "Nota" %}: {{ item.note }}</p>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-      <p class="mt-3 text-sm text-text-muted">
-        {% trans "Cantidad total" %}: <strong>{{ total_quantity }}</strong>
+  <div class="page-stack">
+    <section class="section-shell-lg">
+      <p class="page-eyebrow">{% trans "Paso final de solicitud" %}</p>
+      <h1 class="mt-2 page-title">{{ page_title }}</h1>
+      <p class="page-lead">
+        {% trans "Completa estos datos para que el equipo confirme disponibilidad, precio final y plazo de entrega." %}
       </p>
-      <a
-        href="{% url 'cart:request_cart_detail' %}"
-        class="mt-4 btn btn-secondary"
-      >
-        {% trans "Volver al carrito" %}
-      </a>
     </section>
 
-    <section class="lg:col-span-3 section-shell">
-      <h2 class="subsection-title">{% trans "Datos de contacto" %}</h2>
+    <div class="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <aside class="section-shell h-fit lg:sticky lg:top-4" aria-label="{% trans 'Resumen del carrito de solicitud' %}">
+        <h2 class="subsection-title">{% trans "Resumen de artículos" %}</h2>
+        <ul class="mt-3 space-y-3">
+          {% for item in cart_items %}
+            <li class="panel-muted text-sm text-text-muted">
+              <p class="font-semibold text-text">{{ item.product.title }}</p>
+              <p class="mt-1">{% trans "Referencia (OEM)" %}: <span class="font-medium text-text">{{ item.product.sku }}</span></p>
+              <p>{% trans "Cantidad" %}: <span class="font-medium text-text">{{ item.quantity }}</span></p>
+              {% if item.note %}
+                <p class="mt-1">{% trans "Nota" %}: {{ item.note }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="mt-3 text-sm text-text-muted">
+          {% trans "Cantidad total" %}: <strong class="text-text">{{ total_quantity }}</strong>
+        </p>
+        <a
+          href="{% url 'cart:request_cart_detail' %}"
+          class="mt-4 btn btn-secondary w-full"
+        >
+          {% trans "Volver al carrito" %}
+        </a>
+      </aside>
 
-      <form method="post" class="mt-4 space-y-4" novalidate>
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger" role="alert">
-            <ul class="list-disc pl-5">
-              {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-
-        <div>
-          <label for="{{ form.contact_name.id_for_label }}" class="form-label">
-            {{ form.contact_name.label }}
-          </label>
-          {{ form.contact_name }}
-          {% if form.contact_name.errors %}<p id="contact_name-errors" class="form-error" role="alert">{{ form.contact_name.errors|striptags }}</p>{% endif %}
-        </div>
-
-        <div>
-          <label for="{{ form.contact_email.id_for_label }}" class="form-label">
-            {{ form.contact_email.label }}
-          </label>
-          {{ form.contact_email }}
-          {% if form.contact_email.errors %}<p id="contact_email-errors" class="form-error" role="alert">{{ form.contact_email.errors|striptags }}</p>{% endif %}
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label for="{{ form.phone.id_for_label }}" class="form-label">
-              {{ form.phone.label }}
-            </label>
-            {{ form.phone }}
-            {% if form.phone.errors %}<p id="phone-errors" class="form-error" role="alert">{{ form.phone.errors|striptags }}</p>{% endif %}
-          </div>
-          <div>
-            <label for="{{ form.tax_id.id_for_label }}" class="form-label">
-              {{ form.tax_id.label }}
-            </label>
-            {{ form.tax_id }}
-            {% if form.tax_id.errors %}<p id="tax_id-errors" class="form-error" role="alert">{{ form.tax_id.errors|striptags }}</p>{% endif %}
-          </div>
-        </div>
-
-        <div>
-          <label for="{{ form.company_name.id_for_label }}" class="form-label">
-            {{ form.company_name.label }}
-          </label>
-          {{ form.company_name }}
-          {% if form.company_name.errors %}<p id="company_name-errors" class="form-error" role="alert">{{ form.company_name.errors|striptags }}</p>{% endif %}
-        </div>
-
-        <div>
-          <label for="{{ form.notes_from_customer.id_for_label }}" class="form-label">
-            {{ form.notes_from_customer.label }}
-          </label>
-          {{ form.notes_from_customer }}
-          {% if form.notes_from_customer.errors %}<p id="notes_from_customer-errors" class="form-error" role="alert">{{ form.notes_from_customer.errors|striptags }}</p>{% endif %}
-        </div>
-
-        <p class="text-sm text-text-muted">
-          {% trans "Al enviar, se registra tu solicitud para revisión interna. Este envío no confirma stock, precio final ni plazo final." %}
+      <section class="section-shell">
+        <h2 class="subsection-title">{% trans "Datos de contacto" %}</h2>
+        <p class="mt-2 text-sm text-text-muted">
+          {% trans "Estos datos se usan para responder la solicitud y confirmar condiciones comerciales." %}
         </p>
 
-        <button
-          type="submit"
-          class="btn btn-primary"
-        >
-          {% trans "Enviar solicitud" %}
-        </button>
-      </form>
-    </section>
+        <form method="post" class="mt-4 space-y-4" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              <ul class="list-disc pl-5">
+                {% for error in form.non_field_errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <div>
+            <label for="{{ form.contact_name.id_for_label }}" class="form-label">
+              {{ form.contact_name.label }}
+            </label>
+            {{ form.contact_name }}
+            {% if form.contact_name.errors %}<p id="contact_name-errors" class="form-error" role="alert">{{ form.contact_name.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.contact_email.id_for_label }}" class="form-label">
+              {{ form.contact_email.label }}
+            </label>
+            {{ form.contact_email }}
+            {% if form.contact_email.errors %}<p id="contact_email-errors" class="form-error" role="alert">{{ form.contact_email.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="{{ form.phone.id_for_label }}" class="form-label">
+                {{ form.phone.label }}
+              </label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<p id="phone-errors" class="form-error" role="alert">{{ form.phone.errors|striptags }}</p>{% endif %}
+            </div>
+            <div>
+              <label for="{{ form.tax_id.id_for_label }}" class="form-label">
+                {{ form.tax_id.label }}
+              </label>
+              {{ form.tax_id }}
+              {% if form.tax_id.errors %}<p id="tax_id-errors" class="form-error" role="alert">{{ form.tax_id.errors|striptags }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div>
+            <label for="{{ form.company_name.id_for_label }}" class="form-label">
+              {{ form.company_name.label }}
+            </label>
+            {{ form.company_name }}
+            {% if form.company_name.errors %}<p id="company_name-errors" class="form-error" role="alert">{{ form.company_name.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.notes_from_customer.id_for_label }}" class="form-label">
+              {{ form.notes_from_customer.label }}
+            </label>
+            {{ form.notes_from_customer }}
+            {% if form.notes_from_customer.errors %}<p id="notes_from_customer-errors" class="form-error" role="alert">{{ form.notes_from_customer.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <div class="panel-muted">
+            <p class="text-sm text-text-muted">
+              {% trans "Al enviar, se registra tu solicitud para revisión interna. Este envío no confirma stock, precio final ni plazo final." %}
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary w-full sm:w-auto"
+          >
+            {% trans "Enviar solicitud" %}
+          </button>
+        </form>
+      </section>
+    </div>
   </div>
 {% endblock %}

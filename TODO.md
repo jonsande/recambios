@@ -102,6 +102,7 @@
   - [x] slice inicial 10.1: tokens de tema centralizados (paleta azul técnica sobria)
   - [x] slice inicial 10.1: patrones reutilizables base (botones, formularios, paneles, alertas, badges)
   - [x] slice inicial 10.1: aplicación controlada en layout compartido y páginas públicas representativas
+  - [x] slice 10.2: refinado visual visible en shell global y páginas públicas clave (home, catálogo, detalle, solicitud y oferta/pago placeholder)
   - [ ] componentes reutilizables
   - [ ] mobile-first sólido
   - [ ] accesibilidad funcional

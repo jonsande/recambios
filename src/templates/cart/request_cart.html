@@ -4,126 +4,134 @@
 {% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
 
 {% block content %}
-  <section>
-    <h1 class="page-title">{{ page_title }}</h1>
-    <p class="mt-3 max-w-3xl text-sm text-text-muted sm:text-base">
-      {% trans "Este carrito es para solicitudes de disponibilidad, precio final y plazo. No es un proceso de compra directa." %}
-    </p>
-  </section>
+  <div class="page-stack">
+    <section class="section-shell-lg">
+      <p class="page-eyebrow">{% trans "Solicitud comercial" %}</p>
+      <h1 class="mt-2 page-title">{{ page_title }}</h1>
+      <p class="page-lead">
+        {% trans "Este carrito es para solicitudes de disponibilidad, precio final y plazo. No es un proceso de compra directa." %}
+      </p>
+    </section>
 
-  {% if cart_items %}
-    <section class="mt-6 space-y-4" aria-label="{% trans 'Artículos en carrito de solicitud' %}">
-      {% for item in cart_items %}
-        <article class="section-shell">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 class="subsection-title">
-                <a
-                  href="{% url 'catalog:product_detail' slug=item.product.slug %}"
-                  class="underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-                >
-                  {{ item.product.title }}
-                </a>
-              </h2>
-              <p class="mt-1 text-sm text-text-muted">{% trans "Referencia (OEM)" %}: {{ item.product.sku }}</p>
-            </div>
-          </div>
+    {% if cart_items %}
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <section class="space-y-4" aria-label="{% trans 'Artículos en carrito de solicitud' %}">
+          {% for item in cart_items %}
+            <article class="section-shell">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="meta-copy">{% trans "Línea de solicitud" %}</p>
+                  <h2 class="subsection-title mt-1">
+                    <a
+                      href="{% url 'catalog:product_detail' slug=item.product.slug %}"
+                      class="underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                    >
+                      {{ item.product.title }}
+                    </a>
+                  </h2>
+                  <p class="mt-2 text-sm text-text-muted">{% trans "Referencia (OEM)" %}: <span class="font-semibold text-text">{{ item.product.sku }}</span></p>
+                </div>
+              </div>
 
-          <form
-            method="post"
-            action="{% url 'cart:request_cart_update' product_id=item.product.id %}"
-            class="mt-4 grid gap-3 sm:grid-cols-2"
-          >
-            {% csrf_token %}
-            <div>
-              <label for="qty-{{ item.product.id }}" class="form-label">
-                {% trans "Cantidad solicitada" %}
-              </label>
-              <input
-                id="qty-{{ item.product.id }}"
-                name="quantity"
-                type="number"
-                inputmode="numeric"
-                min="0"
-                max="999"
-                value="{{ item.quantity }}"
-                class="form-input"
+              <form
+                method="post"
+                action="{% url 'cart:request_cart_update' product_id=item.product.id %}"
+                class="mt-4 grid gap-3 sm:grid-cols-2"
               >
-              <p class="mt-1 text-xs text-text-muted">{% trans "Usa 0 para eliminar el artículo." %}</p>
-            </div>
+                {% csrf_token %}
+                <div>
+                  <label for="qty-{{ item.product.id }}" class="form-label">
+                    {% trans "Cantidad solicitada" %}
+                  </label>
+                  <input
+                    id="qty-{{ item.product.id }}"
+                    name="quantity"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="999"
+                    value="{{ item.quantity }}"
+                    class="form-input"
+                  >
+                  <p class="mt-1 text-xs text-text-muted">{% trans "Usa 0 para eliminar el artículo." %}</p>
+                </div>
 
-            <div>
-              <label for="note-{{ item.product.id }}" class="form-label">
-                {% trans "Nota para este artículo" %}
-              </label>
-              <textarea
-                id="note-{{ item.product.id }}"
-                name="note"
-                rows="3"
-                maxlength="500"
-                class="form-textarea"
-              >{{ item.note }}</textarea>
-            </div>
+                <div>
+                  <label for="note-{{ item.product.id }}" class="form-label">
+                    {% trans "Nota para este artículo" %}
+                  </label>
+                  <textarea
+                    id="note-{{ item.product.id }}"
+                    name="note"
+                    rows="3"
+                    maxlength="500"
+                    class="form-textarea"
+                  >{{ item.note }}</textarea>
+                </div>
 
-            <div class="sm:col-span-2 flex flex-wrap items-center gap-2">
+                <div class="sm:col-span-2 flex flex-wrap items-center gap-2">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                  >
+                    {% trans "Actualizar artículo" %}
+                  </button>
+                </div>
+              </form>
+
+              <form method="post" action="{% url 'cart:request_cart_remove' product_id=item.product.id %}" class="mt-3">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="btn btn-secondary"
+                >
+                  {% trans "Eliminar" %}
+                </button>
+              </form>
+            </article>
+          {% endfor %}
+        </section>
+
+        <aside class="section-shell h-fit lg:sticky lg:top-4">
+          <h2 class="subsection-title">{% trans "Resumen de solicitud" %}</h2>
+          <dl class="mt-3 grid gap-2 text-sm text-text-muted">
+            <div class="panel-muted">
+              <dt class="font-medium text-text-muted">{% trans "Líneas" %}</dt>
+              <dd class="mt-1 text-lg font-semibold text-text">{{ line_count }}</dd>
+            </div>
+            <div class="panel-muted">
+              <dt class="font-medium text-text-muted">{% trans "Cantidad total" %}</dt>
+              <dd class="mt-1 text-lg font-semibold text-text">{{ total_quantity }}</dd>
+            </div>
+          </dl>
+
+          <div class="mt-4 space-y-2">
+            <a
+              href="{% url 'inquiries:public_inquiry_submit' %}"
+              class="btn btn-primary w-full"
+            >
+              {% trans "Continuar con solicitud" %}
+            </a>
+            <form method="post" action="{% url 'cart:request_cart_clear' %}">
+              {% csrf_token %}
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="btn btn-secondary w-full"
               >
-                {% trans "Actualizar artículo" %}
+                {% trans "Vaciar carrito" %}
               </button>
-            </div>
-          </form>
-
-          <form method="post" action="{% url 'cart:request_cart_remove' product_id=item.product.id %}" class="mt-2">
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="btn btn-secondary"
-            >
-              {% trans "Eliminar" %}
-            </button>
-          </form>
-        </article>
-      {% endfor %}
-    </section>
-
-    <section class="mt-6 section-shell">
-      <h2 class="subsection-title">{% trans "Resumen de solicitud" %}</h2>
-      <dl class="mt-3 grid gap-2 text-sm text-text-muted sm:grid-cols-2">
-        <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Líneas" %}</dt>
-          <dd class="mt-1 text-text">{{ line_count }}</dd>
-        </div>
-        <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Cantidad total" %}</dt>
-          <dd class="mt-1 text-text">{{ total_quantity }}</dd>
-        </div>
-      </dl>
-
-      <div class="mt-4 flex flex-wrap items-center gap-2">
-        <a
-          href="{% url 'inquiries:public_inquiry_submit' %}"
-          class="btn btn-primary"
-        >
-          {% trans "Continuar con solicitud" %}
-        </a>
-        <form method="post" action="{% url 'cart:request_cart_clear' %}">
-          {% csrf_token %}
-          <button
-            type="submit"
-            class="btn btn-secondary"
-          >
-            {% trans "Vaciar carrito" %}
-          </button>
-        </form>
+            </form>
+          </div>
+        </aside>
       </div>
-    </section>
-  {% else %}
-    {% trans "Tu carrito de solicitud está vacío." as empty_title %}
-    {% trans "Explora el catálogo y añade productos para preparar tu consulta comercial." as empty_message %}
-    {% trans "Ver productos" as empty_cta %}
-    {% url 'catalog:product_list' as product_list_url %}
-    {% include "components/empty_state.html" with title=empty_title message=empty_message cta_href=product_list_url cta_label=empty_cta %}
-  {% endif %}
+    {% else %}
+      <section class="section-shell">
+        {% trans "Tu carrito de solicitud está vacío." as empty_title %}
+        {% trans "Explora el catálogo y añade productos para preparar tu consulta comercial." as empty_message %}
+        {% trans "Ver productos" as empty_cta %}
+        {% url 'catalog:product_list' as product_list_url %}
+        {% include "components/empty_state.html" with title=empty_title message=empty_message cta_href=product_list_url cta_label=empty_cta %}
+      </section>
+    {% endif %}
+  </div>
 {% endblock %}

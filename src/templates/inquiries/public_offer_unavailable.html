@@ -4,21 +4,26 @@
 {% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
 
 {% block content %}
-  <section class="section-shell-lg">
-    <h1 class="page-title">{{ page_title }}</h1>
-    <p class="mt-3 text-sm text-text-muted sm:text-base">
-      {% trans "Esta oferta todavía no está disponible para respuesta del cliente." %}
-    </p>
-    <p class="mt-2 text-sm text-text-muted sm:text-base">
-      {% trans "Si tienes dudas, contacta con nuestro equipo comercial para recibir asistencia." %}
-    </p>
-    <div class="mt-5">
-      <a
-        href="{% url 'pages:contact' %}"
-        class="btn btn-secondary"
-      >
-        {% trans "Contactar" %}
-      </a>
-    </div>
-  </section>
+  <div class="page-stack">
+    <section class="section-shell-lg">
+      <p class="page-eyebrow">{% trans "Estado de oferta" %}</p>
+      <h1 class="mt-2 page-title">{{ page_title }}</h1>
+      <p class="page-lead">
+        {% trans "Esta oferta todavía no está disponible para respuesta del cliente." %}
+      </p>
+      <div class="panel-muted mt-4">
+        <p class="text-sm text-text-muted">
+          {% trans "Si tienes dudas, contacta con nuestro equipo comercial para recibir asistencia." %}
+        </p>
+      </div>
+      <div class="cta-row">
+        <a
+          href="{% url 'pages:contact' %}"
+          class="btn btn-secondary"
+        >
+          {% trans "Contactar" %}
+        </a>
+      </div>
+    </section>
+  </div>
 {% endblock %}

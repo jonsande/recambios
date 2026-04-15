@@ -4,51 +4,55 @@
 {% block title %}{{ page_title }} | {% trans "Recambios Técnicos" %}{% endblock %}
 
 {% block content %}
-  <section>
-    <h1 class="page-title">{{ page_title }}</h1>
-    <p class="mt-3 max-w-3xl text-sm text-text-muted sm:text-base">
-      {% trans "Tu oferta está aceptada y este será el siguiente paso para completar el pago." %}
-    </p>
-  </section>
+  <div class="page-stack">
+    <section class="section-shell-lg">
+      <p class="page-eyebrow">{% trans "Paso de pago" %}</p>
+      <h1 class="mt-2 page-title">{{ page_title }}</h1>
+      <p class="page-lead">
+        {% trans "Tu oferta está aceptada y este será el siguiente paso para completar el pago." %}
+      </p>
+    </section>
 
-  <section class="mt-4 alert alert-success" aria-live="polite">
-    {% trans "Hemos registrado tu aceptación correctamente." %}
-  </section>
+    <section class="alert alert-success" aria-live="polite">
+      {% trans "Hemos registrado tu aceptación correctamente." %}
+    </section>
 
-  <section class="mt-6 section-shell" aria-label="{% trans 'Resumen de pago pendiente' %}">
-    <dl class="grid gap-3 text-sm sm:grid-cols-2">
-      <div class="panel-muted">
-        <dt class="font-medium text-text-muted">{% trans "Referencia de oferta" %}</dt>
-        <dd class="mt-1 text-base font-semibold text-text">{{ offer.reference_code }}</dd>
-      </div>
-      <div class="panel-muted">
-        <dt class="font-medium text-text-muted">{% trans "Referencia de pago" %}</dt>
-        <dd class="mt-1 text-base font-semibold text-text">{{ payment.reference_code }}</dd>
-      </div>
-      <div class="panel-muted">
-        <dt class="font-medium text-text-muted">{% trans "Importe pendiente" %}</dt>
-        <dd class="mt-1 text-lg font-bold text-primary-strong">{{ payment.payable_amount }} {{ payment.currency }}</dd>
-      </div>
-      <div class="panel-muted">
-        <dt class="font-medium text-text-muted">{% trans "Estado" %}</dt>
-        <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
-      </div>
-    </dl>
-  </section>
+    <section class="section-shell" aria-label="{% trans 'Resumen de pago pendiente' %}">
+      <h2 class="subsection-title">{% trans "Resumen de pago pendiente" %}</h2>
+      <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Referencia de oferta" %}</dt>
+          <dd class="mt-1 text-base font-semibold text-text">{{ offer.reference_code }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Referencia de pago" %}</dt>
+          <dd class="mt-1 text-base font-semibold text-text">{{ payment.reference_code }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Importe pendiente" %}</dt>
+          <dd class="mt-1 text-2xl font-bold tracking-tight text-primary-strong">{{ payment.payable_amount }} {{ payment.currency }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Estado" %}</dt>
+          <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
+        </div>
+      </dl>
+    </section>
 
-  <section class="mt-4 alert alert-warning">
-    <p>{% trans "La pasarela de pago online todavía no está disponible en esta fase." %}</p>
-    <p class="mt-2">
-      {% trans "Nuestro equipo activará este paso en una siguiente iteración y te informará por los canales habituales." %}
-    </p>
-  </section>
+    <section class="alert alert-warning">
+      <p>{% trans "La pasarela de pago online todavía no está disponible en esta fase." %}</p>
+      <p class="mt-2">
+        {% trans "Nuestro equipo activará este paso en una siguiente iteración y te informará por los canales habituales." %}
+      </p>
+    </section>
 
-  <section class="mt-4">
-    <a
-      href="{% url 'inquiries:public_inquiry_offer_detail' access_token=offer.access_token %}"
-      class="btn btn-secondary"
-    >
-      {% trans "Volver al detalle de la oferta" %}
-    </a>
-  </section>
+    <section>
+      <a
+        href="{% url 'inquiries:public_inquiry_offer_detail' access_token=offer.access_token %}"
+        class="btn btn-secondary"
+      >
+        {% trans "Volver al detalle de la oferta" %}
+      </a>
+    </section>
+  </div>
 {% endblock %}

@@ -4,97 +4,134 @@
 {% block title %}{% trans "Inicio | Recambios Técnicos" %}{% endblock %}
 
 {% block content %}
-  <section class="section-shell-lg">
-    <p class="text-sm font-semibold uppercase tracking-wide text-text-muted">
-      {% trans "Plataforma de recambios de automoción" %}
-    </p>
-    <h1 class="mt-2 page-title">
-      {% trans "Catálogo técnico para consulta profesional y particular" %}
-    </h1>
-    <p class="mt-4 max-w-3xl text-sm text-text-muted sm:text-base">
-      {% trans "Selecciona recambios por categoría o revisa productos publicados. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación." %}
-    </p>
-    <div class="mt-5 flex flex-wrap gap-3">
-      <a
-        href="{% url 'catalog:category_list' %}"
-        class="btn btn-primary"
-      >
-        {% trans "Explorar categorías" %}
-      </a>
-      <a
-        href="{% url 'catalog:product_list' %}"
-        class="btn btn-secondary"
-      >
-        {% trans "Ver productos publicados" %}
-      </a>
-      <a
-        href="{% url 'catalog:compatibility_vehicle_types' %}"
-        class="btn btn-secondary"
-      >
-        {% trans "Buscar por vehículo compatible" %}
-      </a>
-    </div>
-  </section>
+  <div class="page-stack">
+    <section class="hero-shell">
+      <div class="hero-grid">
+        <div>
+          <p class="page-eyebrow">{% trans "Plataforma de recambios de automoción" %}</p>
+          <h1 class="mt-2 page-title">
+            {% trans "Catálogo técnico para consulta profesional y particular" %}
+          </h1>
+          <p class="page-lead">
+            {% trans "Selecciona recambios por categoría, referencia o compatibilidad. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación." %}
+          </p>
 
-  <section class="mt-8">
-    <header class="mb-4 flex items-center justify-between gap-4">
-      <h2 class="text-xl font-semibold text-primary-strong">{% trans "Categorías destacadas" %}</h2>
-      <a
-        href="{% url 'catalog:category_list' %}"
-        class="link-inline text-sm"
-      >
-        {% trans "Ver todas" %}
-      </a>
-    </header>
-
-    {% if highlight_categories %}
-      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {% for category in highlight_categories %}
-          <li>
-            <a
-              href="{% url 'catalog:category_products' category_slug=category.slug %}"
-              class="card-link"
-            >
-              <h3 class="subsection-title">{{ category.name }}</h3>
-              {% if category.description %}
-                <p class="mt-2 text-sm text-text-muted">{{ category.description|truncatewords:18 }}</p>
-              {% endif %}
-              <p class="mt-3 text-sm text-text-muted">
-                {% blocktrans count total=category.public_product_count %}
-                  1 producto publicado
-                {% plural %}
-                  {{ total }} productos publicados
-                {% endblocktrans %}
-              </p>
+          <div class="cta-row">
+            <a href="{% url 'catalog:category_list' %}" class="btn btn-primary">
+              {% trans "Explorar categorías" %}
             </a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      {% trans "No hay categorías públicas disponibles todavía." as empty_message %}
-      {% trans "Las categorías aparecerán cuando existan productos publicados y activos." as empty_help %}
-      {% include "components/empty_state.html" with title=empty_message message=empty_help %}
-    {% endif %}
-  </section>
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary">
+              {% trans "Ver productos publicados" %}
+            </a>
+            <a href="{% url 'catalog:compatibility_vehicle_types' %}" class="btn btn-secondary">
+              {% trans "Buscar por vehículo compatible" %}
+            </a>
+          </div>
 
-  <section class="mt-10">
-    <h2 class="text-xl font-semibold text-primary-strong">{{ products_section_title }}</h2>
-    <p class="mt-2 text-sm text-text-muted">
-      {% trans "Presentación pública inicial del catálogo. Para precio final y plazo siempre se requiere confirmación previa." %}
-    </p>
+          <div class="info-grid">
+            <article class="info-item">
+              <p class="info-value">{% trans "OEM y equivalencias" %}</p>
+              <p class="info-label">{% trans "Búsqueda técnica prioritaria" %}</p>
+            </article>
+            <article class="info-item">
+              <p class="info-value">{% trans "Flujo por solicitud" %}</p>
+              <p class="info-label">{% trans "Confirmación comercial previa" %}</p>
+            </article>
+            <article class="info-item">
+              <p class="info-value">{% trans "ES / EN" %}</p>
+              <p class="info-label">{% trans "Soporte bilingüe v1" %}</p>
+            </article>
+          </div>
+        </div>
 
-    {% if home_products %}
-      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {% for product in home_products %}
-          {% include "catalog/partials/product_card.html" with product=product %}
-        {% endfor %}
+        <aside class="section-shell">
+          <h2 class="subsection-title">{% trans "Entrada rápida al catálogo" %}</h2>
+          <p class="mt-2 text-sm text-text-muted">
+            {% trans "Busca por referencia, OEM o término técnico y accede al listado filtrado." %}
+          </p>
+          <form method="get" action="{% url 'catalog:product_list' %}" class="mt-4 space-y-3">
+            <div>
+              <label for="home-q" class="form-label">{% trans "Referencia o término" %}</label>
+              <input
+                id="home-q"
+                name="q"
+                type="text"
+                class="form-input"
+                placeholder="{% trans 'Ej.: 038145209A, alternador, A3 8P' %}"
+              >
+            </div>
+            <button type="submit" class="btn btn-primary w-full">
+              {% trans "Buscar recambio" %}
+            </button>
+          </form>
+          <p class="mt-3 text-xs text-text-muted">
+            {% trans "Los resultados muestran productos publicados y su estado de consulta comercial." %}
+          </p>
+        </aside>
       </div>
-    {% else %}
-      <div class="mt-4">
+    </section>
+
+    <section class="section-shell">
+      <header class="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <p class="page-eyebrow">{% trans "Navegación por familias" %}</p>
+          <h2 class="section-title">{% trans "Categorías destacadas" %}</h2>
+        </div>
+        <a href="{% url 'catalog:category_list' %}" class="link-inline text-sm">
+          {% trans "Ver todas" %}
+        </a>
+      </header>
+
+      {% if highlight_categories %}
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {% for category in highlight_categories %}
+            <li>
+              <a
+                href="{% url 'catalog:category_products' category_slug=category.slug %}"
+                class="card-link h-full"
+              >
+                <h3 class="subsection-title">{{ category.name }}</h3>
+                {% if category.description %}
+                  <p class="mt-2 text-sm text-text-muted">{{ category.description|truncatewords:18 }}</p>
+                {% endif %}
+                <p class="mt-3 text-sm text-text-muted">
+                  {% blocktrans count total=category.public_product_count %}
+                    1 producto publicado
+                  {% plural %}
+                    {{ total }} productos publicados
+                  {% endblocktrans %}
+                </p>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        {% trans "No hay categorías públicas disponibles todavía." as empty_message %}
+        {% trans "Las categorías aparecerán cuando existan productos publicados y activos." as empty_help %}
+        {% include "components/empty_state.html" with title=empty_message message=empty_help %}
+      {% endif %}
+    </section>
+
+    <section class="section-shell">
+      <header class="mb-4">
+        <p class="page-eyebrow">{% trans "Catálogo publicado" %}</p>
+        <h2 class="section-title">{{ products_section_title }}</h2>
+        <p class="mt-2 text-sm text-text-muted">
+          {% trans "Presentación pública inicial del catálogo. Para precio final y plazo siempre se requiere confirmación previa." %}
+        </p>
+      </header>
+
+      {% if home_products %}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {% for product in home_products %}
+            {% include "catalog/partials/product_card.html" with product=product %}
+          {% endfor %}
+        </div>
+      {% else %}
         {% trans "No hay productos públicos disponibles." as empty_message %}
         {% trans "Publica productos desde el panel interno para que aparezcan aquí." as empty_help %}
         {% include "components/empty_state.html" with title=empty_message message=empty_help %}
-      </div>
-    {% endif %}
-  </section>
+      {% endif %}
+    </section>
+  </div>
 {% endblock %}

@@ -16,18 +16,24 @@
     {% trans "Saltar al contenido principal" %}
   </a>
 
-  <header class="border-b border-border bg-surface">
-    <div class="layout-shell py-4">
-      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <a
-          href="{% url 'pages:home' %}"
-          class="text-lg font-semibold tracking-tight text-primary-strong"
-        >
-          {% trans "Recambios Técnicos" %}
-        </a>
+  <header class="site-header">
+    <div class="layout-shell site-header-inner">
+      <div class="site-header-row">
+        <div class="space-y-3">
+          <a href="{% url 'pages:home' %}" class="site-brand">
+            <span class="site-brand-mark" aria-hidden="true">RT</span>
+            <span>
+              <span class="site-brand-title">{% trans "Recambios Técnicos" %}</span>
+              <span class="site-brand-subtitle">{% trans "Consulta profesional de disponibilidad, precio y plazo" %}</span>
+            </span>
+          </a>
+          <p class="technical-copy">
+            {% trans "Catálogo técnico para particulares, talleres y empresas" %}
+          </p>
+        </div>
 
         <nav aria-label="{% trans 'Navegación principal' %}">
-          <ul class="flex flex-wrap items-center gap-2 text-sm font-medium">
+          <ul class="site-nav-list">
             <li>
               <a class="link-nav" href="{% url 'pages:home' %}">
                 {% trans "Inicio" %}
@@ -60,7 +66,10 @@
             </li>
             <li>
               <a class="link-nav" href="{% url 'cart:request_cart_detail' %}">
-                {% trans "Solicitud" %}{% if request_cart_total_quantity %} ({{ request_cart_total_quantity }}){% endif %}
+                {% trans "Solicitud" %}
+                {% if request_cart_total_quantity %}
+                  <span class="ml-1 badge badge-neutral">{{ request_cart_total_quantity }}</span>
+                {% endif %}
               </a>
             </li>
             <li>
@@ -72,13 +81,14 @@
         </nav>
       </div>
 
-      <div class="mt-3 flex items-center gap-2 text-sm">
-        <span class="text-text-muted">{% trans "Idioma" %}:</span>
+      <div class="language-switch">
+        <span class="meta-copy">{% trans "Idioma de navegación" %}</span>
         {% language "es" %}{% url 'pages:home' as home_es %}{% endlanguage %}
         {% language "en" %}{% url 'pages:home' as home_en %}{% endlanguage %}
         <a
           href="{{ home_es }}"
           lang="es"
+          aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
           class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
         >
           ES
@@ -86,6 +96,7 @@
         <a
           href="{{ home_en }}"
           lang="en"
+          aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
           class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
         >
           EN
@@ -94,16 +105,27 @@
     </div>
   </header>
 
-  <main id="main-content" class="layout-shell py-8">
+  <main id="main-content" class="layout-shell main-shell">
     {% if messages %}
-      <section class="mb-4 space-y-2" aria-label="{% trans 'Mensajes del sistema' %}">
+      <section class="flash-list" aria-label="{% trans 'Mensajes del sistema' %}">
         {% for message in messages %}
           <div
             class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}"
             role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
             aria-live="{% if message.tags == 'error' %}assertive{% else %}polite{% endif %}"
           >
-            {{ message }}
+            <p class="meta-copy">
+              {% if message.tags == "error" %}
+                {% trans "Error" %}
+              {% elif message.tags == "success" %}
+                {% trans "Confirmación" %}
+              {% elif message.tags == "warning" %}
+                {% trans "Aviso" %}
+              {% else %}
+                {% trans "Información" %}
+              {% endif %}
+            </p>
+            <p class="mt-1">{{ message }}</p>
           </div>
         {% endfor %}
       </section>
@@ -111,11 +133,32 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="mt-12 border-t border-border bg-surface">
-    <div class="layout-shell py-6">
-      <div class="flex flex-col gap-3 text-sm text-text-muted sm:flex-row sm:items-center sm:justify-between">
-        <p>{% trans "Catálogo técnico orientado a consulta previa de disponibilidad, precio y plazo." %}</p>
-        <p>© {% now "Y" %} {% trans "Recambios Técnicos" %}</p>
+  <footer class="footer-shell">
+    <div class="layout-shell">
+      <div class="footer-grid">
+        <section>
+          <h2 class="subsection-title">{% trans "Recambios Técnicos" %}</h2>
+          <p class="mt-2 text-sm">
+            {% trans "Plataforma de recambios con búsqueda por referencias y validación comercial previa de disponibilidad, precio final y plazo." %}
+          </p>
+        </section>
+        <section>
+          <h2 class="subsection-title">{% trans "Navegación" %}</h2>
+          <ul class="mt-2 space-y-1">
+            <li><a class="link-inline text-sm" href="{% url 'catalog:product_list' %}">{% trans "Catálogo de productos" %}</a></li>
+            <li><a class="link-inline text-sm" href="{% url 'catalog:compatibility_vehicle_types' %}">{% trans "Compatibilidad por vehículo" %}</a></li>
+            <li><a class="link-inline text-sm" href="{% url 'cart:request_cart_detail' %}">{% trans "Carrito de solicitud" %}</a></li>
+          </ul>
+        </section>
+        <section>
+          <h2 class="subsection-title">{% trans "Soporte" %}</h2>
+          <p class="mt-2 text-sm">{% trans "¿Necesitas una referencia concreta o validación técnica?" %}</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <a class="link-inline text-sm" href="{% url 'pages:contact' %}">{% trans "Contacto" %}</a>
+            <a class="link-inline text-sm" href="{% url 'pages:legal' %}">{% trans "Aviso legal" %}</a>
+          </div>
+          <p class="mt-3 text-xs text-text-muted">© {% now "Y" %} {% trans "Recambios Técnicos" %}</p>
+        </section>
       </div>
     </div>
   </footer>
