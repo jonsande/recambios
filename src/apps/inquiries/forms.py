@@ -11,11 +11,7 @@ class PublicInquirySubmissionForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-input",
             }
         ),
     )
@@ -24,11 +20,7 @@ class PublicInquirySubmissionForm(forms.Form):
         required=False,
         widget=forms.EmailInput(
             attrs={
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-input",
                 "autocomplete": "email",
             }
         ),
@@ -39,11 +31,7 @@ class PublicInquirySubmissionForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-input",
                 "autocomplete": "tel",
             }
         ),
@@ -54,11 +42,7 @@ class PublicInquirySubmissionForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-input",
                 "autocomplete": "organization",
             }
         ),
@@ -69,11 +53,7 @@ class PublicInquirySubmissionForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-input",
             }
         ),
     )
@@ -83,11 +63,7 @@ class PublicInquirySubmissionForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 "rows": 4,
-                "class": (
-                    "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm "
-                    "text-slate-900 focus:outline-none focus-visible:ring-2 "
-                    "focus-visible:ring-slate-700 focus-visible:ring-offset-2"
-                ),
+                "class": "form-textarea",
             }
         ),
     )

@@ -1,20 +1,20 @@
 {% load i18n %}
-<article class="flex h-full flex-col rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+<article class="flex h-full flex-col rounded-xl border border-border bg-surface p-4 shadow-sm">
   <header>
-    <h3 class="text-base font-semibold text-slate-950">
+    <h3 class="subsection-title">
       <a
         href="{% url 'catalog:product_detail' slug=product.slug %}"
-        class="focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+        class=" focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         {{ product.title }}
       </a>
     </h3>
     {% if product.short_description %}
-      <p class="mt-2 text-sm text-slate-600">{{ product.short_description }}</p>
+      <p class="mt-2 text-sm text-text-muted">{{ product.short_description }}</p>
     {% endif %}
   </header>
 
-  <dl class="mt-4 space-y-1 text-sm text-slate-700">
+  <dl class="mt-4 space-y-1 text-sm text-text-muted">
     <div class="flex justify-between gap-2">
       <dt class="font-medium">{% trans "Referencia (OEM)" %}</dt>
       <dd class="text-right">{{ product.sku }}</dd>
@@ -39,15 +39,15 @@
     </div>
   </dl>
 
-  <div class="mt-4 border-t border-slate-200 pt-4">
+  <div class="mt-4 border-t border-border pt-4">
     {% if product.price_visibility_mode == "visible_info" and product.last_known_price %}
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <p class="text-xs font-medium uppercase tracking-wide text-text-muted">
         {% trans "Último precio conocido" %}
       </p>
-      <p class="mt-1 text-xl font-semibold text-slate-950">
+      <p class="mt-1 text-xl font-semibold text-primary-strong">
         {{ product.last_known_price }} {{ product.currency }}
       </p>
-      <p class="mt-2 text-xs text-slate-600">
+      <p class="mt-2 text-xs text-text-muted">
         {% trans "Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo." %}
       </p>
     {% endif %}
@@ -57,7 +57,7 @@
         {% csrf_token %}
         <button
           type="submit"
-          class="inline-flex w-full justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          class="btn btn-primary w-full"
         >
           {% trans "Solicitar precio y plazo" %}
         </button>
@@ -69,7 +69,7 @@
         <input type="hidden" name="next" value="{{ request.get_full_path }}">
         <button
           type="submit"
-          class="inline-flex w-full justify-center rounded-md border border-slate-400 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+          class="btn btn-secondary w-full"
         >
           {% trans "Añadir a carrito" %}
         </button>
@@ -80,7 +80,7 @@
   <div class="mt-4">
     <a
       href="{% url 'catalog:product_detail' slug=product.slug %}"
-      class="text-sm font-semibold text-slate-900 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+      class="link-inline text-sm"
     >
       {% trans "Ver detalle técnico" %}
     </a>

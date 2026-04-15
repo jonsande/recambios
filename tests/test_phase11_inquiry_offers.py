@@ -1113,8 +1113,8 @@ def test_public_offer_sent_token_shows_offer_data_and_actions(client, django_use
     assert "Responder a la oferta" in content
     assert "Aceptar oferta y proceder al pago" in content
     assert "Rechazar oferta" in content
-    assert "bg-slate-900" in content
-    assert "border-slate-400" in content
+    assert "btn btn-primary" in content
+    assert "btn btn-secondary" in content
     assert (
         "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago."
         in content

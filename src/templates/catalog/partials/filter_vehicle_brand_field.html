@@ -1,6 +1,6 @@
 {% load i18n %}
 <div id="catalog-brand-field" aria-live="polite">
-  <label for="catalog-brand" class="block text-sm font-medium text-slate-900">
+  <label for="catalog-brand" class="form-label">
     {% trans "Marca de vehículo" %}
   </label>
   <select
@@ -13,7 +13,7 @@
     hx-include="#catalog-filter-form [name='vehicle_type'], #catalog-filter-form [name='brand']"
     hx-vals='{"scope_category":"{{ scope_category_slug|default_if_none:"" }}"}'
     data-vehicle-filter-htmx="1"
-    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2"
+    class="form-select"
   >
     <option value="">{% trans "Todas las marcas" %}</option>
     {% for option in vehicle_brand_options %}

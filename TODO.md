@@ -99,6 +99,9 @@
   - [x] página de confirmación posterior al envío
 
 - [ ] **Fase 10** — Frontend refinado y sistema visual
+  - [x] slice inicial 10.1: tokens de tema centralizados (paleta azul técnica sobria)
+  - [x] slice inicial 10.1: patrones reutilizables base (botones, formularios, paneles, alertas, badges)
+  - [x] slice inicial 10.1: aplicación controlada en layout compartido y páginas públicas representativas
   - [ ] componentes reutilizables
   - [ ] mobile-first sólido
   - [ ] accesibilidad funcional

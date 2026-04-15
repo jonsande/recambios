@@ -1,24 +1,221 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0f172a;
-  --color-primary-foreground: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-text: #0f172a;
-  --color-text-muted: #334155;
+  /* Central visual theme tokens: change these values to reskin the public UI globally. */
+  --color-primary: #1f3a5f;
+  --color-primary-strong: #16304f;
+  --color-accent: #2f6fb3;
+  --color-surface: #f7f9fc;
+  --color-surface-muted: #eef2f6;
+  --color-text: #1f2933;
+  --color-text-muted: #52606d;
+  --color-border: #d9e2ec;
+
+  --color-success: #2f7a59;
+  --color-success-surface: #e7f2ec;
+  --color-success-border: #b8d7c6;
+  --color-warning: #8a6a1d;
+  --color-warning-surface: #f6f0df;
+  --color-warning-border: #e2d3aa;
+  --color-danger: #a03d3d;
+  --color-danger-surface: #f8eaea;
+  --color-danger-border: #e5bdbd;
+
+  --color-focus-ring: #2f6fb3;
 
   --font-sans: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
   --font-display: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-slate-100 text-slate-900 antialiased;
+    @apply bg-surface-muted text-text antialiased;
   }
 
   a {
     @apply underline-offset-2;
+  }
+
+  :where(a, button, input, select, textarea, [role="button"], summary):focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .layout-shell {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-primary-strong sm:text-3xl;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-primary-strong;
+  }
+
+  .subsection-title {
+    @apply text-base font-semibold text-primary-strong;
+  }
+
+  .body-copy {
+    @apply text-sm leading-relaxed text-text sm:text-base;
+  }
+
+  .muted-copy {
+    @apply text-sm text-text-muted;
+  }
+
+  .meta-copy {
+    @apply text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+
+  .technical-copy {
+    @apply text-xs font-medium tracking-wide text-text-muted;
+  }
+
+  .section-shell {
+    @apply rounded-xl border bg-surface p-4 shadow-sm sm:p-5;
+  }
+
+  .section-shell-lg {
+    @apply rounded-2xl border bg-surface p-6 shadow-sm sm:p-8;
+  }
+
+  .panel-muted {
+    @apply rounded-md border bg-surface-muted p-3;
+  }
+
+  .panel-dashed {
+    @apply rounded-xl border border-dashed bg-surface p-6 text-center;
+  }
+
+  .card-link {
+    @apply block rounded-xl border bg-surface p-4 shadow-sm transition duration-150 hover:border-accent hover:shadow;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply border-primary bg-primary text-white hover:border-primary-strong hover:bg-primary-strong;
+  }
+
+  .btn-secondary {
+    @apply border-border bg-surface text-text hover:bg-surface-muted;
+  }
+
+  .btn-ghost {
+    @apply border-transparent bg-transparent text-text hover:bg-surface-muted;
+  }
+
+  .link-nav {
+    @apply rounded-md px-3 py-2 text-sm font-medium text-text transition-colors duration-150 hover:bg-surface-muted;
+  }
+
+  .link-nav-active {
+    @apply bg-primary text-white hover:bg-primary-strong;
+  }
+
+  .link-inline {
+    @apply font-semibold text-primary hover:text-primary-strong hover:underline;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-text;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    @apply mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface;
+  }
+
+  .form-help {
+    @apply mt-1 text-xs text-text-muted;
+  }
+
+  .form-error {
+    @apply mt-1 text-sm text-danger;
+  }
+
+  .field-checkbox {
+    @apply h-4 w-4 rounded border-border text-primary;
+    @apply focus-visible:ring-2 focus-visible:ring-accent;
+  }
+
+  .alert {
+    @apply rounded-md border px-3 py-2 text-sm;
+  }
+
+  .alert-info {
+    @apply border-border bg-surface-muted text-text;
+  }
+
+  .alert-success {
+    @apply border-success-border bg-success-surface text-success;
+  }
+
+  .alert-warning {
+    @apply border-warning-border bg-warning-surface text-warning;
+  }
+
+  .alert-danger {
+    @apply border-danger-border bg-danger-surface text-danger;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium;
+  }
+
+  .badge-neutral {
+    @apply border-border bg-surface-muted text-text-muted;
+  }
+
+  .badge-success {
+    @apply border-success-border bg-success-surface text-success;
+  }
+
+  .badge-warning {
+    @apply border-warning-border bg-warning-surface text-warning;
+  }
+
+  .badge-danger {
+    @apply border-danger-border bg-danger-surface text-danger;
+  }
+
+  .technical-grid {
+    @apply divide-y divide-border rounded-md border;
+  }
+
+  .technical-grid-row {
+    @apply grid gap-2 px-4 py-3 sm:grid-cols-2;
+  }
+
+  .technical-grid-key {
+    @apply font-medium text-text-muted;
+  }
+
+  .technical-grid-value {
+    @apply text-text;
+  }
+
+  .table-tech {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .table-tech th {
+    @apply border-b border-border bg-surface-muted px-3 py-2 text-left font-semibold text-text;
+  }
+
+  .table-tech td {
+    @apply border-b border-border px-3 py-2 text-text;
   }
 }
