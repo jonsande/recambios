@@ -56,26 +56,26 @@
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
-    --color-primary: #1f3a5f;
-    --color-primary-strong: #16304f;
-    --color-accent: #2f6fb3;
-    --color-surface: #f7f9fc;
+    --color-primary: #21466b;
+    --color-primary-strong: #173753;
+    --color-accent: #2d7b9d;
+    --color-surface: #f5f8fb;
     --color-surface-elevated: #ffffff;
-    --color-surface-muted: #eef2f6;
-    --color-text: #1f2933;
-    --color-text-muted: #52606d;
-    --color-border: #d9e2ec;
-    --color-border-strong: #bcccdc;
-    --color-success: #2f7a59;
-    --color-success-surface: #e7f2ec;
-    --color-success-border: #b8d7c6;
-    --color-warning: #8a6a1d;
-    --color-warning-surface: #f6f0df;
-    --color-warning-border: #e2d3aa;
-    --color-danger: #a03d3d;
-    --color-danger-surface: #f8eaea;
-    --color-danger-border: #e5bdbd;
-    --color-focus-ring: #2f6fb3;
+    --color-surface-muted: #eaf0f6;
+    --color-text: #1d2935;
+    --color-text-muted: #566879;
+    --color-border: #d3dde8;
+    --color-border-strong: #b8c6d6;
+    --color-success: #2f7558;
+    --color-success-surface: #e5f1eb;
+    --color-success-border: #b5d3c3;
+    --color-warning: #83651e;
+    --color-warning-surface: #f4efdf;
+    --color-warning-border: #decfaa;
+    --color-danger: #9b3f3f;
+    --color-danger-surface: #f7e9e9;
+    --color-danger-border: #e3bbbb;
+    --color-focus-ring: #2d7b9d;
   }
 }
 @layer base {
@@ -852,7 +852,7 @@
   .hover\:bg-primary\/90 {
     &:hover {
       @media (hover: hover) {
-        background-color: color-mix(in srgb, #1f3a5f 90%, transparent);
+        background-color: color-mix(in srgb, #21466b 90%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           background-color: color-mix(in oklab, var(--color-primary) 90%, transparent);
         }
@@ -1124,7 +1124,7 @@
     background-attachment: fixed;
   }
   body.site-chrome-light {
-    --site-chrome-bg-current: var(--site-chrome-bg-light, #ffffff);
+    --site-chrome-bg-current: var(--site-chrome-bg-light, #f7fbff);
     --site-chrome-text: #1f2933;
     --site-chrome-muted: #52606d;
     --site-chrome-border: #bcccdc;
@@ -1226,7 +1226,7 @@
     }
   }
   .breadcrumbs-separator {
-    color: color-mix(in srgb, #52606d 70%, transparent);
+    color: color-mix(in srgb, #566879 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       color: color-mix(in oklab, var(--color-text-muted) 70%, transparent);
     }
@@ -1398,9 +1398,9 @@
   }
   .site-claim {
     flex-basis: 100%;
-    padding-left: calc(var(--spacing) * 5);
+    padding-left: calc(var(--spacing) * 3);
     @media (width >= 40rem) {
-      padding-left: calc(var(--spacing) * 8);
+      padding-left: calc(var(--spacing) * 4);
     }
   }
   .site-menu {
@@ -1612,7 +1612,7 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
     border-color: var(--color-border);
-    background-color: color-mix(in srgb, #eef2f6 80%, transparent);
+    background-color: color-mix(in srgb, #eaf0f6 80%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-surface-muted) 80%, transparent);
     }
