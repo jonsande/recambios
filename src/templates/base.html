@@ -99,74 +99,85 @@
             </a>
           </div>
 
-          <details class="site-menu">
-            <summary class="site-menu-toggle">
-              <span>{% trans "Menú" %}</span>
-              <span aria-hidden="true">☰</span>
-            </summary>
-            <div class="site-menu-panel">
-              <nav aria-label="{% trans 'Navegación principal móvil' %}">
-                <ul class="site-nav-list-mobile">
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'catalog:category_list' %}">
-                      {% trans "Categorías" %}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'catalog:product_list' %}">
-                      {% trans "Productos" %}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'catalog:compatibility_vehicle_types' %}">
-                      {% trans "Compatibilidad" %}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'pages:about' %}">
-                      {% trans "Nosotros" %}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'pages:contact' %}">
-                      {% trans "Contacto" %}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="site-nav-link-mobile" href="{% url 'cart:request_cart_detail' %}">
-                      {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
-                        {% trans "Cart" %}
-                      {% else %}
-                        {% trans "Carrito" %}
-                      {% endif %}
-                      {% if request_cart_total_quantity %}
-                        ({{ request_cart_total_quantity }})
-                      {% endif %}
-                    </a>
-                  </li>
-                </ul>
-              </nav>
+          <div class="site-menu">
+            <button
+              type="button"
+              class="site-menu-toggle"
+              aria-expanded="false"
+              aria-controls="site-menu-panel"
+            >
+              <span class="sr-only">{% trans "Abrir o cerrar navegación" %}</span>
+              <span class="site-menu-icon" aria-hidden="true">
+                <span class="site-menu-icon-bar"></span>
+                <span class="site-menu-icon-bar"></span>
+                <span class="site-menu-icon-bar"></span>
+              </span>
+            </button>
+            <div id="site-menu-panel" class="site-menu-panel" hidden>
+              <div class="layout-shell site-menu-panel-inner">
+                <nav aria-label="{% trans 'Navegación principal móvil' %}">
+                  <ul class="site-nav-list-mobile">
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'catalog:category_list' %}">
+                        {% trans "Categorías" %}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'catalog:product_list' %}">
+                        {% trans "Productos" %}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'catalog:compatibility_vehicle_types' %}">
+                        {% trans "Compatibilidad" %}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'pages:about' %}">
+                        {% trans "Nosotros" %}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'pages:contact' %}">
+                        {% trans "Contacto" %}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="site-nav-link-mobile" href="{% url 'cart:request_cart_detail' %}">
+                        {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+                          {% trans "Cart" %}
+                        {% else %}
+                          {% trans "Carrito" %}
+                        {% endif %}
+                        {% if request_cart_total_quantity %}
+                          ({{ request_cart_total_quantity }})
+                        {% endif %}
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
 
-              <div class="language-switch mt-3 border-t border-border pt-3" aria-label="{% trans 'Selector de idioma' %}">
-                <a
-                  href="{{ home_es }}"
-                  lang="es"
-                  aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
-                  class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
-                >
-                  ES
-                </a>
-                <a
-                  href="{{ home_en }}"
-                  lang="en"
-                  aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
-                  class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
-                >
-                  EN
-                </a>
+                <div class="language-switch site-menu-language mt-5" aria-label="{% trans 'Selector de idioma' %}">
+                  <a
+                    href="{{ home_es }}"
+                    lang="es"
+                    aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
+                    class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                  >
+                    ES
+                  </a>
+                  <a
+                    href="{{ home_en }}"
+                    lang="en"
+                    aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
+                    class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                  >
+                    EN
+                  </a>
+                </div>
               </div>
             </div>
-          </details>
+          </div>
         </div>
         <p class="site-claim technical-copy">
           {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
@@ -207,13 +218,16 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="footer-shell">
+  <footer
+    class="footer-shell {{ site_footer_class }}"
+    {% if site_footer_bg %}style="--site-footer-bg-override: {{ site_footer_bg }};"{% endif %}
+  >
     <div class="layout-shell">
       <div class="footer-grid">
         <section>
           <div class="footer-brand">
             <img
-              src="{% static site_brand_logo %}"
+              src="{% static site_footer_logo %}"
               alt=""
               class="site-brand-icon site-brand-icon-footer"
               width="149"
@@ -246,5 +260,97 @@
     </div>
   </footer>
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script>
+    (function () {
+      const menu = document.querySelector(".site-menu");
+      if (!menu) {
+        return;
+      }
+
+      const toggle = menu.querySelector(".site-menu-toggle");
+      const panel = menu.querySelector(".site-menu-panel");
+      if (!toggle || !panel) {
+        return;
+      }
+
+      let closeTimer = null;
+      const closeMenu = function (restoreFocus = true) {
+        if (!menu.classList.contains("is-open")) {
+          return;
+        }
+
+        menu.classList.remove("is-open");
+        menu.classList.add("is-closing");
+        document.body.classList.remove("site-menu-open");
+        toggle.setAttribute("aria-expanded", "false");
+
+        const finalizeClose = function () {
+          if (closeTimer) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+          }
+          menu.classList.remove("is-closing");
+          panel.hidden = true;
+          panel.removeEventListener("transitionend", onTransitionEnd);
+          if (restoreFocus) {
+            toggle.focus();
+          }
+        };
+
+        const onTransitionEnd = function (event) {
+          if (event.target !== panel || event.propertyName !== "transform") {
+            return;
+          }
+          if (closeTimer) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+          }
+          finalizeClose();
+        };
+
+        panel.addEventListener("transitionend", onTransitionEnd);
+        closeTimer = window.setTimeout(finalizeClose, 360);
+      };
+
+      const openMenu = function () {
+        if (menu.classList.contains("is-open")) {
+          return;
+        }
+
+        if (closeTimer) {
+          window.clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+
+        panel.hidden = false;
+        menu.classList.remove("is-closing");
+        window.requestAnimationFrame(function () {
+          menu.classList.add("is-open");
+          document.body.classList.add("site-menu-open");
+          toggle.setAttribute("aria-expanded", "true");
+        });
+      };
+
+      menu.querySelectorAll(".site-nav-link-mobile, .site-menu-language a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          closeMenu(false);
+        });
+      });
+
+      toggle.addEventListener("click", function () {
+        if (menu.classList.contains("is-open")) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && menu.classList.contains("is-open")) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

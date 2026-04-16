@@ -12,6 +12,8 @@ from apps.common.context_processors import site_brand
     SITE_CHROME_VARIANT="light",
     SITE_CHROME_BG_LIGHT="#ffffff",
     SITE_CHROME_BG_DARK="#557873",
+    SITE_FOOTER_VARIANT="inherit",
+    SITE_FOOTER_BG="",
 )
 def test_site_brand_context_uses_current_language() -> None:
     request = RequestFactory().get("/es/")
@@ -25,6 +27,10 @@ def test_site_brand_context_uses_current_language() -> None:
     assert context["site_chrome_class"] == "site-chrome-light"
     assert context["site_chrome_bg_light"] == "#ffffff"
     assert context["site_chrome_bg_dark"] == "#557873"
+    assert context["site_footer_variant"] == "light"
+    assert context["site_footer_class"] == "site-footer-light"
+    assert context["site_footer_logo"] == "img/light.png"
+    assert context["site_footer_bg"] == ""
 
 
 @override_settings(
@@ -36,6 +42,8 @@ def test_site_brand_context_uses_current_language() -> None:
     SITE_CHROME_VARIANT="dark",
     SITE_CHROME_BG_LIGHT="#f8f8f8",
     SITE_CHROME_BG_DARK="#557873",
+    SITE_FOOTER_VARIANT="light",
+    SITE_FOOTER_BG="#101010",
 )
 def test_site_brand_context_falls_back_to_default_for_unknown_language() -> None:
     request = RequestFactory().get("/fr/")
@@ -49,3 +57,7 @@ def test_site_brand_context_falls_back_to_default_for_unknown_language() -> None
     assert context["site_chrome_class"] == "site-chrome-dark"
     assert context["site_chrome_bg_light"] == "#f8f8f8"
     assert context["site_chrome_bg_dark"] == "#557873"
+    assert context["site_footer_variant"] == "light"
+    assert context["site_footer_class"] == "site-footer-light"
+    assert context["site_footer_logo"] == "img/light.png"
+    assert context["site_footer_bg"] == "#101010"

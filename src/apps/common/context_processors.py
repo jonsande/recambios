@@ -18,6 +18,15 @@ def site_brand(request) -> dict[str, str]:
         if chrome_variant == "dark"
         else settings.SITE_BRAND_LOGO_LIGHT
     )
+    footer_variant_setting = settings.SITE_FOOTER_VARIANT
+    footer_variant = (
+        chrome_variant if footer_variant_setting == "inherit" else footer_variant_setting
+    )
+    footer_logo = (
+        settings.SITE_BRAND_LOGO_DARK
+        if footer_variant == "dark"
+        else settings.SITE_BRAND_LOGO_LIGHT
+    )
 
     return {
         "site_brand_name": localized_name,
@@ -26,4 +35,8 @@ def site_brand(request) -> dict[str, str]:
         "site_chrome_class": f"site-chrome-{chrome_variant}",
         "site_chrome_bg_light": settings.SITE_CHROME_BG_LIGHT,
         "site_chrome_bg_dark": settings.SITE_CHROME_BG_DARK,
+        "site_footer_variant": footer_variant,
+        "site_footer_class": f"site-footer-{footer_variant}",
+        "site_footer_logo": footer_logo,
+        "site_footer_bg": settings.SITE_FOOTER_BG,
     }

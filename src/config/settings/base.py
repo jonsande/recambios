@@ -190,6 +190,16 @@ SITE_CHROME_BG_DARK = config(
     "SITE_CHROME_BG_DARK",
     default="#557873",
 )
+SITE_FOOTER_VARIANT = config(
+    "SITE_FOOTER_VARIANT",
+    default="inherit",
+).strip().lower()
+if SITE_FOOTER_VARIANT not in {"inherit", "light", "dark"}:
+    SITE_FOOTER_VARIANT = "inherit"
+SITE_FOOTER_BG = config(
+    "SITE_FOOTER_BG",
+    default="",
+).strip()
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
