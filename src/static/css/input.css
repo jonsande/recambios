@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #24463f;
-  --color-primary-strong: #19332e;
-  --color-accent: #a67c52;
-  --color-accent-soft: #f1e8de;
-  --color-surface: #f7f8f6;
+  --color-primary: #1d2b3a;
+  --color-primary-strong: #121c27;
+  --color-accent: #7da321;
+  --color-accent-soft: #edf4db;
+  --color-surface: #f6f8f7;
   --color-surface-elevated: #ffffff;
-  --color-surface-muted: #ebefeb;
-  --color-text: #1f2927;
-  --color-text-muted: #5f6d69;
-  --color-border: #d5ddd8;
-  --color-border-strong: #bcc8c2;
+  --color-surface-muted: #ebefed;
+  --color-text: #1d252d;
+  --color-text-muted: #616d77;
+  --color-border: #d6dfe3;
+  --color-border-strong: #bcc8ce;
 
-  --color-success: #2f6a50;
-  --color-success-surface: #e5efe9;
-  --color-success-border: #b9cfbf;
-  --color-warning: #8a6820;
+  --color-success: #2e6a50;
+  --color-success-surface: #e4efe9;
+  --color-success-border: #b8cfbf;
+  --color-warning: #8b6820;
   --color-warning-surface: #f5efdf;
-  --color-warning-border: #e1d1ab;
-  --color-danger: #994545;
-  --color-danger-surface: #f6eaea;
-  --color-danger-border: #e2c0c0;
+  --color-warning-border: #e1d0ab;
+  --color-danger: #9a4242;
+  --color-danger-surface: #f7e9e9;
+  --color-danger-border: #e4bdbd;
 
-  --color-focus-ring: #a67c52;
+  --color-focus-ring: #7da321;
 
   --font-sans: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
   --font-display: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
@@ -159,6 +159,12 @@
   .site-brand-name {
     @apply ml-0.5 block truncate text-xl font-semibold leading-none tracking-tight text-primary-strong sm:ml-1 sm:text-2xl lg:text-[1.75rem];
     color: var(--site-chrome-text);
+    transition: color 150ms ease;
+  }
+
+  .site-brand:hover .site-brand-name,
+  .site-brand:focus-visible .site-brand-name {
+    color: var(--color-accent);
   }
 
   .site-nav-list {

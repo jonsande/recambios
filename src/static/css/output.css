@@ -55,27 +55,27 @@
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
-    --color-primary: #24463f;
-    --color-primary-strong: #19332e;
-    --color-accent: #a67c52;
-    --color-accent-soft: #f1e8de;
-    --color-surface: #f7f8f6;
+    --color-primary: #1d2b3a;
+    --color-primary-strong: #121c27;
+    --color-accent: #7da321;
+    --color-accent-soft: #edf4db;
+    --color-surface: #f6f8f7;
     --color-surface-elevated: #ffffff;
-    --color-surface-muted: #ebefeb;
-    --color-text: #1f2927;
-    --color-text-muted: #5f6d69;
-    --color-border: #d5ddd8;
-    --color-border-strong: #bcc8c2;
-    --color-success: #2f6a50;
-    --color-success-surface: #e5efe9;
-    --color-success-border: #b9cfbf;
-    --color-warning: #8a6820;
+    --color-surface-muted: #ebefed;
+    --color-text: #1d252d;
+    --color-text-muted: #616d77;
+    --color-border: #d6dfe3;
+    --color-border-strong: #bcc8ce;
+    --color-success: #2e6a50;
+    --color-success-surface: #e4efe9;
+    --color-success-border: #b8cfbf;
+    --color-warning: #8b6820;
     --color-warning-surface: #f5efdf;
-    --color-warning-border: #e1d1ab;
-    --color-danger: #994545;
-    --color-danger-surface: #f6eaea;
-    --color-danger-border: #e2c0c0;
-    --color-focus-ring: #a67c52;
+    --color-warning-border: #e1d0ab;
+    --color-danger: #9a4242;
+    --color-danger-surface: #f7e9e9;
+    --color-danger-border: #e4bdbd;
+    --color-focus-ring: #7da321;
   }
 }
 @layer base {
@@ -849,7 +849,7 @@
   .hover\:bg-primary\/90 {
     &:hover {
       @media (hover: hover) {
-        background-color: color-mix(in srgb, #24463f 90%, transparent);
+        background-color: color-mix(in srgb, #1d2b3a 90%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           background-color: color-mix(in oklab, var(--color-primary) 90%, transparent);
         }
@@ -1226,7 +1226,7 @@
     }
   }
   .breadcrumbs-separator {
-    color: color-mix(in srgb, #5f6d69 70%, transparent);
+    color: color-mix(in srgb, #616d77 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       color: color-mix(in oklab, var(--color-text-muted) 70%, transparent);
     }
@@ -1376,6 +1376,10 @@
       font-size: 1.75rem;
     }
     color: var(--site-chrome-text);
+    transition: color 150ms ease;
+  }
+  .site-brand:hover .site-brand-name, .site-brand:focus-visible .site-brand-name {
+    color: var(--color-accent);
   }
   .site-nav-list {
     display: flex;
@@ -1665,7 +1669,7 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
     border-color: var(--color-border);
-    background-color: color-mix(in srgb, #ebefeb 80%, transparent);
+    background-color: color-mix(in srgb, #ebefed 80%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-surface-muted) 80%, transparent);
     }
