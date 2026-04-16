@@ -35,7 +35,7 @@
           class="form-select"
           required
         >
-          <option value="">{% trans "Selecciona modelo" %}</option>
+          <option value="">{% trans "Seleccione modelo" %}</option>
           {% for option in model_options %}
             <option value="{{ option }}" {% if option == selected_model %}selected{% endif %}>{{ option }}</option>
           {% endfor %}
@@ -70,7 +70,7 @@
               Rango observado en compatibilidades publicadas: hasta {{ end }}.
             {% endblocktrans %}
           {% else %}
-            {% trans "Si no indicas año, se mostrarán resultados de todas las compatibilidades del modelo." %}
+            {% trans "Si no indica año, se mostrarán resultados de todas las compatibilidades del modelo." %}
           {% endif %}
         </p>
       </div>

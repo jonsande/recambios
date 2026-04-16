@@ -120,7 +120,7 @@ class PublicInquirySubmissionForm(forms.Form):
             if not cleaned_data.get("contact_email"):
                 self.add_error(
                     "contact_email",
-                    _("El email de contacto es obligatorio si tu cuenta no tiene email."),
+                    _("El email de contacto es obligatorio si su cuenta no tiene email."),
                 )
             return cleaned_data
 

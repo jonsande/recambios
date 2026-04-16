@@ -27,6 +27,7 @@ def site_brand(request) -> dict[str, str]:
         if footer_variant == "dark"
         else settings.SITE_BRAND_LOGO_LIGHT
     )
+    hero_variant = settings.SITE_HERO_VARIANT
 
     return {
         "site_brand_name": localized_name,
@@ -39,4 +40,6 @@ def site_brand(request) -> dict[str, str]:
         "site_footer_class": f"site-footer-{footer_variant}",
         "site_footer_logo": footer_logo,
         "site_footer_bg": settings.SITE_FOOTER_BG,
+        "site_hero_variant": hero_variant,
+        "site_hero_class": f"site-hero-{hero_variant}",
     }

@@ -53,7 +53,7 @@
                     value="{{ item.quantity }}"
                     class="form-input"
                   >
-                  <p class="mt-1 text-xs text-text-muted">{% trans "Usa 0 para eliminar el artículo." %}</p>
+                  <p class="mt-1 text-xs text-text-muted">{% trans "Use 0 para eliminar el artículo." %}</p>
                 </div>
 
                 <div>
@@ -126,8 +126,8 @@
       </div>
     {% else %}
       <section class="section-shell">
-        {% trans "Tu carrito de solicitud está vacío." as empty_title %}
-        {% trans "Explora el catálogo y añade productos para preparar tu consulta comercial." as empty_message %}
+        {% trans "Su carrito de solicitud está vacío." as empty_title %}
+        {% trans "Explore el catálogo y añada productos para preparar su consulta comercial." as empty_message %}
         {% trans "Ver productos" as empty_cta %}
         {% url 'catalog:product_list' as product_list_url %}
         {% include "components/empty_state.html" with title=empty_title message=empty_message cta_href=product_list_url cta_label=empty_cta %}

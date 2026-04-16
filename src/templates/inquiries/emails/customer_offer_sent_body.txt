@@ -1,23 +1,23 @@
 {% load i18n %}
-{% blocktrans with reference=inquiry.reference_code %}Tu solicitud {{ reference }} ya tiene una oferta confirmada.{% endblocktrans %}
+{% blocktrans with reference=inquiry.reference_code %}Su solicitud {{ reference }} ya tiene una oferta confirmada.{% endblocktrans %}
 
 {% trans "Resumen de la oferta:" %}
 {% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
-{% trans "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar." %}
+{% trans "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
 
 {% if offer.customer_message %}
 {% trans "Mensaje comercial:" %}
 {{ offer.customer_message }}
 {% endif %}
 
-{% trans "Revisa la oferta y responde (aceptar o rechazar) desde este enlace seguro:" %}
+{% trans "Revise la oferta y responda (aceptar o rechazar) desde este enlace seguro:" %}
 {{ offer_public_url }}
 
-{% trans "Este correo no incluye pago online en esta fase. Tras tu aceptación, te guiaremos con el siguiente paso." %}
+{% trans "Este correo no incluye pago online en esta fase. Tras su aceptación, le guiaremos con el siguiente paso." %}
 
 {% if customer_reply_to_email %}
-{% blocktrans with reply_to=customer_reply_to_email %}Si necesitas ayuda, responde a {{ reply_to }} indicando tus referencias.{% endblocktrans %}
+{% blocktrans with reply_to=customer_reply_to_email %}Si necesita ayuda, responda a {{ reply_to }} indicando sus referencias.{% endblocktrans %}
 {% endif %}

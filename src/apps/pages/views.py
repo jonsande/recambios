@@ -20,7 +20,7 @@ class HomeView(TemplateView):
             products_section_title = _("Productos destacados")
         else:
             home_products = list(public_products[:HOME_PRODUCT_LIMIT])
-            products_section_title = _("Últimos productos publicados")
+            products_section_title = _("Ofertas recientes")
 
         highlight_categories = list(
             get_public_categories_queryset(with_counts=True)

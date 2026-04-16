@@ -13,7 +13,7 @@
 
     {% if is_accepted %}
       <section class="alert alert-success" aria-live="polite">
-        <p>{% trans "Tu aceptación está registrada y el siguiente paso es completar el pago." %}</p>
+        <p>{% trans "Su aceptación está registrada y el siguiente paso es completar el pago." %}</p>
         <div class="mt-3">
           <a
             href="{% url 'inquiries:public_inquiry_offer_payment_placeholder' access_token=offer.access_token %}"
@@ -25,7 +25,7 @@
       </section>
     {% elif is_rejected %}
       <section class="alert alert-warning" aria-live="polite">
-        {% trans "Esta oferta figura como rechazada. Si necesitas revisar alternativas, puedes contactar con nuestro equipo." %}
+        {% trans "Esta oferta figura como rechazada. Si necesita revisar alternativas, puede contactar con nuestro equipo." %}
       </section>
     {% endif %}
 
@@ -65,14 +65,14 @@
     {% endif %}
 
     <section class="alert alert-warning" aria-label="{% trans 'Aviso de disponibilidad' %}">
-      {% trans "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, te contactaremos antes de continuar." %}
+      {% trans "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
     </section>
 
     {% if can_respond %}
       <section class="section-shell" aria-label="{% trans 'Respuesta de oferta' %}">
         <h2 class="subsection-title">{% trans "Responder a la oferta" %}</h2>
         <p class="mt-2 text-sm text-text-muted">
-          {% trans "Revisa los datos y selecciona la opción que corresponda. Si aceptas, pasarás al siguiente paso de pago." %}
+          {% trans "Revise los datos y seleccione la opción que corresponda. Si acepta, pasará al siguiente paso de pago." %}
         </p>
         <form method="post" class="mt-4 flex flex-wrap gap-3">
           {% csrf_token %}

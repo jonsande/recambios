@@ -89,7 +89,7 @@ def test_sends_internal_and_customer_emails_on_draft_to_submitted_transition(
     assert customer_email.to == ["phase8@example.com"]
     assert inquiry.reference_code in customer_email.subject
     assert customer_email.reply_to == ["atencion@example.com"]
-    assert "confirma la recepción de tu solicitud" in customer_email.body
+    assert "confirma la recepción de su solicitud" in customer_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -122,7 +122,7 @@ def test_customer_submission_email_supports_multiple_reply_to_addresses(
     customer_email = mail.outbox[1]
     assert customer_email.reply_to == ["atencion@example.com", "ventas@example.com"]
     assert (
-        "responde a atencion@example.com, ventas@example.com indicando tu referencia"
+        "responda a atencion@example.com, ventas@example.com indicando su referencia"
         in customer_email.body
     )
 
@@ -245,4 +245,4 @@ def test_spanish_templates_render_when_inquiry_language_is_es(
     assert len(mail.outbox) == 2
     assert "Nueva solicitud recibida:" in mail.outbox[0].subject
     assert "Se ha generado una nueva solicitud." in mail.outbox[0].body
-    assert "Hemos recibido tu solicitud" in mail.outbox[1].subject
+    assert "Hemos recibido su solicitud" in mail.outbox[1].subject

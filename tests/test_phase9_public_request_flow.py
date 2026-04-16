@@ -416,7 +416,7 @@ def test_submit_is_atomic_when_item_creation_fails(client, monkeypatch) -> None:
 
     assert response.status_code == 200
     content = response.content.decode()
-    assert "No se ha podido registrar tu solicitud." in content
+    assert "No se ha podido registrar su solicitud." in content
     assert Inquiry.objects.count() == 0
     assert len(mail.outbox) == 0
 

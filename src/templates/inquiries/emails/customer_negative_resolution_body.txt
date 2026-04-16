@@ -1,5 +1,5 @@
 {% load i18n %}
-{% blocktrans with reference=inquiry.reference_code %}Hemos finalizado la revisión de tu solicitud {{ reference }}.{% endblocktrans %}
+{% blocktrans with reference=inquiry.reference_code %}Hemos finalizado la revisión de su solicitud {{ reference }}.{% endblocktrans %}
 
 {% trans "En esta ocasión no podemos confirmar una oferta para los artículos solicitados." %}
 
@@ -21,8 +21,8 @@
 {{ inquiry.negative_resolution_customer_message }}
 {% endif %}
 
-{% trans "Si quieres que revisemos alternativas, responde a este correo indicando la referencia de tu solicitud." %}
+{% trans "Si desea que revisemos alternativas, responda a este correo indicando la referencia de su solicitud." %}
 
 {% if customer_reply_to_email %}
-{% blocktrans with reply_to=customer_reply_to_email %}También puedes escribirnos a {{ reply_to }} para ampliar detalles.{% endblocktrans %}
+{% blocktrans with reply_to=customer_reply_to_email %}También puede escribirnos a {{ reply_to }} para ampliar detalles.{% endblocktrans %}
 {% endif %}

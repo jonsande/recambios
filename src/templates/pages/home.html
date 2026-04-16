@@ -5,15 +5,15 @@
 
 {% block content %}
   <div class="page-stack">
-    <section class="hero-shell">
+    <section class="hero-shell {{ site_hero_class }}">
       <div class="hero-grid">
         <div>
-          <p class="page-eyebrow">{% trans "Plataforma de recambios de automoción" %}</p>
+          <p class="page-eyebrow">{% trans "Recambios de automoción" %}</p>
           <h1 class="mt-2 page-title">
-            {% trans "Catálogo técnico para consulta profesional y particular" %}
+            {% trans "Venta de recambios a profesionales y particulares" %}
           </h1>
           <p class="page-lead">
-            {% trans "Selecciona recambios por categoría, referencia o compatibilidad. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación." %}
+            {% trans "Seleccione recambios por categoría, referencia o compatibilidad. La disponibilidad, el precio final y el plazo se confirman siempre antes de tramitar cualquier operación." %}
           </p>
 
           <div class="cta-row">
@@ -21,7 +21,7 @@
               {% trans "Explorar categorías" %}
             </a>
             <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary">
-              {% trans "Ver productos publicados" %}
+              {% trans "Ver productos" %}
             </a>
             <a href="{% url 'catalog:compatibility_vehicle_types' %}" class="btn btn-secondary">
               {% trans "Buscar por vehículo compatible" %}
@@ -34,20 +34,20 @@
               <p class="info-label">{% trans "Búsqueda técnica prioritaria" %}</p>
             </article>
             <article class="info-item">
-              <p class="info-value">{% trans "Flujo por solicitud" %}</p>
+              <p class="info-value">{% trans "Solicite una oferta" %}</p>
               <p class="info-label">{% trans "Confirmación comercial previa" %}</p>
             </article>
             <article class="info-item">
-              <p class="info-value">{% trans "ES / EN" %}</p>
-              <p class="info-label">{% trans "Soporte bilingüe v1" %}</p>
+              <p class="info-value">{% trans "Agente independiente" %}</p>
+              <p class="info-label">{% trans "MEJORES PRECIOS Y TRATO PERSONALIZADO" %}</p>
             </article>
           </div>
         </div>
 
         <aside class="section-shell">
-          <h2 class="subsection-title">{% trans "Entrada rápida al catálogo" %}</h2>
+          <h2 class="subsection-title">{% trans "Búsqueda rápida" %}</h2>
           <p class="mt-2 text-sm text-text-muted">
-            {% trans "Busca por referencia, OEM o término técnico y accede al listado filtrado." %}
+            {% trans "Busque por referencia, OEM o término técnico y acceda al listado filtrado." %}
           </p>
           <form method="get" action="{% url 'catalog:product_list' %}" class="mt-4 space-y-3">
             <div>
@@ -114,7 +114,7 @@
 
     <section class="section-shell">
       <header class="mb-4">
-        <p class="page-eyebrow">{% trans "Catálogo publicado" %}</p>
+        <p class="page-eyebrow">{% trans "CATÁLOGO" %}</p>
         <h2 class="section-title">{{ products_section_title }}</h2>
         <p class="mt-2 text-sm text-text-muted">
           {% trans "Presentación pública inicial del catálogo. Para precio final y plazo siempre se requiere confirmación previa." %}
@@ -129,7 +129,7 @@
         </div>
       {% else %}
         {% trans "No hay productos públicos disponibles." as empty_message %}
-        {% trans "Publica productos desde el panel interno para que aparezcan aquí." as empty_help %}
+        {% trans "Los productos publicados desde el panel interno aparecerán aquí." as empty_help %}
         {% include "components/empty_state.html" with title=empty_message message=empty_help %}
       {% endif %}
     </section>

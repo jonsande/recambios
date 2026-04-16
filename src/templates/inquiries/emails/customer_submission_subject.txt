@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktrans with reference=inquiry.reference_code %}Hemos recibido tu solicitud {{ reference }}{% endblocktrans %}
+{% load i18n %}{% blocktrans with reference=inquiry.reference_code %}Hemos recibido su solicitud {{ reference }}{% endblocktrans %}

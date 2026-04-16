@@ -1,7 +1,7 @@
 {% load i18n %}
-{% blocktrans with reference=inquiry.reference_code %}Hemos recibido tu solicitud {{ reference }}.{% endblocktrans %}
+{% blocktrans with reference=inquiry.reference_code %}Hemos recibido su solicitud {{ reference }}.{% endblocktrans %}
 
-{% trans "Gracias por tu consulta. Nuestro equipo revisará disponibilidad, precio final y plazo de entrega antes de responderte." %}
+{% trans "Gracias por su consulta. Nuestro equipo revisará disponibilidad, precio final y plazo de entrega antes de responderle." %}
 {% blocktrans with reference=inquiry.reference_code %}Referencia de la solicitud: {{ reference }}{% endblocktrans %}
 
 {% trans "Resumen de artículos enviados:" %}
@@ -9,9 +9,9 @@
 {% empty %}{% trans "No hay artículos registrados." %}
 {% endfor %}
 
-{% trans "Este correo confirma la recepción de tu solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
-{% trans "Te contactaremos en cuanto validemos la información con nuestro equipo interno/proveedor." %}
+{% trans "Este correo confirma la recepción de su solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
+{% trans "Le contactaremos en cuanto validemos la información con nuestro equipo interno/proveedor." %}
 
 {% if customer_reply_to_email %}
-{% blocktrans with reply_to=customer_reply_to_email %}Si necesitas ampliar datos, responde a {{ reply_to }} indicando tu referencia.{% endblocktrans %}
+{% blocktrans with reply_to=customer_reply_to_email %}Si necesita ampliar datos, responda a {{ reply_to }} indicando su referencia.{% endblocktrans %}
 {% endif %}

@@ -46,7 +46,7 @@
       <section class="section-shell h-fit lg:sticky lg:top-4">
         <h2 class="subsection-title">{% trans "Búsqueda técnica y filtros" %}</h2>
         <p class="mt-2 text-sm text-text-muted">
-          {% trans "Usa referencia OEM, referencias cruzadas o términos de vehículo para localizar recambios publicados." %}
+          {% trans "Use referencia OEM, referencias cruzadas o términos de vehículo para localizar recambios publicados." %}
         </p>
 
         <form id="catalog-filter-form" method="get" action="" class="mt-4 space-y-4" aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}">
@@ -264,13 +264,13 @@
         {% else %}
           <div class="section-shell">
             {% if has_active_filters %}
-              {% trans "No hay resultados para tu búsqueda o filtros actuales." as empty_message %}
+            {% trans "No hay resultados para su búsqueda o filtros actuales." as empty_message %}
               {% trans "Ajusta los criterios o limpia filtros para ver más productos publicados." as empty_help %}
               {% trans "Limpiar filtros" as clear_filters_label %}
               {% include "components/empty_state.html" with title=empty_message message=empty_help cta_href=reset_filters_url cta_label=clear_filters_label %}
             {% else %}
               {% trans "No hay productos publicados en esta sección." as empty_message %}
-              {% trans "Puedes volver al listado de categorías para navegar otras áreas del catálogo." as empty_help %}
+              {% trans "Puede volver al listado de categorías para navegar otras áreas del catálogo." as empty_help %}
               {% trans "Ver categorías" as categories_label %}
               {% url 'catalog:category_list' as categories_url %}
               {% include "components/empty_state.html" with title=empty_message message=empty_help cta_href=categories_url cta_label=categories_label %}

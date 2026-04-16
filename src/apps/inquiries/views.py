@@ -28,7 +28,7 @@ class PublicInquirySubmitView(FormView):
         if not get_request_cart_items(request.session):
             messages.error(
                 request,
-                _("Tu carrito de solicitud está vacío. Añade al menos un producto para continuar."),
+                _("Su carrito de solicitud está vacío. Añada al menos un producto para continuar."),
             )
             return redirect("cart:request_cart_detail")
         return super().dispatch(request, *args, **kwargs)
@@ -55,7 +55,7 @@ class PublicInquirySubmitView(FormView):
         if not cart_items:
             form.add_error(
                 None,
-                _("Tu carrito de solicitud está vacío. Añade productos antes de enviar."),
+                _("Su carrito de solicitud está vacío. Añada productos antes de enviar."),
             )
             return self.form_invalid(form)
 
@@ -66,8 +66,8 @@ class PublicInquirySubmitView(FormView):
             form.add_error(
                 None,
                 _(
-                    "No se ha podido registrar tu solicitud. "
-                    "Revisa los datos del carrito e inténtalo de nuevo."
+                    "No se ha podido registrar su solicitud. "
+                    "Revise los datos del carrito e inténtelo de nuevo."
                 ),
             )
             return self.form_invalid(form)
@@ -176,15 +176,15 @@ class PublicInquiryOfferDetailView(TemplateView):
             return context
 
         page_title = _("Oferta confirmada")
-        page_intro = _("Revisa el importe confirmado y el plazo estimado antes de responder.")
+        page_intro = _("Revise el importe confirmado y el plazo estimado antes de responder.")
         if self.offer.status == InquiryOffer.Status.ACCEPTED:
             page_title = _("Oferta aceptada")
-            page_intro = _("Has aceptado esta oferta. El siguiente paso es la gestión del pago.")
+            page_intro = _("Ha aceptado esta oferta. El siguiente paso es la gestión del pago.")
         elif self.offer.status == InquiryOffer.Status.REJECTED:
             page_title = _("Oferta rechazada")
             page_intro = _(
-                "Has rechazado esta oferta. Si necesitas revisar alternativas, "
-                "puedes contactar con nuestro equipo."
+                "Ha rechazado esta oferta. Si necesita revisar alternativas, "
+                "puede contactar con nuestro equipo."
             )
 
         context.update(
@@ -212,7 +212,7 @@ class PublicInquiryOfferDetailView(TemplateView):
                     request,
                     _(
                         "Esta oferta ya tiene una respuesta registrada. "
-                        "Puedes revisar su estado actual."
+                        "Puede revisar su estado actual."
                     ),
                 )
                 return redirect(request.path)
@@ -222,7 +222,7 @@ class PublicInquiryOfferDetailView(TemplateView):
                 InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
                 messages.success(
                     request,
-                    _("Oferta aceptada. A continuación verás el siguiente paso para el pago."),
+                    _("Oferta aceptada. A continuación verá el siguiente paso para el pago."),
                 )
                 return redirect(
                     "inquiries:public_inquiry_offer_payment_placeholder",
@@ -230,7 +230,7 @@ class PublicInquiryOfferDetailView(TemplateView):
                 )
             else:
                 offer.mark_rejected(save=True)
-                messages.success(request, _("Has rechazado la oferta."))
+                messages.success(request, _("Ha rechazado la oferta."))
 
         return redirect(request.path)
 
@@ -261,16 +261,16 @@ class PublicInquiryOfferPaymentPlaceholderView(TemplateView):
                 messages.info(
                     request,
                     _(
-                        "Esta oferta aún está pendiente de tu respuesta. "
-                        "Acepta la oferta para avanzar al pago."
+                        "Esta oferta aún está pendiente de su respuesta. "
+                        "Acepte la oferta para avanzar al pago."
                     ),
                 )
             elif self.offer.status == InquiryOffer.Status.REJECTED:
                 messages.info(
                     request,
                     _(
-                        "Esta oferta fue rechazada. Si necesitas revisar "
-                        "alternativas, contacta con nuestro equipo."
+                        "Esta oferta fue rechazada. Si necesita revisar "
+                        "alternativas, contacte con nuestro equipo."
                     ),
                 )
             else:

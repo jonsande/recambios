@@ -16,13 +16,13 @@
     <h1 class="mt-3 page-title">{{ page_title }}</h1>
     <p class="mt-3 max-w-3xl text-sm text-text-muted sm:text-base">
       {% blocktrans with vehicle_type=selected_vehicle_type_label %}
-        Tipo seleccionado: {{ vehicle_type }}. Elige una marca para continuar con el filtrado por modelo y año.
+        Tipo seleccionado: {{ vehicle_type }}. Elija una marca para continuar con el filtrado por modelo y año.
       {% endblocktrans %}
     </p>
   </section>
 
   <section class="mt-6 section-shell">
-    <h2 class="subsection-title">{% trans "Selecciona marca de vehículo" %}</h2>
+    <h2 class="subsection-title">{% trans "Seleccione marca de vehículo" %}</h2>
 
     <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {% for option in brand_options %}

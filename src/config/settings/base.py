@@ -190,6 +190,12 @@ SITE_CHROME_BG_DARK = config(
     "SITE_CHROME_BG_DARK",
     default="#557873",
 )
+SITE_HERO_VARIANT = config(
+    "SITE_HERO_VARIANT",
+    default="light",
+).strip().lower()
+if SITE_HERO_VARIANT not in {"light", "dark"}:
+    SITE_HERO_VARIANT = "light"
 SITE_FOOTER_VARIANT = config(
     "SITE_FOOTER_VARIANT",
     default="inherit",

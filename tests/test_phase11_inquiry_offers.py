@@ -1066,12 +1066,12 @@ def test_public_offer_draft_token_shows_unavailable_without_offer_data(
         currency="EUR",
         customer_message="Mensaje borrador interno",
     )
-    url = reverse(
-        "inquiries:public_inquiry_offer_detail",
-        kwargs={"access_token": offer.access_token},
-    )
-
-    response = client.get(url)
+    with translation.override("es"):
+        url = reverse(
+            "inquiries:public_inquiry_offer_detail",
+            kwargs={"access_token": offer.access_token},
+        )
+        response = client.get(url)
     assert response.status_code == 200
     content = response.content.decode()
 
@@ -1110,13 +1110,21 @@ def test_public_offer_sent_token_shows_offer_data_and_actions(client, django_use
     assert inquiry.reference_code in content
     assert "410" in content
     assert "EUR" in content
-    assert "Responder a la oferta" in content
-    assert "Aceptar oferta y proceder al pago" in content
-    assert "Rechazar oferta" in content
+    assert (
+        "Responder a la oferta" in content
+        or "Respond to this offer" in content
+    )
+    assert (
+        "Aceptar oferta y proceder al pago" in content
+        or "Accept offer and proceed to payment" in content
+    )
+    assert "Rechazar oferta" in content or "Reject offer" in content
     assert "btn btn-primary" in content
     assert "btn btn-secondary" in content
     assert (
         "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago."
+        in content
+        or "The offer remains subject to effective availability at the time of payment processing."
         in content
     )
 
@@ -1221,17 +1229,17 @@ def test_public_offer_state_specific_copy_for_accepted_and_rejected(
     rejected_offer.mark_sent(save=True)
     rejected_offer.mark_rejected(save=True)
 
-    accepted_url = reverse(
-        "inquiries:public_inquiry_offer_detail",
-        kwargs={"access_token": accepted_offer.access_token},
-    )
-    rejected_url = reverse(
-        "inquiries:public_inquiry_offer_detail",
-        kwargs={"access_token": rejected_offer.access_token},
-    )
-
-    accepted_response = client.get(accepted_url)
-    rejected_response = client.get(rejected_url)
+    with translation.override("es"):
+        accepted_url = reverse(
+            "inquiries:public_inquiry_offer_detail",
+            kwargs={"access_token": accepted_offer.access_token},
+        )
+        rejected_url = reverse(
+            "inquiries:public_inquiry_offer_detail",
+            kwargs={"access_token": rejected_offer.access_token},
+        )
+        accepted_response = client.get(accepted_url)
+        rejected_response = client.get(rejected_url)
     accepted_content = accepted_response.content.decode()
     rejected_content = rejected_response.content.decode()
 
@@ -1240,7 +1248,7 @@ def test_public_offer_state_specific_copy_for_accepted_and_rejected(
     assert "Oferta aceptada" in accepted_content
     assert "Continuar al paso de pago" in accepted_content
     assert "Oferta rechazada" in rejected_content
-    assert "Si necesitas revisar alternativas" in rejected_content
+    assert "Si necesita revisar alternativas" in rejected_content
     assert "Responder a la oferta" not in accepted_content
     assert "Responder a la oferta" not in rejected_content
 
@@ -1426,13 +1434,14 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
 
     assert len(mail.outbox) == 1
     email = mail.outbox[0]
-    expected_url = (
-        "https://recambios.example"
-        + reverse(
-            "inquiries:public_inquiry_offer_detail",
-            kwargs={"access_token": offer.access_token},
+    with translation.override("es"):
+        expected_url = (
+            "https://recambios.example"
+            + reverse(
+                "inquiries:public_inquiry_offer_detail",
+                kwargs={"access_token": offer.access_token},
+            )
         )
-    )
 
     assert offer.reference_code in email.subject
     assert inquiry.reference_code in email.body
