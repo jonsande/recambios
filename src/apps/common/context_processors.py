@@ -36,6 +36,8 @@ def site_brand(request) -> dict[str, str]:
         "site_chrome_class": f"site-chrome-{chrome_variant}",
         "site_chrome_bg_light": settings.SITE_CHROME_BG_LIGHT,
         "site_chrome_bg_dark": settings.SITE_CHROME_BG_DARK,
+        "site_color_palette": settings.SITE_COLOR_PALETTE,
+        "site_color_palette_class": f"site-palette-{settings.SITE_COLOR_PALETTE}",
         "site_footer_variant": footer_variant,
         "site_footer_class": f"site-footer-{footer_variant}",
         "site_footer_logo": footer_logo,

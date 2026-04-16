@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body
-  class="min-h-screen {{ site_chrome_class }}"
+  class="min-h-screen {{ site_chrome_class }} {{ site_color_palette_class }}"
   style="--site-chrome-bg-light: {{ site_chrome_bg_light }}; --site-chrome-bg-dark: {{ site_chrome_bg_dark }};"
 >
   <a
@@ -85,7 +85,7 @@
               href="{{ home_es }}"
               lang="es"
               aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
-              class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+              class="language-switch-link"
             >
               ES
             </a>
@@ -93,7 +93,7 @@
               href="{{ home_en }}"
               lang="en"
               aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
-              class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+              class="language-switch-link"
             >
               EN
             </a>
@@ -162,7 +162,7 @@
                     href="{{ home_es }}"
                     lang="es"
                     aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'es' %}true{% else %}false{% endif %}"
-                    class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'es' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                    class="language-switch-link"
                   >
                     ES
                   </a>
@@ -170,7 +170,7 @@
                     href="{{ home_en }}"
                     lang="en"
                     aria-current="{% if CURRENT_LANGUAGE|slice:':2' == 'en' %}true{% else %}false{% endif %}"
-                    class="rounded-md px-2 py-1 font-medium {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}bg-primary text-white{% else %}bg-surface-muted text-text hover:bg-surface{% endif %}"
+                    class="language-switch-link"
                   >
                     EN
                   </a>

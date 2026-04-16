@@ -190,6 +190,17 @@ SITE_CHROME_BG_DARK = config(
     "SITE_CHROME_BG_DARK",
     default="#557873",
 )
+SITE_COLOR_PALETTE = config(
+    "SITE_COLOR_PALETTE",
+    default="navy-lime",
+).strip().lower()
+if SITE_COLOR_PALETTE not in {
+    "petrol-sand",
+    "industrial-blue",
+    "charcoal-teal",
+    "navy-lime",
+}:
+    SITE_COLOR_PALETTE = "navy-lime"
 SITE_HERO_VARIANT = config(
     "SITE_HERO_VARIANT",
     default="light",
