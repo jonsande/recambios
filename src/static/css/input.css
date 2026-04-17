@@ -517,6 +517,10 @@
   .hero-shell {
     --hero-border: var(--color-border-strong);
     --hero-bg: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(238, 242, 246, 0.46) 100%);
+    --hero-bg-image: url("/static/img/hero_bg_01.jpg");
+    --hero-bg-image-size: cover;
+    --hero-bg-image-position: center;
+    --hero-bg-image-opacity: 0.045;
     --hero-shadow: 0 22px 44px -34px rgba(15, 23, 42, 0.55);
     --hero-title: var(--color-primary-strong);
     --hero-eyebrow: var(--color-accent);
@@ -537,9 +541,30 @@
     --hero-input-bg: rgba(255, 255, 255, 0.96);
     --hero-input-border: var(--color-border-strong);
     @apply rounded-3xl border px-5 py-7 sm:px-8 sm:py-9;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border-color: var(--hero-border);
     background-image: var(--hero-bg);
     box-shadow: var(--hero-shadow);
+  }
+
+  .hero-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--hero-bg-image);
+    background-size: var(--hero-bg-image-size);
+    background-position: var(--hero-bg-image-position);
+    background-repeat: no-repeat;
+    opacity: var(--hero-bg-image-opacity);
+  }
+
+  .hero-shell > * {
+    position: relative;
+    z-index: 1;
   }
 
   .hero-grid {
@@ -628,6 +653,7 @@
   .site-hero-dark {
     --hero-border: #2b6287;
     --hero-bg: linear-gradient(135deg, #173753 0%, #21466b 52%, #2d7b9d 100%);
+    --hero-bg-image-opacity: 0.06;
     --hero-shadow: 0 24px 50px -30px rgba(16, 36, 56, 0.72);
     --hero-title: #f4f9ff;
     --hero-eyebrow: #d7eaf2;
