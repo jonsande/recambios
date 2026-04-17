@@ -213,6 +213,12 @@ SITE_BOXES_VARIANT = config(
 ).strip().lower()
 if SITE_BOXES_VARIANT not in {"inherit", "light", "dark"}:
     SITE_BOXES_VARIANT = "inherit"
+SITE_OFFERS_VARIANT = config(
+    "SITE_OFFERS_VARIANT",
+    default="inherit",
+).strip().lower()
+if SITE_OFFERS_VARIANT not in {"inherit", "light", "dark"}:
+    SITE_OFFERS_VARIANT = "inherit"
 SITE_CORNERS_VARIANT = config(
     "SITE_CORNERS_VARIANT",
     default="sharp",

@@ -112,7 +112,7 @@
       {% endif %}
     </section>
 
-    <section class="section-shell">
+    <section class="section-shell home-offers-shell {{ site_offers_class }}">
       <header class="mb-4">
         <p class="page-eyebrow">{% trans "CATÁLOGO" %}</p>
         <h2 class="section-title">{{ products_section_title }}</h2>
@@ -122,9 +122,9 @@
       </header>
 
       {% if home_products %}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="home-offers-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {% for product in home_products %}
-            {% include "catalog/partials/product_card.html" with product=product %}
+            {% include "catalog/partials/product_card.html" with product=product home_offers_mode=True %}
           {% endfor %}
         </div>
       {% else %}

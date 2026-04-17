@@ -32,6 +32,10 @@ def site_brand(request) -> dict[str, str]:
     boxes_variant = (
         hero_variant if boxes_variant_setting == "inherit" else boxes_variant_setting
     )
+    offers_variant_setting = settings.SITE_OFFERS_VARIANT
+    offers_variant = (
+        boxes_variant if offers_variant_setting == "inherit" else offers_variant_setting
+    )
     corners_variant = settings.SITE_CORNERS_VARIANT
 
     return {
@@ -51,6 +55,8 @@ def site_brand(request) -> dict[str, str]:
         "site_hero_class": f"site-hero-{hero_variant}",
         "site_boxes_variant": boxes_variant,
         "site_boxes_class": f"home-families-shell-boxes-{boxes_variant}",
+        "site_offers_variant": offers_variant,
+        "site_offers_class": f"home-offers-shell-variant-{offers_variant}",
         "site_corners_variant": corners_variant,
         "site_corners_class": f"site-corners-{corners_variant}",
     }
