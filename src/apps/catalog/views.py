@@ -15,6 +15,9 @@ from .public import get_public_categories_queryset, get_public_products_queryset
 
 PRODUCTS_PER_PAGE = 12
 VEHICLE_TYPE_ORDER = tuple(choice for choice, _label in Vehicle.VehicleType.choices)
+CATALOG_VIEW_MODE_COOKIE_NAME = "catalog_results_view_mode"
+CATALOG_VIEW_MODE_CHOICES = {"cards", "list"}
+CATALOG_VIEW_MODE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 
 def _format_decimal_value(value) -> str:
@@ -625,6 +628,19 @@ class ProductListView(ListView):
     selected_condition_code = ""
     selected_attribute_filters: dict[str, list[str]]
     has_active_filters = False
+    results_view_mode = "cards"
+    requested_view_mode = ""
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if self.requested_view_mode in CATALOG_VIEW_MODE_CHOICES:
+            response.set_cookie(
+                CATALOG_VIEW_MODE_COOKIE_NAME,
+                self.requested_view_mode,
+                max_age=CATALOG_VIEW_MODE_COOKIE_MAX_AGE,
+                samesite="Lax",
+            )
+        return response
 
     def get_queryset(self):
         queryset = get_public_products_queryset()
@@ -649,6 +665,20 @@ class ProductListView(ListView):
         self.selected_category_slug = (self.request.GET.get("category") or "").strip()
         self.selected_condition_code = (self.request.GET.get("condition") or "").strip()
         self.selected_attribute_filters = {}
+        requested_view_mode = (self.request.GET.get("view") or "").strip().lower()
+        self.requested_view_mode = requested_view_mode
+        cookie_view_mode = (
+            (self.request.COOKIES.get(CATALOG_VIEW_MODE_COOKIE_NAME) or "").strip().lower()
+        )
+        self.results_view_mode = (
+            requested_view_mode
+            if requested_view_mode in CATALOG_VIEW_MODE_CHOICES
+            else (
+                cookie_view_mode
+                if cookie_view_mode in CATALOG_VIEW_MODE_CHOICES
+                else "cards"
+            )
+        )
 
         if self.search_query:
             normalized_reference = normalize_part_number(self.search_query)
@@ -790,13 +820,30 @@ class ProductListView(ListView):
         query_params_without_page = self.request.GET.copy()
         query_params_without_page.pop("page", None)
         context["query_string_without_page"] = query_params_without_page.urlencode()
+
+        query_params_without_page_without_view = query_params_without_page.copy()
+        query_params_without_page_without_view.pop("view", None)
+
+        query_params_for_cards_view = query_params_without_page_without_view.copy()
+        query_params_for_cards_view["view"] = "cards"
+        context["results_view_cards_query"] = query_params_for_cards_view.urlencode()
+
+        query_params_for_list_view = query_params_without_page_without_view.copy()
+        query_params_for_list_view["view"] = "list"
+        context["results_view_list_query"] = query_params_for_list_view.urlencode()
+        context["results_view_mode"] = self.results_view_mode
+
         if self.current_category:
-            context["reset_filters_url"] = reverse(
+            reset_filters_url = reverse(
                 "catalog:category_products",
                 kwargs={"category_slug": self.current_category.slug},
             )
         else:
-            context["reset_filters_url"] = reverse("catalog:product_list")
+            reset_filters_url = reverse("catalog:product_list")
+
+        if self.results_view_mode == "list":
+            reset_filters_url = f"{reset_filters_url}?view=list"
+        context["reset_filters_url"] = reset_filters_url
 
         return context
 

@@ -1,0 +1,86 @@
+{% load i18n %}
+<article class="product-list-row">
+  <div class="product-list-row-main">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="badge badge-neutral">{{ product.category.name }}</span>
+      <span class="badge badge-neutral">{{ product.condition.name }}</span>
+    </div>
+
+    <h3 class="subsection-title">
+      <a
+        href="{% url 'catalog:product_detail' slug=product.slug %}"
+        class="focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+      >
+        {{ product.title }}
+      </a>
+    </h3>
+
+    {% if product.short_description %}
+      <p class="text-sm text-text-muted">{{ product.short_description }}</p>
+    {% endif %}
+
+    <dl class="product-list-row-meta">
+      <div class="panel-muted flex justify-between gap-2">
+        <dt class="font-medium">{% trans "Referencia (OEM)" %}</dt>
+        <dd class="text-right font-semibold text-text">{{ product.sku }}</dd>
+      </div>
+      <div class="panel-muted flex justify-between gap-2">
+        <dt class="font-medium">{% trans "Marca" %}</dt>
+        <dd class="text-right text-text">
+          {% if product.brand %}
+            {{ product.brand.name }}
+          {% else %}
+            {% trans "Sin marca especificada" %}
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="product-list-row-side">
+    <div>
+      {% if product.price_visibility_mode == "visible_info" and product.last_known_price %}
+        <p class="meta-copy">
+          {% trans "Último precio conocido" %}
+        </p>
+        <p class="mt-1 text-xl font-semibold text-primary-strong">
+          {{ product.last_known_price }} {{ product.currency }}
+        </p>
+        <p class="mt-2 text-xs text-text-muted">
+          {% trans "Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo." %}
+        </p>
+      {% endif %}
+    </div>
+
+    <div class="space-y-2">
+      <form method="post" action="{% url 'cart:request_cart_direct_inquiry' product_id=product.id %}">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="btn btn-primary w-full"
+        >
+          {% trans "Solicitar precio y plazo" %}
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'cart:request_cart_add' product_id=product.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button
+          type="submit"
+          class="btn btn-secondary w-full"
+        >
+          {% trans "Añadir a carrito" %}
+        </button>
+      </form>
+    </div>
+
+    <a
+      href="{% url 'catalog:product_detail' slug=product.slug %}"
+      class="link-inline text-sm"
+    >
+      {% trans "Ver detalle técnico" %}
+    </a>
+  </div>
+</article>

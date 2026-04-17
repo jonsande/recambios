@@ -211,6 +211,74 @@ def test_public_product_list_includes_published_products_with_null_brand(client)
 
 
 @pytest.mark.django_db
+def test_public_product_list_supports_cards_and_list_display_modes(client) -> None:
+    supplier = make_supplier("SUP-P5-VIEW")
+    brand = make_brand("Brand P5 View", "brand-p5-view")
+    category = make_category("Category P5 View", "category-p5-view")
+    condition = make_condition("new-p5-view", "Nuevo P5 View", "new-p5-view")
+
+    for index in range(1, 14):
+        make_product(
+            supplier=supplier,
+            brand=brand,
+            category=category,
+            condition=condition,
+            sku=f"SKU-P5-VIEW-{index}",
+            title=f"View Product {index}",
+        )
+
+    cards_response = client.get("/es/productos/")
+    list_response = client.get("/es/productos/?view=list")
+    invalid_response = client.get("/es/productos/?view=unknown")
+
+    assert cards_response.status_code == 200
+    assert cards_response.context["results_view_mode"] == "cards"
+    assert "product-list-rows" not in cards_response.content.decode()
+
+    list_content = list_response.content.decode()
+    assert list_response.status_code == 200
+    assert list_response.context["results_view_mode"] == "list"
+    assert "product-list-rows" in list_content
+    assert list_response.context["is_paginated"] is True
+    assert list_response.context["page_obj"].has_next() is True
+    assert list_response.context["query_string_without_page"] == "view=list"
+
+    assert invalid_response.status_code == 200
+    assert invalid_response.context["results_view_mode"] == "list"
+
+
+@pytest.mark.django_db
+def test_public_product_list_persists_selected_view_mode_with_cookie(client) -> None:
+    supplier = make_supplier("SUP-P5-VIEW-COOKIE")
+    brand = make_brand("Brand P5 View Cookie", "brand-p5-view-cookie")
+    category = make_category("Category P5 View Cookie", "category-p5-view-cookie")
+    condition = make_condition("new-p5-view-cookie", "Nuevo P5 View Cookie", "new-p5-view-cookie")
+
+    make_product(
+        supplier=supplier,
+        brand=brand,
+        category=category,
+        condition=condition,
+        sku="SKU-P5-VIEW-COOKIE",
+        title="View Cookie Product",
+    )
+
+    list_response = client.get("/es/productos/?view=list")
+    assert list_response.status_code == 200
+    assert list_response.context["results_view_mode"] == "list"
+    assert list_response.cookies["catalog_results_view_mode"].value == "list"
+
+    persisted_response = client.get("/es/productos/")
+    assert persisted_response.status_code == 200
+    assert persisted_response.context["results_view_mode"] == "list"
+    assert "product-list-rows" in persisted_response.content.decode()
+
+    cards_response = client.get("/es/productos/?view=cards")
+    assert cards_response.status_code == 200
+    assert cards_response.context["results_view_mode"] == "cards"
+    assert cards_response.cookies["catalog_results_view_mode"].value == "cards"
+
+@pytest.mark.django_db
 def test_category_and_product_detail_routes_work_in_both_languages(client) -> None:
     supplier = make_supplier("SUP-P5-ROUTES")
     brand = make_brand("Valeo P5", "valeo-p5")

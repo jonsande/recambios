@@ -202,7 +202,11 @@
         </form>
       </section>
 
-      <section class="space-y-4" aria-label="{% trans 'Resultados de catálogo' %}">
+      <section
+        id="catalog-results-shell"
+        class="space-y-4"
+        aria-label="{% trans 'Resultados de catálogo' %}"
+      >
         <div class="result-toolbar">
           <div>
             <h2 class="subsection-title">{% trans "Resultados" %}</h2>
@@ -220,25 +224,75 @@
               {% endif %}
             </p>
           </div>
-          {% if has_active_filters %}
-            <a href="{{ reset_filters_url }}" class="btn btn-ghost">
-              {% trans "Quitar filtros" %}
-            </a>
-          {% endif %}
+          <div class="result-toolbar-actions">
+            <div class="view-switch" role="group" aria-label="{% trans 'Modo de visualización de resultados' %}">
+              <a
+                href="?{{ results_view_cards_query }}"
+                hx-get="?{{ results_view_cards_query }}"
+                hx-target="#catalog-results-shell"
+                hx-select="#catalog-results-shell"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+                class="view-switch-link {% if results_view_mode == 'cards' %}view-switch-link-active{% endif %}"
+                aria-current="{% if results_view_mode == 'cards' %}true{% else %}false{% endif %}"
+              >
+                {% trans "Fichas" %}
+              </a>
+              <a
+                href="?{{ results_view_list_query }}"
+                hx-get="?{{ results_view_list_query }}"
+                hx-target="#catalog-results-shell"
+                hx-select="#catalog-results-shell"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+                class="view-switch-link {% if results_view_mode == 'list' %}view-switch-link-active{% endif %}"
+                aria-current="{% if results_view_mode == 'list' %}true{% else %}false{% endif %}"
+              >
+                {% trans "Listado" %}
+              </a>
+            </div>
+
+            {% if has_active_filters %}
+              <a
+                href="{{ reset_filters_url }}"
+                hx-get="{{ reset_filters_url }}"
+                hx-target="#catalog-results-shell"
+                hx-select="#catalog-results-shell"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+                class="btn btn-ghost"
+              >
+                {% trans "Quitar filtros" %}
+              </a>
+            {% endif %}
+          </div>
         </div>
 
         {% if products %}
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {% for product in products %}
-              {% include "catalog/partials/product_card.html" with product=product %}
-            {% endfor %}
-          </div>
+          {% if results_view_mode == "list" %}
+            <div class="product-list-rows">
+              {% for product in products %}
+                {% include "catalog/partials/product_list_row.html" with product=product %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {% for product in products %}
+                {% include "catalog/partials/product_card.html" with product=product %}
+              {% endfor %}
+            </div>
+          {% endif %}
 
           {% if is_paginated %}
             <nav class="pagination-shell" aria-label="{% trans 'Paginación de productos' %}">
               {% if page_obj.has_previous %}
                 <a
                   href="?{{ query_string_without_page }}{% if query_string_without_page %}&{% endif %}page={{ page_obj.previous_page_number }}"
+                  hx-get="?{{ query_string_without_page }}{% if query_string_without_page %}&{% endif %}page={{ page_obj.previous_page_number }}"
+                  hx-target="#catalog-results-shell"
+                  hx-select="#catalog-results-shell"
+                  hx-swap="outerHTML"
+                  hx-push-url="true"
                   class="btn btn-ghost px-3 py-2"
                 >
                   {% trans "Anterior" %}
@@ -254,6 +308,11 @@
               {% if page_obj.has_next %}
                 <a
                   href="?{{ query_string_without_page }}{% if query_string_without_page %}&{% endif %}page={{ page_obj.next_page_number }}"
+                  hx-get="?{{ query_string_without_page }}{% if query_string_without_page %}&{% endif %}page={{ page_obj.next_page_number }}"
+                  hx-target="#catalog-results-shell"
+                  hx-select="#catalog-results-shell"
+                  hx-swap="outerHTML"
+                  hx-push-url="true"
                   class="btn btn-ghost px-3 py-2"
                 >
                   {% trans "Siguiente" %}
