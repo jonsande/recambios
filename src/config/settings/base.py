@@ -207,6 +207,12 @@ SITE_HERO_VARIANT = config(
 ).strip().lower()
 if SITE_HERO_VARIANT not in {"light", "dark"}:
     SITE_HERO_VARIANT = "light"
+SITE_BOXES_VARIANT = config(
+    "SITE_BOXES_VARIANT",
+    default="inherit",
+).strip().lower()
+if SITE_BOXES_VARIANT not in {"inherit", "light", "dark"}:
+    SITE_BOXES_VARIANT = "inherit"
 SITE_FOOTER_VARIANT = config(
     "SITE_FOOTER_VARIANT",
     default="inherit",

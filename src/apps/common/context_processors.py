@@ -28,6 +28,10 @@ def site_brand(request) -> dict[str, str]:
         else settings.SITE_BRAND_LOGO_LIGHT
     )
     hero_variant = settings.SITE_HERO_VARIANT
+    boxes_variant_setting = settings.SITE_BOXES_VARIANT
+    boxes_variant = (
+        hero_variant if boxes_variant_setting == "inherit" else boxes_variant_setting
+    )
 
     return {
         "site_brand_name": localized_name,
@@ -44,4 +48,6 @@ def site_brand(request) -> dict[str, str]:
         "site_footer_bg": settings.SITE_FOOTER_BG,
         "site_hero_variant": hero_variant,
         "site_hero_class": f"site-hero-{hero_variant}",
+        "site_boxes_variant": boxes_variant,
+        "site_boxes_class": f"home-families-shell-boxes-{boxes_variant}",
     }

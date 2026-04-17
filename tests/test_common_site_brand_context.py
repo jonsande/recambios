@@ -14,6 +14,7 @@ from apps.common.context_processors import site_brand
     SITE_CHROME_BG_DARK="#557873",
     SITE_COLOR_PALETTE="industrial-blue",
     SITE_HERO_VARIANT="light",
+    SITE_BOXES_VARIANT="light",
     SITE_FOOTER_VARIANT="inherit",
     SITE_FOOTER_BG="",
 )
@@ -33,6 +34,8 @@ def test_site_brand_context_uses_current_language() -> None:
     assert context["site_color_palette_class"] == "site-palette-industrial-blue"
     assert context["site_hero_variant"] == "light"
     assert context["site_hero_class"] == "site-hero-light"
+    assert context["site_boxes_variant"] == "light"
+    assert context["site_boxes_class"] == "home-families-shell-boxes-light"
     assert context["site_footer_variant"] == "light"
     assert context["site_footer_class"] == "site-footer-light"
     assert context["site_footer_logo"] == "img/light.png"
@@ -50,6 +53,7 @@ def test_site_brand_context_uses_current_language() -> None:
     SITE_CHROME_BG_DARK="#557873",
     SITE_COLOR_PALETTE="petrol-sand",
     SITE_HERO_VARIANT="dark",
+    SITE_BOXES_VARIANT="inherit",
     SITE_FOOTER_VARIANT="light",
     SITE_FOOTER_BG="#101010",
 )
@@ -69,6 +73,8 @@ def test_site_brand_context_falls_back_to_default_for_unknown_language() -> None
     assert context["site_color_palette_class"] == "site-palette-petrol-sand"
     assert context["site_hero_variant"] == "dark"
     assert context["site_hero_class"] == "site-hero-dark"
+    assert context["site_boxes_variant"] == "dark"
+    assert context["site_boxes_class"] == "home-families-shell-boxes-dark"
     assert context["site_footer_variant"] == "light"
     assert context["site_footer_class"] == "site-footer-light"
     assert context["site_footer_logo"] == "img/light.png"

@@ -71,13 +71,13 @@
       </div>
     </section>
 
-    <section class="section-shell">
+    <section class="section-shell home-families-shell {{ site_boxes_class }}">
       <header class="mb-4 flex items-center justify-between gap-4">
         <div>
           <p class="page-eyebrow">{% trans "Navegación por familias" %}</p>
           <h2 class="section-title">{% trans "Categorías destacadas" %}</h2>
         </div>
-        <a href="{% url 'catalog:category_list' %}" class="link-inline text-sm">
+        <a href="{% url 'catalog:category_list' %}" class="home-families-all-link">
           {% trans "Ver todas" %}
         </a>
       </header>
@@ -88,13 +88,13 @@
             <li>
               <a
                 href="{% url 'catalog:category_products' category_slug=category.slug %}"
-                class="card-link h-full"
+                class="card-link home-family-card"
               >
                 <h3 class="subsection-title">{{ category.name }}</h3>
                 {% if category.description %}
                   <p class="mt-2 text-sm text-text-muted">{{ category.description|truncatewords:18 }}</p>
                 {% endif %}
-                <p class="mt-3 text-sm text-text-muted">
+                <p class="home-family-meta">
                   {% blocktrans count total=category.public_product_count %}
                     1 producto publicado
                   {% plural %}
