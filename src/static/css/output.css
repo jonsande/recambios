@@ -1068,6 +1068,16 @@
       grid-template-columns: minmax(0,1fr) 20rem;
     }
   }
+  .lg\:items-start {
+    @media (width >= 64rem) {
+      align-items: flex-start;
+    }
+  }
+  .lg\:self-start {
+    @media (width >= 64rem) {
+      align-self: flex-start;
+    }
+  }
   .lg\:px-8 {
     @media (width >= 64rem) {
       padding-inline: calc(var(--spacing) * 8);
@@ -2403,6 +2413,15 @@
   }
   .product-list-row-side > .link-inline {
     margin-top: auto;
+  }
+  @media (min-width: 1024px) {
+    .catalog-filter-panel {
+      min-height: 0;
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+    }
   }
   .pagination-shell {
     margin-top: calc(var(--spacing) * 8);

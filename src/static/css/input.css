@@ -1001,6 +1001,16 @@
     @apply mt-auto;
   }
 
+  @media (min-width: 1024px) {
+    .catalog-filter-panel {
+      min-height: 0;
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+    }
+  }
+
   .pagination-shell {
     @apply mt-8 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-border bg-surface-elevated p-3;
   }
