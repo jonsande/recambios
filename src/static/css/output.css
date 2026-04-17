@@ -2191,6 +2191,15 @@
   .hero-shell .page-lead {
     color: var(--hero-muted);
   }
+  .hero-shell .breadcrumbs {
+    color: var(--hero-muted);
+  }
+  .hero-shell .breadcrumbs a {
+    color: var(--hero-title);
+  }
+  .hero-shell .breadcrumbs a:hover {
+    color: var(--hero-eyebrow);
+  }
   .hero-shell .section-shell {
     border-color: var(--hero-panel-border);
     background-color: var(--hero-panel-bg);
@@ -2476,6 +2485,18 @@
     &:focus-visible {
       --tw-ring-offset-color: var(--color-surface);
     }
+  }
+  .form-select option {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-text);
+  }
+  .form-select option:checked, .form-select option[selected] {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+  .form-select option:hover {
+    background-color: var(--color-accent-soft);
+    color: var(--color-primary-strong);
   }
   .form-help {
     margin-top: calc(var(--spacing) * 1);

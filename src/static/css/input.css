@@ -849,6 +849,18 @@
     color: var(--hero-muted);
   }
 
+  .hero-shell .breadcrumbs {
+    color: var(--hero-muted);
+  }
+
+  .hero-shell .breadcrumbs a {
+    color: var(--hero-title);
+  }
+
+  .hero-shell .breadcrumbs a:hover {
+    color: var(--hero-eyebrow);
+  }
+
   .hero-shell .section-shell {
     border-color: var(--hero-panel-border);
     background-color: var(--hero-panel-bg);
@@ -979,6 +991,22 @@
   .form-textarea {
     @apply mt-1 w-full rounded-lg border border-border-strong bg-surface-elevated px-3 py-2.5 text-sm text-text placeholder:text-text-muted;
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface;
+  }
+
+  .form-select option {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-text);
+  }
+
+  .form-select option:checked,
+  .form-select option[selected] {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  .form-select option:hover {
+    background-color: var(--color-accent-soft);
+    color: var(--color-primary-strong);
   }
 
   .form-help {
