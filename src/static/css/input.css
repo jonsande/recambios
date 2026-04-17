@@ -25,6 +25,13 @@
 
   --color-focus-ring: #7da321;
 
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+
   --font-sans: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
   --font-display: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
 }
@@ -38,6 +45,24 @@
     @apply bg-surface-muted text-text antialiased;
     background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(247, 248, 249, 0.94) 34%, rgba(242, 244, 245, 0.96) 100%);
     background-attachment: fixed;
+  }
+
+  body.site-corners-rounded {
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+  }
+
+  body.site-corners-sharp {
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-2xl: 0;
+    --radius-3xl: 0;
   }
 
   body.site-palette-petrol-sand {
@@ -169,6 +194,11 @@
   :where(a, button, input, select, textarea, [role="button"], summary):focus-visible {
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
+  }
+
+  body.site-corners-sharp [class~="rounded-full"],
+  body.site-corners-sharp [class*="rounded-full"] {
+    border-radius: 0 !important;
   }
 }
 
