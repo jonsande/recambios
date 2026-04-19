@@ -338,7 +338,7 @@ def test_combined_filters_apply_with_attribute_filtering(client) -> None:
 
 
 @pytest.mark.django_db
-def test_product_filter_form_uses_htmx_for_dependent_vehicle_select_updates(client) -> None:
+def test_product_filter_form_uses_stable_server_side_vehicle_filters_layout(client) -> None:
     supplier = make_supplier("P6-HTMX-FORM")
     category = make_category("HTMX Form", "htmx-form-p6")
     condition = make_condition("p6-htmx-form-new", "Nuevo HTMX Form", "p6-htmx-form-new")
@@ -365,17 +365,20 @@ def test_product_filter_form_uses_htmx_for_dependent_vehicle_select_updates(clie
     content = response.content.decode()
 
     assert response.status_code == 200
-    assert 'hx-get="/es/productos/filtros/vehiculo/marca/"' in content
-    assert 'hx-get="/es/productos/filtros/vehiculo/modelo/"' in content
-    assert 'data-vehicle-filter-htmx="1"' in content
-    assert 'id="vehicle-filter-loading"' in content
-    assert "setTimeout(function () {" in content
-    assert "}, 150);" in content
+    assert 'id="catalog-vehicle-type"' in content
+    assert 'id="catalog-brand"' in content
+    assert 'id="catalog-model"' in content
+    assert 'grid gap-3 sm:grid-cols-2 xl:grid-cols-3' in content
+    assert 'hx-get="/es/productos/filtros/vehiculo/marca/"' not in content
+    assert 'hx-get="/es/productos/filtros/vehiculo/modelo/"' not in content
+    assert 'data-vehicle-filter-htmx="1"' not in content
+    assert 'id="vehicle-filter-loading"' not in content
+    assert "setTimeout(function () {" not in content
     assert "requestSubmit()" not in content
 
 
 @pytest.mark.django_db
-def test_vehicle_brand_partial_endpoint_returns_narrowed_options_and_model_oob(client) -> None:
+def test_vehicle_brand_partial_endpoint_returns_narrowed_brand_options(client) -> None:
     supplier = make_supplier("P6-HTMX-BRAND")
     category = make_category("HTMX Brand", "htmx-brand-p6")
     condition = make_condition("p6-htmx-brand-new", "Nuevo HTMX Brand", "p6-htmx-brand-new")
@@ -418,12 +421,8 @@ def test_vehicle_brand_partial_endpoint_returns_narrowed_options_and_model_oob(c
 
     assert response.status_code == 200
     assert 'id="catalog-brand-field"' in content
-    assert 'id="catalog-model-field"' in content
-    assert 'hx-swap-oob="outerHTML"' in content
     assert "Volvo Trucks HTMX" in content
     assert "Audi Cars HTMX" not in content
-    assert ">FH<" in content
-    assert ">A4<" not in content
 
 
 @pytest.mark.django_db

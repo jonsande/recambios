@@ -6,13 +6,6 @@
   <select
     id="catalog-brand"
     name="brand"
-    hx-get="{% url 'catalog:product_filter_vehicle_models_partial' %}"
-    hx-trigger="change"
-    hx-target="#catalog-model-field"
-    hx-swap="outerHTML"
-    hx-include="#catalog-filter-form [name='vehicle_type'], #catalog-filter-form [name='brand']"
-    hx-vals='{"scope_category":"{{ scope_category_slug|default_if_none:"" }}"}'
-    data-vehicle-filter-htmx="1"
     class="form-select"
   >
     <option value="">{% trans "Todas las marcas" %}</option>
@@ -21,6 +14,3 @@
     {% endfor %}
   </select>
 </div>
-{% if include_model_oob %}
-  {% include "catalog/partials/filter_vehicle_model_field.html" %}
-{% endif %}

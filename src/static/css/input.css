@@ -645,7 +645,7 @@
     --home-offers-eyebrow: var(--color-text-muted);
     --home-offers-title: var(--color-primary-strong);
     --home-offers-body: var(--color-text-muted);
-    --home-offers-card-bg: var(--color-surface-elevated);
+    --home-offers-card-bg: #e0e1e3;
     --home-offers-card-border: var(--color-border);
     --home-offers-card-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.42);
     --home-offers-card-title: var(--color-primary-strong);

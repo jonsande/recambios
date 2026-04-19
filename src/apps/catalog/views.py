@@ -578,8 +578,6 @@ class ProductFilterVehicleBrandFieldView(TemplateView):
                     selected_vehicle_brand_slug="",
                 ),
                 "selected_vehicle_model": "",
-                "model_swap_oob": True,
-                "include_model_oob": True,
                 "scope_category_slug": scope_category_slug.strip(),
             }
         )

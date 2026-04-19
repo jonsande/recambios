@@ -42,14 +42,25 @@
       </section>
     {% endif %}
 
-    <div class="grid gap-6 lg:items-start lg:grid-cols-[20rem_minmax(0,1fr)]">
-      <section class="section-shell catalog-filter-panel lg:sticky lg:top-4 lg:self-start">
+    <div id="catalog-layout-shell" class="space-y-6">
+      <section class="section-shell">
         <h2 class="subsection-title">{% trans "Búsqueda técnica y filtros" %}</h2>
         <p class="mt-2 text-sm text-text-muted">
           {% trans "Use referencia OEM, referencias cruzadas o términos de vehículo para localizar recambios publicados." %}
         </p>
 
-        <form id="catalog-filter-form" method="get" action="" class="mt-4 space-y-4" aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}">
+        <form
+          id="catalog-filter-form"
+          method="get"
+          action=""
+          hx-get="{{ request.path }}"
+          hx-target="#catalog-layout-shell"
+          hx-select="#catalog-layout-shell"
+          hx-swap="outerHTML"
+          hx-push-url="true"
+          class="mt-4 space-y-4"
+          aria-label="{% trans 'Formulario de búsqueda y filtros de catálogo' %}"
+        >
           <div>
             <label for="catalog-q" class="form-label">
               {% trans "Buscar por referencia OEM o referencia" %}
@@ -64,7 +75,7 @@
             >
           </div>
 
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <div>
               <label for="catalog-vehicle-type" class="form-label">
                 {% trans "Tipo de vehículo" %}
@@ -72,13 +83,6 @@
               <select
                 id="catalog-vehicle-type"
                 name="vehicle_type"
-                hx-get="{% url 'catalog:product_filter_vehicle_brands_partial' %}"
-                hx-trigger="change"
-                hx-target="#catalog-brand-field"
-                hx-swap="outerHTML"
-                hx-include="#catalog-filter-form [name='vehicle_type']"
-                hx-vals='{"scope_category":"{{ scope_category_slug }}"}'
-                data-vehicle-filter-htmx="1"
                 class="form-select"
               >
                 <option value="">{% trans "Todos los tipos" %}</option>
@@ -88,24 +92,8 @@
               </select>
             </div>
 
-            {% include "catalog/partials/filter_vehicle_brand_field.html" with scope_category_slug=scope_category_slug %}
+            {% include "catalog/partials/filter_vehicle_brand_field.html" %}
             {% include "catalog/partials/filter_vehicle_model_field.html" %}
-
-            <div class="sm:col-span-2 lg:col-span-1">
-              <p
-                id="vehicle-filter-loading"
-                class="hidden mt-1 items-center gap-2 rounded-md border border-border bg-surface-muted px-3 py-2 text-xs text-text-muted"
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                <span
-                  class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-border border-t-transparent"
-                  aria-hidden="true"
-                ></span>
-                <span>{% trans "Actualizando opciones de vehículo..." %}</span>
-              </p>
-            </div>
 
             <div>
               <label for="catalog-year" class="form-label">
@@ -194,6 +182,11 @@
             </button>
             <a
               href="{{ reset_filters_url }}"
+              hx-get="{{ reset_filters_url }}"
+              hx-target="#catalog-layout-shell"
+              hx-select="#catalog-layout-shell"
+              hx-swap="outerHTML"
+              hx-push-url="true"
               class="btn btn-secondary"
             >
               {% trans "Limpiar filtros" %}
@@ -256,8 +249,8 @@
               <a
                 href="{{ reset_filters_url }}"
                 hx-get="{{ reset_filters_url }}"
-                hx-target="#catalog-results-shell"
-                hx-select="#catalog-results-shell"
+                hx-target="#catalog-layout-shell"
+                hx-select="#catalog-layout-shell"
                 hx-swap="outerHTML"
                 hx-push-url="true"
                 class="btn btn-ghost"
@@ -340,67 +333,4 @@
     </div>
   </div>
 
-  <script>
-    (function () {
-      const indicator = document.getElementById("vehicle-filter-loading");
-      if (!indicator) {
-        return;
-      }
-
-      let pendingVehicleFilterRequests = 0;
-      let showIndicatorTimerId = null;
-      const triggerSelector = '[data-vehicle-filter-htmx="1"]';
-
-      function showIndicator() {
-        indicator.classList.remove("hidden");
-        indicator.classList.add("inline-flex");
-      }
-
-      function hideIndicator() {
-        indicator.classList.add("hidden");
-        indicator.classList.remove("inline-flex");
-      }
-
-      function isVehicleFilterTrigger(eventDetail) {
-        return Boolean(eventDetail?.elt?.matches?.(triggerSelector));
-      }
-
-      document.body.addEventListener("htmx:beforeRequest", function (event) {
-        if (!isVehicleFilterTrigger(event.detail)) {
-          return;
-        }
-
-        pendingVehicleFilterRequests += 1;
-        if (pendingVehicleFilterRequests > 1) {
-          return;
-        }
-
-        hideIndicator();
-        if (showIndicatorTimerId !== null) {
-          window.clearTimeout(showIndicatorTimerId);
-        }
-        showIndicatorTimerId = window.setTimeout(function () {
-          showIndicator();
-          showIndicatorTimerId = null;
-        }, 150);
-      });
-
-      document.body.addEventListener("htmx:afterRequest", function (event) {
-        if (!isVehicleFilterTrigger(event.detail)) {
-          return;
-        }
-
-        pendingVehicleFilterRequests = Math.max(0, pendingVehicleFilterRequests - 1);
-        if (pendingVehicleFilterRequests > 0) {
-          return;
-        }
-
-        if (showIndicatorTimerId !== null) {
-          window.clearTimeout(showIndicatorTimerId);
-          showIndicatorTimerId = null;
-        }
-        hideIndicator();
-      });
-    })();
-  </script>
 {% endblock %}
