@@ -945,6 +945,15 @@
     @apply flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated px-4 py-3 sm:flex-row sm:items-center sm:justify-between;
   }
 
+  .catalog-search-panel {
+    background-color: #e0e1e3;
+  }
+
+  #catalog-results-shell .catalog-results-grid > article,
+  #catalog-results-shell .product-list-row {
+    background-color: #e0e1e3;
+  }
+
   .result-meta {
     @apply text-sm text-text-muted;
   }

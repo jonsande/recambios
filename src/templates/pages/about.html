@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% get_current_language as CURRENT_LANGUAGE %}
 
 {% block title %}{% trans "Nosotros" %} | {{ site_brand_name }}{% endblock %}
 
 {% block content %}
   <article class="section-shell-lg">
     <h1 class="page-title">
-      {% trans "Sobre la plataforma" %}
+      {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+        About {{ site_brand_name }}
+      {% else %}
+        Sobre {{ site_brand_name }}
+      {% endif %}
     </h1>
     <p class="mt-4 text-sm text-text-muted sm:text-base">
       {% blocktrans with brand=site_brand_name %}{{ brand }} es una plataforma orientada a la localización y consulta de recambios de automoción con enfoque técnico. Nuestro objetivo es ofrecer información clara de producto para particulares, talleres y profesionales.{% endblocktrans %}

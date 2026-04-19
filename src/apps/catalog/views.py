@@ -15,9 +15,7 @@ from .public import get_public_categories_queryset, get_public_products_queryset
 
 PRODUCTS_PER_PAGE = 12
 VEHICLE_TYPE_ORDER = tuple(choice for choice, _label in Vehicle.VehicleType.choices)
-CATALOG_VIEW_MODE_COOKIE_NAME = "catalog_results_view_mode"
 CATALOG_VIEW_MODE_CHOICES = {"cards", "list"}
-CATALOG_VIEW_MODE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 
 def _format_decimal_value(value) -> str:
@@ -627,18 +625,6 @@ class ProductListView(ListView):
     selected_attribute_filters: dict[str, list[str]]
     has_active_filters = False
     results_view_mode = "cards"
-    requested_view_mode = ""
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if self.requested_view_mode in CATALOG_VIEW_MODE_CHOICES:
-            response.set_cookie(
-                CATALOG_VIEW_MODE_COOKIE_NAME,
-                self.requested_view_mode,
-                max_age=CATALOG_VIEW_MODE_COOKIE_MAX_AGE,
-                samesite="Lax",
-            )
-        return response
 
     def get_queryset(self):
         queryset = get_public_products_queryset()
@@ -664,18 +650,10 @@ class ProductListView(ListView):
         self.selected_condition_code = (self.request.GET.get("condition") or "").strip()
         self.selected_attribute_filters = {}
         requested_view_mode = (self.request.GET.get("view") or "").strip().lower()
-        self.requested_view_mode = requested_view_mode
-        cookie_view_mode = (
-            (self.request.COOKIES.get(CATALOG_VIEW_MODE_COOKIE_NAME) or "").strip().lower()
-        )
         self.results_view_mode = (
             requested_view_mode
             if requested_view_mode in CATALOG_VIEW_MODE_CHOICES
-            else (
-                cookie_view_mode
-                if cookie_view_mode in CATALOG_VIEW_MODE_CHOICES
-                else "cards"
-            )
+            else "cards"
         )
 
         if self.search_query:

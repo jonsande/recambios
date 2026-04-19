@@ -21,7 +21,7 @@
         <p class="page-lead">{{ current_category.description }}</p>
       {% else %}
         <p class="page-lead">
-          {% trans "Listado público inicial de productos publicados. El precio visible es informativo y siempre sujeto a validación comercial." %}
+          {% trans "El precio es meramente orientativo (responde al último precio conseguido para el producto) y siempre sujeto a validación comercial." %}
         </p>
       {% endif %}
 
@@ -43,7 +43,7 @@
     {% endif %}
 
     <div id="catalog-layout-shell" class="space-y-6">
-      <section class="section-shell">
+      <section class="section-shell catalog-search-panel">
         <h2 class="subsection-title">{% trans "Búsqueda técnica y filtros" %}</h2>
         <p class="mt-2 text-sm text-text-muted">
           {% trans "Use referencia OEM, referencias cruzadas o términos de vehículo para localizar recambios publicados." %}
@@ -269,7 +269,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="catalog-results-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {% for product in products %}
                 {% include "catalog/partials/product_card.html" with product=product %}
               {% endfor %}

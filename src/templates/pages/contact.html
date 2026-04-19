@@ -1,15 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% get_current_language as CURRENT_LANGUAGE %}
 
 {% block title %}{% trans "Contacto" %} | {{ site_brand_name }}{% endblock %}
 
 {% block content %}
-  <article class="section-shell-lg">
+  <article class="section-shell-lg" style="background-color: #e0e1e3;">
     <h1 class="page-title">
-      {% trans "Contacto comercial" %}
+      {% trans "Contacto" %}
     </h1>
     <p class="mt-4 text-sm text-text-muted sm:text-base">
-      {% trans "Si necesita confirmar disponibilidad, precio final y plazo de un recambio, contáctenos por correo o teléfono indicando la referencia técnica y la cantidad." %}
+      {% if CURRENT_LANGUAGE|slice:':2' == 'en' %}
+        If you need to confirm availability, final price and lead time for a spare part, or have any other inquiry, contact us by email or phone.
+      {% else %}
+        Si necesita confirmar disponibilidad, precio final y plazo de un recambio, o tiene cualquier otra consulta, contáctenos por correo o teléfono.
+      {% endif %}
     </p>
 
     {% if product_hint %}
