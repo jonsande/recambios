@@ -11,13 +11,15 @@ from .emails import (
     send_customer_offer_sent_email,
     send_inquiry_submitted_emails,
     send_internal_offer_response_notification_email,
+    send_internal_payment_paid_notification_email,
     send_supplier_offer_sent_notifications,
 )
-from .models import Inquiry, InquiryOffer
+from .models import Inquiry, InquiryOffer, InquiryOfferPayment
 
 STATUS_BEFORE_SAVE_ATTR = "_status_before_save"
 NEGATIVE_RESOLVED_AT_BEFORE_SAVE_ATTR = "_negative_resolved_at_before_save"
 OFFER_STATUS_BEFORE_SAVE_ATTR = "_offer_status_before_save"
+PAYMENT_STATUS_BEFORE_SAVE_ATTR = "_payment_status_before_save"
 logger = logging.getLogger(__name__)
 
 
@@ -220,6 +222,68 @@ def send_internal_offer_response_email_on_status_entry(
                 offer.reference_code,
                 offer.inquiry.reference_code,
                 response_status,
+            )
+
+    transaction.on_commit(_send_after_commit, robust=True)
+
+
+@receiver(pre_save, sender=InquiryOfferPayment)
+def cache_payment_status_before_save(
+    sender,
+    instance: InquiryOfferPayment,
+    **kwargs,
+) -> None:
+    if instance._state.adding or not instance.pk:
+        setattr(instance, PAYMENT_STATUS_BEFORE_SAVE_ATTR, None)
+        return
+
+    previous_status = sender.objects.filter(pk=instance.pk).values_list("status", flat=True).first()
+    setattr(instance, PAYMENT_STATUS_BEFORE_SAVE_ATTR, previous_status)
+
+
+@receiver(post_save, sender=InquiryOfferPayment)
+def send_internal_payment_paid_email_on_status_entry(
+    sender,
+    instance: InquiryOfferPayment,
+    created: bool,
+    **kwargs,
+) -> None:
+    previous_status = getattr(instance, PAYMENT_STATUS_BEFORE_SAVE_ATTR, None)
+    entered_paid = instance.status == InquiryOfferPayment.Status.PAID and (
+        created or previous_status != InquiryOfferPayment.Status.PAID
+    )
+    if not entered_paid:
+        return
+
+    payment_id = instance.pk
+
+    def _send_after_commit() -> None:
+        if payment_id is None:
+            return
+
+        payment = (
+            InquiryOfferPayment.objects.select_related(
+                "offer",
+                "offer__inquiry",
+                "offer__inquiry__user",
+            )
+            .filter(pk=payment_id)
+            .first()
+        )
+        if payment is None:
+            return
+
+        try:
+            send_internal_payment_paid_notification_email(payment)
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to send internal paid-payment notification email "
+                    "(payment=%s offer=%s inquiry=%s)."
+                ),
+                payment.reference_code,
+                payment.offer.reference_code,
+                payment.offer.inquiry.reference_code,
             )
 
     transaction.on_commit(_send_after_commit, robust=True)

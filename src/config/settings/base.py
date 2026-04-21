@@ -155,6 +155,9 @@ PUBLIC_BASE_URL = config(
     "PUBLIC_BASE_URL",
     default="http://127.0.0.1:8000",
 )
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
 
 SITE_BRAND_NAME = config(
     "SITE_BRAND_NAME",

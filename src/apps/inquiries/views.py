@@ -6,16 +6,27 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
-from django.views.generic import FormView, TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import FormView, TemplateView, View
 
 from apps.cart.services import clear_request_cart, get_request_cart_items
 
 from .forms import PublicInquirySubmissionForm
 from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
+from .payments import (
+    StripeCheckoutSessionError,
+    StripeConfigurationError,
+    StripeWebhookPayloadError,
+    StripeWebhookSignatureError,
+    construct_stripe_webhook_event,
+    create_or_reuse_checkout_session_for_offer,
+    process_stripe_checkout_event,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -235,7 +246,7 @@ class PublicInquiryOfferDetailView(TemplateView):
         return redirect(request.path)
 
 
-class PublicInquiryOfferPaymentPlaceholderView(TemplateView):
+class PublicInquiryOfferPaymentView(TemplateView):
     template_name = "inquiries/public_offer_payment_placeholder.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -256,35 +267,51 @@ class PublicInquiryOfferPaymentPlaceholderView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.offer = self._get_offer()
-        if self.offer.status != InquiryOffer.Status.ACCEPTED:
-            if self.offer.status == InquiryOffer.Status.SENT:
-                messages.info(
-                    request,
-                    _(
-                        "Esta oferta aún está pendiente de su respuesta. "
-                        "Acepte la oferta para avanzar al pago."
-                    ),
-                )
-            elif self.offer.status == InquiryOffer.Status.REJECTED:
-                messages.info(
-                    request,
-                    _(
-                        "Esta oferta fue rechazada. Si necesita revisar "
-                        "alternativas, contacte con nuestro equipo."
-                    ),
-                )
-            else:
-                messages.info(
-                    request,
-                    _("Esta oferta todavía no está disponible para continuar al paso de pago."),
-                )
-            return redirect(
-                "inquiries:public_inquiry_offer_detail",
-                access_token=self.offer.access_token,
-            )
-
+        redirect_response = self._redirect_if_offer_not_accepted(request, offer=self.offer)
+        if redirect_response is not None:
+            return redirect_response
         self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
         return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.offer = self._get_offer()
+        redirect_response = self._redirect_if_offer_not_accepted(request, offer=self.offer)
+        if redirect_response is not None:
+            return redirect_response
+
+        try:
+            checkout_result = create_or_reuse_checkout_session_for_offer(
+                self.offer,
+                language_code=request.LANGUAGE_CODE,
+            )
+        except StripeConfigurationError:
+            logger.exception(
+                "Stripe checkout initiation blocked due to configuration error (offer=%s).",
+                self.offer.reference_code,
+            )
+            messages.error(
+                request,
+                _(
+                    "El pago online no está disponible temporalmente. "
+                    "Nuestro equipo ha sido notificado."
+                ),
+            )
+            return redirect(request.path)
+        except (StripeCheckoutSessionError, ValidationError, ValueError):
+            logger.exception(
+                "Stripe checkout initiation failed (offer=%s).",
+                self.offer.reference_code,
+            )
+            messages.error(
+                request,
+                _(
+                    "No se ha podido iniciar la pasarela de pago. "
+                    "Inténtelo de nuevo en unos minutos."
+                ),
+            )
+            return redirect(request.path)
+
+        return redirect(checkout_result.session_url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -293,9 +320,167 @@ class PublicInquiryOfferPaymentPlaceholderView(TemplateView):
                 "page_title": _("Paso de pago"),
                 "offer": self.offer,
                 "payment": self.payment,
+                "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
+                "can_start_checkout": self.payment.status == InquiryOfferPayment.Status.PENDING,
             }
         )
         return context
+
+    @staticmethod
+    def _redirect_if_offer_not_accepted(request, *, offer: InquiryOffer):
+        if offer.status == InquiryOffer.Status.ACCEPTED:
+            return None
+
+        if offer.status == InquiryOffer.Status.SENT:
+            messages.info(
+                request,
+                _(
+                    "Esta oferta aún está pendiente de su respuesta. "
+                    "Acepte la oferta para avanzar al pago."
+                ),
+            )
+        elif offer.status == InquiryOffer.Status.REJECTED:
+            messages.info(
+                request,
+                _(
+                    "Esta oferta fue rechazada. Si necesita revisar "
+                    "alternativas, contacte con nuestro equipo."
+                ),
+            )
+        else:
+            messages.info(
+                request,
+                _("Esta oferta todavía no está disponible para continuar al paso de pago."),
+            )
+        return redirect(
+            "inquiries:public_inquiry_offer_detail",
+            access_token=offer.access_token,
+        )
+
+
+class PublicInquiryOfferPaymentSuccessView(TemplateView):
+    template_name = "inquiries/public_offer_payment_success.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.access_token = kwargs.get("access_token")
+        if self.access_token is None:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_offer(self) -> InquiryOffer:
+        offer = (
+            InquiryOffer.objects.select_related("inquiry")
+            .filter(access_token=self.access_token)
+            .first()
+        )
+        if offer is None:
+            raise Http404
+        return offer
+
+    def get(self, request, *args, **kwargs):
+        self.offer = self._get_offer()
+        self.payment = InquiryOfferPayment.objects.filter(offer=self.offer).first()
+        if self.payment is None:
+            messages.info(
+                request,
+                _("No se ha encontrado un pago activo para esta oferta."),
+            )
+            return redirect(
+                "inquiries:public_inquiry_offer_detail",
+                access_token=self.offer.access_token,
+            )
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": _("Confirmación de pago"),
+                "offer": self.offer,
+                "payment": self.payment,
+                "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
+            }
+        )
+        return context
+
+
+class PublicInquiryOfferPaymentCancelView(TemplateView):
+    template_name = "inquiries/public_offer_payment_cancel.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.access_token = kwargs.get("access_token")
+        if self.access_token is None:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_offer(self) -> InquiryOffer:
+        offer = (
+            InquiryOffer.objects.select_related("inquiry")
+            .filter(access_token=self.access_token)
+            .first()
+        )
+        if offer is None:
+            raise Http404
+        return offer
+
+    def get(self, request, *args, **kwargs):
+        self.offer = self._get_offer()
+        self.payment = InquiryOfferPayment.objects.filter(offer=self.offer).first()
+        if self.payment is None:
+            messages.info(
+                request,
+                _("No se ha encontrado un pago activo para esta oferta."),
+            )
+            return redirect(
+                "inquiries:public_inquiry_offer_detail",
+                access_token=self.offer.access_token,
+            )
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": _("Pago no completado"),
+                "offer": self.offer,
+                "payment": self.payment,
+                "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
+            }
+        )
+        return context
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class StripeCheckoutWebhookView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        signature = (request.META.get("HTTP_STRIPE_SIGNATURE") or "").strip()
+        if not signature:
+            return HttpResponseBadRequest("Missing Stripe signature.")
+
+        try:
+            event = construct_stripe_webhook_event(request.body, signature)
+        except StripeWebhookSignatureError:
+            logger.warning("Stripe webhook rejected due to invalid signature.")
+            return HttpResponseBadRequest("Invalid Stripe signature.")
+        except StripeWebhookPayloadError:
+            logger.warning("Stripe webhook rejected due to invalid payload.")
+            return HttpResponseBadRequest("Invalid Stripe payload.")
+        except StripeConfigurationError:
+            logger.exception("Stripe webhook processing blocked by missing configuration.")
+            return HttpResponse(status=500)
+        except StripeCheckoutSessionError:
+            logger.exception("Stripe webhook verification failed due to provider error.")
+            return HttpResponse(status=502)
+
+        try:
+            process_stripe_checkout_event(event)
+        except Exception:
+            logger.exception("Stripe webhook event processing failed.")
+            return HttpResponse(status=500)
+
+        return HttpResponse(status=200)
 
 
 def _resolve_inquiry_language() -> str:

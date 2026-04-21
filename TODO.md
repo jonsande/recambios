@@ -134,7 +134,7 @@
     - [x] agrupación por proveedor en consultas mixtas (un email por proveedor con solo sus líneas)
     - [x] notificación interna cuando falla o falta el email operativo de proveedor, sin revertir estado comercial
   - [x] tests específicos de integridad y flujo de Fase 11
-  - [ ] integración real de pasarela de pago (siguiente slice de Fase 11)
+  - [x] integración real de pasarela de pago (Stripe Checkout slice inicial)
 
 - [ ] **Fase 12** — SEO, rendimiento y bilingüe ES/EN
   - [ ] meta tags dinámicos

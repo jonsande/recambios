@@ -6,10 +6,10 @@
 {% block content %}
   <div class="page-stack">
     <section class="section-shell-lg">
-      <p class="page-eyebrow">{% trans "Paso de pago" %}</p>
+      <p class="page-eyebrow">{% trans "Pago seguro" %}</p>
       <h1 class="mt-2 page-title">{{ page_title }}</h1>
       <p class="page-lead">
-        {% trans "Su oferta está aceptada y este será el siguiente paso para completar el pago." %}
+        {% trans "Su oferta está aceptada. Puede continuar a Stripe Checkout para completar el pago en una pasarela alojada y segura." %}
       </p>
     </section>
 
@@ -39,10 +39,32 @@
       </dl>
     </section>
 
+    {% if is_paid %}
+      <section class="alert alert-success">
+        <p>{% trans "Este pago ya figura como confirmado en nuestro sistema." %}</p>
+      </section>
+    {% elif can_start_checkout %}
+      <section class="section-shell" aria-label="{% trans 'Acciones de pago' %}">
+        <h2 class="subsection-title">{% trans "Continuar a Stripe Checkout" %}</h2>
+        <p class="mt-2 text-sm text-text-muted sm:text-base">
+          {% trans "Al continuar, será redirigido a Stripe para finalizar el pago. No almacenamos datos de tarjeta en esta plataforma." %}
+        </p>
+        <form method="post" class="mt-4">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">
+            {% trans "Proceder al pago seguro" %}
+          </button>
+        </form>
+      </section>
+    {% else %}
+      <section class="alert alert-warning">
+        <p>{% trans "Este pago no está en estado pendiente y no puede iniciarse desde esta pantalla." %}</p>
+      </section>
+    {% endif %}
+
     <section class="alert alert-warning">
-      <p>{% trans "La pasarela de pago online todavía no está disponible en esta fase." %}</p>
-      <p class="mt-2">
-        {% trans "Nuestro equipo activará este paso en una siguiente iteración y le informará por los canales habituales." %}
+      <p>
+        {% trans "La página de retorno desde Stripe no es la fuente final de confirmación. El estado definitivo se valida mediante notificación técnica de la pasarela." %}
       </p>
     </section>
 

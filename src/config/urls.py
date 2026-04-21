@@ -3,10 +3,17 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+from apps.inquiries.views import StripeCheckoutWebhookView
+
 urlpatterns = [
     path("", RedirectView.as_view(url="/es/", permanent=False), name="root-redirect"),
     path('admin/', admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "webhooks/stripe/checkout/",
+        StripeCheckoutWebhookView.as_view(),
+        name="stripe_checkout_webhook",
+    ),
 ]
 
 urlpatterns += i18n_patterns(

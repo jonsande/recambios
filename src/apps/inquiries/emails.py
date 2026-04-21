@@ -11,7 +11,7 @@ from django.utils import translation
 
 from apps.suppliers.models import Supplier
 
-from .models import Inquiry, InquiryOffer
+from .models import Inquiry, InquiryOffer, InquiryOfferPayment
 
 SUPPORTED_INQUIRY_LANGUAGES = {choice for choice, _label in Inquiry.Language.choices}
 SUPPLIER_NOTIFICATION_LANGUAGE = "en"
@@ -318,6 +318,35 @@ def send_internal_offer_response_notification_email(
     return True
 
 
+def send_internal_payment_paid_notification_email(payment: InquiryOfferPayment) -> bool:
+    recipients = _resolve_internal_notification_recipients()
+    if not recipients:
+        return False
+
+    context = _build_internal_payment_paid_email_context(payment)
+    language = _resolve_language(payment.offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/internal_payment_paid_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/internal_payment_paid_body.txt",
+        context,
+        language,
+    )
+    customer_email = context.get("requester_email")
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.SERVER_EMAIL,
+        to=recipients,
+        reply_to=[customer_email] if customer_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
 def send_customer_negative_resolution_email(inquiry: Inquiry) -> bool:
     context = _build_negative_resolution_email_context(inquiry)
     customer_email = context.get("requester_email")
@@ -481,6 +510,17 @@ def _build_internal_offer_response_email_context(offer: InquiryOffer) -> dict:
         "offer": offer,
         "requester_email": requester_email,
         "offer_public_url": _build_offer_public_url(offer),
+    }
+
+
+def _build_internal_payment_paid_email_context(payment: InquiryOfferPayment) -> dict:
+    requester_email = _resolve_requester_email(payment.offer.inquiry)
+    return {
+        "inquiry": payment.offer.inquiry,
+        "offer": payment.offer,
+        "payment": payment,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(payment.offer),
     }
 
 

@@ -3,7 +3,9 @@ from django.utils.translation import gettext_lazy as _
 
 from .views import (
     PublicInquiryOfferDetailView,
-    PublicInquiryOfferPaymentPlaceholderView,
+    PublicInquiryOfferPaymentCancelView,
+    PublicInquiryOfferPaymentSuccessView,
+    PublicInquiryOfferPaymentView,
     PublicInquirySubmitView,
     PublicInquirySuccessView,
 )
@@ -24,7 +26,17 @@ urlpatterns = [
     ),
     path(
         _("oferta/<uuid:access_token>/pago/"),
-        PublicInquiryOfferPaymentPlaceholderView.as_view(),
+        PublicInquiryOfferPaymentView.as_view(),
         name="public_inquiry_offer_payment_placeholder",
+    ),
+    path(
+        _("oferta/<uuid:access_token>/pago/exito/"),
+        PublicInquiryOfferPaymentSuccessView.as_view(),
+        name="public_inquiry_offer_payment_success",
+    ),
+    path(
+        _("oferta/<uuid:access_token>/pago/cancelado/"),
+        PublicInquiryOfferPaymentCancelView.as_view(),
+        name="public_inquiry_offer_payment_cancel",
     ),
 ]

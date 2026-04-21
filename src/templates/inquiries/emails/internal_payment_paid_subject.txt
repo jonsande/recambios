@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with reference=payment.reference_code %}Pago confirmado por Stripe: {{ reference }}{% endblocktrans %}
