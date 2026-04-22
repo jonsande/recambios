@@ -6,7 +6,7 @@
 {% block content %}
   <div class="page-stack">
     <section class="section-shell-lg">
-      <p class="page-eyebrow">{% trans "Retorno de pago" %}</p>
+      <p class="page-eyebrow">{% trans "Estado del pago" %}</p>
       <h1 class="mt-2 page-title">{{ page_title }}</h1>
       {% if is_paid %}
         <p class="page-lead">
@@ -14,13 +14,13 @@
         </p>
       {% else %}
         <p class="page-lead">
-          {% trans "No se completó el pago en Stripe. Puede reintentarlo cuando lo necesite desde el mismo enlace de oferta." %}
+          {% trans "El pago no se completó en esta operación. Si la oferta sigue disponible, puede reintentarlo ahora desde esta misma página." %}
         </p>
       {% endif %}
     </section>
 
-    <section class="section-shell" aria-label="{% trans 'Resumen de pago' %}">
-      <h2 class="subsection-title">{% trans "Resumen" %}</h2>
+    <section class="section-shell" aria-label="{% trans 'Resumen de su pago' %}">
+      <h2 class="subsection-title">{% trans "Resumen de su pago" %}</h2>
       <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Referencia de oferta" %}</dt>
@@ -35,24 +35,32 @@
           <dd class="mt-1 text-2xl font-bold tracking-tight text-primary-strong">{{ payment.payable_amount }} {{ payment.currency }}</dd>
         </div>
         <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Estado interno" %}</dt>
+          <dt class="font-medium text-text-muted">{% trans "Estado" %}</dt>
           <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
         </div>
       </dl>
     </section>
+
+    {% if not is_paid %}
+      <section class="alert alert-warning">
+        <p>
+          {% trans "Si ya intentó pagar hace unos minutos, espere un momento y compruebe de nuevo el estado antes de volver a intentarlo." %}
+        </p>
+      </section>
+    {% endif %}
 
     <section class="cta-row">
       <a
         href="{% url 'inquiries:public_inquiry_offer_payment_placeholder' access_token=offer.access_token %}"
         class="btn btn-primary"
       >
-        {% trans "Reintentar pago" %}
+        {% trans "Reintentar pago ahora" %}
       </a>
       <a
         href="{% url 'inquiries:public_inquiry_offer_detail' access_token=offer.access_token %}"
         class="btn btn-secondary"
       >
-        {% trans "Volver a la oferta" %}
+        {% trans "Ver detalle de oferta" %}
       </a>
     </section>
   </div>

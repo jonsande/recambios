@@ -17,6 +17,9 @@ from .models import InquiryOffer, InquiryOfferPayment
 logger = logging.getLogger(__name__)
 
 STRIPE_PROVIDER = "stripe_checkout"
+RELEVANT_STRIPE_EVENT_TYPES = {
+    "checkout.session.completed",
+}
 ZERO_DECIMAL_CURRENCIES = {
     "bif",
     "clp",
@@ -152,11 +155,23 @@ def construct_stripe_webhook_event(payload: bytes, signature: str) -> dict[str, 
 
 def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
     event_type = str(event.get("type", ""))
+    if event_type not in RELEVANT_STRIPE_EVENT_TYPES:
+        logger.debug("Stripe webhook event ignored as out of scope (type=%s).", event_type)
+        return False
+
     data = event.get("data", {})
     if not isinstance(data, dict):
+        logger.warning(
+            "Stripe webhook event has invalid data payload for relevant type (type=%s).",
+            event_type,
+        )
         return False
     payload = data.get("object", {})
     if not isinstance(payload, dict):
+        logger.warning(
+            "Stripe webhook event has invalid object payload for relevant type (type=%s).",
+            event_type,
+        )
         return False
 
     payment = _resolve_payment_from_checkout_payload(payload)

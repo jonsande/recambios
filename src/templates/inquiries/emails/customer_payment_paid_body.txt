@@ -1,0 +1,18 @@
+{% load i18n %}
+{% trans "Hemos confirmado correctamente su pago." %}
+
+{% trans "Resumen de su operación:" %}
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% blocktrans with payment_reference=payment.reference_code %}Referencia de pago: {{ payment_reference }}{% endblocktrans %}
+{% blocktrans with amount=payment.payable_amount currency=payment.currency %}Importe confirmado: {{ amount }} {{ currency }}{% endblocktrans %}
+{% if payment.paid_at %}{% blocktrans with paid_at=payment.paid_at %}Fecha de confirmación: {{ paid_at }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Nuestro equipo ya está iniciando la tramitación interna de su pedido/solicitud con esta confirmación de pago." %}
+{% trans "Puede consultar su oferta en este enlace:" %}
+{{ offer_public_url }}
+
+{% if customer_reply_to_email %}
+{% blocktrans with reply_to=customer_reply_to_email %}Si necesita ayuda, puede responder a {{ reply_to }} indicando sus referencias.{% endblocktrans %}
+{% endif %}

@@ -300,9 +300,103 @@ def test_paid_internal_notification_is_sent_exactly_once(django_user_model, sett
 
     assert first_changed is True
     assert second_changed is False
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].to == ["ops@example.com"]
-    assert "Pago confirmado por Stripe" in mail.outbox[0].subject
+    assert len(mail.outbox) == 2
+
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    customer_email = next(
+        email for email in mail.outbox if email.to == ["stripe_paid_once@example.com"]
+    )
+    assert "Pago confirmado por Stripe" in internal_email.subject
+    assert "Pago confirmado de su solicitud" in customer_email.subject
+    assert offer.inquiry.reference_code in customer_email.body
+    assert offer.reference_code in customer_email.body
+    assert payment.reference_code in customer_email.body
+    assert "Importe confirmado:" in customer_email.body
+    assert payment.currency in customer_email.body
+
+
+@pytest.mark.django_db
+def test_irrelevant_stripe_events_are_ignored_without_warning_noise(caplog) -> None:
+    with caplog.at_level("WARNING", logger="apps.inquiries.payments"):
+        changed = process_stripe_checkout_event(
+            {
+                "type": "charge.succeeded",
+                "data": {"object": {"id": "ch_123"}},
+            }
+        )
+
+    assert changed is False
+    assert not any(record.levelname == "WARNING" for record in caplog.records)
+
+
+@pytest.mark.django_db
+def test_relevant_stripe_event_without_matching_payment_logs_warning(caplog) -> None:
+    with caplog.at_level("WARNING", logger="apps.inquiries.payments"):
+        changed = process_stripe_checkout_event(
+            {
+                "type": "checkout.session.completed",
+                "data": {
+                    "object": {
+                        "id": "cs_unknown",
+                        "payment_status": "paid",
+                        "metadata": {"payment_reference": "PAY-UNKNOWN"},
+                    }
+                },
+            }
+        )
+
+    assert changed is False
+    assert any(
+        "could not be matched to an internal payment" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_customer_paid_email_failure_does_not_rollback_paid_state(
+    django_user_model,
+    settings,
+    caplog,
+) -> None:
+    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+    settings.SERVER_EMAIL = "notifications@example.com"
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+    offer = make_accepted_offer(django_user_model, username="stripe_paid_email_fail")
+    payment = InquiryOfferPayment.ensure_pending_from_offer(
+        offer,
+        provider=STRIPE_PROVIDER,
+        provider_reference="cs_test_customer_fail",
+        save=True,
+    )
+    event = {
+        "type": "checkout.session.completed",
+        "data": {
+            "object": {
+                "id": "cs_test_customer_fail_paid",
+                "payment_status": "paid",
+                "metadata": {
+                    "payment_reference": payment.reference_code,
+                    "offer_reference": offer.reference_code,
+                    "inquiry_reference": offer.inquiry.reference_code,
+                },
+            }
+        },
+    }
+
+    with patch(
+        "apps.inquiries.signals.send_customer_payment_paid_confirmation_email",
+        side_effect=RuntimeError("smtp down"),
+    ):
+        with caplog.at_level("ERROR", logger="apps.inquiries.signals"):
+            changed = process_stripe_checkout_event(event)
+
+    payment.refresh_from_db()
+    assert changed is True
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert any(
+        "Failed to send customer paid-payment confirmation email" in record.getMessage()
+        for record in caplog.records
+    )
 
 
 @pytest.mark.django_db
@@ -346,3 +440,11 @@ def test_public_payment_post_redirects_to_stripe_checkout_and_return_pages_do_no
     assert success_response.status_code == 200
     assert cancel_response.status_code == 200
     assert payment.status == InquiryOfferPayment.Status.PENDING
+
+    success_content = success_response.content.decode()
+    cancel_content = cancel_response.content.decode()
+    assert "Estamos completando la verificación final de su pago." in success_content
+    assert "notificación técnica firmada de Stripe" not in success_content
+    assert "Comprobar estado del pago" in success_content
+    assert "El pago no se completó en esta operación." in cancel_content
+    assert "Reintentar pago ahora" in cancel_content

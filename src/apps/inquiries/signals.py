@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from .emails import (
     send_customer_negative_resolution_email,
     send_customer_offer_sent_email,
+    send_customer_payment_paid_confirmation_email,
     send_inquiry_submitted_emails,
     send_internal_offer_response_notification_email,
     send_internal_payment_paid_notification_email,
@@ -279,6 +280,19 @@ def send_internal_payment_paid_email_on_status_entry(
             logger.exception(
                 (
                     "Failed to send internal paid-payment notification email "
+                    "(payment=%s offer=%s inquiry=%s)."
+                ),
+                payment.reference_code,
+                payment.offer.reference_code,
+                payment.offer.inquiry.reference_code,
+            )
+
+        try:
+            send_customer_payment_paid_confirmation_email(payment)
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to send customer paid-payment confirmation email "
                     "(payment=%s offer=%s inquiry=%s)."
                 ),
                 payment.reference_code,

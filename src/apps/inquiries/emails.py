@@ -347,6 +347,39 @@ def send_internal_payment_paid_notification_email(payment: InquiryOfferPayment) 
     return True
 
 
+def send_customer_payment_paid_confirmation_email(payment: InquiryOfferPayment) -> bool:
+    context = _build_customer_payment_paid_email_context(payment)
+    customer_email = context.get("requester_email")
+    if not customer_email:
+        logger.warning(
+            "Customer paid-confirmation email skipped due to missing recipient email (payment=%s).",
+            payment.reference_code,
+        )
+        return False
+
+    language = _resolve_language(payment.offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/customer_payment_paid_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/customer_payment_paid_body.txt",
+        context,
+        language,
+    )
+    reply_to_emails = _resolve_customer_reply_to_emails()
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=reply_to_emails or None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
 def send_customer_negative_resolution_email(inquiry: Inquiry) -> bool:
     context = _build_negative_resolution_email_context(inquiry)
     customer_email = context.get("requester_email")
@@ -521,6 +554,18 @@ def _build_internal_payment_paid_email_context(payment: InquiryOfferPayment) -> 
         "payment": payment,
         "requester_email": requester_email,
         "offer_public_url": _build_offer_public_url(payment.offer),
+    }
+
+
+def _build_customer_payment_paid_email_context(payment: InquiryOfferPayment) -> dict:
+    requester_email = _resolve_requester_email(payment.offer.inquiry)
+    return {
+        "inquiry": payment.offer.inquiry,
+        "offer": payment.offer,
+        "payment": payment,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(payment.offer),
+        "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
 

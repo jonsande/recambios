@@ -6,21 +6,21 @@
 {% block content %}
   <div class="page-stack">
     <section class="section-shell-lg">
-      <p class="page-eyebrow">{% trans "Retorno de pago" %}</p>
+      <p class="page-eyebrow">{% trans "Estado del pago" %}</p>
       <h1 class="mt-2 page-title">{{ page_title }}</h1>
       {% if is_paid %}
         <p class="page-lead">
-          {% trans "Hemos confirmado el pago correctamente. Nuestro equipo iniciará el siguiente paso operativo." %}
+          {% trans "Su pago figura como confirmado. Nuestro equipo continuará con la tramitación interna de su pedido/solicitud." %}
         </p>
       {% else %}
         <p class="page-lead">
-          {% trans "Hemos recibido su retorno desde Stripe. El pago aún puede estar en validación técnica." %}
+          {% trans "Estamos completando la verificación final de su pago. En cuanto se confirme, continuaremos con el siguiente paso y recibirá confirmación por correo." %}
         </p>
       {% endif %}
     </section>
 
-    <section class="section-shell" aria-label="{% trans 'Resumen de pago' %}">
-      <h2 class="subsection-title">{% trans "Resumen" %}</h2>
+    <section class="section-shell" aria-label="{% trans 'Resumen de su pago' %}">
+      <h2 class="subsection-title">{% trans "Resumen de su pago" %}</h2>
       <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Referencia de oferta" %}</dt>
@@ -35,7 +35,7 @@
           <dd class="mt-1 text-2xl font-bold tracking-tight text-primary-strong">{{ payment.payable_amount }} {{ payment.currency }}</dd>
         </div>
         <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Estado interno" %}</dt>
+          <dt class="font-medium text-text-muted">{% trans "Estado" %}</dt>
           <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
         </div>
       </dl>
@@ -43,7 +43,7 @@
 
     <section class="alert alert-warning">
       <p>
-        {% trans "Esta página no confirma por sí sola el pago final. La confirmación definitiva se aplica cuando recibimos la notificación técnica firmada de Stripe." %}
+        {% trans "Esta página es informativa. La confirmación final del pago se completa automáticamente en cuanto la pasarela termina su proceso de verificación." %}
       </p>
     </section>
 
@@ -52,13 +52,13 @@
         href="{% url 'inquiries:public_inquiry_offer_payment_placeholder' access_token=offer.access_token %}"
         class="btn btn-secondary"
       >
-        {% trans "Volver al pago" %}
+        {% trans "Comprobar estado del pago" %}
       </a>
       <a
         href="{% url 'inquiries:public_inquiry_offer_detail' access_token=offer.access_token %}"
         class="btn btn-secondary"
       >
-        {% trans "Ver oferta" %}
+        {% trans "Ver detalle de oferta" %}
       </a>
     </section>
   </div>
