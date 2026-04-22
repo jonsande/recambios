@@ -44,7 +44,7 @@
     {% if not is_paid %}
       <section class="alert alert-warning">
         <p>
-          {% trans "Si ya intentó pagar hace unos minutos, espere un momento y compruebe de nuevo el estado antes de volver a intentarlo." %}
+          {% trans "Si decide reintentar, se abrirá una nueva sesión segura de Stripe Checkout para este mismo pago." %}
         </p>
       </section>
     {% endif %}

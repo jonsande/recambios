@@ -89,9 +89,9 @@ def test_checkout_session_creation_persists_stripe_provider_reference(django_use
     }
 
     with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
-        "apps.inquiries.payments._resolve_reusable_checkout_session",
-        return_value=None,
-    ), patch("apps.inquiries.payments._create_checkout_session", return_value=session):
+        "apps.inquiries.payments._create_checkout_session",
+        return_value=session,
+    ):
         result = create_or_reuse_checkout_session_for_offer(offer, language_code="es")
 
     payment = InquiryOfferPayment.objects.get(offer=offer)
@@ -126,33 +126,45 @@ def test_checkout_session_initiation_is_blocked_for_non_accepted_offer(django_us
 
 
 @pytest.mark.django_db
-def test_checkout_session_is_idempotent_and_reuses_same_internal_payment(django_user_model) -> None:
+def test_checkout_session_is_idempotent_and_creates_new_session_each_attempt(
+    django_user_model,
+) -> None:
     offer = make_accepted_offer(django_user_model, username="stripe_idempotent")
-    session = {
-        "id": "cs_test_reused",
-        "url": "https://checkout.stripe.com/c/pay/cs_test_reused",
+    first_session = {
+        "id": "cs_test_first",
+        "url": "https://checkout.stripe.com/c/pay/cs_test_first",
+        "status": "open",
+        "payment_status": "unpaid",
+    }
+    second_session = {
+        "id": "cs_test_second",
+        "url": "https://checkout.stripe.com/c/pay/cs_test_second",
         "status": "open",
         "payment_status": "unpaid",
     }
 
     with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
-        "apps.inquiries.payments._resolve_reusable_checkout_session",
-        side_effect=[None, session],
-    ), patch(
         "apps.inquiries.payments._create_checkout_session",
-        return_value=session,
+        side_effect=[first_session, second_session],
     ) as create_mock:
         first = create_or_reuse_checkout_session_for_offer(offer, language_code="es")
         second = create_or_reuse_checkout_session_for_offer(offer, language_code="es")
 
+    payment = InquiryOfferPayment.objects.get(offer=offer)
     assert first.payment.pk == second.payment.pk
-    assert second.reused_existing_session is True
-    assert create_mock.call_count == 1
+    assert first.session_id == "cs_test_first"
+    assert second.session_id == "cs_test_second"
+    assert first.reused_existing_session is False
+    assert second.reused_existing_session is False
+    assert payment.provider_reference == "cs_test_second"
+    assert create_mock.call_count == 2
     assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
 
 
 @pytest.mark.django_db
-def test_checkout_retry_after_unusable_session_uses_same_payment_record(django_user_model) -> None:
+def test_checkout_retry_reuses_same_payment_record_without_duplicate_rows(
+    django_user_model,
+) -> None:
     offer = make_accepted_offer(django_user_model, username="stripe_retry")
     first_session = {
         "id": "cs_test_old",
@@ -168,9 +180,6 @@ def test_checkout_retry_after_unusable_session_uses_same_payment_record(django_u
     }
 
     with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
-        "apps.inquiries.payments._resolve_reusable_checkout_session",
-        side_effect=[None, None],
-    ), patch(
         "apps.inquiries.payments._create_checkout_session",
         side_effect=[first_session, retry_session],
     ):
@@ -179,8 +188,45 @@ def test_checkout_retry_after_unusable_session_uses_same_payment_record(django_u
 
     payment = InquiryOfferPayment.objects.get(offer=offer)
     assert first.payment.pk == second.payment.pk
+    assert first.session_id != second.session_id
     assert payment.provider_reference == "cs_test_new"
     assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
+
+
+@pytest.mark.django_db
+def test_checkout_session_creation_is_restricted_to_card_for_v1(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_card_only")
+    captured_payload: dict = {}
+
+    class _DummySession:
+        @staticmethod
+        def create(**kwargs):
+            captured_payload.update(kwargs)
+            return {
+                "id": "cs_test_card_only",
+                "url": "https://checkout.stripe.com/c/pay/cs_test_card_only",
+            }
+
+    class _DummyCheckout:
+        Session = _DummySession
+
+    class _DummyStripe:
+        checkout = _DummyCheckout
+        api_key = ""
+
+    with patch("apps.inquiries.payments._load_stripe_module", return_value=_DummyStripe), patch(
+        "apps.inquiries.payments._require_stripe_secret_key",
+        return_value="sk_test",
+    ), patch(
+        "apps.inquiries.payments._build_offer_url",
+        side_effect=[
+            "https://recambios.example/payment/success",
+            "https://recambios.example/payment/cancel",
+        ],
+    ):
+        create_or_reuse_checkout_session_for_offer(offer, language_code="es")
+
+    assert captured_payload.get("payment_method_types") == ["card"]
 
 
 @pytest.mark.django_db
@@ -318,14 +364,21 @@ def test_paid_internal_notification_is_sent_exactly_once(django_user_model, sett
 @pytest.mark.django_db
 def test_irrelevant_stripe_events_are_ignored_without_warning_noise(caplog) -> None:
     with caplog.at_level("WARNING", logger="apps.inquiries.payments"):
-        changed = process_stripe_checkout_event(
+        first_changed = process_stripe_checkout_event(
             {
                 "type": "charge.succeeded",
                 "data": {"object": {"id": "ch_123"}},
             }
         )
+        second_changed = process_stripe_checkout_event(
+            {
+                "type": "payment_intent.created",
+                "data": {"object": {"id": "pi_123"}},
+            }
+        )
 
-    assert changed is False
+    assert first_changed is False
+    assert second_changed is False
     assert not any(record.levelname == "WARNING" for record in caplog.records)
 
 

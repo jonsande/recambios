@@ -135,6 +135,9 @@
     - [x] notificación interna cuando falla o falta el email operativo de proveedor, sin revertir estado comercial
   - [x] tests específicos de integridad y flujo de Fase 11
   - [x] integración real de pasarela de pago (Stripe Checkout slice inicial)
+  - [x] polish post-Stripe: mejora de copy pública en retorno éxito/cancelación y reducción de ruido de logs en webhook para eventos irrelevantes
+  - [x] email transaccional de confirmación de pago al cliente en transición real a `paid`, con trigger exact-once y tolerancia a fallo de envío sin revertir estado
+  - [x] hardening v1 Stripe: mismo `InquiryOfferPayment` por oferta + nueva Checkout Session por cada intento, restricción explícita a `card` y modelo de eventos relevantes documentado en código/tests
 
 - [ ] **Fase 12** — SEO, rendimiento y bilingüe ES/EN
   - [ ] meta tags dinámicos

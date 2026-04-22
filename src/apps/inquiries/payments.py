@@ -17,9 +17,12 @@ from .models import InquiryOffer, InquiryOfferPayment
 logger = logging.getLogger(__name__)
 
 STRIPE_PROVIDER = "stripe_checkout"
+# V1 scope: keep webhook processing intentionally narrow and focused on Checkout paid confirmation.
 RELEVANT_STRIPE_EVENT_TYPES = {
     "checkout.session.completed",
 }
+# V1 scope: conservative payment-method set for predictable production behavior.
+STRIPE_V1_CHECKOUT_PAYMENT_METHOD_TYPES = ("card",)
 ZERO_DECIMAL_CURRENCIES = {
     "bif",
     "clp",
@@ -73,6 +76,12 @@ def create_or_reuse_checkout_session_for_offer(
     *,
     language_code: str | None = None,
 ) -> StripeCheckoutSessionResult:
+    """
+    Prepare a Stripe Checkout attempt for an accepted offer.
+
+    Internal payment rows stay one-per-offer. Every new attempt creates a fresh
+    Checkout Session and updates the same payment record with the latest session reference.
+    """
     _require_stripe_secret_key()
 
     payment = InquiryOfferPayment.ensure_pending_from_offer(
@@ -93,21 +102,6 @@ def create_or_reuse_checkout_session_for_offer(
         if payment.provider != STRIPE_PROVIDER:
             payment.provider = STRIPE_PROVIDER
             payment.save(update_fields=["provider", "updated_at"])
-
-        reusable_session = _resolve_reusable_checkout_session(payment)
-        if reusable_session is not None:
-            session_id = str(_get_attr(reusable_session, "id", ""))
-            session_url = str(_get_attr(reusable_session, "url", ""))
-            if not session_id or not session_url:
-                raise StripeCheckoutSessionError(
-                    "Stripe reusable session response is missing id or url."
-                )
-            return StripeCheckoutSessionResult(
-                payment=payment,
-                session_id=session_id,
-                session_url=session_url,
-                reused_existing_session=True,
-            )
 
         created_session = _create_checkout_session(payment, language_code=language_code)
         session_id = str(_get_attr(created_session, "id", ""))
@@ -217,39 +211,6 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
     return False
 
 
-def _resolve_reusable_checkout_session(payment: InquiryOfferPayment) -> Any | None:
-    provider_reference = (payment.provider_reference or "").strip()
-    if not provider_reference:
-        return None
-
-    session = _retrieve_checkout_session(provider_reference)
-    if session is None:
-        return None
-
-    session_status = str(_get_attr(session, "status", "")).lower()
-    payment_status = str(_get_attr(session, "payment_status", "")).lower()
-    has_url = bool(str(_get_attr(session, "url", "")).strip())
-
-    if session_status == "open" and payment_status in {"unpaid", "no_payment_required"} and has_url:
-        return session
-    return None
-
-
-def _retrieve_checkout_session(session_id: str) -> Any | None:
-    stripe = _load_stripe_module()
-    stripe.api_key = _require_stripe_secret_key()
-
-    try:
-        return stripe.checkout.Session.retrieve(session_id)
-    except stripe.error.InvalidRequestError:
-        logger.warning("Stored Stripe checkout session not found (session=%s).", session_id)
-        return None
-    except stripe.error.StripeError as error:
-        raise StripeCheckoutSessionError(
-            "Stripe checkout session retrieval failed."
-        ) from error
-
-
 def _create_checkout_session(
     payment: InquiryOfferPayment,
     *,
@@ -274,6 +235,7 @@ def _create_checkout_session(
     try:
         return stripe.checkout.Session.create(
             mode="payment",
+            payment_method_types=list(STRIPE_V1_CHECKOUT_PAYMENT_METHOD_TYPES),
             success_url=success_url,
             cancel_url=cancel_url,
             client_reference_id=payment.reference_code,
