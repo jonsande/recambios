@@ -1,0 +1,14 @@
+Supplier inquiry notification
+
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+
+A customer has submitted an inquiry for parts linked to your supplier account.
+Please confirm availability and final supplier pricing as soon as possible.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with availability and price confirmation details.

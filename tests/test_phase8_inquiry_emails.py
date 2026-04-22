@@ -8,12 +8,27 @@ from apps.inquiries.models import Inquiry, InquiryItem
 from apps.suppliers.models import Supplier
 
 
-def make_product(sku: str = "SKU-INQ-EMAIL") -> Product:
-    supplier = Supplier.objects.create(
-        name=f"Supplier {sku}",
-        slug=f"supplier-{sku.lower()}",
-        code=f"SUP-{sku}",
+def make_supplier(
+    code: str,
+    *,
+    orders_email: str = "",
+    auto_send_inquiry_submitted_notification: bool = False,
+    inquiry_submitted_email_subject_template: str = "",
+    inquiry_submitted_email_body_template: str = "",
+) -> Supplier:
+    return Supplier.objects.create(
+        name=f"Supplier {code}",
+        slug=f"supplier-{code.lower()}",
+        code=code,
+        orders_email=orders_email,
+        auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
+        inquiry_submitted_email_subject_template=inquiry_submitted_email_subject_template,
+        inquiry_submitted_email_body_template=inquiry_submitted_email_body_template,
     )
+
+
+def make_product(sku: str = "SKU-INQ-EMAIL", *, supplier: Supplier | None = None) -> Product:
+    supplier = supplier or make_supplier(code=f"SUP-{sku}")
     brand = Brand.objects.create(
         name=f"Brand {sku}",
         slug=f"brand-{sku.lower()}",
@@ -90,6 +105,129 @@ def test_sends_internal_and_customer_emails_on_draft_to_submitted_transition(
     assert inquiry.reference_code in customer_email.subject
     assert customer_email.reply_to == ["atencion@example.com"]
     assert "confirma la recepción de su solicitud" in customer_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_sends_supplier_inquiry_notification_with_internal_copy_when_enabled(
+    django_user_model,
+    email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-INQ-AUTO",
+        orders_email="orders.inq@supplier.example",
+        auto_send_inquiry_submitted_notification=True,
+    )
+    user = django_user_model.objects.create_user(
+        username="phase8supplier",
+        email="phase8supplier@example.com",
+        password="pass1234",
+    )
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.DRAFT,
+        language=Inquiry.Language.SPANISH,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-INQ-AUTO", supplier=supplier),
+        requested_quantity=2,
+    )
+
+    mail.outbox.clear()
+    inquiry.status = Inquiry.Status.SUBMITTED
+    inquiry.save(update_fields=["status"])
+
+    assert len(mail.outbox) == 3
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.inq@supplier.example"]
+    )
+    assert "New inquiry - availability and price confirmation required:" in supplier_email.subject
+    assert inquiry.reference_code in supplier_email.subject
+    assert inquiry.reference_code in supplier_email.body
+    assert "SKU-INQ-AUTO" in supplier_email.body
+    assert "Qty: 2" in supplier_email.body
+    assert supplier_email.reply_to == ["atencion@example.com"]
+    assert supplier_email.bcc == ["internal-team@example.com"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_inquiry_notification_is_not_sent_when_automation_is_disabled(
+    django_user_model,
+    email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-INQ-OFF",
+        orders_email="orders.off@supplier.example",
+        auto_send_inquiry_submitted_notification=False,
+    )
+    user = django_user_model.objects.create_user(
+        username="phase8supplieroff",
+        email="phase8supplieroff@example.com",
+        password="pass1234",
+    )
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.DRAFT,
+        language=Inquiry.Language.SPANISH,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-INQ-OFF", supplier=supplier),
+        requested_quantity=1,
+    )
+
+    mail.outbox.clear()
+    inquiry.status = Inquiry.Status.SUBMITTED
+    inquiry.save(update_fields=["status"])
+
+    assert len(mail.outbox) == 2
+    assert not any(email.to == ["orders.off@supplier.example"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_inquiry_notification_uses_supplier_custom_templates(
+    django_user_model,
+    email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-INQ-CUSTOM",
+        orders_email="orders.custom@supplier.example",
+        auto_send_inquiry_submitted_notification=True,
+        inquiry_submitted_email_subject_template=(
+            "CUSTOM inquiry {{ inquiry.reference_code }} / {{ supplier.code }}"
+        ),
+        inquiry_submitted_email_body_template=(
+            "Custom inquiry body for {{ supplier.name }}:"
+            " {% for item in items %}{{ item.sku }} x{{ item.quantity }} {% endfor %}"
+        ),
+    )
+    user = django_user_model.objects.create_user(
+        username="phase8suppliercustom",
+        email="phase8suppliercustom@example.com",
+        password="pass1234",
+    )
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.DRAFT,
+        language=Inquiry.Language.SPANISH,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-INQ-CUSTOM", supplier=supplier),
+        requested_quantity=5,
+    )
+
+    mail.outbox.clear()
+    inquiry.status = Inquiry.Status.SUBMITTED
+    inquiry.save(update_fields=["status"])
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.custom@supplier.example"]
+    )
+    assert supplier_email.subject == f"CUSTOM inquiry {inquiry.reference_code} / SUP-INQ-CUSTOM"
+    assert "Custom inquiry body for Supplier SUP-INQ-CUSTOM" in supplier_email.body
+    assert "SKU-INQ-CUSTOM x5" in supplier_email.body
+    assert "Supplier inquiry notification" not in supplier_email.body
 
 
 @pytest.mark.django_db(transaction=True)

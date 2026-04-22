@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django.db import models
 from django.db.models import Count, Q
 
 from apps.users.roles import is_restricted_supplier_user
@@ -22,18 +24,80 @@ class SupplierAdmin(admin.ModelAdmin):
         "code",
         "country",
         "orders_email",
+        "auto_send_inquiry_submitted_notification",
         "auto_send_offer_sent_notification",
         "is_active",
         "active_assignments_count",
         "updated_at",
     )
-    list_filter = ("is_active", "country")
+    list_filter = (
+        "is_active",
+        "country",
+        "auto_send_inquiry_submitted_notification",
+        "auto_send_offer_sent_notification",
+    )
     search_fields = ("name", "code", "slug", "contact_email", "orders_email")
     ordering = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "updated_at"
     inlines = (SupplierUserAssignmentInline,)
+    fieldsets = (
+        (
+            "Supplier",
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "code",
+                    "is_active",
+                )
+            },
+        ),
+        (
+            "Contact",
+            {
+                "fields": (
+                    "country",
+                    "website",
+                    "contact_name",
+                    "contact_email",
+                    "orders_email",
+                    "contact_phone",
+                )
+            },
+        ),
+        (
+            "Automatic Supplier Notifications",
+            {
+                "description": (
+                    "If a custom template field is empty, the default email template is used."
+                ),
+                "fields": (
+                    "auto_send_inquiry_submitted_notification",
+                    "auto_send_offer_sent_notification",
+                    "inquiry_submitted_email_subject_template",
+                    "inquiry_submitted_email_body_template",
+                    "offer_sent_email_subject_template",
+                    "offer_sent_email_body_template",
+                ),
+            },
+        ),
+        (
+            "Timestamps",
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+    )
+    formfield_overrides = {
+        models.TextField: {
+            "widget": forms.Textarea(attrs={"rows": 6}),
+        }
+    }
 
     @admin.display(description="Active Assignments", ordering="active_assignments_count")
     def active_assignments_count(self, obj: Supplier) -> int:

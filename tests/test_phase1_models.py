@@ -77,6 +77,18 @@ def test_product_sku_is_globally_unique() -> None:
 
 
 @pytest.mark.django_db
+def test_supplier_notification_fields_default_to_disabled_and_empty_templates() -> None:
+    supplier = make_supplier(code="SUP-NOTIFY-DEFAULTS")
+
+    assert supplier.auto_send_offer_sent_notification is False
+    assert supplier.auto_send_inquiry_submitted_notification is False
+    assert supplier.inquiry_submitted_email_subject_template == ""
+    assert supplier.inquiry_submitted_email_body_template == ""
+    assert supplier.offer_sent_email_subject_template == ""
+    assert supplier.offer_sent_email_body_template == ""
+
+
+@pytest.mark.django_db
 def test_product_brand_can_be_empty_when_not_required() -> None:
     supplier = make_supplier(code="SUP-NOBRAND")
     category = make_category(name="Electrical", slug="electrical")

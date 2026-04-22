@@ -1,0 +1,1 @@
+Supplier inquiry notification issue: {{ inquiry.reference_code }} / {{ supplier.code }}

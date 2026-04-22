@@ -1,0 +1,1 @@
+New inquiry - availability and price confirmation required: {{ inquiry.reference_code }} / {{ supplier.code }}

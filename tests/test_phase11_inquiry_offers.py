@@ -27,6 +27,11 @@ def make_supplier(
     contact_email: str = "",
     orders_email: str = "",
     auto_send_offer_sent_notification: bool = False,
+    auto_send_inquiry_submitted_notification: bool = False,
+    inquiry_submitted_email_subject_template: str = "",
+    inquiry_submitted_email_body_template: str = "",
+    offer_sent_email_subject_template: str = "",
+    offer_sent_email_body_template: str = "",
 ) -> Supplier:
     return Supplier.objects.create(
         name=f"Supplier {code}",
@@ -35,6 +40,11 @@ def make_supplier(
         contact_email=contact_email,
         orders_email=orders_email,
         auto_send_offer_sent_notification=auto_send_offer_sent_notification,
+        auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
+        inquiry_submitted_email_subject_template=inquiry_submitted_email_subject_template,
+        inquiry_submitted_email_body_template=inquiry_submitted_email_body_template,
+        offer_sent_email_subject_template=offer_sent_email_subject_template,
+        offer_sent_email_body_template=offer_sent_email_body_template,
     )
 
 
@@ -1701,6 +1711,85 @@ def test_supplier_notification_is_sent_to_orders_email_on_true_sent_entry(
     assert supplier_email.reply_to == ["atencion@example.com", "operaciones@example.com"]
     assert supplier_email.bcc == ["ops@example.com"]
     assert not any(email.to == ["general@supplier.example"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_offer_notification_uses_supplier_custom_templates(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-CUSTOM",
+        orders_email="orders.custom@supplier.example",
+        auto_send_offer_sent_notification=True,
+        offer_sent_email_subject_template=(
+            "CUSTOM offer {{ offer.reference_code }} / {{ supplier.code }}"
+        ),
+        offer_sent_email_body_template=(
+            "Custom offer body for {{ supplier.name }}: "
+            "{% for item in items %}{{ item.sku }} x{{ item.quantity }} {% endfor %}"
+        ),
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_custom",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-CUSTOM", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=4)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("210.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.custom@supplier.example"]
+    )
+    assert supplier_email.subject == f"CUSTOM offer {offer.reference_code} / SUP-SUPPLIER-CUSTOM"
+    assert "Custom offer body for Supplier SUP-SUPPLIER-CUSTOM" in supplier_email.body
+    assert "SKU-SUPPLIER-CUSTOM x4" in supplier_email.body
+    assert "A customer-facing offer has already been sent" not in supplier_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_notification_uses_server_email_copy_when_internal_recipients_are_missing(
+    django_user_model,
+    supplier_notification_email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = []
+    settings.SERVER_EMAIL = "fallback-ops@example.com"
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-FALLBACK",
+        orders_email="orders.fallback@supplier.example",
+        auto_send_offer_sent_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_copy_fallback",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-FALLBACK", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("260.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.fallback@supplier.example"]
+    )
+    assert supplier_email.bcc == ["fallback-ops@example.com"]
 
 
 @pytest.mark.django_db(transaction=True)

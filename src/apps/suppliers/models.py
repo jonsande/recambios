@@ -22,6 +22,40 @@ class Supplier(models.Model):
             "Enable automatic supplier notification when a customer-facing offer is sent."
         ),
     )
+    auto_send_inquiry_submitted_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier inquiry notification when a customer inquiry is submitted."
+        ),
+    )
+    inquiry_submitted_email_subject_template = models.TextField(
+        blank=True,
+        help_text=(
+            "Optional subject template for automatic supplier inquiry notifications. "
+            "Supports Django template variables such as inquiry, supplier, and items."
+        ),
+    )
+    inquiry_submitted_email_body_template = models.TextField(
+        blank=True,
+        help_text=(
+            "Optional body template for automatic supplier inquiry notifications. "
+            "Supports Django template variables such as inquiry, supplier, and items."
+        ),
+    )
+    offer_sent_email_subject_template = models.TextField(
+        blank=True,
+        help_text=(
+            "Optional subject template for automatic supplier offer-sent notifications. "
+            "Supports Django template variables such as offer, inquiry, supplier, and items."
+        ),
+    )
+    offer_sent_email_body_template = models.TextField(
+        blank=True,
+        help_text=(
+            "Optional body template for automatic supplier offer-sent notifications. "
+            "Supports Django template variables such as offer, inquiry, supplier, and items."
+        ),
+    )
     contact_phone = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
