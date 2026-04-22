@@ -359,6 +359,8 @@ def test_paid_internal_notification_is_sent_exactly_once(django_user_model, sett
     assert payment.reference_code in customer_email.body
     assert "Importe confirmado:" in customer_email.body
     assert payment.currency in customer_email.body
+    assert "\n\n\n" not in internal_email.body
+    assert "\n\n\n" not in customer_email.body
 
 
 @pytest.mark.django_db

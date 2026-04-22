@@ -1,0 +1,1 @@
+{% load i18n %}{% if inquiry.language == "en" %}Internal copy - customer offer sent: {{ offer.reference_code }}{% else %}Copia interna - correo de oferta enviado al cliente: {{ offer.reference_code }}{% endif %}

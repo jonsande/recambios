@@ -37,7 +37,7 @@ class Inquiry(models.Model):
     REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
     STATUS_TRANSITIONS = {
         Status.DRAFT: (Status.SUBMITTED, Status.CLOSED),
-        Status.SUBMITTED: (Status.IN_REVIEW, Status.CLOSED),
+        Status.SUBMITTED: (Status.IN_REVIEW, Status.SUPPLIER_PENDING, Status.CLOSED),
         Status.IN_REVIEW: (Status.SUPPLIER_PENDING, Status.RESPONDED, Status.CLOSED),
         Status.SUPPLIER_PENDING: (Status.IN_REVIEW, Status.RESPONDED, Status.CLOSED),
         Status.RESPONDED: (Status.ACCEPTED, Status.REJECTED, Status.CLOSED),

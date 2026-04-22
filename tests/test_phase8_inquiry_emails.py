@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 
 import pytest
@@ -100,6 +101,25 @@ def test_sends_internal_and_customer_emails_on_draft_to_submitted_transition(
     assert inquiry.reference_code in internal_email.subject
     assert "Resumen de artículos" in internal_email.body
     assert "SKU-INQ-EMAIL-TRANS" in internal_email.body
+    assert "Notas del cliente:" in internal_email.body
+    assert "Estado de la notificación automática al proveedor:" in internal_email.body
+    assert internal_email.body.index("Notas del cliente:") < internal_email.body.index(
+        "Estado de la notificación automática al proveedor:"
+    )
+    assert (
+        "Estado de la notificación automática al proveedor:\nNo enviada"
+        in internal_email.body
+    )
+    assert (
+        re.search(
+            (
+                r"Detalle de notificaciones automáticas al proveedor:\n+- "
+                r"Supplier SUP-SKU-INQ-EMAIL-TRANS"
+            ),
+            internal_email.body,
+        )
+        is not None
+    )
 
     assert customer_email.to == ["phase8@example.com"]
     assert inquiry.reference_code in customer_email.subject
@@ -149,6 +169,19 @@ def test_sends_supplier_inquiry_notification_with_internal_copy_when_enabled(
     assert supplier_email.reply_to == ["atencion@example.com"]
     assert supplier_email.bcc == ["internal-team@example.com"]
 
+    internal_email = next(
+        email for email in mail.outbox if email.to == ["internal-team@example.com"]
+    )
+    assert "Estado de la notificación automática al proveedor:" in internal_email.body
+    assert "Copia del mensaje enviado al proveedor:" in internal_email.body
+    assert supplier_email.subject in internal_email.body
+    assert supplier_email.body in internal_email.body
+    assert "Estado de la notificación automática al proveedor:\n\n\n" not in internal_email.body
+    assert "Detalle de notificaciones automáticas al proveedor:\n\n\n" not in internal_email.body
+
+    inquiry.refresh_from_db()
+    assert inquiry.status == Inquiry.Status.SUPPLIER_PENDING
+
 
 @pytest.mark.django_db(transaction=True)
 def test_supplier_inquiry_notification_is_not_sent_when_automation_is_disabled(
@@ -182,6 +215,14 @@ def test_supplier_inquiry_notification_is_not_sent_when_automation_is_disabled(
 
     assert len(mail.outbox) == 2
     assert not any(email.to == ["orders.off@supplier.example"] for email in mail.outbox)
+    internal_email = next(
+        email for email in mail.outbox if email.to == ["internal-team@example.com"]
+    )
+    assert "Estado de la notificación automática al proveedor:" in internal_email.body
+    assert "No enviada" in internal_email.body
+
+    inquiry.refresh_from_db()
+    assert inquiry.status == Inquiry.Status.SUBMITTED
 
 
 @pytest.mark.django_db(transaction=True)

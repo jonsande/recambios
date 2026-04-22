@@ -1,0 +1,12 @@
+{% if inquiry.language == "en" %}Supplier automatic notification status:{% else %}Estado de la notificación automática al proveedor:{% endif %}
+{% if supplier_notification_summary_status == "sent" %}{% if inquiry.language == "en" %}Sent{% else %}Enviada{% endif %}{% elif supplier_notification_summary_status == "partial" %}{% if inquiry.language == "en" %}Partially sent{% else %}Parcialmente enviada{% endif %}{% else %}{% if inquiry.language == "en" %}Not sent{% else %}No enviada{% endif %}{% endif %}
+{% if supplier_notification_results %}
+{% if inquiry.language == "en" %}Supplier automatic notification details:{% else %}Detalle de notificaciones automáticas al proveedor:{% endif %}{% for notification in supplier_notification_results %}
+- {{ notification.supplier_display }} | {% if notification.status_code == "sent" %}{% if inquiry.language == "en" %}Sent{% else %}Enviada{% endif %}{% elif notification.status_code == "skipped_disabled" %}{% if inquiry.language == "en" %}Skipped (automatic notification disabled){% else %}Omitida (notificación automática desactivada){% endif %}{% elif notification.status_code == "skipped_missing_orders_email" %}{% if inquiry.language == "en" %}Skipped (missing supplier operational email){% else %}Omitida (falta email operativo del proveedor){% endif %}{% elif notification.status_code == "send_failure" %}{% if inquiry.language == "en" %}Delivery failed{% else %}Error de envío{% endif %}{% else %}{% if inquiry.language == "en" %}Unknown{% else %}Desconocido{% endif %}{% endif %}{% if notification.recipient_email %} | {{ notification.recipient_email }}{% endif %}{% if notification.failure_reason_label %} | {% if inquiry.language == "en" %}Reason{% else %}Motivo{% endif %}: {{ notification.failure_reason_label }}{% endif %}{% if notification.failure_detail %} | {% if inquiry.language == "en" %}Detail{% else %}Detalle{% endif %}: {{ notification.failure_detail }}{% endif %}
+{% if notification.subject and notification.body %}
+{% if inquiry.language == "en" %}Copy of message sent to supplier:{% else %}Copia del mensaje enviado al proveedor:{% endif %}
+{% if inquiry.language == "en" %}Subject{% else %}Asunto{% endif %}: {{ notification.subject }}
+{{ notification.body }}
+{% endif %}
+{% endfor %}
+{% endif %}

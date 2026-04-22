@@ -1,0 +1,22 @@
+{% load i18n %}
+{% if inquiry.language == "en" %}
+A customer offer email has been sent.
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Customer recipient: {{ customer_email_recipient }}
+{% else %}
+Se ha enviado un email de oferta al cliente.
+Referencia de oferta: {{ offer.reference_code }}
+Referencia de solicitud: {{ inquiry.reference_code }}
+Destinatario cliente: {{ customer_email_recipient }}
+{% endif %}
+
+{% if inquiry.language == "en" %}
+Copy of message sent to customer:
+{% else %}
+Copia del mensaje enviado al cliente:
+{% endif %}
+{% if inquiry.language == "en" %}Subject{% else %}Asunto{% endif %}: {{ customer_email_subject }}
+{{ customer_email_body }}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -16,14 +17,20 @@ from .models import Inquiry, InquiryOffer, InquiryOfferPayment
 
 SUPPORTED_INQUIRY_LANGUAGES = {choice for choice, _label in Inquiry.Language.choices}
 SUPPLIER_NOTIFICATION_LANGUAGE = "en"
+SUPPLIER_NOTIFICATION_STATUS_SENT = "sent"
+SUPPLIER_NOTIFICATION_STATUS_SKIPPED_DISABLED = "skipped_disabled"
+SUPPLIER_NOTIFICATION_STATUS_SKIPPED_MISSING_ORDERS_EMAIL = "skipped_missing_orders_email"
+SUPPLIER_NOTIFICATION_STATUS_SEND_FAILURE = "send_failure"
 logger = logging.getLogger(__name__)
 
 
 def send_inquiry_submitted_emails(inquiry: Inquiry) -> None:
     context = _build_inquiry_email_context(inquiry)
+    supplier_notifications = send_supplier_inquiry_submitted_notifications(inquiry)
+    _set_supplier_pending_if_auto_supplier_notification_sent(inquiry, supplier_notifications)
+    context.update(_build_supplier_notification_context(supplier_notifications))
     send_internal_submission_notification_email(inquiry, context=context)
     send_customer_submission_confirmation_email(inquiry, context=context)
-    send_supplier_inquiry_submitted_notifications(inquiry)
 
 
 def send_internal_submission_notification_email(
@@ -92,16 +99,74 @@ def send_customer_submission_confirmation_email(
 
 
 def send_customer_offer_sent_email(offer: InquiryOffer) -> bool:
-    context = _build_offer_sent_email_context(offer)
-    customer_email = context.get("requester_email")
+    email_sent, _payload = send_customer_offer_sent_email_with_payload(offer)
+    return email_sent
+
+
+def send_customer_offer_sent_email_with_payload(
+    offer: InquiryOffer,
+) -> tuple[bool, dict | None]:
+    payload = _build_customer_offer_sent_email_payload(offer)
+    customer_email = payload.get("recipient_email")
     if not customer_email:
         logger.warning(
             "Customer offer email skipped due to missing recipient email (offer=%s inquiry=%s).",
             offer.reference_code,
             offer.inquiry.reference_code,
         )
+        return False, None
+
+    email = EmailMessage(
+        subject=payload["subject"],
+        body=payload["body"],
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=payload["reply_to_emails"] or None,
+    )
+    email.send(fail_silently=False)
+    return True, payload
+
+
+def send_internal_offer_sent_copy_notification_email(
+    offer: InquiryOffer,
+    *,
+    customer_email_payload: dict,
+    supplier_notifications: list[dict],
+) -> bool:
+    recipients = _resolve_internal_notification_recipients()
+    if not recipients:
         return False
 
+    context = _build_internal_offer_sent_copy_email_context(
+        offer=offer,
+        customer_email_payload=customer_email_payload,
+        supplier_notifications=supplier_notifications,
+    )
+    language = _resolve_language(offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/internal_offer_sent_copy_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/internal_offer_sent_copy_body.txt",
+        context,
+        language,
+    )
+    customer_email = context.get("requester_email")
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.SERVER_EMAIL,
+        to=recipients,
+        reply_to=[customer_email] if customer_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
+def _build_customer_offer_sent_email_payload(offer: InquiryOffer) -> dict:
+    context = _build_offer_sent_email_context(offer)
     language = _resolve_language(offer.inquiry.language)
     subject = _render_subject(
         "inquiries/emails/customer_offer_sent_subject.txt",
@@ -114,18 +179,16 @@ def send_customer_offer_sent_email(offer: InquiryOffer) -> bool:
         language,
     )
     reply_to_emails = _resolve_customer_reply_to_emails()
-    email = EmailMessage(
-        subject=subject,
-        body=body,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[customer_email],
-        reply_to=reply_to_emails or None,
-    )
-    email.send(fail_silently=False)
-    return True
+    return {
+        "subject": subject,
+        "body": body,
+        "recipient_email": context.get("requester_email"),
+        "reply_to_emails": reply_to_emails,
+    }
 
 
-def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
+def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> list[dict]:
+    notification_results: list[dict] = []
     supplier_groups = _build_supplier_item_groups_for_inquiry(inquiry)
     if not supplier_groups:
         logger.warning(
@@ -135,7 +198,7 @@ def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
             ),
             inquiry.reference_code,
         )
-        return
+        return notification_results
 
     for supplier_group in supplier_groups:
         supplier = supplier_group["supplier"]
@@ -147,6 +210,12 @@ def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
                 ),
                 inquiry.reference_code,
                 supplier.code,
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_DISABLED,
+                )
             )
             continue
 
@@ -165,6 +234,16 @@ def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
                 supplier=supplier,
                 supplier_items=supplier_group["items"],
                 failure_reason_code="missing_orders_email",
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_MISSING_ORDERS_EMAIL,
+                    failure_reason_code="missing_orders_email",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "missing_orders_email"
+                    ),
+                )
             )
             continue
 
@@ -201,6 +280,15 @@ def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
 
         try:
             email.send(fail_silently=False)
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SENT,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                )
+            )
         except Exception as error:
             logger.exception(
                 (
@@ -217,9 +305,26 @@ def send_supplier_inquiry_submitted_notifications(inquiry: Inquiry) -> None:
                 failure_reason_code="send_failure",
                 failure_detail=str(error),
             )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SEND_FAILURE,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                    failure_reason_code="send_failure",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "send_failure"
+                    ),
+                    failure_detail=str(error),
+                )
+            )
+
+    return notification_results
 
 
-def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
+def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> list[dict]:
+    notification_results: list[dict] = []
     supplier_groups = _build_supplier_item_groups_for_offer(offer)
     if not supplier_groups:
         logger.warning(
@@ -230,7 +335,7 @@ def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
             offer.reference_code,
             offer.inquiry.reference_code,
         )
-        return
+        return notification_results
 
     for supplier_group in supplier_groups:
         supplier = supplier_group["supplier"]
@@ -243,6 +348,12 @@ def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
                 offer.reference_code,
                 offer.inquiry.reference_code,
                 supplier.code,
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_DISABLED,
+                )
             )
             continue
 
@@ -263,6 +374,16 @@ def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
                 supplier=supplier,
                 supplier_items=supplier_group["items"],
                 failure_reason_code="missing_orders_email",
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_MISSING_ORDERS_EMAIL,
+                    failure_reason_code="missing_orders_email",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "missing_orders_email"
+                    ),
+                )
             )
             continue
 
@@ -299,6 +420,15 @@ def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
 
         try:
             email.send(fail_silently=False)
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SENT,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                )
+            )
         except Exception as error:
             logger.exception(
                 (
@@ -316,6 +446,22 @@ def send_supplier_offer_sent_notifications(offer: InquiryOffer) -> None:
                 failure_reason_code="send_failure",
                 failure_detail=str(error),
             )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SEND_FAILURE,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                    failure_reason_code="send_failure",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "send_failure"
+                    ),
+                    failure_detail=str(error),
+                )
+            )
+
+    return notification_results
 
 
 def _notify_internal_supplier_notification_failure(
@@ -674,6 +820,99 @@ def _build_supplier_offer_sent_email_context(
     }
 
 
+def _build_internal_offer_sent_copy_email_context(
+    *,
+    offer: InquiryOffer,
+    customer_email_payload: dict,
+    supplier_notifications: list[dict],
+) -> dict:
+    context = _build_supplier_notification_context(supplier_notifications)
+    context.update(
+        {
+            "offer": offer,
+            "inquiry": offer.inquiry,
+            "requester_email": _resolve_requester_email(offer.inquiry),
+            "customer_email_recipient": customer_email_payload.get("recipient_email", ""),
+            "customer_email_subject": customer_email_payload.get("subject", ""),
+            "customer_email_body": customer_email_payload.get("body", ""),
+        }
+    )
+    return context
+
+
+def _build_supplier_notification_result(
+    *,
+    supplier: Supplier,
+    status_code: str,
+    recipient_email: str = "",
+    subject: str = "",
+    body: str = "",
+    failure_reason_code: str = "",
+    failure_reason_label: str = "",
+    failure_detail: str = "",
+) -> dict:
+    return {
+        "supplier_name": supplier.name,
+        "supplier_code": supplier.code,
+        "supplier_display": f"{supplier.name} ({supplier.code})",
+        "status_code": status_code,
+        "recipient_email": recipient_email,
+        "subject": subject,
+        "body": body,
+        "failure_reason_code": failure_reason_code,
+        "failure_reason_label": failure_reason_label,
+        "failure_detail": failure_detail,
+    }
+
+
+def _build_supplier_notification_context(supplier_notifications: list[dict]) -> dict:
+    total = len(supplier_notifications)
+    sent_count = sum(
+        1
+        for notification in supplier_notifications
+        if notification.get("status_code") == SUPPLIER_NOTIFICATION_STATUS_SENT
+    )
+    if total == 0 or sent_count == 0:
+        summary_status = "not_sent"
+    elif sent_count == total:
+        summary_status = "sent"
+    else:
+        summary_status = "partial"
+    return {
+        "supplier_notification_results": supplier_notifications,
+        "supplier_notification_total_count": total,
+        "supplier_notification_sent_count": sent_count,
+        "supplier_notification_summary_status": summary_status,
+    }
+
+
+def _set_supplier_pending_if_auto_supplier_notification_sent(
+    inquiry: Inquiry,
+    supplier_notifications: list[dict],
+) -> None:
+    has_sent_notification = any(
+        notification.get("status_code") == SUPPLIER_NOTIFICATION_STATUS_SENT
+        for notification in supplier_notifications
+    )
+    if not has_sent_notification:
+        return
+    if inquiry.status == Inquiry.Status.SUPPLIER_PENDING:
+        return
+    if not inquiry.can_transition_to(Inquiry.Status.SUPPLIER_PENDING):
+        logger.warning(
+            (
+                "Inquiry status could not be moved to supplier_pending after supplier "
+                "notification delivery (inquiry=%s status=%s)."
+            ),
+            inquiry.reference_code,
+            inquiry.status,
+        )
+        return
+
+    inquiry.transition_to(Inquiry.Status.SUPPLIER_PENDING)
+    inquiry.save(update_fields=["status", "updated_at"])
+
+
 def _build_internal_supplier_notification_failure_email_context(
     *,
     offer: InquiryOffer,
@@ -945,4 +1184,13 @@ def _render_subject(template_name: str, context: dict, language: str) -> str:
 
 def _render_body(template_name: str, context: dict, language: str) -> str:
     with translation.override(language):
-        return render_to_string(template_name, context).strip()
+        rendered_body = render_to_string(template_name, context)
+    return _normalize_plain_text_email_body(rendered_body)
+
+
+def _normalize_plain_text_email_body(body: str) -> str:
+    # Keep intentional section spacing while avoiding noisy template-induced gaps.
+    normalized_lines = [line.rstrip() for line in body.splitlines()]
+    normalized_body = "\n".join(normalized_lines)
+    normalized_body = re.sub(r"\n{3,}", "\n\n", normalized_body)
+    return normalized_body.strip()

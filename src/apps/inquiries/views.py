@@ -134,7 +134,10 @@ class PublicInquirySuccessView(TemplateView):
         reference_code = (self.kwargs.get("reference_code") or "").strip()
         inquiry_exists = Inquiry.objects.filter(
             reference_code=reference_code,
-            status=Inquiry.Status.SUBMITTED,
+            status__in=(
+                Inquiry.Status.SUBMITTED,
+                Inquiry.Status.SUPPLIER_PENDING,
+            ),
         ).exists()
         if not inquiry_exists:
             raise Http404

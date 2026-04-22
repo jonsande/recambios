@@ -21,3 +21,5 @@
 {% trans "Notas del cliente:" %}
 {{ inquiry.notes_from_customer }}
 {% endif %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

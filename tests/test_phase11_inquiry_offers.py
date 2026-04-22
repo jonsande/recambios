@@ -586,6 +586,7 @@ def test_negative_resolution_email_supports_english_content(
     assert "We have completed the review of your inquiry" in email.body
     assert "We could not obtain a firm confirmation from the supplier." in email.body
     assert "We cannot secure a firm supplier confirmation right now." in email.body
+    assert "\n\n\n" not in email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1414,11 +1415,11 @@ def test_offer_sent_email_is_sent_once_on_true_status_entry(
 
     mail.outbox.clear()
     offer.mark_sent(save=True)
-    assert len(mail.outbox) == 1
+    assert len(mail.outbox) == 2
 
     offer.internal_notes = "Actualizacion interna"
     offer.save(update_fields=["internal_notes"])
-    assert len(mail.outbox) == 1
+    assert len(mail.outbox) == 2
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1442,8 +1443,8 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 1
-    email = mail.outbox[0]
+    assert len(mail.outbox) == 2
+    email = next(email for email in mail.outbox if email.to == ["offer_email_content@example.com"])
     with translation.override("es"):
         expected_url = (
             "https://recambios.example"
@@ -1466,6 +1467,7 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
         in email.body
     )
     assert expected_url in email.body
+    assert "\n\n\n" not in email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1494,8 +1496,9 @@ def test_offer_sent_email_recipient_prefers_registered_user_email(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].to == ["priority@example.com"]
+    assert len(mail.outbox) == 2
+    customer_email = next(email for email in mail.outbox if email.to == ["priority@example.com"])
+    assert customer_email.to == ["priority@example.com"]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1517,8 +1520,9 @@ def test_offer_sent_email_recipient_falls_back_to_guest_email(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].to == ["guest-offer@example.com"]
+    assert len(mail.outbox) == 2
+    customer_email = next(email for email in mail.outbox if email.to == ["guest-offer@example.com"])
+    assert customer_email.to == ["guest-offer@example.com"]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1578,11 +1582,12 @@ def test_offer_sent_email_renders_english_content_when_inquiry_language_is_en(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 1
-    email = mail.outbox[0]
+    assert len(mail.outbox) == 2
+    email = next(email for email in mail.outbox if email.to == ["offer_email_english@example.com"])
     assert "Confirmed offer available:" in email.subject
     assert "Offer summary:" in email.body
     assert "Review the offer and respond (accept or reject) using this secure link:" in email.body
+    assert "\n\n\n" not in email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1632,8 +1637,11 @@ def test_admin_send_action_triggers_offer_sent_email_for_valid_offers_only(
     invalid_offer.refresh_from_db()
     assert valid_offer.status == InquiryOffer.Status.SENT
     assert invalid_offer.status == InquiryOffer.Status.DRAFT
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].to == ["offer_email_admin_valid@example.com"]
+    assert len(mail.outbox) == 2
+    customer_email = next(
+        email for email in mail.outbox if email.to == ["offer_email_admin_valid@example.com"]
+    )
+    assert customer_email.to == ["offer_email_admin_valid@example.com"]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1699,7 +1707,7 @@ def test_supplier_notification_is_sent_to_orders_email_on_true_sent_entry(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 2
+    assert len(mail.outbox) == 3
     assert any(email.to == ["offer_supplier_notify@example.com"] for email in mail.outbox)
     supplier_email = next(email for email in mail.outbox if email.to == ["orders@supplier.example"])
     assert "Offer sent to customer - availability follow-up:" in supplier_email.subject
@@ -1711,6 +1719,12 @@ def test_supplier_notification_is_sent_to_orders_email_on_true_sent_entry(
     assert supplier_email.reply_to == ["atencion@example.com", "operaciones@example.com"]
     assert supplier_email.bcc == ["ops@example.com"]
     assert not any(email.to == ["general@supplier.example"] for email in mail.outbox)
+    internal_copy_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert "Copia interna - correo de oferta enviado al cliente:" in internal_copy_email.subject
+    assert "Copia del mensaje enviado al cliente:" in internal_copy_email.body
+    assert "Copia del mensaje enviado al proveedor:" in internal_copy_email.body
+    assert supplier_email.subject in internal_copy_email.body
+    assert supplier_email.body in internal_copy_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1754,6 +1768,9 @@ def test_supplier_offer_notification_uses_supplier_custom_templates(
     assert "Custom offer body for Supplier SUP-SUPPLIER-CUSTOM" in supplier_email.body
     assert "SKU-SUPPLIER-CUSTOM x4" in supplier_email.body
     assert "A customer-facing offer has already been sent" not in supplier_email.body
+    internal_copy_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert supplier_email.subject in internal_copy_email.body
+    assert supplier_email.body in internal_copy_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1786,10 +1803,12 @@ def test_supplier_notification_uses_server_email_copy_when_internal_recipients_a
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
+    assert len(mail.outbox) == 2
     supplier_email = next(
         email for email in mail.outbox if email.to == ["orders.fallback@supplier.example"]
     )
     assert supplier_email.bcc == ["fallback-ops@example.com"]
+    assert not any(email.to == ["fallback-ops@example.com"] for email in mail.outbox)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1818,11 +1837,11 @@ def test_supplier_notification_is_sent_once_on_true_sent_entry_only(
 
     mail.outbox.clear()
     offer.mark_sent(save=True)
-    assert len(mail.outbox) == 2
+    assert len(mail.outbox) == 3
 
     offer.internal_notes = "Supplier follow-up metadata"
     offer.save(update_fields=["internal_notes"])
-    assert len(mail.outbox) == 2
+    assert len(mail.outbox) == 3
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1861,6 +1880,12 @@ def test_supplier_notification_sends_internal_copy_to_all_configured_recipients(
         email for email in mail.outbox if email.to == ["orders.bcc@supplier.example"]
     )
     assert supplier_email.bcc == ["ops@example.com", "sales@example.com"]
+    internal_copy_email = next(
+        email
+        for email in mail.outbox
+        if email.to == ["ops@example.com", "sales@example.com"]
+    )
+    assert "Copia del mensaje enviado al cliente:" in internal_copy_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1890,10 +1915,12 @@ def test_supplier_notification_is_not_sent_when_automatic_supplier_notifications
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].to == ["offer_supplier_disabled@example.com"]
+    assert len(mail.outbox) == 2
+    assert any(email.to == ["offer_supplier_disabled@example.com"] for email in mail.outbox)
+    internal_copy_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert "Estado de la notificación automática al proveedor:" in internal_copy_email.body
+    assert "No enviada" in internal_copy_email.body
     assert not any(email.to == ["orders.disabled@supplier.example"] for email in mail.outbox)
-    assert not any(email.to == ["ops@example.com"] for email in mail.outbox)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1924,18 +1951,29 @@ def test_missing_supplier_orders_email_triggers_internal_failure_notification(
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 2
+    assert len(mail.outbox) == 3
     assert any(email.to == ["offer_supplier_missing_orders@example.com"] for email in mail.outbox)
     assert not any(
         email.to == ["general.missing@supplier.example"] for email in mail.outbox
     )
 
-    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
-    assert "Supplier notification issue:" in internal_email.subject
-    assert offer.reference_code in internal_email.body
-    assert inquiry.reference_code in internal_email.body
-    assert supplier.code in internal_email.body
-    assert "Missing supplier operational orders email." in internal_email.body
+    internal_copy_email = next(
+        email
+        for email in mail.outbox
+        if email.to == ["ops@example.com"]
+        and "Copia interna - correo de oferta enviado al cliente:" in email.subject
+    )
+    assert "No enviada" in internal_copy_email.body
+
+    internal_failure_email = next(
+        email
+        for email in mail.outbox
+        if email.to == ["ops@example.com"] and "Supplier notification issue:" in email.subject
+    )
+    assert offer.reference_code in internal_failure_email.body
+    assert inquiry.reference_code in internal_failure_email.body
+    assert supplier.code in internal_failure_email.body
+    assert "Missing supplier operational orders email." in internal_failure_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1986,13 +2024,25 @@ def test_supplier_notification_failure_sends_internal_alert_and_keeps_offer_sent
     inquiry.refresh_from_db()
     assert offer.status == InquiryOffer.Status.SENT
     assert inquiry.status == Inquiry.Status.RESPONDED
-    assert len(mail.outbox) == 3
+    assert len(mail.outbox) == 4
     assert any(email.to == ["offer_supplier_send_failure@example.com"] for email in mail.outbox)
     assert any(email.to == ["orders.ok@supplier.example"] for email in mail.outbox)
     assert not any(email.to == ["orders.fail@supplier.example"] for email in mail.outbox)
-    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
-    assert "Supplier notification delivery failed." in internal_email.body
-    assert "smtp supplier down" in internal_email.body
+    internal_copy_email = next(
+        email
+        for email in mail.outbox
+        if email.to == ["ops@example.com"]
+        and "Copia interna - correo de oferta enviado al cliente:" in email.subject
+    )
+    assert "Error de envío" in internal_copy_email.body
+    assert "smtp supplier down" in internal_copy_email.body
+    internal_failure_email = next(
+        email
+        for email in mail.outbox
+        if email.to == ["ops@example.com"] and "Supplier notification issue:" in email.subject
+    )
+    assert "Supplier notification delivery failed." in internal_failure_email.body
+    assert "smtp supplier down" in internal_failure_email.body
     assert any(
         "Failed to send supplier offer notification email" in record.getMessage()
         for record in caplog.records
@@ -2035,7 +2085,7 @@ def test_mixed_supplier_inquiry_sends_one_supplier_email_per_supplier_with_scope
     mail.outbox.clear()
     offer.mark_sent(save=True)
 
-    assert len(mail.outbox) == 3
+    assert len(mail.outbox) == 4
     supplier_a_email = next(
         email for email in mail.outbox if email.to == ["orders.a@supplier.example"]
     )

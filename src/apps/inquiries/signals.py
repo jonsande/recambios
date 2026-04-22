@@ -8,10 +8,11 @@ from django.dispatch import receiver
 
 from .emails import (
     send_customer_negative_resolution_email,
-    send_customer_offer_sent_email,
+    send_customer_offer_sent_email_with_payload,
     send_customer_payment_paid_confirmation_email,
     send_inquiry_submitted_emails,
     send_internal_offer_response_notification_email,
+    send_internal_offer_sent_copy_notification_email,
     send_internal_payment_paid_notification_email,
     send_supplier_offer_sent_notifications,
 )
@@ -155,8 +156,13 @@ def send_customer_offer_email_on_status_entry(
         if offer is None:
             return
 
+        customer_email_payload: dict | None = None
+        customer_email_sent = False
         try:
-            send_customer_offer_sent_email(offer)
+            (
+                customer_email_sent,
+                customer_email_payload,
+            ) = send_customer_offer_sent_email_with_payload(offer)
         except Exception:
             logger.exception(
                 "Failed to send customer offer email (offer=%s inquiry=%s).",
@@ -164,8 +170,9 @@ def send_customer_offer_email_on_status_entry(
                 offer.inquiry.reference_code,
             )
 
+        supplier_notifications: list[dict] = []
         try:
-            send_supplier_offer_sent_notifications(offer)
+            supplier_notifications = send_supplier_offer_sent_notifications(offer)
         except Exception:
             logger.exception(
                 (
@@ -175,6 +182,23 @@ def send_customer_offer_email_on_status_entry(
                 offer.reference_code,
                 offer.inquiry.reference_code,
             )
+
+        if customer_email_sent and customer_email_payload:
+            try:
+                send_internal_offer_sent_copy_notification_email(
+                    offer,
+                    customer_email_payload=customer_email_payload,
+                    supplier_notifications=supplier_notifications,
+                )
+            except Exception:
+                logger.exception(
+                    (
+                        "Failed to send internal offer-sent copy notification email "
+                        "(offer=%s inquiry=%s)."
+                    ),
+                    offer.reference_code,
+                    offer.inquiry.reference_code,
+                )
 
     transaction.on_commit(_send_after_commit, robust=True)
 

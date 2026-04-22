@@ -292,6 +292,40 @@ def test_final_submit_is_only_event_creating_submitted_inquiry_and_emails(client
 
 
 @pytest.mark.usefixtures("email_settings")
+def test_success_page_is_available_when_inquiry_moves_to_supplier_pending(client) -> None:
+    product = make_public_product(sku="SKU-P9-SUPPEND")
+    product.supplier.orders_email = "orders.pending@supplier.example"
+    product.supplier.auto_send_inquiry_submitted_notification = True
+    product.supplier.save(
+        update_fields=[
+            "orders_email",
+            "auto_send_inquiry_submitted_notification",
+        ]
+    )
+    client.post(f"/es/solicitud/carrito/anadir/{product.id}/", data={"quantity": "1"})
+
+    response = client.post(
+        "/es/solicitud/enviar/",
+        data={
+            "contact_name": "Cliente Pending",
+            "contact_email": "cliente.pending@example.com",
+            "phone": "",
+            "company_name": "",
+            "tax_id": "",
+            "notes_from_customer": "",
+        },
+    )
+
+    assert response.status_code == 302
+    inquiry = Inquiry.objects.get()
+    assert inquiry.status == Inquiry.Status.SUPPLIER_PENDING
+    assert len(mail.outbox) == 3
+
+    success_response = client.get(response.url)
+    assert success_response.status_code == 200
+
+
+@pytest.mark.usefixtures("email_settings")
 def test_submitted_inquiry_does_not_resend_emails_on_later_saves(client) -> None:
     product = make_public_product(sku="SKU-P9-NODUPMAIL")
     client.post(f"/es/solicitud/carrito/anadir/{product.id}/", data={"quantity": "1"})
