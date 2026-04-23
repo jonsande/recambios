@@ -24,11 +24,15 @@ class SupplierAdmin(admin.ModelAdmin):
         "code",
         "country",
         "orders_email",
+        "offer_response_deadline_hours",
+        "accepted_payment_deadline_hours",
         "auto_send_inquiry_submitted_notification",
         "auto_send_offer_sent_notification",
         "auto_send_offer_accepted_notification",
         "auto_send_offer_rejected_notification",
         "auto_send_payment_paid_notification",
+        "auto_send_offer_expired_notification",
+        "auto_send_payment_expired_notification",
         "is_active",
         "active_assignments_count",
         "updated_at",
@@ -41,6 +45,8 @@ class SupplierAdmin(admin.ModelAdmin):
         "auto_send_offer_accepted_notification",
         "auto_send_offer_rejected_notification",
         "auto_send_payment_paid_notification",
+        "auto_send_offer_expired_notification",
+        "auto_send_payment_expired_notification",
     )
     search_fields = (
         "name",
@@ -53,6 +59,8 @@ class SupplierAdmin(admin.ModelAdmin):
         "offer_accepted_notification_email",
         "offer_rejected_notification_email",
         "payment_paid_notification_email",
+        "offer_expired_notification_email",
+        "payment_expired_notification_email",
     )
     ordering = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -101,6 +109,20 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "Commercial Deadlines",
+            {
+                "description": (
+                    "These values define customer response/payment windows. "
+                    "When multiple suppliers are involved in an inquiry, the shortest "
+                    "configured window is applied."
+                ),
+                "fields": (
+                    "offer_response_deadline_hours",
+                    "accepted_payment_deadline_hours",
+                ),
+            },
+        ),
+        (
             "Automatic Supplier Notifications - Offer Sent",
             {
                 "fields": (
@@ -139,6 +161,24 @@ class SupplierAdmin(admin.ModelAdmin):
                     "auto_send_payment_paid_notification",
                     "payment_paid_notification_email",
                     "send_payment_paid_notification_internal_copy",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Offer Expired",
+            {
+                "fields": (
+                    "auto_send_offer_expired_notification",
+                    "offer_expired_notification_email",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Payment Expired",
+            {
+                "fields": (
+                    "auto_send_payment_expired_notification",
+                    "payment_expired_notification_email",
                 ),
             },
         ),

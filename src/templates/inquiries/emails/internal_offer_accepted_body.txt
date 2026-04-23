@@ -5,6 +5,8 @@
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with accepted_at=offer.accepted_at %}Fecha de aceptación: {{ accepted_at }}{% endblocktrans %}
+{% if offer.payment_deadline_hours_snapshot %}{% blocktrans with hours=offer.payment_deadline_hours_snapshot %}Ventana máxima para pago tras aceptación: {{ hours }} horas{% endblocktrans %}
+{% endif %}
 {% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
 {% endif %}
 

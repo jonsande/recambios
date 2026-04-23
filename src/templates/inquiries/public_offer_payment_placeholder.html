@@ -36,6 +36,16 @@
           <dt class="font-medium text-text-muted">{% trans "Estado" %}</dt>
           <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
         </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Fecha límite de pago" %}</dt>
+          <dd class="mt-1 text-text">
+            {% if payment_deadline_at %}
+              {{ payment_deadline_at }}
+            {% else %}
+              {% trans "Pendiente de definir" %}
+            {% endif %}
+          </dd>
+        </div>
       </dl>
     </section>
 
@@ -55,6 +65,12 @@
             {% trans "Proceder al pago seguro" %}
           </button>
         </form>
+      </section>
+    {% elif payment.status == "cancelled" %}
+      <section class="alert alert-warning">
+        <p>
+          {% trans "El plazo de pago de esta oferta ha vencido. Si sigue habiendo disponibilidad, solicite una nueva oferta para continuar." %}
+        </p>
       </section>
     {% else %}
       <section class="alert alert-warning">

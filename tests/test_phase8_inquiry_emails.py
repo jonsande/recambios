@@ -16,6 +16,8 @@ def make_supplier(
     inquiry_submitted_notification_email: str = "",
     auto_send_inquiry_submitted_notification: bool = False,
     send_inquiry_submitted_notification_internal_copy: bool = True,
+    offer_response_deadline_hours: int = 24,
+    accepted_payment_deadline_hours: int = 24,
     inquiry_submitted_email_subject_template: str = "",
     inquiry_submitted_email_body_template: str = "",
 ) -> Supplier:
@@ -29,6 +31,8 @@ def make_supplier(
         send_inquiry_submitted_notification_internal_copy=(
             send_inquiry_submitted_notification_internal_copy
         ),
+        offer_response_deadline_hours=offer_response_deadline_hours,
+        accepted_payment_deadline_hours=accepted_payment_deadline_hours,
         inquiry_submitted_email_subject_template=inquiry_submitted_email_subject_template,
         inquiry_submitted_email_body_template=inquiry_submitted_email_body_template,
     )
@@ -131,6 +135,7 @@ def test_sends_internal_and_customer_emails_on_draft_to_submitted_transition(
     assert inquiry.reference_code in customer_email.subject
     assert customer_email.reply_to == ["atencion@example.com"]
     assert "confirma la recepción de su solicitud" in customer_email.body
+    assert "la oferta tendrá un plazo máximo de" in customer_email.body
 
 
 @pytest.mark.django_db(transaction=True)
@@ -172,6 +177,7 @@ def test_sends_supplier_inquiry_notification_with_internal_copy_when_enabled(
     assert inquiry.reference_code in supplier_email.body
     assert "SKU-INQ-AUTO" in supplier_email.body
     assert "Qty: 2" in supplier_email.body
+    assert "response window will be up to" in supplier_email.body
     assert supplier_email.reply_to == ["atencion@example.com"]
     assert supplier_email.bcc == ["internal-team@example.com"]
 

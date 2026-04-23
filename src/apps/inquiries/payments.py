@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.db import transaction
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 
 from .models import InquiryOffer, InquiryOfferPayment
 
@@ -98,6 +98,8 @@ def create_or_reuse_checkout_session_for_offer(
         )
         if payment.status != InquiryOfferPayment.Status.PENDING:
             raise ValueError("Only pending payments can be processed through Stripe Checkout.")
+        if payment.payment_deadline_at and timezone.now() >= payment.payment_deadline_at:
+            raise ValueError("Payment deadline has expired for this offer.")
 
         if payment.provider != STRIPE_PROVIDER:
             payment.provider = STRIPE_PROVIDER

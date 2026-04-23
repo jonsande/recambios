@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with reference=offer.reference_code %}Oferta caducada por plazo: {{ reference }}{% endblocktrans %}

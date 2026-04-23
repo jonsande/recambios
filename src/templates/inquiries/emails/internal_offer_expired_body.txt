@@ -1,0 +1,18 @@
+{% load i18n %}
+{% trans "La oferta ha pasado automáticamente a estado caducada por vencimiento de plazo de respuesta." %}
+
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% if offer.offer_response_deadline_at %}{% blocktrans with deadline=offer.offer_response_deadline_at %}Fecha límite de respuesta: {{ deadline }}{% endblocktrans %}
+{% endif %}
+{% if offer.expired_at %}{% blocktrans with expired_at=offer.expired_at %}Fecha de caducidad aplicada: {{ expired_at }}{% endblocktrans %}
+{% endif %}
+{% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Enlace público de la oferta:" %}
+{{ offer_public_url }}
+
+{% trans "Se ha enviado aviso al cliente para que solicite una nueva oferta en caso de mantener interés y disponibilidad." %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

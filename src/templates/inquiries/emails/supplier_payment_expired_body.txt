@@ -1,0 +1,18 @@
+Supplier notification regarding expired payment window
+
+Payment reference: {{ payment.reference_code }}
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+Payment deadline reached at: {{ payment_deadline_at }}
+Cancelled at: {{ payment.cancelled_at }}
+
+The customer accepted the offer but did not complete payment within the agreed payment window.
+Please release any temporary reservation associated with this request and share any relevant availability update.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with any operational update.

@@ -28,6 +28,10 @@ def make_supplier(
     auto_send_payment_paid_notification: bool = False,
     payment_paid_notification_email: str = "",
     send_payment_paid_notification_internal_copy: bool = False,
+    offer_response_deadline_hours: int = 24,
+    accepted_payment_deadline_hours: int = 24,
+    auto_send_payment_expired_notification: bool = False,
+    payment_expired_notification_email: str = "",
 ) -> Supplier:
     return Supplier.objects.create(
         name=f"Supplier {code}",
@@ -36,6 +40,10 @@ def make_supplier(
         auto_send_payment_paid_notification=auto_send_payment_paid_notification,
         payment_paid_notification_email=payment_paid_notification_email,
         send_payment_paid_notification_internal_copy=send_payment_paid_notification_internal_copy,
+        offer_response_deadline_hours=offer_response_deadline_hours,
+        accepted_payment_deadline_hours=accepted_payment_deadline_hours,
+        auto_send_payment_expired_notification=auto_send_payment_expired_notification,
+        payment_expired_notification_email=payment_expired_notification_email,
     )
 
 

@@ -5,6 +5,10 @@
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
+{% if offer_response_deadline_at %}{% blocktrans with response_deadline=offer_response_deadline_at %}Fecha límite para responder a la oferta: {{ response_deadline }}{% endblocktrans %}
+{% endif %}{% if offer_response_deadline_hours %}{% blocktrans with response_hours=offer_response_deadline_hours %}Ventana máxima de respuesta: {{ response_hours }} horas{% endblocktrans %}
+{% endif %}{% if payment_deadline_hours %}{% blocktrans with payment_hours=payment_deadline_hours %}Si acepta la oferta, tendrá un máximo de {{ payment_hours }} horas para completar el pago.{% endblocktrans %}
+{% endif %}
 {% trans "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
 {% if offer.customer_message %}
 {% trans "Mensaje comercial:" %}

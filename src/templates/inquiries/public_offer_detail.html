@@ -27,6 +27,10 @@
       <section class="alert alert-warning" aria-live="polite">
         {% trans "Esta oferta figura como rechazada. Si necesita revisar alternativas, puede contactar con nuestro equipo." %}
       </section>
+    {% elif is_expired %}
+      <section class="alert alert-warning" aria-live="polite">
+        {% trans "El plazo para responder a esta oferta ha vencido. Si sigue habiendo disponibilidad, puede solicitar una nueva oferta." %}
+      </section>
     {% endif %}
 
     <section class="section-shell" aria-label="{% trans 'Resumen de oferta confirmada' %}">
@@ -51,6 +55,37 @@
               {{ offer.lead_time_text }}
             {% else %}
               {% trans "Pendiente de confirmar" %}
+            {% endif %}
+          </dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Fecha límite para responder" %}</dt>
+          <dd class="mt-1 text-text">
+            {% if offer.offer_response_deadline_at %}
+              {{ offer.offer_response_deadline_at }}
+              {% if offer.response_deadline_hours_snapshot %}
+                <span class="block text-xs text-text-muted">
+                  {% blocktrans with hours=offer.response_deadline_hours_snapshot %}
+                    Ventana de respuesta: {{ hours }} horas
+                  {% endblocktrans %}
+                </span>
+              {% endif %}
+            {% else %}
+              {% trans "Pendiente de definir" %}
+            {% endif %}
+          </dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Plazo para pagar tras aceptación" %}</dt>
+          <dd class="mt-1 text-text">
+            {% if payment_deadline_at %}
+              {{ payment_deadline_at }}
+            {% elif offer.payment_deadline_hours_snapshot %}
+              {% blocktrans with hours=offer.payment_deadline_hours_snapshot %}
+                {{ hours }} horas desde la aceptación
+              {% endblocktrans %}
+            {% else %}
+              {% trans "Pendiente de definir" %}
             {% endif %}
           </dd>
         </div>

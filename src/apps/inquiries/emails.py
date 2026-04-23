@@ -795,6 +795,284 @@ def send_supplier_payment_paid_notifications(payment: InquiryOfferPayment) -> li
     return notification_results
 
 
+def send_supplier_offer_expired_notifications(offer: InquiryOffer) -> list[dict]:
+    notification_results: list[dict] = []
+    supplier_groups = _build_supplier_item_groups_for_offer(offer)
+    if not supplier_groups:
+        logger.warning(
+            (
+                "Supplier offer-expired notification skipped because no supplier-linked "
+                "inquiry items were found (offer=%s inquiry=%s)."
+            ),
+            offer.reference_code,
+            offer.inquiry.reference_code,
+        )
+        return notification_results
+
+    for supplier_group in supplier_groups:
+        supplier = supplier_group["supplier"]
+        if not supplier.auto_send_offer_expired_notification:
+            logger.info(
+                (
+                    "Supplier offer-expired notification skipped because automatic "
+                    "notifications are disabled for supplier (offer=%s inquiry=%s supplier=%s)."
+                ),
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_DISABLED,
+                )
+            )
+            continue
+
+        supplier_email = _resolve_supplier_notification_recipient_email(
+            supplier=supplier,
+            event_specific_email=supplier.offer_expired_notification_email,
+        )
+        if not supplier_email:
+            logger.warning(
+                (
+                    "Supplier offer-expired notification skipped due to missing recipient "
+                    "email (offer=%s inquiry=%s supplier=%s)."
+                ),
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            _notify_internal_supplier_notification_failure(
+                offer=offer,
+                supplier=supplier,
+                supplier_items=supplier_group["items"],
+                failure_reason_code="missing_orders_email",
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_MISSING_ORDERS_EMAIL,
+                    failure_reason_code="missing_orders_email",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "missing_orders_email"
+                    ),
+                )
+            )
+            continue
+
+        context = _build_supplier_offer_expired_email_context(
+            offer=offer,
+            supplier=supplier,
+            supplier_items=supplier_group["items"],
+        )
+        subject = _render_subject(
+            "inquiries/emails/supplier_offer_expired_subject.txt",
+            context,
+            SUPPLIER_NOTIFICATION_LANGUAGE,
+        )
+        body = _render_body(
+            "inquiries/emails/supplier_offer_expired_body.txt",
+            context,
+            SUPPLIER_NOTIFICATION_LANGUAGE,
+        )
+        reply_to_emails = _resolve_customer_reply_to_emails()
+        email = EmailMessage(
+            subject=subject,
+            body=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[supplier_email],
+            reply_to=reply_to_emails or None,
+        )
+
+        try:
+            email.send(fail_silently=False)
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SENT,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                )
+            )
+        except Exception as error:
+            logger.exception(
+                (
+                    "Failed to send supplier offer-expired notification email "
+                    "(offer=%s inquiry=%s supplier=%s)."
+                ),
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            _notify_internal_supplier_notification_failure(
+                offer=offer,
+                supplier=supplier,
+                supplier_items=supplier_group["items"],
+                failure_reason_code="send_failure",
+                failure_detail=str(error),
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SEND_FAILURE,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                    failure_reason_code="send_failure",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "send_failure"
+                    ),
+                    failure_detail=str(error),
+                )
+            )
+
+    return notification_results
+
+
+def send_supplier_payment_expired_notifications(payment: InquiryOfferPayment) -> list[dict]:
+    notification_results: list[dict] = []
+    offer = payment.offer
+    supplier_groups = _build_supplier_item_groups_for_offer(offer)
+    if not supplier_groups:
+        logger.warning(
+            (
+                "Supplier payment-expired notification skipped because no supplier-linked "
+                "inquiry items were found (payment=%s offer=%s inquiry=%s)."
+            ),
+            payment.reference_code,
+            offer.reference_code,
+            offer.inquiry.reference_code,
+        )
+        return notification_results
+
+    for supplier_group in supplier_groups:
+        supplier = supplier_group["supplier"]
+        if not supplier.auto_send_payment_expired_notification:
+            logger.info(
+                (
+                    "Supplier payment-expired notification skipped because automatic "
+                    "notifications are disabled for supplier (payment=%s offer=%s inquiry=%s "
+                    "supplier=%s)."
+                ),
+                payment.reference_code,
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_DISABLED,
+                )
+            )
+            continue
+
+        supplier_email = _resolve_supplier_notification_recipient_email(
+            supplier=supplier,
+            event_specific_email=supplier.payment_expired_notification_email,
+        )
+        if not supplier_email:
+            logger.warning(
+                (
+                    "Supplier payment-expired notification skipped due to missing recipient "
+                    "email (payment=%s offer=%s inquiry=%s supplier=%s)."
+                ),
+                payment.reference_code,
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            _notify_internal_supplier_notification_failure(
+                offer=offer,
+                supplier=supplier,
+                supplier_items=supplier_group["items"],
+                failure_reason_code="missing_orders_email",
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SKIPPED_MISSING_ORDERS_EMAIL,
+                    failure_reason_code="missing_orders_email",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "missing_orders_email"
+                    ),
+                )
+            )
+            continue
+
+        context = _build_supplier_payment_expired_email_context(
+            payment=payment,
+            supplier=supplier,
+            supplier_items=supplier_group["items"],
+        )
+        subject = _render_subject(
+            "inquiries/emails/supplier_payment_expired_subject.txt",
+            context,
+            SUPPLIER_NOTIFICATION_LANGUAGE,
+        )
+        body = _render_body(
+            "inquiries/emails/supplier_payment_expired_body.txt",
+            context,
+            SUPPLIER_NOTIFICATION_LANGUAGE,
+        )
+        reply_to_emails = _resolve_customer_reply_to_emails()
+        email = EmailMessage(
+            subject=subject,
+            body=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[supplier_email],
+            reply_to=reply_to_emails or None,
+        )
+
+        try:
+            email.send(fail_silently=False)
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SENT,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                )
+            )
+        except Exception as error:
+            logger.exception(
+                (
+                    "Failed to send supplier payment-expired notification email "
+                    "(payment=%s offer=%s inquiry=%s supplier=%s)."
+                ),
+                payment.reference_code,
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                supplier.code,
+            )
+            _notify_internal_supplier_notification_failure(
+                offer=offer,
+                supplier=supplier,
+                supplier_items=supplier_group["items"],
+                failure_reason_code="send_failure",
+                failure_detail=str(error),
+            )
+            notification_results.append(
+                _build_supplier_notification_result(
+                    supplier=supplier,
+                    status_code=SUPPLIER_NOTIFICATION_STATUS_SEND_FAILURE,
+                    recipient_email=supplier_email,
+                    subject=subject,
+                    body=body,
+                    failure_reason_code="send_failure",
+                    failure_reason_label=_build_supplier_notification_failure_reason_label(
+                        "send_failure"
+                    ),
+                    failure_detail=str(error),
+                )
+            )
+
+    return notification_results
+
+
 def _resolve_supplier_notification_recipient_email(
     *,
     supplier: Supplier,
@@ -1034,6 +1312,75 @@ def send_customer_payment_paid_confirmation_email(payment: InquiryOfferPayment) 
     return True
 
 
+def send_customer_offer_expired_email(offer: InquiryOffer) -> bool:
+    context = _build_customer_offer_expired_email_context(offer)
+    customer_email = context.get("requester_email")
+    if not customer_email:
+        logger.warning(
+            "Customer offer-expired email skipped due to missing recipient email (offer=%s).",
+            offer.reference_code,
+        )
+        return False
+
+    language = _resolve_language(offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/customer_offer_expired_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/customer_offer_expired_body.txt",
+        context,
+        language,
+    )
+    reply_to_emails = _resolve_customer_reply_to_emails()
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=reply_to_emails or None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
+def send_customer_payment_expired_email(payment: InquiryOfferPayment) -> bool:
+    context = _build_customer_payment_expired_email_context(payment)
+    customer_email = context.get("requester_email")
+    if not customer_email:
+        logger.warning(
+            (
+                "Customer payment-expired email skipped due to missing recipient email "
+                "(payment=%s)."
+            ),
+            payment.reference_code,
+        )
+        return False
+
+    language = _resolve_language(payment.offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/customer_payment_expired_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/customer_payment_expired_body.txt",
+        context,
+        language,
+    )
+    reply_to_emails = _resolve_customer_reply_to_emails()
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=reply_to_emails or None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
 def send_customer_negative_resolution_email(inquiry: Inquiry) -> bool:
     context = _build_negative_resolution_email_context(inquiry)
     customer_email = context.get("requester_email")
@@ -1070,6 +1417,74 @@ def send_customer_negative_resolution_email(inquiry: Inquiry) -> bool:
     return True
 
 
+def send_internal_offer_expired_notification_email(
+    offer: InquiryOffer,
+    *,
+    supplier_notifications: list[dict] | None = None,
+) -> bool:
+    recipients = _resolve_internal_notification_recipients()
+    if not recipients:
+        return False
+
+    context = _build_internal_offer_expired_email_context(offer)
+    context.update(_build_supplier_notification_context(supplier_notifications or []))
+    language = _resolve_language(offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/internal_offer_expired_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/internal_offer_expired_body.txt",
+        context,
+        language,
+    )
+    customer_email = context.get("requester_email")
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.SERVER_EMAIL,
+        to=recipients,
+        reply_to=[customer_email] if customer_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
+def send_internal_payment_expired_notification_email(
+    payment: InquiryOfferPayment,
+    *,
+    supplier_notifications: list[dict] | None = None,
+) -> bool:
+    recipients = _resolve_internal_notification_recipients()
+    if not recipients:
+        return False
+
+    context = _build_internal_payment_expired_email_context(payment)
+    context.update(_build_supplier_notification_context(supplier_notifications or []))
+    language = _resolve_language(payment.offer.inquiry.language)
+    subject = _render_subject(
+        "inquiries/emails/internal_payment_expired_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/internal_payment_expired_body.txt",
+        context,
+        language,
+    )
+    customer_email = context.get("requester_email")
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.SERVER_EMAIL,
+        to=recipients,
+        reply_to=[customer_email] if customer_email else None,
+    )
+    email.send(fail_silently=False)
+    return True
+
+
 def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
     requester_name = inquiry.requester_display
     if inquiry.user_id and inquiry.user:
@@ -1086,6 +1501,10 @@ def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
         }
         for item in inquiry.items.select_related("product").order_by("id")
     ]
+    (
+        offer_response_deadline_hours,
+        payment_deadline_hours,
+    ) = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
 
     return {
         "inquiry": inquiry,
@@ -1095,6 +1514,8 @@ def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
         "requester_phone": inquiry.guest_phone,
         "company_name": inquiry.company_name,
         "tax_id": inquiry.tax_id,
+        "offer_response_deadline_hours": offer_response_deadline_hours,
+        "payment_deadline_hours": payment_deadline_hours,
         "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
@@ -1106,6 +1527,9 @@ def _build_offer_sent_email_context(offer: InquiryOffer) -> dict:
         "offer": offer,
         "requester_email": requester_email,
         "offer_public_url": _build_offer_public_url(offer),
+        "offer_response_deadline_hours": offer.response_deadline_hours_snapshot,
+        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
+        "offer_response_deadline_at": offer.offer_response_deadline_at,
         "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
@@ -1148,10 +1572,16 @@ def _build_supplier_inquiry_submitted_email_context(
     supplier: Supplier,
     supplier_items: list[dict],
 ) -> dict:
+    (
+        offer_response_deadline_hours,
+        payment_deadline_hours,
+    ) = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
     return {
         "inquiry": inquiry,
         "supplier": supplier,
         "items": supplier_items,
+        "offer_response_deadline_hours": offer_response_deadline_hours,
+        "payment_deadline_hours": payment_deadline_hours,
     }
 
 
@@ -1166,6 +1596,9 @@ def _build_supplier_offer_sent_email_context(
         "inquiry": offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
+        "offer_response_deadline_hours": offer.response_deadline_hours_snapshot,
+        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
+        "offer_response_deadline_at": offer.offer_response_deadline_at,
     }
 
 
@@ -1182,6 +1615,7 @@ def _build_supplier_offer_response_email_context(
         "supplier": supplier,
         "items": supplier_items,
         "response_status": response_status,
+        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
     }
 
 
@@ -1197,6 +1631,39 @@ def _build_supplier_payment_paid_email_context(
         "inquiry": payment.offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
+        "payment_deadline_at": payment.payment_deadline_at,
+    }
+
+
+def _build_supplier_offer_expired_email_context(
+    *,
+    offer: InquiryOffer,
+    supplier: Supplier,
+    supplier_items: list[dict],
+) -> dict:
+    return {
+        "offer": offer,
+        "inquiry": offer.inquiry,
+        "supplier": supplier,
+        "items": supplier_items,
+        "offer_response_deadline_at": offer.offer_response_deadline_at,
+        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
+    }
+
+
+def _build_supplier_payment_expired_email_context(
+    *,
+    payment: InquiryOfferPayment,
+    supplier: Supplier,
+    supplier_items: list[dict],
+) -> dict:
+    return {
+        "payment": payment,
+        "offer": payment.offer,
+        "inquiry": payment.offer.inquiry,
+        "supplier": supplier,
+        "items": supplier_items,
+        "payment_deadline_at": payment.payment_deadline_at,
     }
 
 
@@ -1372,7 +1839,51 @@ def _build_internal_payment_paid_email_context(payment: InquiryOfferPayment) -> 
     }
 
 
+def _build_internal_offer_expired_email_context(offer: InquiryOffer) -> dict:
+    requester_email = _resolve_requester_email(offer.inquiry)
+    return {
+        "inquiry": offer.inquiry,
+        "offer": offer,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(offer),
+    }
+
+
+def _build_internal_payment_expired_email_context(payment: InquiryOfferPayment) -> dict:
+    requester_email = _resolve_requester_email(payment.offer.inquiry)
+    return {
+        "inquiry": payment.offer.inquiry,
+        "offer": payment.offer,
+        "payment": payment,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(payment.offer),
+    }
+
+
 def _build_customer_payment_paid_email_context(payment: InquiryOfferPayment) -> dict:
+    requester_email = _resolve_requester_email(payment.offer.inquiry)
+    return {
+        "inquiry": payment.offer.inquiry,
+        "offer": payment.offer,
+        "payment": payment,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(payment.offer),
+        "customer_reply_to_email": _resolve_customer_reply_to_display(),
+    }
+
+
+def _build_customer_offer_expired_email_context(offer: InquiryOffer) -> dict:
+    requester_email = _resolve_requester_email(offer.inquiry)
+    return {
+        "inquiry": offer.inquiry,
+        "offer": offer,
+        "requester_email": requester_email,
+        "offer_public_url": _build_offer_public_url(offer),
+        "customer_reply_to_email": _resolve_customer_reply_to_display(),
+    }
+
+
+def _build_customer_payment_expired_email_context(payment: InquiryOfferPayment) -> dict:
     requester_email = _resolve_requester_email(payment.offer.inquiry)
     return {
         "inquiry": payment.offer.inquiry,

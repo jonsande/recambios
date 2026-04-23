@@ -12,6 +12,10 @@
         <p class="page-lead">
           {% trans "Este pago ya figura como confirmado, por lo que no necesita repetir la operación." %}
         </p>
+      {% elif payment.status == "cancelled" %}
+        <p class="page-lead">
+          {% trans "El plazo para pagar esta oferta ha vencido. Si sigue habiendo disponibilidad, solicite una nueva oferta." %}
+        </p>
       {% else %}
         <p class="page-lead">
           {% trans "El pago no se completó en esta operación. Si la oferta sigue disponible, puede reintentarlo ahora desde esta misma página." %}

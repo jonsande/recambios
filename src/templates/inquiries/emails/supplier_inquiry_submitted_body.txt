@@ -5,6 +5,8 @@ Supplier: {{ supplier.name }} ({{ supplier.code }})
 
 A customer has submitted an inquiry for parts linked to your supplier account.
 Please confirm availability and final supplier pricing as soon as possible.
+If availability is confirmed and we send an offer to the customer, the response window will be up to {{ offer_response_deadline_hours }} hours and, after acceptance, the payment window will be up to {{ payment_deadline_hours }} hours.
+Please reserve these items during these windows whenever possible.
 
 Items for your supplier account:
 {% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}

@@ -11,6 +11,7 @@
 
 {% trans "Este correo confirma la recepción de su solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
 {% trans "Le contactaremos en cuanto validemos la información con nuestro equipo interno/proveedor." %}
+{% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, la oferta tendrá un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar el pago.{% endblocktrans %}
 
 {% if customer_reply_to_email %}
 {% blocktrans with reply_to=customer_reply_to_email %}Si necesita ampliar datos, responda a {{ reply_to }} indicando su referencia.{% endblocktrans %}

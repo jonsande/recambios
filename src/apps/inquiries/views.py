@@ -16,6 +16,7 @@ from django.views.generic import FormView, TemplateView, View
 
 from apps.cart.services import clear_request_cart, get_request_cart_items
 
+from .deadlines import expire_offer_if_due, expire_payment_if_due
 from .forms import PublicInquirySubmissionForm
 from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
 from .payments import (
@@ -52,11 +53,17 @@ class PublicInquirySubmitView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cart_items = get_request_cart_items(self.request.session)
+        (
+            offer_response_deadline_hours,
+            payment_deadline_hours,
+        ) = _resolve_deadline_hours_for_cart_items(cart_items)
         context.update(
             {
                 "page_title": _("Enviar solicitud"),
                 "cart_items": cart_items,
                 "total_quantity": sum(item.quantity for item in cart_items),
+                "offer_response_deadline_hours": offer_response_deadline_hours,
+                "payment_deadline_hours": payment_deadline_hours,
             }
         )
         return context
@@ -172,6 +179,8 @@ class PublicInquiryOfferDetailView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.offer = self._get_offer()
+        if expire_offer_if_due(self.offer):
+            self.offer = self._get_offer()
         return super().get(request, *args, **kwargs)
 
     def get_template_names(self):
@@ -191,14 +200,24 @@ class PublicInquiryOfferDetailView(TemplateView):
 
         page_title = _("Oferta confirmada")
         page_intro = _("Revise el importe confirmado y el plazo estimado antes de responder.")
+        payment_deadline_at = None
         if self.offer.status == InquiryOffer.Status.ACCEPTED:
             page_title = _("Oferta aceptada")
             page_intro = _("Ha aceptado esta oferta. El siguiente paso es la gestión del pago.")
+            payment = InquiryOfferPayment.objects.filter(offer_id=self.offer.pk).first()
+            if payment is not None:
+                payment_deadline_at = payment.payment_deadline_at
         elif self.offer.status == InquiryOffer.Status.REJECTED:
             page_title = _("Oferta rechazada")
             page_intro = _(
                 "Ha rechazado esta oferta. Si necesita revisar alternativas, "
                 "puede contactar con nuestro equipo."
+            )
+        elif self.offer.status == InquiryOffer.Status.EXPIRED:
+            page_title = _("Oferta caducada")
+            page_intro = _(
+                "El plazo para responder a esta oferta ha vencido. Si sigue habiendo "
+                "disponibilidad, puede solicitar una nueva oferta."
             )
 
         context.update(
@@ -209,6 +228,8 @@ class PublicInquiryOfferDetailView(TemplateView):
                 "can_respond": self.offer.status == InquiryOffer.Status.SENT,
                 "is_accepted": self.offer.status == InquiryOffer.Status.ACCEPTED,
                 "is_rejected": self.offer.status == InquiryOffer.Status.REJECTED,
+                "is_expired": self.offer.status == InquiryOffer.Status.EXPIRED,
+                "payment_deadline_at": payment_deadline_at,
             }
         )
         return context
@@ -217,6 +238,17 @@ class PublicInquiryOfferDetailView(TemplateView):
         decision = (request.POST.get("decision") or "").strip().lower()
         if decision not in {"accept", "reject"}:
             messages.error(request, _("La respuesta seleccionada no es válida."))
+            return redirect(request.path)
+
+        offer_snapshot = self._get_offer()
+        if expire_offer_if_due(offer_snapshot):
+            messages.info(
+                request,
+                _(
+                    "El plazo para responder a esta oferta ha vencido. "
+                    "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta."
+                ),
+            )
             return redirect(request.path)
 
         with transaction.atomic():
@@ -233,7 +265,6 @@ class PublicInquiryOfferDetailView(TemplateView):
 
             if decision == "accept":
                 offer.mark_accepted(save=True)
-                InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
                 messages.success(
                     request,
                     _("Oferta aceptada. A continuación verá el siguiente paso para el pago."),
@@ -270,17 +301,42 @@ class PublicInquiryOfferPaymentView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.offer = self._get_offer()
+        if expire_offer_if_due(self.offer):
+            self.offer = self._get_offer()
         redirect_response = self._redirect_if_offer_not_accepted(request, offer=self.offer)
         if redirect_response is not None:
             return redirect_response
         self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
+        if expire_payment_if_due(self.payment):
+            self.payment.refresh_from_db()
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.offer = self._get_offer()
+        if expire_offer_if_due(self.offer):
+            self.offer = self._get_offer()
         redirect_response = self._redirect_if_offer_not_accepted(request, offer=self.offer)
         if redirect_response is not None:
             return redirect_response
+        self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
+        if expire_payment_if_due(self.payment):
+            messages.info(
+                request,
+                _(
+                    "El plazo para pagar esta oferta ha vencido. "
+                    "Si sigue habiendo disponibilidad, solicite una nueva oferta."
+                ),
+            )
+            return redirect(request.path)
+        if self.payment.status != InquiryOfferPayment.Status.PENDING:
+            messages.info(
+                request,
+                _(
+                    "Este pago ya no está pendiente. "
+                    "Si necesita ayuda, contacte con nuestro equipo."
+                ),
+            )
+            return redirect(request.path)
 
         try:
             checkout_result = create_or_reuse_checkout_session_for_offer(
@@ -325,6 +381,7 @@ class PublicInquiryOfferPaymentView(TemplateView):
                 "payment": self.payment,
                 "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
                 "can_start_checkout": self.payment.status == InquiryOfferPayment.Status.PENDING,
+                "payment_deadline_at": self.payment.payment_deadline_at,
             }
         )
         return context
@@ -348,6 +405,14 @@ class PublicInquiryOfferPaymentView(TemplateView):
                 _(
                     "Esta oferta fue rechazada. Si necesita revisar "
                     "alternativas, contacte con nuestro equipo."
+                ),
+            )
+        elif offer.status == InquiryOffer.Status.EXPIRED:
+            messages.info(
+                request,
+                _(
+                    "El plazo para responder a esta oferta ha vencido. "
+                    "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta."
                 ),
             )
         else:
@@ -382,6 +447,8 @@ class PublicInquiryOfferPaymentSuccessView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.offer = self._get_offer()
+        if expire_offer_if_due(self.offer):
+            self.offer = self._get_offer()
         self.payment = InquiryOfferPayment.objects.filter(offer=self.offer).first()
         if self.payment is None:
             messages.info(
@@ -392,6 +459,8 @@ class PublicInquiryOfferPaymentSuccessView(TemplateView):
                 "inquiries:public_inquiry_offer_detail",
                 access_token=self.offer.access_token,
             )
+        if expire_payment_if_due(self.payment):
+            self.payment.refresh_from_db()
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -428,6 +497,8 @@ class PublicInquiryOfferPaymentCancelView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.offer = self._get_offer()
+        if expire_offer_if_due(self.offer):
+            self.offer = self._get_offer()
         self.payment = InquiryOfferPayment.objects.filter(offer=self.offer).first()
         if self.payment is None:
             messages.info(
@@ -438,6 +509,8 @@ class PublicInquiryOfferPaymentCancelView(TemplateView):
                 "inquiries:public_inquiry_offer_detail",
                 access_token=self.offer.access_token,
             )
+        if expire_payment_if_due(self.payment):
+            self.payment.refresh_from_db()
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -491,3 +564,22 @@ def _resolve_inquiry_language() -> str:
     if current_language.startswith("en"):
         return Inquiry.Language.ENGLISH
     return Inquiry.Language.SPANISH
+
+
+def _resolve_deadline_hours_for_cart_items(cart_items) -> tuple[int, int]:
+    response_candidates: list[int] = []
+    payment_candidates: list[int] = []
+    seen_supplier_ids: set[int] = set()
+    for item in cart_items:
+        supplier = item.product.supplier
+        if supplier.pk is None or supplier.pk in seen_supplier_ids:
+            continue
+        seen_supplier_ids.add(supplier.pk)
+        if supplier.offer_response_deadline_hours > 0:
+            response_candidates.append(supplier.offer_response_deadline_hours)
+        if supplier.accepted_payment_deadline_hours > 0:
+            payment_candidates.append(supplier.accepted_payment_deadline_hours)
+
+    response_deadline_hours = min(response_candidates) if response_candidates else 24
+    payment_deadline_hours = min(payment_candidates) if payment_candidates else 24
+    return response_deadline_hours, payment_deadline_hours

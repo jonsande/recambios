@@ -6,6 +6,10 @@ Supplier: {{ supplier.name }} ({{ supplier.code }})
 
 A customer-facing offer has already been sent and is currently pending customer decision.
 Please inform us immediately if availability changes before the customer responds, so we can invalidate or update the offer if needed.
+Offer response deadline: {{ offer_response_deadline_at }}
+Offer response window: {{ offer_response_deadline_hours }} hours.
+If accepted, customer payment window: {{ payment_deadline_hours }} hours.
+Please reserve these items until these windows are completed whenever possible.
 
 Items for your supplier account:
 {% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}

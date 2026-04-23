@@ -71,16 +71,20 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "currency",
         "payment_reference",
         "sent_at",
+        "offer_response_deadline_at",
         "accepted_at",
         "rejected_at",
+        "expired_at",
         "updated_at",
     )
     list_filter = (
         "status",
         "currency",
         "sent_at",
+        "offer_response_deadline_at",
         "accepted_at",
         "rejected_at",
+        "expired_at",
         "created_at",
     )
     search_fields = (
@@ -99,8 +103,12 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "status",
         "access_token",
         "sent_at",
+        "offer_response_deadline_at",
+        "response_deadline_hours_snapshot",
+        "payment_deadline_hours_snapshot",
         "accepted_at",
         "rejected_at",
+        "expired_at",
         "created_at",
         "updated_at",
     )
@@ -139,8 +147,12 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "sent_at",
+                    "offer_response_deadline_at",
+                    "response_deadline_hours_snapshot",
+                    "payment_deadline_hours_snapshot",
                     "accepted_at",
                     "rejected_at",
+                    "expired_at",
                 )
             },
         ),
@@ -327,6 +339,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "provider",
         "provider_reference",
         "initiated_at",
+        "payment_deadline_at",
         "paid_at",
         "failed_at",
         "cancelled_at",
@@ -337,6 +350,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "currency",
         "provider",
         "initiated_at",
+        "payment_deadline_at",
         "paid_at",
         "failed_at",
         "cancelled_at",
@@ -358,6 +372,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "payable_amount",
         "currency",
         "initiated_at",
+        "payment_deadline_at",
         "paid_at",
         "failed_at",
         "cancelled_at",
@@ -398,6 +413,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "initiated_at",
+                    "payment_deadline_at",
                     "paid_at",
                     "failed_at",
                     "cancelled_at",

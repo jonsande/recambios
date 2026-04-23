@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with reference=payment.reference_code %}Pago cancelado por vencimiento de plazo: {{ reference }}{% endblocktrans %}

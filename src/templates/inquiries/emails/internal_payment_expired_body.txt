@@ -1,0 +1,19 @@
+{% load i18n %}
+{% trans "El pago pendiente se ha cancelado automáticamente por vencimiento de plazo." %}
+
+{% blocktrans with payment_reference=payment.reference_code %}Referencia de pago: {{ payment_reference }}{% endblocktrans %}
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% if payment.payment_deadline_at %}{% blocktrans with deadline=payment.payment_deadline_at %}Fecha límite de pago: {{ deadline }}{% endblocktrans %}
+{% endif %}
+{% if payment.cancelled_at %}{% blocktrans with cancelled_at=payment.cancelled_at %}Fecha de cancelación aplicada: {{ cancelled_at }}{% endblocktrans %}
+{% endif %}
+{% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Enlace público de la oferta:" %}
+{{ offer_public_url }}
+
+{% trans "Se ha enviado aviso al cliente para que solicite una nueva oferta en caso de mantener interés y disponibilidad." %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

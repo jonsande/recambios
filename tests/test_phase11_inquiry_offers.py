@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import uuid
+from datetime import timedelta
 from decimal import Decimal
+from io import StringIO
 from unittest.mock import patch
 
 import pytest
@@ -10,12 +12,14 @@ from django.contrib.auth.models import Group
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
+from django.core.management import call_command
 from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone, translation
 
 from apps.catalog.models import Brand, Category, Condition, Product
 from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin, InquiryOfferPaymentAdmin
+from apps.inquiries.deadlines import expire_due_inquiry_deadlines
 from apps.inquiries.models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
 from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF
@@ -31,11 +35,17 @@ def make_supplier(
     offer_accepted_notification_email: str = "",
     offer_rejected_notification_email: str = "",
     payment_paid_notification_email: str = "",
+    offer_expired_notification_email: str = "",
+    payment_expired_notification_email: str = "",
+    offer_response_deadline_hours: int = 24,
+    accepted_payment_deadline_hours: int = 24,
     auto_send_offer_sent_notification: bool = False,
     auto_send_inquiry_submitted_notification: bool = False,
     auto_send_offer_accepted_notification: bool = False,
     auto_send_offer_rejected_notification: bool = False,
     auto_send_payment_paid_notification: bool = False,
+    auto_send_offer_expired_notification: bool = False,
+    auto_send_payment_expired_notification: bool = False,
     send_inquiry_submitted_notification_internal_copy: bool = False,
     send_offer_sent_notification_internal_copy: bool = True,
     send_offer_accepted_notification_internal_copy: bool = False,
@@ -57,11 +67,17 @@ def make_supplier(
         offer_accepted_notification_email=offer_accepted_notification_email,
         offer_rejected_notification_email=offer_rejected_notification_email,
         payment_paid_notification_email=payment_paid_notification_email,
+        offer_expired_notification_email=offer_expired_notification_email,
+        payment_expired_notification_email=payment_expired_notification_email,
+        offer_response_deadline_hours=offer_response_deadline_hours,
+        accepted_payment_deadline_hours=accepted_payment_deadline_hours,
         auto_send_offer_sent_notification=auto_send_offer_sent_notification,
         auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
         auto_send_offer_accepted_notification=auto_send_offer_accepted_notification,
         auto_send_offer_rejected_notification=auto_send_offer_rejected_notification,
         auto_send_payment_paid_notification=auto_send_payment_paid_notification,
+        auto_send_offer_expired_notification=auto_send_offer_expired_notification,
+        auto_send_payment_expired_notification=auto_send_payment_expired_notification,
         send_inquiry_submitted_notification_internal_copy=(
             send_inquiry_submitted_notification_internal_copy
         ),
@@ -249,12 +265,115 @@ def test_offer_transition_rules_and_timestamps_with_valid_inquiry_sync(django_us
 
 
 @pytest.mark.django_db
+def test_mark_sent_uses_shortest_supplier_deadlines_and_sets_snapshots(
+    django_user_model,
+) -> None:
+    supplier_a = make_supplier(
+        code="SUP-DEADLINE-A",
+        offer_response_deadline_hours=48,
+        accepted_payment_deadline_hours=72,
+    )
+    supplier_b = make_supplier(
+        code="SUP-DEADLINE-B",
+        offer_response_deadline_hours=24,
+        accepted_payment_deadline_hours=36,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_deadline_snapshots",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-DEADLINE-A", supplier=supplier_a),
+        requested_quantity=1,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-DEADLINE-B", supplier=supplier_b),
+        requested_quantity=1,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("350.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    offer.mark_sent(save=True)
+    offer.refresh_from_db()
+
+    assert offer.response_deadline_hours_snapshot == 24
+    assert offer.payment_deadline_hours_snapshot == 36
+    assert offer.offer_response_deadline_at == offer.sent_at + timedelta(hours=24)
+
+
+@pytest.mark.django_db
+def test_mark_expired_transitions_offer_and_inquiry_to_rejected(django_user_model) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_mark_expired",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("220.00"),
+        currency="EUR",
+        lead_time_text="3 days",
+    )
+    offer.mark_sent(save=True)
+
+    offer.mark_expired(save=True)
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert offer.expired_at is not None
+    assert inquiry.status == Inquiry.Status.REJECTED
+    with pytest.raises(ValueError):
+        offer.mark_accepted(save=True)
+
+
+@pytest.mark.django_db
+def test_mark_accepted_creates_pending_payment_with_deadline_snapshot(django_user_model) -> None:
+    supplier = make_supplier(
+        code="SUP-ACCEPT-DEADLINE",
+        offer_response_deadline_hours=24,
+        accepted_payment_deadline_hours=12,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_accept_payment_deadline",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-ACCEPT-DEADLINE", supplier=supplier),
+        requested_quantity=1,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("340.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    offer.mark_sent(save=True)
+    offer.mark_accepted(save=True)
+    offer.refresh_from_db()
+    payment = InquiryOfferPayment.objects.get(offer=offer)
+
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+    assert payment.payment_deadline_at == offer.accepted_at + timedelta(hours=12)
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "offer_status",
     (
         InquiryOffer.Status.DRAFT,
         InquiryOffer.Status.SENT,
         InquiryOffer.Status.REJECTED,
+        InquiryOffer.Status.EXPIRED,
     ),
 )
 def test_payment_initiation_is_blocked_for_non_accepted_offers(
@@ -277,6 +396,9 @@ def test_payment_initiation_is_blocked_for_non_accepted_offers(
     elif offer_status == InquiryOffer.Status.REJECTED:
         offer.mark_sent(save=True)
         offer.mark_rejected(save=True)
+    elif offer_status == InquiryOffer.Status.EXPIRED:
+        offer.mark_sent(save=True)
+        offer.mark_expired(save=True)
 
     with pytest.raises(ValueError):
         InquiryOfferPayment.initiate_from_offer(offer, save=True)
@@ -334,7 +456,6 @@ def test_offer_with_payment_record_must_stay_accepted(django_user_model) -> None
         django_user_model,
         username="payment_offer_stays_accepted",
     )
-    InquiryOfferPayment.initiate_from_offer(offer, save=True)
 
     offer.status = InquiryOffer.Status.REJECTED
     offer.rejected_at = timezone.now()
@@ -345,15 +466,15 @@ def test_offer_with_payment_record_must_stay_accepted(django_user_model) -> None
 
 
 @pytest.mark.django_db
-def test_one_payment_record_per_offer_is_enforced(django_user_model) -> None:
+def test_payment_initiation_from_accepted_offer_reuses_existing_payment(django_user_model) -> None:
     offer = make_accepted_offer(
         django_user_model,
         username="payment_one_per_offer",
     )
-    InquiryOfferPayment.initiate_from_offer(offer, save=True)
-
-    with pytest.raises(ValidationError):
-        InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    first_payment = InquiryOfferPayment.objects.get(offer=offer)
+    second_payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    assert second_payment.pk == first_payment.pk
+    assert InquiryOfferPayment.objects.filter(offer=offer).count() == 1
 
 
 @pytest.mark.django_db
@@ -362,7 +483,7 @@ def test_payment_transition_rules_and_timestamps(django_user_model) -> None:
         django_user_model,
         username="payment_transition_rules",
     )
-    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    payment = InquiryOfferPayment.objects.get(offer=offer)
 
     payment.mark_paid(save=True)
     payment.refresh_from_db()
@@ -381,7 +502,7 @@ def test_payment_status_requires_consistent_timestamps(django_user_model) -> Non
         django_user_model,
         username="payment_timestamp_integrity",
     )
-    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    payment = InquiryOfferPayment.objects.get(offer=offer)
     payment.paid_at = timezone.now()
 
     with pytest.raises(ValidationError):
@@ -1369,6 +1490,7 @@ def test_public_payment_placeholder_renders_for_accepted_offer(client, django_us
     (
         InquiryOffer.Status.SENT,
         InquiryOffer.Status.REJECTED,
+        InquiryOffer.Status.EXPIRED,
     ),
 )
 def test_public_payment_placeholder_redirects_non_accepted_offers_to_detail(
@@ -1392,6 +1514,9 @@ def test_public_payment_placeholder_redirects_non_accepted_offers_to_detail(
     elif starting_status == InquiryOffer.Status.REJECTED:
         offer.mark_sent(save=True)
         offer.mark_rejected(save=True)
+    elif starting_status == InquiryOffer.Status.EXPIRED:
+        offer.mark_sent(save=True)
+        offer.mark_expired(save=True)
 
     payment_url = reverse(
         "inquiries:public_inquiry_offer_payment_placeholder",
@@ -1406,6 +1531,85 @@ def test_public_payment_placeholder_redirects_non_accepted_offers_to_detail(
     assert response.status_code == 302
     assert response.url == offer_url
     assert not InquiryOfferPayment.objects.filter(offer=offer).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_public_offer_runtime_guard_expires_due_offer_and_blocks_response(
+    client,
+    django_user_model,
+    offer_email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_public_expired_guard",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("510.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    offer.mark_sent(save=True)
+    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=5)
+    offer.save(update_fields=["offer_response_deadline_at"])
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    mail.outbox.clear()
+    get_response = client.get(url)
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+
+    assert get_response.status_code == 200
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert inquiry.status == Inquiry.Status.REJECTED
+    assert "Oferta caducada" in get_response.content.decode()
+    assert len(mail.outbox) == 2
+
+    post_response = client.post(url, data={"decision": "accept"})
+    assert post_response.status_code == 302
+    offer.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.EXPIRED
+
+
+@pytest.mark.django_db(transaction=True)
+def test_public_payment_runtime_guard_cancels_due_pending_payment(
+    client,
+    django_user_model,
+    offer_email_settings,
+    settings,
+) -> None:
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+    offer = make_accepted_offer(
+        django_user_model,
+        username="offer_public_payment_expired_guard",
+        confirmed_total=Decimal("630.00"),
+    )
+    payment = InquiryOfferPayment.objects.get(offer=offer)
+    payment.payment_deadline_at = timezone.now() - timedelta(minutes=5)
+    payment.save(update_fields=["payment_deadline_at"])
+    payment_url = reverse(
+        "inquiries:public_inquiry_offer_payment_placeholder",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    mail.outbox.clear()
+    get_response = client.get(payment_url)
+    payment.refresh_from_db()
+    assert get_response.status_code == 200
+    assert payment.status == InquiryOfferPayment.Status.CANCELLED
+    assert "plazo de pago" in get_response.content.decode().lower()
+    assert len(mail.outbox) == 2
+
+    post_response = client.post(payment_url)
+    assert post_response.status_code == 302
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.CANCELLED
 
 
 @pytest.fixture
@@ -1426,6 +1630,165 @@ def internal_offer_response_email_settings(offer_email_settings, settings):
 def supplier_notification_email_settings(offer_email_settings, settings):
     settings.SERVER_EMAIL = "notifications@example.com"
     settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_expire_due_inquiry_deadlines_expires_offer_once_and_sends_expected_emails(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-EXPIRE-OFFER",
+        orders_email="orders.expire.offer@supplier.example",
+        offer_expired_notification_email="offer.expired@supplier.example",
+        auto_send_offer_expired_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_expire_deadline_service",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-EXPIRE-OFFER", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("245.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+    offer.mark_sent(save=True)
+    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["offer_response_deadline_at"])
+
+    mail.outbox.clear()
+    first_summary = expire_due_inquiry_deadlines()
+    second_summary = expire_due_inquiry_deadlines()
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+
+    assert first_summary["offers_expired"] == 1
+    assert first_summary["payments_expired"] == 0
+    assert second_summary["offers_expired"] == 0
+    assert second_summary["payments_expired"] == 0
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert inquiry.status == Inquiry.Status.REJECTED
+    assert len(mail.outbox) == 3
+    assert any(email.to == ["offer_expire_deadline_service@example.com"] for email in mail.outbox)
+    assert any(email.to == ["ops@example.com"] for email in mail.outbox)
+    assert any(email.to == ["offer.expired@supplier.example"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_offer_expired_supplier_notification_uses_orders_email_fallback(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-EXPIRE-FALLBACK",
+        orders_email="orders.expire.fallback@supplier.example",
+        offer_expired_notification_email="",
+        auto_send_offer_expired_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_expire_fallback",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-EXPIRE-FALLBACK", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("265.00"),
+        currency="EUR",
+        lead_time_text="5 days",
+    )
+    offer.mark_sent(save=True)
+    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["offer_response_deadline_at"])
+
+    mail.outbox.clear()
+    expire_due_inquiry_deadlines()
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.expire.fallback@supplier.example"]
+    )
+    assert "Offer expired without customer response" in supplier_email.subject
+
+
+@pytest.mark.django_db(transaction=True)
+def test_expire_due_inquiry_deadlines_cancels_payment_once_and_sends_expected_emails(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-EXPIRE-PAYMENT",
+        orders_email="orders.expire.payment@supplier.example",
+        payment_expired_notification_email="payment.expired@supplier.example",
+        auto_send_payment_expired_notification=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="payment_expire_deadline_service",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-EXPIRE-PAYMENT", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("480.00"),
+        currency="EUR",
+        lead_time_text="6 days",
+    )
+    offer.mark_sent(save=True)
+    offer.mark_accepted(save=True)
+    payment = InquiryOfferPayment.objects.get(offer=offer)
+    payment.payment_deadline_at = timezone.now() - timedelta(minutes=1)
+    payment.save(update_fields=["payment_deadline_at"])
+
+    mail.outbox.clear()
+    first_summary = expire_due_inquiry_deadlines()
+    second_summary = expire_due_inquiry_deadlines()
+    payment.refresh_from_db()
+
+    assert first_summary["offers_expired"] == 0
+    assert first_summary["payments_expired"] == 1
+    assert second_summary["payments_expired"] == 0
+    assert payment.status == InquiryOfferPayment.Status.CANCELLED
+    assert len(mail.outbox) == 3
+    assert any(email.to == ["payment_expire_deadline_service@example.com"] for email in mail.outbox)
+    assert any(email.to == ["ops@example.com"] for email in mail.outbox)
+    assert any(email.to == ["payment.expired@supplier.example"] for email in mail.outbox)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_expire_inquiry_deadlines_management_command_runs_expiry(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    inquiry = make_inquiry(
+        django_user_model,
+        username="expire_command_offer",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("190.00"),
+        currency="EUR",
+        lead_time_text="3 days",
+    )
+    offer.mark_sent(save=True)
+    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["offer_response_deadline_at"])
+
+    out = StringIO()
+    call_command("expire_inquiry_deadlines", stdout=out)
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
+    output = out.getvalue()
+
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert inquiry.status == Inquiry.Status.REJECTED
+    assert "Offers expired: 1" in output
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1494,6 +1857,8 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
     assert "EUR" in email.body
     assert "5-7 dias laborables" in email.body
     assert "Disponibilidad confirmada para el lote solicitado." in email.body
+    assert "Fecha límite para responder a la oferta:" in email.body
+    assert "Si acepta la oferta, tendrá un máximo de" in email.body
     assert (
         "La disponibilidad final se confirma en el momento de tramitación del pago."
         in email.body

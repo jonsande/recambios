@@ -1,0 +1,15 @@
+{% load i18n %}
+{% trans "La oferta asociada a su solicitud ha caducado por falta de respuesta dentro del plazo establecido." %}
+
+{% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
+{% if offer.offer_response_deadline_at %}{% blocktrans with deadline=offer.offer_response_deadline_at %}Fecha límite de respuesta: {{ deadline }}{% endblocktrans %}
+{% endif %}
+
+{% trans "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta para continuar con la compra." %}
+{% trans "Puede revisar el estado de la oferta aquí:" %}
+{{ offer_public_url }}
+
+{% if customer_reply_to_email %}
+{% blocktrans with reply_to=customer_reply_to_email %}Si necesita ayuda, responda a {{ reply_to }} indicando sus referencias.{% endblocktrans %}
+{% endif %}

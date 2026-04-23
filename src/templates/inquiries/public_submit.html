@@ -111,6 +111,11 @@
             <p class="text-sm text-text-muted">
               {% trans "Al enviar, se registra su solicitud para revisión interna. Este envío no confirma stock, precio final ni plazo final." %}
             </p>
+            <p class="mt-2 text-sm text-text-muted">
+              {% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}
+                Si confirmamos disponibilidad, recibirá una oferta con un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla; tras su aceptación, el plazo máximo para completar el pago será de {{ payment_hours }} horas.
+              {% endblocktrans %}
+            </p>
           </div>
 
           <button

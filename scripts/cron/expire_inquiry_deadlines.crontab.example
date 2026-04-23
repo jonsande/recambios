@@ -1,0 +1,11 @@
+# Recambios - Expire inquiry deadlines every 5 minutes
+# Use: crontab -e  (or install into /etc/cron.d with user field)
+#
+# Required:
+# - PROJECT_DIR: absolute path to repository root in production
+# - DJANGO_SETTINGS_MODULE_VALUE: production settings module
+#
+# Example:
+# */5 * * * * PROJECT_DIR=/var/www/recambios DJANGO_SETTINGS_MODULE_VALUE=config.settings.prod /bin/bash /var/www/recambios/scripts/cron/expire_inquiry_deadlines.sh
+
+*/5 * * * * PROJECT_DIR=/ruta/proyecto DJANGO_SETTINGS_MODULE_VALUE=config.settings.prod /bin/bash /ruta/proyecto/scripts/cron/expire_inquiry_deadlines.sh

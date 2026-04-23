@@ -1,13 +1,13 @@
-Supplier notification regarding accepted customer offer
+Supplier notification regarding expired customer offer
 
 Offer reference: {{ offer.reference_code }}
 Inquiry reference: {{ inquiry.reference_code }}
 Supplier: {{ supplier.name }} ({{ supplier.code }})
-Accepted at: {{ offer.accepted_at }}
-Customer payment window after acceptance: {{ payment_deadline_hours }} hours.
+Response deadline reached at: {{ offer_response_deadline_at }}
+Expired at: {{ offer.expired_at }}
 
-The customer has accepted the offer.
-Please start supplier order preparation and confirm any final fulfillment constraints.
+The customer did not respond within the agreed response window and the offer is now expired.
+Please release any temporary reservation associated with this request and share any relevant availability update.
 
 Items for your supplier account:
 {% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}

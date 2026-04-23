@@ -51,6 +51,32 @@ class Supplier(models.Model):
             "payment is confirmed. Falls back to orders_email when empty."
         ),
     )
+    offer_expired_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when a customer "
+            "offer expires without response. Falls back to orders_email when empty."
+        ),
+    )
+    payment_expired_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when an accepted "
+            "offer payment window expires. Falls back to orders_email when empty."
+        ),
+    )
+    offer_response_deadline_hours = models.PositiveIntegerField(
+        default=24,
+        help_text=(
+            "Maximum number of hours a customer has to accept or reject an offer once sent."
+        ),
+    )
+    accepted_payment_deadline_hours = models.PositiveIntegerField(
+        default=24,
+        help_text=(
+            "Maximum number of hours a customer has to pay after accepting an offer."
+        ),
+    )
     auto_send_offer_sent_notification = models.BooleanField(
         default=False,
         help_text=(
@@ -73,6 +99,20 @@ class Supplier(models.Model):
         default=False,
         help_text=(
             "Enable automatic supplier notification when customer payment is confirmed."
+        ),
+    )
+    auto_send_offer_expired_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when a customer offer expires "
+            "without response."
+        ),
+    )
+    auto_send_payment_expired_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when an accepted offer payment "
+            "window expires."
         ),
     )
     auto_send_inquiry_submitted_notification = models.BooleanField(
