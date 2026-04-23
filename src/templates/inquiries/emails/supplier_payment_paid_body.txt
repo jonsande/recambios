@@ -1,0 +1,19 @@
+Supplier notification regarding confirmed customer payment
+
+Payment reference: {{ payment.reference_code }}
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+Paid amount: {{ payment.payable_amount }} {{ payment.currency }}
+Paid at: {{ payment.paid_at }}
+{% if payment.provider_reference %}Provider reference: {{ payment.provider_reference }}
+{% endif %}
+Customer payment is confirmed.
+Please start supplier fulfillment and report any critical logistics update.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with fulfillment updates.

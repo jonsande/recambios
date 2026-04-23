@@ -16,3 +16,5 @@
 {{ offer_public_url }}
 
 {% trans "Siguiente paso recomendado: iniciar pedido a proveedor y preparación logística." %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

@@ -13,7 +13,9 @@ def make_supplier(
     code: str,
     *,
     orders_email: str = "",
+    inquiry_submitted_notification_email: str = "",
     auto_send_inquiry_submitted_notification: bool = False,
+    send_inquiry_submitted_notification_internal_copy: bool = True,
     inquiry_submitted_email_subject_template: str = "",
     inquiry_submitted_email_body_template: str = "",
 ) -> Supplier:
@@ -22,7 +24,11 @@ def make_supplier(
         slug=f"supplier-{code.lower()}",
         code=code,
         orders_email=orders_email,
+        inquiry_submitted_notification_email=inquiry_submitted_notification_email,
         auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
+        send_inquiry_submitted_notification_internal_copy=(
+            send_inquiry_submitted_notification_internal_copy
+        ),
         inquiry_submitted_email_subject_template=inquiry_submitted_email_subject_template,
         inquiry_submitted_email_body_template=inquiry_submitted_email_body_template,
     )
@@ -223,6 +229,50 @@ def test_supplier_inquiry_notification_is_not_sent_when_automation_is_disabled(
 
     inquiry.refresh_from_db()
     assert inquiry.status == Inquiry.Status.SUBMITTED
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_inquiry_notification_uses_event_specific_email_and_disables_internal_copy(
+    django_user_model,
+    email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-INQ-SPECIFIC",
+        orders_email="orders.default@supplier.example",
+        inquiry_submitted_notification_email="inq.specific@supplier.example",
+        auto_send_inquiry_submitted_notification=True,
+        send_inquiry_submitted_notification_internal_copy=False,
+    )
+    user = django_user_model.objects.create_user(
+        username="phase8supplier_specific",
+        email="phase8supplier_specific@example.com",
+        password="pass1234",
+    )
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.DRAFT,
+        language=Inquiry.Language.SPANISH,
+    )
+    InquiryItem.objects.create(
+        inquiry=inquiry,
+        product=make_product("SKU-INQ-SPECIFIC", supplier=supplier),
+        requested_quantity=1,
+    )
+
+    mail.outbox.clear()
+    inquiry.status = Inquiry.Status.SUBMITTED
+    inquiry.save(update_fields=["status"])
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["inq.specific@supplier.example"]
+    )
+    assert supplier_email.bcc == []
+    assert not any(email.to == ["orders.default@supplier.example"] for email in mail.outbox)
+
+    internal_email = next(
+        email for email in mail.outbox if email.to == ["internal-team@example.com"]
+    )
+    assert "Copia del mensaje enviado al proveedor:" not in internal_email.body
 
 
 @pytest.mark.django_db(transaction=True)

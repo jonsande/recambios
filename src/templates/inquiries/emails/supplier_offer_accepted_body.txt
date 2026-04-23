@@ -1,0 +1,16 @@
+Supplier notification regarding accepted customer offer
+
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+Accepted at: {{ offer.accepted_at }}
+
+The customer has accepted the offer.
+Please start supplier order preparation and confirm any final fulfillment constraints.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with any operational update.

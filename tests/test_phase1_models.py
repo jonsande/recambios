@@ -82,6 +82,19 @@ def test_supplier_notification_fields_default_to_disabled_and_empty_templates() 
 
     assert supplier.auto_send_offer_sent_notification is False
     assert supplier.auto_send_inquiry_submitted_notification is False
+    assert supplier.auto_send_offer_accepted_notification is False
+    assert supplier.auto_send_offer_rejected_notification is False
+    assert supplier.auto_send_payment_paid_notification is False
+    assert supplier.send_inquiry_submitted_notification_internal_copy is False
+    assert supplier.send_offer_sent_notification_internal_copy is False
+    assert supplier.send_offer_accepted_notification_internal_copy is False
+    assert supplier.send_offer_rejected_notification_internal_copy is False
+    assert supplier.send_payment_paid_notification_internal_copy is False
+    assert supplier.inquiry_submitted_notification_email == ""
+    assert supplier.offer_sent_notification_email == ""
+    assert supplier.offer_accepted_notification_email == ""
+    assert supplier.offer_rejected_notification_email == ""
+    assert supplier.payment_paid_notification_email == ""
     assert supplier.inquiry_submitted_email_subject_template == ""
     assert supplier.inquiry_submitted_email_body_template == ""
     assert supplier.offer_sent_email_subject_template == ""

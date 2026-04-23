@@ -1,0 +1,1 @@
+Offer rejected by customer - release reservation: {{ offer.reference_code }} / {{ supplier.code }}

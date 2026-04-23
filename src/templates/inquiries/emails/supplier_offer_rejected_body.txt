@@ -1,0 +1,16 @@
+Supplier notification regarding rejected customer offer
+
+Offer reference: {{ offer.reference_code }}
+Inquiry reference: {{ inquiry.reference_code }}
+Supplier: {{ supplier.name }} ({{ supplier.code }})
+Rejected at: {{ offer.rejected_at }}
+
+The customer has rejected the offer.
+Please release any temporary reservation associated with this request and share any follow-up constraints if needed.
+
+Items for your supplier account:
+{% for item in items %}- {{ item.sku }} | {{ item.title }} | Qty: {{ item.quantity }}
+{% empty %}- No supplier items were found for this notification.
+{% endfor %}
+
+Please reply to this email with any operational update.

@@ -1,0 +1,1 @@
+Offer accepted by customer - proceed with order: {{ offer.reference_code }} / {{ supplier.code }}

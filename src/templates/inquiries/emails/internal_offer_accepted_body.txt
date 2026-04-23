@@ -12,3 +12,5 @@
 {{ offer_public_url }}
 
 {% trans "Siguiente paso esperado: gestión de pago con el cliente." %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

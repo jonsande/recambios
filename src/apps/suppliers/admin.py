@@ -26,6 +26,9 @@ class SupplierAdmin(admin.ModelAdmin):
         "orders_email",
         "auto_send_inquiry_submitted_notification",
         "auto_send_offer_sent_notification",
+        "auto_send_offer_accepted_notification",
+        "auto_send_offer_rejected_notification",
+        "auto_send_payment_paid_notification",
         "is_active",
         "active_assignments_count",
         "updated_at",
@@ -35,8 +38,22 @@ class SupplierAdmin(admin.ModelAdmin):
         "country",
         "auto_send_inquiry_submitted_notification",
         "auto_send_offer_sent_notification",
+        "auto_send_offer_accepted_notification",
+        "auto_send_offer_rejected_notification",
+        "auto_send_payment_paid_notification",
     )
-    search_fields = ("name", "code", "slug", "contact_email", "orders_email")
+    search_fields = (
+        "name",
+        "code",
+        "slug",
+        "contact_email",
+        "orders_email",
+        "inquiry_submitted_notification_email",
+        "offer_sent_notification_email",
+        "offer_accepted_notification_email",
+        "offer_rejected_notification_email",
+        "payment_paid_notification_email",
+    )
     ordering = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at", "updated_at")
@@ -71,15 +88,57 @@ class SupplierAdmin(admin.ModelAdmin):
             "Automatic Supplier Notifications",
             {
                 "description": (
-                    "If a custom template field is empty, the default email template is used."
+                    "If a custom template field is empty, the default email template is used. "
+                    "If an event-specific destination email is empty, orders_email is used."
                 ),
                 "fields": (
                     "auto_send_inquiry_submitted_notification",
-                    "auto_send_offer_sent_notification",
+                    "inquiry_submitted_notification_email",
+                    "send_inquiry_submitted_notification_internal_copy",
                     "inquiry_submitted_email_subject_template",
                     "inquiry_submitted_email_body_template",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Offer Sent",
+            {
+                "fields": (
+                    "auto_send_offer_sent_notification",
+                    "offer_sent_notification_email",
+                    "send_offer_sent_notification_internal_copy",
                     "offer_sent_email_subject_template",
                     "offer_sent_email_body_template",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Offer Accepted",
+            {
+                "fields": (
+                    "auto_send_offer_accepted_notification",
+                    "offer_accepted_notification_email",
+                    "send_offer_accepted_notification_internal_copy",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Offer Rejected",
+            {
+                "fields": (
+                    "auto_send_offer_rejected_notification",
+                    "offer_rejected_notification_email",
+                    "send_offer_rejected_notification_internal_copy",
+                ),
+            },
+        ),
+        (
+            "Automatic Supplier Notifications - Payment Paid",
+            {
+                "fields": (
+                    "auto_send_payment_paid_notification",
+                    "payment_paid_notification_email",
+                    "send_payment_paid_notification_internal_copy",
                 ),
             },
         ),

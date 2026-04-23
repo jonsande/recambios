@@ -22,11 +22,20 @@ from apps.inquiries.payments import (
 from apps.suppliers.models import Supplier
 
 
-def make_supplier(code: str) -> Supplier:
+def make_supplier(
+    code: str,
+    *,
+    auto_send_payment_paid_notification: bool = False,
+    payment_paid_notification_email: str = "",
+    send_payment_paid_notification_internal_copy: bool = False,
+) -> Supplier:
     return Supplier.objects.create(
         name=f"Supplier {code}",
         slug=f"supplier-{code.lower()}",
         code=code,
+        auto_send_payment_paid_notification=auto_send_payment_paid_notification,
+        payment_paid_notification_email=payment_paid_notification_email,
+        send_payment_paid_notification_internal_copy=send_payment_paid_notification_internal_copy,
     )
 
 
@@ -58,6 +67,7 @@ def make_accepted_offer(
     *,
     username: str,
     confirmed_total: Decimal = Decimal("250.00"),
+    supplier: Supplier | None = None,
 ) -> InquiryOffer:
     user = django_user_model.objects.create_user(
         username=username,
@@ -65,7 +75,7 @@ def make_accepted_offer(
         password="pass1234",
     )
     inquiry = Inquiry.objects.create(user=user, status=Inquiry.Status.IN_REVIEW)
-    product = make_product(f"SKU-{username.upper()}")
+    product = make_product(f"SKU-{username.upper()}", supplier=supplier)
     inquiry.items.create(product=product, requested_quantity=1)
     offer = InquiryOffer.objects.create(
         inquiry=inquiry,
@@ -361,6 +371,66 @@ def test_paid_internal_notification_is_sent_exactly_once(django_user_model, sett
     assert payment.currency in customer_email.body
     assert "\n\n\n" not in internal_email.body
     assert "\n\n\n" not in customer_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_paid_supplier_notification_is_sent_once_when_enabled_via_webhook(
+    django_user_model,
+    settings,
+) -> None:
+    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+    settings.SERVER_EMAIL = "notifications@example.com"
+    settings.INQUIRY_INTERNAL_NOTIFICATION_EMAILS = ["ops@example.com"]
+
+    supplier = make_supplier(
+        code="SUP-STRIPE-PAID",
+        auto_send_payment_paid_notification=True,
+        payment_paid_notification_email="paid.notify@supplier.example",
+        send_payment_paid_notification_internal_copy=True,
+    )
+    offer = make_accepted_offer(
+        django_user_model,
+        username="stripe_sup_paid_once",
+        supplier=supplier,
+    )
+    payment = InquiryOfferPayment.ensure_pending_from_offer(
+        offer,
+        provider=STRIPE_PROVIDER,
+        provider_reference="cs_test_supplier_pending",
+        save=True,
+    )
+    event = {
+        "type": "checkout.session.completed",
+        "data": {
+            "object": {
+                "id": "cs_test_supplier_paid_once",
+                "payment_status": "paid",
+                "metadata": {
+                    "payment_reference": payment.reference_code,
+                    "offer_reference": offer.reference_code,
+                    "inquiry_reference": offer.inquiry.reference_code,
+                },
+            }
+        },
+    }
+
+    mail.outbox.clear()
+    first_changed = process_stripe_checkout_event(event)
+    second_changed = process_stripe_checkout_event(event)
+
+    assert first_changed is True
+    assert second_changed is False
+    assert len(mail.outbox) == 3
+
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["paid.notify@supplier.example"]
+    )
+    assert "Copia del mensaje enviado al proveedor:" in internal_email.body
+    assert supplier_email.subject in internal_email.body
+    assert supplier_email.body in internal_email.body
+    assert "Customer payment confirmed - prepare fulfillment:" in supplier_email.subject
+    assert supplier_email.bcc == ["ops@example.com"]
 
 
 @pytest.mark.django_db

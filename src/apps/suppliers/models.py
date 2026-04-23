@@ -16,16 +16,104 @@ class Supplier(models.Model):
             "Operational mailbox for orders, confirmed offers, and availability updates."
         ),
     )
+    inquiry_submitted_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when a customer "
+            "inquiry is submitted. Falls back to orders_email when empty."
+        ),
+    )
+    offer_sent_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when an offer "
+            "is sent to the customer. Falls back to orders_email when empty."
+        ),
+    )
+    offer_accepted_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when a customer "
+            "accepts an offer. Falls back to orders_email when empty."
+        ),
+    )
+    offer_rejected_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when a customer "
+            "rejects an offer. Falls back to orders_email when empty."
+        ),
+    )
+    payment_paid_notification_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Optional destination for automatic supplier notifications when customer "
+            "payment is confirmed. Falls back to orders_email when empty."
+        ),
+    )
     auto_send_offer_sent_notification = models.BooleanField(
         default=False,
         help_text=(
             "Enable automatic supplier notification when a customer-facing offer is sent."
         ),
     )
+    auto_send_offer_accepted_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when a customer accepts an offer."
+        ),
+    )
+    auto_send_offer_rejected_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when a customer rejects an offer."
+        ),
+    )
+    auto_send_payment_paid_notification = models.BooleanField(
+        default=False,
+        help_text=(
+            "Enable automatic supplier notification when customer payment is confirmed."
+        ),
+    )
     auto_send_inquiry_submitted_notification = models.BooleanField(
         default=False,
         help_text=(
             "Enable automatic supplier inquiry notification when a customer inquiry is submitted."
+        ),
+    )
+    send_inquiry_submitted_notification_internal_copy = models.BooleanField(
+        default=False,
+        help_text=(
+            "When enabled, sends an internal BCC copy for automatic supplier inquiry "
+            "submitted notifications."
+        ),
+    )
+    send_offer_sent_notification_internal_copy = models.BooleanField(
+        default=False,
+        help_text=(
+            "When enabled, sends an internal BCC copy for automatic supplier "
+            "offer-sent notifications."
+        ),
+    )
+    send_offer_accepted_notification_internal_copy = models.BooleanField(
+        default=False,
+        help_text=(
+            "When enabled, sends an internal BCC copy for automatic supplier "
+            "offer-accepted notifications."
+        ),
+    )
+    send_offer_rejected_notification_internal_copy = models.BooleanField(
+        default=False,
+        help_text=(
+            "When enabled, sends an internal BCC copy for automatic supplier "
+            "offer-rejected notifications."
+        ),
+    )
+    send_payment_paid_notification_internal_copy = models.BooleanField(
+        default=False,
+        help_text=(
+            "When enabled, sends an internal BCC copy for automatic supplier "
+            "payment-paid notifications."
         ),
     )
     inquiry_submitted_email_subject_template = models.TextField(

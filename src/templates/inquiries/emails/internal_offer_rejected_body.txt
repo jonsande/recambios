@@ -12,3 +12,5 @@
 {{ offer_public_url }}
 
 {% trans "Recomendación: revisar alternativas comerciales o contactar al cliente para seguimiento." %}
+
+{% include "inquiries/emails/partials/supplier_notification_summary_block.txt" %}

@@ -26,8 +26,21 @@ def make_supplier(
     *,
     contact_email: str = "",
     orders_email: str = "",
+    inquiry_submitted_notification_email: str = "",
+    offer_sent_notification_email: str = "",
+    offer_accepted_notification_email: str = "",
+    offer_rejected_notification_email: str = "",
+    payment_paid_notification_email: str = "",
     auto_send_offer_sent_notification: bool = False,
     auto_send_inquiry_submitted_notification: bool = False,
+    auto_send_offer_accepted_notification: bool = False,
+    auto_send_offer_rejected_notification: bool = False,
+    auto_send_payment_paid_notification: bool = False,
+    send_inquiry_submitted_notification_internal_copy: bool = False,
+    send_offer_sent_notification_internal_copy: bool = True,
+    send_offer_accepted_notification_internal_copy: bool = False,
+    send_offer_rejected_notification_internal_copy: bool = False,
+    send_payment_paid_notification_internal_copy: bool = False,
     inquiry_submitted_email_subject_template: str = "",
     inquiry_submitted_email_body_template: str = "",
     offer_sent_email_subject_template: str = "",
@@ -39,8 +52,27 @@ def make_supplier(
         code=code,
         contact_email=contact_email,
         orders_email=orders_email,
+        inquiry_submitted_notification_email=inquiry_submitted_notification_email,
+        offer_sent_notification_email=offer_sent_notification_email,
+        offer_accepted_notification_email=offer_accepted_notification_email,
+        offer_rejected_notification_email=offer_rejected_notification_email,
+        payment_paid_notification_email=payment_paid_notification_email,
         auto_send_offer_sent_notification=auto_send_offer_sent_notification,
         auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
+        auto_send_offer_accepted_notification=auto_send_offer_accepted_notification,
+        auto_send_offer_rejected_notification=auto_send_offer_rejected_notification,
+        auto_send_payment_paid_notification=auto_send_payment_paid_notification,
+        send_inquiry_submitted_notification_internal_copy=(
+            send_inquiry_submitted_notification_internal_copy
+        ),
+        send_offer_sent_notification_internal_copy=send_offer_sent_notification_internal_copy,
+        send_offer_accepted_notification_internal_copy=(
+            send_offer_accepted_notification_internal_copy
+        ),
+        send_offer_rejected_notification_internal_copy=(
+            send_offer_rejected_notification_internal_copy
+        ),
+        send_payment_paid_notification_internal_copy=send_payment_paid_notification_internal_copy,
         inquiry_submitted_email_subject_template=inquiry_submitted_email_subject_template,
         inquiry_submitted_email_body_template=inquiry_submitted_email_body_template,
         offer_sent_email_subject_template=offer_sent_email_subject_template,
@@ -2098,6 +2130,173 @@ def test_mixed_supplier_inquiry_sends_one_supplier_email_per_supplier_with_scope
     assert "SKU-MIXED-B1" not in supplier_a_email.body
     assert "SKU-MIXED-B1" in supplier_b_email.body
     assert "SKU-MIXED-A1" not in supplier_b_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_offer_sent_notification_uses_event_specific_email_and_can_disable_internal_copy(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-SUPPLIER-SPECIFIC",
+        orders_email="orders.default@supplier.example",
+        offer_sent_notification_email="offers.specific@supplier.example",
+        auto_send_offer_sent_notification=True,
+        send_offer_sent_notification_internal_copy=False,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_specific",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-SPECIFIC", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=2)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("245.00"),
+        currency="EUR",
+        lead_time_text="4 days",
+    )
+
+    mail.outbox.clear()
+    offer.mark_sent(save=True)
+
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["offers.specific@supplier.example"]
+    )
+    assert not any(email.to == ["orders.default@supplier.example"] for email in mail.outbox)
+    assert supplier_email.bcc == []
+    internal_copy_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    assert "Copia del mensaje enviado al proveedor:" not in internal_copy_email.body
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_offer_accepted_notification_is_sent_with_internal_copy_when_enabled(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-OFFER-ACCEPTED",
+        orders_email="orders.accepted@supplier.example",
+        offer_accepted_notification_email="accepted@supplier.example",
+        auto_send_offer_accepted_notification=True,
+        send_offer_accepted_notification_internal_copy=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_accepted",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-ACCEPTED", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("315.00"),
+        currency="EUR",
+        lead_time_text="3 days",
+    )
+    offer.mark_sent(save=True)
+
+    mail.outbox.clear()
+    offer.mark_accepted(save=True)
+
+    assert len(mail.outbox) == 2
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["accepted@supplier.example"]
+    )
+    assert "Oferta aceptada por cliente:" in internal_email.subject
+    assert "Copia del mensaje enviado al proveedor:" in internal_email.body
+    assert supplier_email.subject in internal_email.body
+    assert supplier_email.body in internal_email.body
+    assert "Offer accepted by customer - proceed with order:" in supplier_email.subject
+    assert supplier_email.bcc == ["ops@example.com"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_offer_rejected_notification_uses_orders_email_fallback_without_internal_copy(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-OFFER-REJECTED",
+        orders_email="orders.rejected@supplier.example",
+        offer_rejected_notification_email="",
+        auto_send_offer_rejected_notification=True,
+        send_offer_rejected_notification_internal_copy=False,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_rejected",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-REJECTED", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=1)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("330.00"),
+        currency="EUR",
+        lead_time_text="6 days",
+    )
+    offer.mark_sent(save=True)
+
+    mail.outbox.clear()
+    offer.mark_rejected(save=True)
+
+    assert len(mail.outbox) == 2
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    supplier_email = next(
+        email for email in mail.outbox if email.to == ["orders.rejected@supplier.example"]
+    )
+    assert supplier_email.bcc == []
+    assert "Copia del mensaje enviado al proveedor:" not in internal_email.body
+    assert "Offer rejected by customer - release reservation:" in supplier_email.subject
+
+
+@pytest.mark.django_db(transaction=True)
+def test_supplier_payment_paid_notification_is_sent_with_event_specific_recipient(
+    django_user_model,
+    supplier_notification_email_settings,
+) -> None:
+    supplier = make_supplier(
+        code="SUP-PAYMENT-PAID",
+        orders_email="orders.paid.default@supplier.example",
+        payment_paid_notification_email="paid@supplier.example",
+        auto_send_payment_paid_notification=True,
+        send_payment_paid_notification_internal_copy=True,
+    )
+    inquiry = make_inquiry(
+        django_user_model,
+        username="offer_supplier_payment_paid",
+        status=Inquiry.Status.IN_REVIEW,
+    )
+    product = make_product("SKU-SUPPLIER-PAID", supplier=supplier)
+    InquiryItem.objects.create(inquiry=inquiry, product=product, requested_quantity=2)
+    offer = InquiryOffer.objects.create(
+        inquiry=inquiry,
+        confirmed_total=Decimal("490.00"),
+        currency="EUR",
+        lead_time_text="8 days",
+    )
+    offer.mark_sent(save=True)
+    offer.mark_accepted(save=True)
+    payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+
+    mail.outbox.clear()
+    payment.mark_paid(save=True)
+
+    assert len(mail.outbox) == 3
+    internal_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
+    supplier_email = next(email for email in mail.outbox if email.to == ["paid@supplier.example"])
+    assert supplier_email.bcc == ["ops@example.com"]
+    assert "Copia del mensaje enviado al proveedor:" in internal_email.body
+    assert supplier_email.subject in internal_email.body
+    assert supplier_email.body in internal_email.body
+    assert "Customer payment confirmed - prepare fulfillment:" in supplier_email.subject
+    assert "SKU-SUPPLIER-PAID" in supplier_email.body
+    assert not any(
+        email.to == ["orders.paid.default@supplier.example"] for email in mail.outbox
+    )
 
 
 @pytest.mark.django_db(transaction=True)

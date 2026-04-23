@@ -14,7 +14,9 @@ from .emails import (
     send_internal_offer_response_notification_email,
     send_internal_offer_sent_copy_notification_email,
     send_internal_payment_paid_notification_email,
+    send_supplier_offer_response_notifications,
     send_supplier_offer_sent_notifications,
+    send_supplier_payment_paid_notifications,
 )
 from .models import Inquiry, InquiryOffer, InquiryOfferPayment
 
@@ -233,10 +235,28 @@ def send_internal_offer_response_email_on_status_entry(
         if offer is None:
             return
 
+        supplier_notifications: list[dict] = []
+        try:
+            supplier_notifications = send_supplier_offer_response_notifications(
+                offer,
+                response_status=response_status,
+            )
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to process supplier offer-response notifications "
+                    "(offer=%s inquiry=%s status=%s)."
+                ),
+                offer.reference_code,
+                offer.inquiry.reference_code,
+                response_status,
+            )
+
         try:
             send_internal_offer_response_notification_email(
                 offer,
                 response_status=response_status,
+                supplier_notifications=supplier_notifications,
             )
         except Exception:
             logger.exception(
@@ -298,8 +318,25 @@ def send_internal_payment_paid_email_on_status_entry(
         if payment is None:
             return
 
+        supplier_notifications: list[dict] = []
         try:
-            send_internal_payment_paid_notification_email(payment)
+            supplier_notifications = send_supplier_payment_paid_notifications(payment)
+        except Exception:
+            logger.exception(
+                (
+                    "Failed to process supplier payment-paid notifications "
+                    "(payment=%s offer=%s inquiry=%s)."
+                ),
+                payment.reference_code,
+                payment.offer.reference_code,
+                payment.offer.inquiry.reference_code,
+            )
+
+        try:
+            send_internal_payment_paid_notification_email(
+                payment,
+                supplier_notifications=supplier_notifications,
+            )
         except Exception:
             logger.exception(
                 (
