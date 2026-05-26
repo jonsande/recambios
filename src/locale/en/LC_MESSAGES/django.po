@@ -877,7 +877,7 @@ msgid "El email de contacto es obligatorio."
 msgstr "Contact email is required."
 
 #: src/apps/inquiries/views.py:25
-msgid "Su carrito de solicitud está vacío. Añada al menos un producto para continuar."
+msgid "Su carrito de solicitudes está vacío. Añada al menos un producto para continuar."
 msgstr "Your request cart is empty. Add at least one product to continue."
 
 #: src/apps/inquiries/views.py:40 src/templates/inquiries/public_submit.html:109
@@ -885,7 +885,7 @@ msgid "Enviar solicitud"
 msgstr "Submit request"
 
 #: src/apps/inquiries/views.py:52
-msgid "Su carrito de solicitud está vacío. Añada productos antes de enviar."
+msgid "Su carrito de solicitudes está vacío. Añada productos antes de enviar."
 msgstr "Your request cart is empty. Add products before submitting."
 
 #: src/apps/inquiries/views.py:69
@@ -966,7 +966,7 @@ msgid "Vaciar carrito"
 msgstr "Clear cart"
 
 #: src/templates/cart/request_cart.html:122
-msgid "Su carrito de solicitud está vacío."
+msgid "Su carrito de solicitudes está vacío."
 msgstr "Your request cart is empty."
 
 #: src/templates/cart/request_cart.html:123

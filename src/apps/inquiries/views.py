@@ -40,7 +40,7 @@ class PublicInquirySubmitView(FormView):
         if not get_request_cart_items(request.session):
             messages.error(
                 request,
-                _("Su carrito de solicitud está vacío. Añada al menos un producto para continuar."),
+                _("Su carrito de solicitudes está vacío. Añada al menos un producto para continuar."),
             )
             return redirect("cart:request_cart_detail")
         return super().dispatch(request, *args, **kwargs)
@@ -73,7 +73,7 @@ class PublicInquirySubmitView(FormView):
         if not cart_items:
             form.add_error(
                 None,
-                _("Su carrito de solicitud está vacío. Añada productos antes de enviar."),
+                _("Su carrito de solicitudes está vacío. Añada productos antes de enviar."),
             )
             return self.form_invalid(form)
 

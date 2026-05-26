@@ -30,7 +30,7 @@ class RequestCartDetailView(TemplateView):
 
         context.update(
             {
-                "page_title": _("Carrito de solicitud"),
+                "page_title": _("Carrito de solicitudes"),
                 "cart_items": cart_items,
                 "line_count": len(cart_items),
                 "total_quantity": total_quantity,
