@@ -689,6 +689,7 @@
   }
   .text-text {
     color: var(--color-text);
+    color-scheme: light;
   }
   .text-text-muted {
     color: var(--color-text-muted);
@@ -2598,6 +2599,19 @@
     &:focus-visible {
       --tw-ring-offset-color: var(--color-surface);
     }
+    caret-color: var(--color-text);
+    -webkit-text-fill-color: var(--color-text);
+  }
+  .form-input:-webkit-autofill, .form-input:-webkit-autofill:hover, .form-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-text) !important;
+    caret-color: var(--color-text);
+    box-shadow: 0 0 0 1000px var(--color-surface-elevated) inset;
+  }
+  #catalog-q, #home-q {
+    color: var(--color-primary-strong) !important;
+    -webkit-text-fill-color: var(--color-primary-strong) !important;
+    caret-color: var(--color-primary-strong);
+    background-color: var(--color-surface-elevated);
   }
   .form-select option {
     background-color: var(--color-surface-elevated);
