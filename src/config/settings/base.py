@@ -187,7 +187,7 @@ if SITE_CHROME_VARIANT not in {"light", "dark"}:
     SITE_CHROME_VARIANT = "light"
 SITE_CHROME_BG_LIGHT = config(
     "SITE_CHROME_BG_LIGHT",
-    default="#f7fbff",
+    default="#ffffff",
 )
 SITE_CHROME_BG_DARK = config(
     "SITE_CHROME_BG_DARK",
