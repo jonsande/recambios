@@ -184,9 +184,12 @@ def _write_cart(session: SessionBase, cart: dict[str, dict[str, int | str]]) -> 
 
 
 def _normalize_quantity(value: int | str | None) -> int:
+    if value is None:
+        return 0
+
     try:
         parsed = int(value)
-    except (TypeError, ValueError):
+    except ValueError:
         parsed = 0
 
     if parsed < 0:

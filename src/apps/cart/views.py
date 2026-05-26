@@ -113,9 +113,12 @@ def _resolve_next_url(request) -> str:
 
 
 def _parse_quantity(value: str | None, *, allow_zero: bool) -> int | None:
+    if value is None:
+        return None
+
     try:
         parsed = int(value)
-    except (TypeError, ValueError):
+    except ValueError:
         return None
 
     if parsed < 0 or (parsed == 0 and not allow_zero):
