@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktrans with reference=submission_group.reference_code %}Hemos recibido su envío de solicitudes {{ reference }}{% endblocktrans %}

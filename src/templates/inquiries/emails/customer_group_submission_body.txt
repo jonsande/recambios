@@ -1,0 +1,17 @@
+{% load i18n %}
+{% blocktrans with reference=submission_group.reference_code %}Hemos recibido su envío de solicitudes {{ reference }}.{% endblocktrans %}
+
+{% trans "Gracias por su consulta. Hemos creado una solicitud independiente para cada producto para poder gestionar su disponibilidad, oferta y posible pago por separado." %}
+{% blocktrans with reference=submission_group.reference_code %}Referencia del envío: {{ reference }}{% endblocktrans %}
+
+{% trans "Solicitudes creadas:" %}
+{% for inquiry in inquiries %}- {{ inquiry.reference_code }} | {{ inquiry.sku }} | {{ inquiry.title }} | {% blocktrans with quantity=inquiry.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}{% if inquiry.customer_note %} | {% blocktrans with note=inquiry.customer_note %}Nota: {{ note }}{% endblocktrans %}{% endif %}
+{% empty %}{% trans "No hay solicitudes registradas." %}
+{% endfor %}
+
+{% trans "Cada solicitud podrá avanzar de forma independiente. Este correo confirma su recepción; no constituye confirmación de stock, precio final ni plazo final." %}
+{% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, cada oferta tendrá un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar su pago.{% endblocktrans %}
+
+{% if customer_reply_to_email %}
+{% blocktrans with reply_to=customer_reply_to_email reference=submission_group.reference_code %}Si necesita ampliar datos, responda a {{ reply_to }} indicando la referencia de envío {{ reference }}.{% endblocktrans %}
+{% endif %}

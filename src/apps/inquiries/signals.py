@@ -73,7 +73,7 @@ def send_submission_emails_on_status_entry(
             return
 
         inquiry = (
-            Inquiry.objects.select_related("user")
+            Inquiry.objects.select_related("user", "submission_group__user")
             .prefetch_related("items__product")
             .filter(pk=inquiry_id)
             .first()

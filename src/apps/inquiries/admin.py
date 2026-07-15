@@ -3,11 +3,19 @@ import logging
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Count
+from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.users.roles import is_restricted_supplier_user
 
 from .emails import send_customer_offer_sent_email
-from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
+from .models import (
+    Inquiry,
+    InquiryItem,
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquirySubmissionGroup,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +60,105 @@ class InquiryItemInline(admin.TabularInline):
     )
     readonly_fields = ("created_at",)
     show_change_link = True
+
+
+class GroupInquiryInline(admin.TabularInline):
+    model = Inquiry
+    extra = 0
+    fields = ("inquiry_link", "status", "single_item", "created_at")
+    readonly_fields = fields
+    can_delete = False
+    show_change_link = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="Inquiry")
+    def inquiry_link(self, obj: Inquiry):
+        if not obj.pk:
+            return "—"
+        url = reverse("admin:inquiries_inquiry_change", args=(obj.pk,))
+        return format_html('<a href="{}">{}</a>', url, obj.reference_code)
+
+    @admin.display(description="Product")
+    def single_item(self, obj: Inquiry) -> str:
+        item = obj.items.select_related("product").order_by("id").first()
+        return f"{item.product.sku} · {item.product.title}" if item else "—"
+
+
+@admin.register(InquirySubmissionGroup)
+class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    list_display = (
+        "reference_code",
+        "requester",
+        "guest_email",
+        "company_name",
+        "language",
+        "inquiry_count",
+        "created_at",
+    )
+    list_filter = ("language", "created_at")
+    search_fields = (
+        "reference_code",
+        "user__username",
+        "user__email",
+        "guest_name",
+        "guest_email",
+        "guest_phone",
+        "company_name",
+        "tax_id",
+        "notes_from_customer",
+        "inquiries__reference_code",
+    )
+    ordering = ("-created_at",)
+    list_select_related = ("user",)
+    readonly_fields = (
+        "reference_code",
+        "user",
+        "guest_name",
+        "guest_email",
+        "guest_phone",
+        "company_name",
+        "tax_id",
+        "language",
+        "notes_from_customer",
+        "created_at",
+        "updated_at",
+    )
+    fieldsets = (
+        ("Submission", {"fields": ("reference_code", "language")}),
+        (
+            "Requester snapshot",
+            {
+                "fields": (
+                    "user",
+                    "guest_name",
+                    "guest_email",
+                    "guest_phone",
+                    "company_name",
+                    "tax_id",
+                )
+            },
+        ),
+        ("Customer notes", {"fields": ("notes_from_customer",)}),
+        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+    inlines = (GroupInquiryInline,)
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(inquiries_count=Count("inquiries"))
+
+    @admin.display(description="Requester")
+    def requester(self, obj: InquirySubmissionGroup) -> str:
+        return obj.requester_display
+
+    @admin.display(ordering="inquiries_count", description="Inquiries")
+    def inquiry_count(self, obj: InquirySubmissionGroup) -> int:
+        return obj.inquiries_count
 
 
 @admin.register(InquiryOffer)
@@ -523,6 +630,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
 
     list_display = (
         "reference_code",
+        "submission_group_reference",
         "status",
         "negative_resolution_reason",
         "negative_resolved_at",
@@ -544,6 +652,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     )
     search_fields = (
         "reference_code",
+        "submission_group__reference_code",
         "user__username",
         "user__email",
         "guest_name",
@@ -555,9 +664,9 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "internal_notes",
     )
     ordering = ("-created_at",)
-    list_select_related = ("user",)
+    list_select_related = ("user", "submission_group")
     autocomplete_fields = ("user",)
-    readonly_fields = ("reference_code", "created_at", "updated_at")
+    readonly_fields = ("reference_code", "submission_group_link", "created_at", "updated_at")
     date_hierarchy = "created_at"
     inlines = (InquiryItemInline,)
     actions = ("finalize_selected_as_not_offerable",)
@@ -567,6 +676,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "reference_code",
+                    "submission_group_link",
                     "status",
                     "language",
                 )
@@ -684,6 +794,23 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     @admin.display(description="Requester")
     def requester(self, obj: Inquiry) -> str:
         return obj.requester_display
+
+    @admin.display(
+        ordering="submission_group__reference_code",
+        description="Submission group",
+    )
+    def submission_group_reference(self, obj: Inquiry) -> str:
+        return obj.submission_group.reference_code if obj.submission_group_id else "—"
+
+    @admin.display(description="Submission group")
+    def submission_group_link(self, obj: Inquiry):
+        if not obj.submission_group_id:
+            return "—"
+        url = reverse(
+            "admin:inquiries_inquirysubmissiongroup_change",
+            args=(obj.submission_group_id,),
+        )
+        return format_html('<a href="{}">{}</a>', url, obj.submission_group.reference_code)
 
     @admin.display(ordering="items_count", description="Items")
     def item_count(self, obj: Inquiry) -> int:

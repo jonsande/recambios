@@ -13,7 +13,7 @@ from django.utils import translation
 
 from apps.suppliers.models import Supplier
 
-from .models import Inquiry, InquiryOffer, InquiryOfferPayment
+from .models import Inquiry, InquiryOffer, InquiryOfferPayment, InquirySubmissionGroup
 
 SUPPORTED_INQUIRY_LANGUAGES = {choice for choice, _label in Inquiry.Language.choices}
 SUPPLIER_NOTIFICATION_LANGUAGE = "en"
@@ -30,7 +30,46 @@ def send_inquiry_submitted_emails(inquiry: Inquiry) -> None:
     _set_supplier_pending_if_auto_supplier_notification_sent(inquiry, supplier_notifications)
     context.update(_build_supplier_notification_context(supplier_notifications))
     send_internal_submission_notification_email(inquiry, context=context)
-    send_customer_submission_confirmation_email(inquiry, context=context)
+    if inquiry.submission_group_id:
+        first_inquiry_id = (
+            inquiry.submission_group.inquiries.order_by("id")
+            .values_list("id", flat=True)
+            .first()
+        )
+        if inquiry.pk == first_inquiry_id:
+            send_customer_group_submission_confirmation_email(inquiry.submission_group)
+    else:
+        send_customer_submission_confirmation_email(inquiry, context=context)
+
+
+def send_customer_group_submission_confirmation_email(
+    submission_group: InquirySubmissionGroup,
+) -> None:
+    context = _build_submission_group_email_context(submission_group)
+    customer_email = context.get("requester_email")
+    if not customer_email:
+        return
+
+    language = _resolve_language(submission_group.language)
+    subject = _render_subject(
+        "inquiries/emails/customer_group_submission_subject.txt",
+        context,
+        language,
+    )
+    body = _render_body(
+        "inquiries/emails/customer_group_submission_body.txt",
+        context,
+        language,
+    )
+    reply_to_emails = _resolve_customer_reply_to_emails()
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[customer_email],
+        reply_to=reply_to_emails or None,
+    )
+    email.send(fail_silently=False)
 
 
 def send_internal_submission_notification_email(
@@ -1520,6 +1559,52 @@ def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
     }
 
 
+def _build_submission_group_email_context(
+    submission_group: InquirySubmissionGroup,
+) -> dict:
+    requester_name = submission_group.requester_display
+    if submission_group.user_id and submission_group.user:
+        full_name = submission_group.user.get_full_name().strip()
+        if full_name:
+            requester_name = full_name
+
+    inquiries = list(
+        submission_group.inquiries.select_related("user")
+        .prefetch_related("items__product__supplier")
+        .order_by("id")
+    )
+    inquiry_rows = []
+    response_deadlines = []
+    payment_deadlines = []
+    for inquiry in inquiries:
+        item = inquiry.items.order_by("id").first()
+        if item is None:
+            continue
+        response_hours, payment_hours = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
+        response_deadlines.append(response_hours)
+        payment_deadlines.append(payment_hours)
+        inquiry_rows.append(
+            {
+                "reference_code": inquiry.reference_code,
+                "sku": item.product.sku,
+                "title": item.product.title,
+                "quantity": item.requested_quantity,
+                "customer_note": item.customer_note,
+            }
+        )
+
+    requester_email = _resolve_submission_group_requester_email(submission_group)
+    return {
+        "submission_group": submission_group,
+        "inquiries": inquiry_rows,
+        "requester_name": requester_name,
+        "requester_email": requester_email,
+        "offer_response_deadline_hours": min(response_deadlines) if response_deadlines else 24,
+        "payment_deadline_hours": min(payment_deadlines) if payment_deadlines else 24,
+        "customer_reply_to_email": _resolve_customer_reply_to_display(),
+    }
+
+
 def _build_offer_sent_email_context(offer: InquiryOffer) -> dict:
     requester_email = _resolve_requester_email(offer.inquiry)
     return {
@@ -1899,6 +1984,14 @@ def _resolve_requester_email(inquiry: Inquiry) -> str:
     if inquiry.user_id and inquiry.user and inquiry.user.email:
         return inquiry.user.email.strip().lower()
     return (inquiry.guest_email or "").strip().lower()
+
+
+def _resolve_submission_group_requester_email(
+    submission_group: InquirySubmissionGroup,
+) -> str:
+    if submission_group.user_id and submission_group.user and submission_group.user.email:
+        return submission_group.user.email.strip().lower()
+    return (submission_group.guest_email or "").strip().lower()
 
 
 def _resolve_customer_reply_to_emails() -> list[str]:

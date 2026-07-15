@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.core import mail
@@ -6,7 +7,13 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from apps.catalog.models import Brand, Category, Condition, Product
-from apps.inquiries.models import Inquiry, InquiryItem
+from apps.inquiries.models import (
+    Inquiry,
+    InquiryItem,
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquirySubmissionGroup,
+)
 from apps.suppliers.models import Supplier
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -207,23 +214,86 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
     assert response.status_code == 302
     assert "/es/solicitud/enviada/" in response.url
 
-    inquiry = Inquiry.objects.get()
-    assert inquiry.status == Inquiry.Status.SUBMITTED
-    assert inquiry.user_id is None
-    assert inquiry.guest_name == "Taller Central"
-    assert inquiry.guest_email == "compras@tallercentral.example"
-    assert inquiry.notes_from_customer == "Confirmar plazo para esta semana"
+    submission_group = InquirySubmissionGroup.objects.get()
+    assert submission_group.reference_code.startswith("REQ-")
+    assert submission_group.user_id is None
+    assert submission_group.guest_name == "Taller Central"
+    assert submission_group.guest_email == "compras@tallercentral.example"
+    assert submission_group.notes_from_customer == "Confirmar plazo para esta semana"
+    assert submission_group.reference_code in response.url
 
-    items = list(inquiry.items.select_related("product").order_by("product__sku"))
-    assert len(items) == 2
+    inquiries = list(
+        submission_group.inquiries.prefetch_related("items__product").order_by("items__product__sku")
+    )
+    assert len(inquiries) == 2
+    assert all(inquiry.status == Inquiry.Status.SUBMITTED for inquiry in inquiries)
+    assert all(inquiry.items.count() == 1 for inquiry in inquiries)
+    assert all(inquiry.guest_name == "Taller Central" for inquiry in inquiries)
+    assert all(
+        inquiry.guest_email == "compras@tallercentral.example" for inquiry in inquiries
+    )
+    assert all(
+        inquiry.notes_from_customer == "Confirmar plazo para esta semana"
+        for inquiry in inquiries
+    )
+
+    items = [inquiry.items.get() for inquiry in inquiries]
     assert items[0].product.sku == "SKU-P9-GUEST-1"
     assert items[0].requested_quantity == 1
     assert items[1].product.sku == "SKU-P9-GUEST-2"
     assert items[1].requested_quantity == 2
     assert items[1].customer_note == "Necesito versión reforzada"
 
-    assert len(mail.outbox) == 2
+    assert len(mail.outbox) == 3
+    customer_emails = [
+        message for message in mail.outbox if message.to == [submission_group.guest_email]
+    ]
+    assert len(customer_emails) == 1
+    assert submission_group.reference_code in customer_emails[0].subject
+    assert all(inquiry.reference_code in customer_emails[0].body for inquiry in inquiries)
     assert "request_cart_v1" not in client.session
+
+
+@pytest.mark.usefixtures("email_settings")
+def test_grouped_submission_sends_one_customer_and_operational_email_per_inquiry(client) -> None:
+    products = [
+        make_public_product(sku="SKU-P9-MAIL-1"),
+        make_public_product(sku="SKU-P9-MAIL-2"),
+    ]
+    supplier_recipients = []
+    for index, product in enumerate(products, start=1):
+        recipient = f"orders{index}@supplier.example"
+        supplier_recipients.append(recipient)
+        product.supplier.orders_email = recipient
+        product.supplier.auto_send_inquiry_submitted_notification = True
+        product.supplier.save(
+            update_fields=["orders_email", "auto_send_inquiry_submitted_notification"]
+        )
+        client.post(
+            f"/es/solicitud/carrito/anadir/{product.id}/",
+            data={"quantity": str(index)},
+        )
+
+    response = client.post(
+        "/es/solicitud/enviar/",
+        data={
+            "contact_name": "Cliente emails agrupados",
+            "contact_email": "grouped-emails@example.com",
+            "phone": "",
+            "company_name": "",
+            "tax_id": "",
+            "notes_from_customer": "",
+        },
+    )
+
+    assert response.status_code == 302
+    assert len(mail.outbox) == 5
+    assert sum(message.to == ["grouped-emails@example.com"] for message in mail.outbox) == 1
+    assert sum(message.to == ["internal-team@example.com"] for message in mail.outbox) == 2
+    assert all(
+        any(message.to == [recipient] for message in mail.outbox)
+        for recipient in supplier_recipients
+    )
 
 
 @pytest.mark.usefixtures("email_settings")
@@ -253,7 +323,10 @@ def test_registered_user_submission_uses_account_email_fallback(client, django_u
     assert response.status_code == 302
 
     inquiry = Inquiry.objects.get()
+    submission_group = InquirySubmissionGroup.objects.get()
     assert inquiry.user_id == user.id
+    assert inquiry.submission_group == submission_group
+    assert submission_group.user_id == user.id
     assert inquiry.guest_name == "Comprador Taller"
     assert inquiry.guest_email == "phase9.user@example.com"
     assert inquiry.status == Inquiry.Status.SUBMITTED
@@ -284,11 +357,35 @@ def test_final_submit_is_only_event_creating_submitted_inquiry_and_emails(client
 
     assert response.status_code == 302
     assert Inquiry.objects.count() == 1
+    assert InquirySubmissionGroup.objects.count() == 1
     assert len(mail.outbox) == 2
 
     success_response = client.get(response.url)
     assert success_response.status_code == 200
+    content = success_response.content.decode()
+    submission_group = InquirySubmissionGroup.objects.get()
+    assert submission_group.reference_code in content
+    assert "Referencia del envío" in content
+    assert "Solicitudes creadas" in content
+    assert "avanzar de forma independiente" in content
     assert len(mail.outbox) == 2
+
+
+@pytest.mark.usefixtures("email_settings")
+def test_legacy_inquiry_reference_success_url_remains_available(client) -> None:
+    inquiry = Inquiry.objects.create(
+        guest_name="Cliente histórico",
+        guest_email="historico@example.com",
+        status=Inquiry.Status.SUPPLIER_PENDING,
+    )
+
+    response = client.get(f"/es/solicitud/enviada/{inquiry.reference_code}/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert inquiry.reference_code in content
+    assert "Referencia de solicitud" in content
+    assert "Referencia del envío" not in content
 
 
 @pytest.mark.usefixtures("email_settings")
@@ -354,6 +451,51 @@ def test_submitted_inquiry_does_not_resend_emails_on_later_saves(client) -> None
 
 
 @pytest.mark.usefixtures("email_settings")
+def test_grouped_inquiries_can_follow_independent_commercial_lifecycles(client) -> None:
+    first_product = make_public_product(sku="SKU-P9-LIFECYCLE-1")
+    second_product = make_public_product(sku="SKU-P9-LIFECYCLE-2")
+    client.post(f"/es/solicitud/carrito/anadir/{first_product.id}/", data={"quantity": "1"})
+    client.post(f"/es/solicitud/carrito/anadir/{second_product.id}/", data={"quantity": "1"})
+    response = client.post(
+        "/es/solicitud/enviar/",
+        data={
+            "contact_name": "Cliente independiente",
+            "contact_email": "independiente@example.com",
+            "phone": "",
+            "company_name": "",
+            "tax_id": "",
+            "notes_from_customer": "",
+        },
+    )
+    assert response.status_code == 302
+    inquiries = list(Inquiry.objects.order_by("id"))
+    offered_inquiry, unavailable_inquiry = inquiries
+
+    offered_inquiry.transition_to(Inquiry.Status.IN_REVIEW)
+    offered_inquiry.save(update_fields=["status"])
+    offer = InquiryOffer.objects.create(
+        inquiry=offered_inquiry,
+        confirmed_total=Decimal("125.00"),
+        currency="EUR",
+        lead_time_text="3-5 days",
+    )
+    offer.mark_sent(save=True)
+    offer.mark_accepted(save=True)
+
+    unavailable_inquiry.negative_resolution_reason = (
+        Inquiry.NegativeResolutionReason.UNAVAILABLE
+    )
+    unavailable_inquiry.finalize_negative_resolution(save=True)
+
+    offered_inquiry.refresh_from_db()
+    unavailable_inquiry.refresh_from_db()
+    assert offered_inquiry.submission_group_id == unavailable_inquiry.submission_group_id
+    assert offered_inquiry.status == Inquiry.Status.ACCEPTED
+    assert InquiryOfferPayment.objects.filter(offer=offer).exists()
+    assert unavailable_inquiry.status == Inquiry.Status.CLOSED
+    assert unavailable_inquiry.negative_resolved_at is not None
+
+@pytest.mark.usefixtures("email_settings")
 def test_empty_cart_submit_routes_redirect_to_cart_and_do_not_create_inquiry(client) -> None:
     get_response = client.get("/es/solicitud/enviar/")
     assert get_response.status_code == 302
@@ -370,6 +512,7 @@ def test_empty_cart_submit_routes_redirect_to_cart_and_do_not_create_inquiry(cli
     assert post_response.url == "/es/solicitud/carrito/"
 
     assert Inquiry.objects.count() == 0
+    assert InquirySubmissionGroup.objects.count() == 0
     assert len(mail.outbox) == 0
 
 
@@ -392,6 +535,7 @@ def test_invalid_guest_form_does_not_create_inquiry_or_send_emails(client) -> No
     assert "El nombre de contacto es obligatorio." in content
     assert "El email de contacto es obligatorio." in content
     assert Inquiry.objects.count() == 0
+    assert InquirySubmissionGroup.objects.count() == 0
     assert len(mail.outbox) == 0
 
 
@@ -408,6 +552,7 @@ def test_submit_view_handles_stale_non_public_products_safely(client) -> None:
     assert response.url == "/es/solicitud/carrito/"
     assert client.session.get("request_cart_v1", {}) == {}
     assert Inquiry.objects.count() == 0
+    assert InquirySubmissionGroup.objects.count() == 0
     assert len(mail.outbox) == 0
 
 
@@ -423,6 +568,7 @@ def test_submit_rejects_tampered_cart_quantities(client) -> None:
     assert response.url == "/es/solicitud/carrito/"
     assert client.session.get("request_cart_v1", {}) == {}
     assert Inquiry.objects.count() == 0
+    assert InquirySubmissionGroup.objects.count() == 0
     assert len(mail.outbox) == 0
 
 

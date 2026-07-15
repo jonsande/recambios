@@ -97,6 +97,8 @@
   - [x] creación de `Inquiry` e `InquiryItem` desde la web pública
   - [x] transición a `submitted` solo en el envío final real
   - [x] página de confirmación posterior al envío
+  - [x] envío multiartículo agrupado con una `Inquiry` independiente por producto
+  - [x] confirmación agrupada al cliente y visibilidad del grupo en admin
 
 - [ ] **Fase 10** — Frontend refinado y sistema visual
   - [x] slice inicial 10.1: tokens de tema centralizados (paleta azul técnica sobria)

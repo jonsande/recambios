@@ -1,11 +1,12 @@
 from decimal import Decimal
 
 import pytest
+from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 
 from apps.catalog.models import Brand, Category, Condition, Product
-from apps.inquiries.models import Inquiry, InquiryItem
+from apps.inquiries.models import Inquiry, InquiryItem, InquirySubmissionGroup
 from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF, ROLE_RESTRICTED_SUPPLIER
 
@@ -82,6 +83,61 @@ def test_guest_inquiry_requires_name_and_email() -> None:
     invalid_inquiry = Inquiry(guest_name="", guest_email="", guest_phone="+34 600 333 444")
     with pytest.raises(ValidationError):
         invalid_inquiry.full_clean()
+
+
+@pytest.mark.django_db
+def test_submission_group_generates_reference_and_requires_guest_contact() -> None:
+    submission_group = InquirySubmissionGroup.objects.create(
+        guest_name="Grouped Guest",
+        guest_email="GROUPED@EXAMPLE.COM",
+        notes_from_customer="  Shared note  ",
+    )
+
+    assert submission_group.reference_code.startswith("REQ-")
+    assert submission_group.guest_email == "grouped@example.com"
+    assert submission_group.notes_from_customer == "Shared note"
+
+    with pytest.raises(ValidationError):
+        InquirySubmissionGroup.objects.create(guest_name="", guest_email="")
+
+
+@pytest.mark.django_db
+def test_submission_group_relates_independent_inquiries_without_limiting_legacy_shape(
+    django_user_model,
+) -> None:
+    user = django_user_model.objects.create_user(
+        username="grouped_customer",
+        email="grouped.customer@example.com",
+        password="pass1234",
+    )
+    submission_group = InquirySubmissionGroup.objects.create(
+        user=user,
+        guest_name="Grouped Customer",
+        guest_email=user.email,
+    )
+    grouped_inquiry = Inquiry.objects.create(user=user, submission_group=submission_group)
+    legacy_inquiry = Inquiry.objects.create(user=user)
+    first_product = make_product(sku="SKU-INQ-GROUPED")
+    second_product = make_product(sku="SKU-INQ-LEGACY-1")
+    third_product = make_product(sku="SKU-INQ-LEGACY-2")
+
+    InquiryItem.objects.create(inquiry=grouped_inquiry, product=first_product)
+    InquiryItem.objects.create(inquiry=legacy_inquiry, product=second_product)
+    InquiryItem.objects.create(inquiry=legacy_inquiry, product=third_product)
+
+    assert list(submission_group.inquiries.all()) == [grouped_inquiry]
+    assert grouped_inquiry.items.count() == 1
+    assert legacy_inquiry.submission_group_id is None
+    assert legacy_inquiry.items.count() == 2
+
+
+@pytest.mark.django_db
+def test_submission_group_is_registered_in_admin_for_operational_visibility() -> None:
+    assert InquirySubmissionGroup in admin.site._registry
+    group_admin = admin.site._registry[InquirySubmissionGroup]
+    assert group_admin.inlines
+    assert "reference_code" in group_admin.search_fields
+    assert "inquiries__reference_code" in group_admin.search_fields
 
 
 @pytest.mark.django_db
@@ -166,6 +222,10 @@ def test_internal_staff_has_inquiry_permissions_and_restricted_supplier_does_not
     assert internal_staff.permissions.filter(
         content_type__app_label="inquiries",
         codename="view_inquiry",
+    ).exists()
+    assert internal_staff.permissions.filter(
+        content_type__app_label="inquiries",
+        codename="view_inquirysubmissiongroup",
     ).exists()
     assert internal_staff.permissions.filter(
         content_type__app_label="inquiries",

@@ -2,6 +2,8 @@
 {% trans "Se ha generado una nueva solicitud." %}
 
 {% blocktrans with reference=inquiry.reference_code %}Referencia: {{ reference }}{% endblocktrans %}
+{% if inquiry.submission_group_id %}{% blocktrans with group_reference=inquiry.submission_group.reference_code %}Referencia del envío agrupado: {{ group_reference }}{% endblocktrans %}
+{% endif %}
 {% blocktrans with language_code=inquiry.language %}Idioma de la solicitud: {{ language_code }}{% endblocktrans %}
 
 {% trans "Datos de contacto del cliente:" %}

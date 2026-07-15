@@ -18,7 +18,13 @@ from apps.cart.services import clear_request_cart, get_request_cart_items
 
 from .deadlines import expire_offer_if_due, expire_payment_if_due
 from .forms import PublicInquirySubmissionForm
-from .models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
+from .models import (
+    Inquiry,
+    InquiryItem,
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquirySubmissionGroup,
+)
 from .payments import (
     StripeCheckoutSessionError,
     StripeConfigurationError,
@@ -40,7 +46,10 @@ class PublicInquirySubmitView(FormView):
         if not get_request_cart_items(request.session):
             messages.error(
                 request,
-                _("Su carrito de solicitudes está vacío. Añada al menos un producto para continuar."),
+                _(
+                    "Su carrito de solicitudes está vacío. "
+                    "Añada al menos un producto para continuar."
+                ),
             )
             return redirect("cart:request_cart_detail")
         return super().dispatch(request, *args, **kwargs)
@@ -78,7 +87,7 @@ class PublicInquirySubmitView(FormView):
             return self.form_invalid(form)
 
         try:
-            inquiry = self._create_submitted_inquiry(form.cleaned_data, cart_items)
+            submission_group = self._create_submitted_inquiries(form.cleaned_data, cart_items)
         except (ValidationError, IntegrityError, ValueError):
             logger.exception("Public inquiry submission failed due to invalid payload.")
             form.add_error(
@@ -94,42 +103,57 @@ class PublicInquirySubmitView(FormView):
 
         messages.success(
             self.request,
-            _("Solicitud enviada correctamente. Referencia: %(reference)s")
-            % {"reference": inquiry.reference_code},
+            _("Solicitud enviada correctamente. Referencia de envío: %(reference)s")
+            % {"reference": submission_group.reference_code},
         )
         return redirect(
             "inquiries:public_inquiry_success",
-            reference_code=inquiry.reference_code,
+            reference_code=submission_group.reference_code,
         )
 
-    def _create_submitted_inquiry(self, cleaned_data: dict, cart_items) -> Inquiry:
+    def _create_submitted_inquiries(
+        self,
+        cleaned_data: dict,
+        cart_items,
+    ) -> InquirySubmissionGroup:
         user = self.request.user if self.request.user.is_authenticated else None
+        language = _resolve_inquiry_language()
 
         with transaction.atomic():
-            inquiry = Inquiry.objects.create(
+            submission_group = InquirySubmissionGroup.objects.create(
                 user=user,
                 guest_name=cleaned_data["contact_name"],
                 guest_email=cleaned_data["contact_email"],
                 guest_phone=cleaned_data["phone"],
                 company_name=cleaned_data["company_name"],
                 tax_id=cleaned_data["tax_id"],
-                language=_resolve_inquiry_language(),
-                status=Inquiry.Status.DRAFT,
+                language=language,
                 notes_from_customer=cleaned_data["notes_from_customer"],
             )
 
             for cart_item in cart_items:
+                inquiry = Inquiry.objects.create(
+                    submission_group=submission_group,
+                    user=user,
+                    guest_name=cleaned_data["contact_name"],
+                    guest_email=cleaned_data["contact_email"],
+                    guest_phone=cleaned_data["phone"],
+                    company_name=cleaned_data["company_name"],
+                    tax_id=cleaned_data["tax_id"],
+                    language=language,
+                    status=Inquiry.Status.DRAFT,
+                    notes_from_customer=cleaned_data["notes_from_customer"],
+                )
                 InquiryItem.objects.create(
                     inquiry=inquiry,
                     product=cart_item.product,
                     requested_quantity=cart_item.quantity,
                     customer_note=cart_item.note,
                 )
+                inquiry.transition_to(Inquiry.Status.SUBMITTED)
+                inquiry.save()
 
-            inquiry.transition_to(Inquiry.Status.SUBMITTED)
-            inquiry.save()
-
-        return inquiry
+        return submission_group
 
 
 class PublicInquirySuccessView(TemplateView):
@@ -139,20 +163,33 @@ class PublicInquirySuccessView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         reference_code = (self.kwargs.get("reference_code") or "").strip()
-        inquiry_exists = Inquiry.objects.filter(
-            reference_code=reference_code,
-            status__in=(
-                Inquiry.Status.SUBMITTED,
-                Inquiry.Status.SUPPLIER_PENDING,
-            ),
-        ).exists()
-        if not inquiry_exists:
-            raise Http404
+        visible_statuses = (Inquiry.Status.SUBMITTED, Inquiry.Status.SUPPLIER_PENDING)
+        submission_group = (
+            InquirySubmissionGroup.objects.prefetch_related("inquiries__items__product")
+            .filter(
+                reference_code=reference_code,
+                inquiries__status__in=visible_statuses,
+            )
+            .distinct()
+            .first()
+        )
+        legacy_inquiry = None
+        if submission_group is None:
+            legacy_inquiry = Inquiry.objects.filter(
+                reference_code=reference_code,
+                status__in=visible_statuses,
+                submission_group__isnull=True,
+            ).first()
+            if legacy_inquiry is None:
+                raise Http404
 
         context.update(
             {
                 "page_title": _("Solicitud enviada"),
-                "inquiry_reference": reference_code,
+                "submission_reference": reference_code,
+                "submission_group": submission_group,
+                "inquiry_count": submission_group.inquiries.count() if submission_group else 1,
+                "is_legacy_inquiry": legacy_inquiry is not None,
             }
         )
         return context

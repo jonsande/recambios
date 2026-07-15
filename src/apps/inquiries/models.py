@@ -12,6 +12,115 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 
 
+class InquirySubmissionGroup(models.Model):
+    class Language(models.TextChoices):
+        SPANISH = "es", "Spanish"
+        ENGLISH = "en", "English"
+
+    REFERENCE_PREFIX = "REQ"
+    REFERENCE_RANDOM_LENGTH = 6
+    REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
+
+    reference_code = models.CharField(
+        max_length=32,
+        unique=True,
+        db_index=True,
+        editable=False,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="inquiry_submission_groups",
+    )
+    guest_name = models.CharField(max_length=150, blank=True)
+    guest_email = models.EmailField(blank=True)
+    guest_phone = models.CharField(max_length=50, blank=True)
+    company_name = models.CharField(max_length=180, blank=True)
+    tax_id = models.CharField(max_length=64, blank=True)
+    language = models.CharField(
+        max_length=5,
+        choices=Language.choices,
+        default=Language.SPANISH,
+    )
+    notes_from_customer = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(user__isnull=False)
+                | (Q(guest_name__gt="") & Q(guest_email__gt="")),
+                name="inq_group_user_or_guest_contact_ck",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["user", "created_at"], name="inq_group_user_created_idx"),
+            models.Index(fields=["guest_email"], name="inq_group_guest_email_idx"),
+        ]
+
+    def __str__(self) -> str:
+        return self.reference_code
+
+    @property
+    def requester_display(self) -> str:
+        if self.user_id:
+            return self.user.get_username()
+        if self.guest_name:
+            return self.guest_name
+        return self.guest_email
+
+    @classmethod
+    def generate_reference_code(cls) -> str:
+        date_part = timezone.localdate().strftime("%Y%m%d")
+        for _ in range(50):
+            suffix = get_random_string(
+                cls.REFERENCE_RANDOM_LENGTH,
+                allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
+            )
+            reference_code = f"{cls.REFERENCE_PREFIX}-{date_part}-{suffix}"
+            if not cls.objects.filter(reference_code=reference_code).exists():
+                return reference_code
+        raise RuntimeError("Unable to generate a unique submission group reference code.")
+
+    def clean(self) -> None:
+        super().clean()
+        errors = {}
+        if not self.user_id:
+            if not self.guest_name:
+                errors["guest_name"] = "Guest name is required when no registered user is attached."
+            if not self.guest_email:
+                errors["guest_email"] = (
+                    "Guest email is required when no registered user is attached."
+                )
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs) -> None:
+        for field_name in (
+            "guest_name",
+            "guest_email",
+            "guest_phone",
+            "company_name",
+            "tax_id",
+            "notes_from_customer",
+        ):
+            value = getattr(self, field_name)
+            if isinstance(value, str):
+                setattr(self, field_name, value.strip())
+
+        if self.guest_email:
+            self.guest_email = self.guest_email.lower()
+        if not self.reference_code:
+            self.reference_code = self.generate_reference_code()
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
 class Inquiry(models.Model):
     class Language(models.TextChoices):
         SPANISH = "es", "Spanish"
@@ -52,6 +161,13 @@ class Inquiry(models.Model):
         unique=True,
         db_index=True,
         editable=False,
+    )
+    submission_group = models.ForeignKey(
+        "inquiries.InquirySubmissionGroup",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="inquiries",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
