@@ -58,6 +58,17 @@
             </div>
           {% endif %}
 
+          <fieldset class="panel-muted space-y-4">
+            <legend class="subsection-title">{% trans "Destino para calcular el envío" %}</legend>
+            <p class="text-sm text-text-muted">
+              {% trans "Usaremos estos datos para incluir el coste de envío en la oferta. La dirección completa se solicitará únicamente si acepta la oferta." %}
+            </p>
+            <div><label for="{{ form.destination_country.id_for_label }}" class="form-label">{{ form.destination_country.label }}</label>{{ form.destination_country }}{% if form.destination_country.errors %}<p id="destination_country-errors" class="form-error" role="alert">{{ form.destination_country.errors|striptags }}</p>{% endif %}</div>
+            <div><label for="{{ form.destination_city.id_for_label }}" class="form-label">{{ form.destination_city.label }}</label>{{ form.destination_city }}{% if form.destination_city.errors %}<p id="destination_city-errors" class="form-error" role="alert">{{ form.destination_city.errors|striptags }}</p>{% endif %}</div>
+            <div><label for="{{ form.destination_region.id_for_label }}" class="form-label">{{ form.destination_region.label }}</label>{{ form.destination_region }}{% if form.destination_region.errors %}<p id="destination_region-errors" class="form-error" role="alert">{{ form.destination_region.errors|striptags }}</p>{% endif %}</div>
+            <div><label for="{{ form.destination_postal_code.id_for_label }}" class="form-label">{{ form.destination_postal_code.label }}</label>{{ form.destination_postal_code }}{% if form.destination_postal_code.errors %}<p id="destination_postal_code-errors" class="form-error" role="alert">{{ form.destination_postal_code.errors|striptags }}</p>{% endif %}</div>
+          </fieldset>
+
           <div>
             <label for="{{ form.contact_name.id_for_label }}" class="form-label">
               {{ form.contact_name.label }}

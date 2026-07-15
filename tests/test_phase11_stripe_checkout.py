@@ -5,11 +5,18 @@ from unittest.mock import patch
 
 import pytest
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.catalog.models import Brand, Category, Condition, Product
-from apps.inquiries.models import Inquiry, InquiryOffer, InquiryOfferPayment
+from apps.inquiries.forms import InquiryOfferPaymentDetailsForm
+from apps.inquiries.models import (
+    Inquiry,
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquiryOfferPaymentDetails,
+)
 from apps.inquiries.payments import (
     STRIPE_PROVIDER,
     StripeCheckoutSessionResult,
@@ -82,7 +89,14 @@ def make_accepted_offer(
         email=f"{username}@example.com",
         password="pass1234",
     )
-    inquiry = Inquiry.objects.create(user=user, status=Inquiry.Status.IN_REVIEW)
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.IN_REVIEW,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
+    )
     product = make_product(f"SKU-{username.upper()}", supplier=supplier)
     inquiry.items.create(product=product, requested_quantity=1)
     offer = InquiryOffer.objects.create(
@@ -93,6 +107,19 @@ def make_accepted_offer(
     )
     offer.mark_sent(save=True)
     offer.mark_accepted(save=True)
+    InquiryOfferPaymentDetails.objects.create(
+        payment=offer.payment,
+        shipping_recipient_name=user.get_username(),
+        shipping_phone="+34 600 000 000",
+        shipping_address_line_1="Calle Mayor 1",
+        shipping_city="Madrid",
+        shipping_region="Madrid",
+        shipping_postal_code="28001",
+        shipping_country="ES",
+        billing_name=user.get_username(),
+        billing_same_as_shipping=True,
+        completed_at=timezone.now(),
+    )
     return offer
 
 
@@ -121,13 +148,62 @@ def test_checkout_session_creation_persists_stripe_provider_reference(django_use
 
 
 @pytest.mark.django_db
+def test_checkout_details_form_prefills_locked_quoted_destination(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="quote_prefill")
+    offer.payment.checkout_details.delete()
+
+    form = InquiryOfferPaymentDetailsForm(payment=offer.payment)
+
+    assert form["shipping_country"].value() == "ES"
+    assert form["shipping_city"].value() == "Madrid"
+    assert form["shipping_region"].value() == "Madrid"
+    assert form["shipping_postal_code"].value() == "28001"
+    assert form.fields["shipping_country"].disabled is True
+    assert form.fields["shipping_city"].disabled is True
+    assert form.fields["shipping_region"].disabled is True
+    assert form.fields["shipping_postal_code"].disabled is True
+
+
+@pytest.mark.django_db
+def test_checkout_session_requires_completed_checkout_details(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_details_guard")
+    offer.payment.checkout_details.delete()
+
+    with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
+        "apps.inquiries.payments._create_checkout_session"
+    ) as create_session:
+        with pytest.raises(ValueError, match="shipping and billing details"):
+            create_or_reuse_checkout_session_for_offer(offer, language_code="es")
+
+    create_session.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_paid_checkout_details_are_immutable(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_paid_details_lock")
+    details = offer.payment.checkout_details
+    offer.payment.mark_paid(save=True)
+    details.shipping_city = "Barcelona"
+
+    with pytest.raises(ValidationError, match="immutable snapshot"):
+        details.save()
+
+
+@pytest.mark.django_db
 def test_checkout_session_initiation_is_blocked_for_non_accepted_offer(django_user_model) -> None:
     user = django_user_model.objects.create_user(
         username="stripe_not_accepted",
         email="stripe_not_accepted@example.com",
         password="pass1234",
     )
-    inquiry = Inquiry.objects.create(user=user, status=Inquiry.Status.IN_REVIEW)
+    inquiry = Inquiry.objects.create(
+        user=user,
+        status=Inquiry.Status.IN_REVIEW,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
+    )
     offer = InquiryOffer.objects.create(
         inquiry=inquiry,
         confirmed_total=Decimal("310.00"),

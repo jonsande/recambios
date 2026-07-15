@@ -12,7 +12,7 @@ from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from .models import InquiryOffer, InquiryOfferPayment
+from .models import InquiryOffer, InquiryOfferPayment, InquiryOfferPaymentDetails
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +100,15 @@ def create_or_reuse_checkout_session_for_offer(
             raise ValueError("Only pending payments can be processed through Stripe Checkout.")
         if payment.payment_deadline_at and timezone.now() >= payment.payment_deadline_at:
             raise ValueError("Payment deadline has expired for this offer.")
+        try:
+            details = payment.checkout_details
+        except InquiryOfferPaymentDetails.DoesNotExist as error:
+            raise ValueError("Completed shipping and billing details are required.") from error
+        if not details.is_complete or not details.matches_quoted_destination:
+            raise ValueError(
+                "Completed shipping and billing details matching the quoted "
+                "destination are required."
+            )
 
         if payment.provider != STRIPE_PROVIDER:
             payment.provider = STRIPE_PROVIDER

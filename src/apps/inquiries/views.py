@@ -17,12 +17,13 @@ from django.views.generic import FormView, TemplateView, View
 from apps.cart.services import clear_request_cart, get_request_cart_items
 
 from .deadlines import expire_offer_if_due, expire_payment_if_due
-from .forms import PublicInquirySubmissionForm
+from .forms import InquiryOfferPaymentDetailsForm, PublicInquirySubmissionForm
 from .models import (
     Inquiry,
     InquiryItem,
     InquiryOffer,
     InquiryOfferPayment,
+    InquiryOfferPaymentDetails,
     InquirySubmissionGroup,
 )
 from .payments import (
@@ -129,6 +130,10 @@ class PublicInquirySubmitView(FormView):
                 tax_id=cleaned_data["tax_id"],
                 language=language,
                 notes_from_customer=cleaned_data["notes_from_customer"],
+                destination_country=cleaned_data["destination_country"],
+                destination_city=cleaned_data["destination_city"],
+                destination_region=cleaned_data["destination_region"],
+                destination_postal_code=cleaned_data["destination_postal_code"],
             )
 
             for cart_item in cart_items:
@@ -143,6 +148,10 @@ class PublicInquirySubmitView(FormView):
                     language=language,
                     status=Inquiry.Status.DRAFT,
                     notes_from_customer=cleaned_data["notes_from_customer"],
+                    destination_country=cleaned_data["destination_country"],
+                    destination_city=cleaned_data["destination_city"],
+                    destination_region=cleaned_data["destination_region"],
+                    destination_postal_code=cleaned_data["destination_postal_code"],
                 )
                 InquiryItem.objects.create(
                     inquiry=inquiry,
@@ -307,7 +316,7 @@ class PublicInquiryOfferDetailView(TemplateView):
                     _("Oferta aceptada. A continuación verá el siguiente paso para el pago."),
                 )
                 return redirect(
-                    "inquiries:public_inquiry_offer_payment_placeholder",
+                    "inquiries:public_inquiry_offer_payment_details",
                     access_token=offer.access_token,
                 )
             else:
@@ -315,6 +324,65 @@ class PublicInquiryOfferDetailView(TemplateView):
                 messages.success(request, _("Ha rechazado la oferta."))
 
         return redirect(request.path)
+
+
+class PublicInquiryOfferPaymentDetailsView(FormView):
+    template_name = "inquiries/public_offer_payment_details.html"
+    form_class = InquiryOfferPaymentDetailsForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.offer = (
+            InquiryOffer.objects.select_related("inquiry")
+            .filter(access_token=kwargs.get("access_token"))
+            .first()
+        )
+        if self.offer is None:
+            raise Http404
+        if self.offer.status != InquiryOffer.Status.ACCEPTED:
+            return redirect(
+                "inquiries:public_inquiry_offer_detail", access_token=self.offer.access_token
+            )
+        self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
+        if expire_payment_if_due(self.payment):
+            self.payment.refresh_from_db()
+        self.details = InquiryOfferPaymentDetails.objects.filter(payment=self.payment).first()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["payment"] = self.payment
+        kwargs["instance"] = self.details
+        return kwargs
+
+    def form_valid(self, form):
+        if self.payment.status != InquiryOfferPayment.Status.PENDING:
+            messages.info(self.request, _("Este pago ya no admite cambios en los datos de envío."))
+            return redirect(self.request.path)
+        if not self.offer.has_complete_quoted_destination:
+            form.add_error(
+                None,
+                _("Falta el destino cotizado. Contacte con nuestro equipo antes de pagar."),
+            )
+            return self.form_invalid(form)
+        with transaction.atomic():
+            form.save()
+        messages.success(self.request, _("Datos de envío y facturación guardados."))
+        return redirect(
+            "inquiries:public_inquiry_offer_payment_placeholder",
+            access_token=self.offer.access_token,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "page_title": _("Datos de envío y facturación"),
+                "offer": self.offer,
+                "payment": self.payment,
+                "quoted_destination_missing": not self.offer.has_complete_quoted_destination,
+            }
+        )
+        return context
 
 
 class PublicInquiryOfferPaymentView(TemplateView):
@@ -346,6 +414,16 @@ class PublicInquiryOfferPaymentView(TemplateView):
         self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
         if expire_payment_if_due(self.payment):
             self.payment.refresh_from_db()
+        self.details = InquiryOfferPaymentDetails.objects.filter(payment=self.payment).first()
+        if not self._details_ready():
+            messages.info(
+                request,
+                _("Complete y revise los datos de envío y facturación antes de pagar."),
+            )
+            return redirect(
+                "inquiries:public_inquiry_offer_payment_details",
+                access_token=self.offer.access_token,
+            )
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -356,6 +434,16 @@ class PublicInquiryOfferPaymentView(TemplateView):
         if redirect_response is not None:
             return redirect_response
         self.payment = InquiryOfferPayment.ensure_pending_from_offer(self.offer, save=True)
+        self.details = InquiryOfferPaymentDetails.objects.filter(payment=self.payment).first()
+        if not self._details_ready():
+            messages.info(
+                request,
+                _("Complete y revise los datos de envío y facturación antes de pagar."),
+            )
+            return redirect(
+                "inquiries:public_inquiry_offer_payment_details",
+                access_token=self.offer.access_token,
+            )
         if expire_payment_if_due(self.payment):
             messages.info(
                 request,
@@ -419,9 +507,18 @@ class PublicInquiryOfferPaymentView(TemplateView):
                 "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
                 "can_start_checkout": self.payment.status == InquiryOfferPayment.Status.PENDING,
                 "payment_deadline_at": self.payment.payment_deadline_at,
+                "details": self.details,
             }
         )
         return context
+
+    def _details_ready(self) -> bool:
+        return bool(
+            self.offer.has_complete_quoted_destination
+            and self.details
+            and self.details.is_complete
+            and self.details.matches_quoted_destination
+        )
 
     @staticmethod
     def _redirect_if_offer_not_accepted(request, *, offer: InquiryOffer):

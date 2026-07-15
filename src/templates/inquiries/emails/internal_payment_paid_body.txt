@@ -9,6 +9,9 @@
 {% endif %}
 {% if payment.provider_reference %}{% blocktrans with provider_reference=payment.provider_reference %}Referencia Stripe Checkout: {{ provider_reference }}{% endblocktrans %}
 {% endif %}
+{% if payment.checkout_details %}{% blocktrans with destination=payment.checkout_details.delivery_destination_summary %}Destino operativo de entrega: {{ destination }}{% endblocktrans %}
+{% trans "Consulte el registro de datos del pago en el admin para ver la dirección completa." %}
+{% endif %}
 {% if requester_email %}{% blocktrans with email=requester_email %}Email del cliente: {{ email }}{% endblocktrans %}
 {% endif %}
 

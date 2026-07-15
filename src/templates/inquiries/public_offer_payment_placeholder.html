@@ -9,8 +9,36 @@
       <p class="page-eyebrow">{% trans "Pago seguro" %}</p>
       <h1 class="mt-2 page-title">{{ page_title }}</h1>
       <p class="page-lead">
-        {% trans "Su oferta está aceptada. Puede continuar a Stripe Checkout para completar el pago en una pasarela alojada y segura." %}
+        {% trans "Revise los datos de entrega y facturación antes de continuar a Stripe Checkout." %}
       </p>
+    </section>
+
+    <section class="section-shell" aria-label="{% trans 'Datos de entrega y facturación' %}">
+      <h2 class="subsection-title">{% trans "Datos de entrega y facturación" %}</h2>
+      <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Destinatario" %}</dt>
+          <dd class="mt-1 text-text">{{ details.shipping_recipient_name }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Dirección de envío" %}</dt>
+          <dd class="mt-1 text-text">
+            {{ details.shipping_address_line_1 }}{% if details.shipping_address_line_2 %}, {{ details.shipping_address_line_2 }}{% endif %},
+            {{ details.shipping_city }}, {{ details.shipping_postal_code }} {{ details.shipping_region }}, {{ details.shipping_country.name }}
+          </dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Identidad de facturación" %}</dt>
+          <dd class="mt-1 text-text">{{ details.billing_name }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Dirección de facturación" %}</dt>
+          <dd class="mt-1 text-text">
+            {% if details.billing_same_as_shipping %}{% trans "Coincide con la dirección de envío" %}{% else %}{{ details.billing_address_line_1 }}, {{ details.billing_city }}, {{ details.billing_postal_code }} {{ details.billing_region }}, {{ details.billing_country.name }}{% endif %}
+          </dd>
+        </div>
+      </dl>
+      <a class="mt-4 btn btn-secondary" href="{% url 'inquiries:public_inquiry_offer_payment_details' access_token=offer.access_token %}">{% trans "Editar datos permitidos" %}</a>
     </section>
 
     <section class="alert alert-success" aria-live="polite">

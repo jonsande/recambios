@@ -14,6 +14,7 @@ from .models import (
     InquiryItem,
     InquiryOffer,
     InquiryOfferPayment,
+    InquiryOfferPaymentDetails,
     InquirySubmissionGroup,
 )
 
@@ -93,6 +94,7 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "requester",
         "guest_email",
         "company_name",
+        "destination_summary",
         "language",
         "inquiry_count",
         "created_at",
@@ -108,6 +110,10 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "company_name",
         "tax_id",
         "notes_from_customer",
+        "destination_country",
+        "destination_city",
+        "destination_region",
+        "destination_postal_code",
         "inquiries__reference_code",
     )
     ordering = ("-created_at",)
@@ -141,6 +147,17 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         ("Customer notes", {"fields": ("notes_from_customer",)}),
+        (
+            "Quotation destination",
+            {
+                "fields": (
+                    "destination_country",
+                    "destination_city",
+                    "destination_region",
+                    "destination_postal_code",
+                )
+            },
+        ),
         ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
     inlines = (GroupInquiryInline,)
@@ -160,12 +177,26 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     def inquiry_count(self, obj: InquirySubmissionGroup) -> int:
         return obj.inquiries_count
 
+    @admin.display(description="Destination")
+    def destination_summary(self, obj: InquirySubmissionGroup) -> str:
+        return ", ".join(
+            value
+            for value in (
+                obj.destination_postal_code,
+                obj.destination_city,
+                obj.destination_region,
+                obj.destination_country.name,
+            )
+            if value
+        ) or "—"
+
 
 @admin.register(InquiryOffer)
 class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     LOCKED_AFTER_SEND_FIELDS = (
         "confirmed_total",
         "currency",
+        "quoted_destination_summary",
         "lead_time_text",
         "customer_message",
     )
@@ -250,6 +281,17 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
+            "Quoted destination",
+            {
+                "fields": (
+                    "quoted_destination_country",
+                    "quoted_destination_city",
+                    "quoted_destination_region",
+                    "quoted_destination_postal_code",
+                )
+            },
+        ),
+        (
             "Lifecycle",
             {
                 "fields": (
@@ -270,6 +312,15 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         readonly_fields = list(super().get_readonly_fields(request, obj))
         if obj is not None and obj.status != InquiryOffer.Status.DRAFT:
             readonly_fields.extend(self.LOCKED_AFTER_SEND_FIELDS)
+        if obj is not None and obj.has_complete_quoted_destination:
+            readonly_fields.extend(
+                (
+                    "quoted_destination_country",
+                    "quoted_destination_city",
+                    "quoted_destination_region",
+                    "quoted_destination_postal_code",
+                )
+            )
         return tuple(dict.fromkeys(readonly_fields))
 
     @admin.display(ordering="inquiry__reference_code", description="Inquiry")
@@ -620,6 +671,48 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         )
 
 
+@admin.register(InquiryOfferPaymentDetails)
+class InquiryOfferPaymentDetailsAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    list_display = (
+        "payment_reference",
+        "offer_reference",
+        "inquiry_reference",
+        "shipping_recipient_name",
+        "delivery_destination_summary",
+        "billing_name",
+        "completed_at",
+        "updated_at",
+    )
+    search_fields = (
+        "payment__reference_code",
+        "payment__offer__reference_code",
+        "payment__offer__inquiry__reference_code",
+        "shipping_recipient_name",
+        "billing_name",
+        "billing_tax_id",
+    )
+    list_select_related = ("payment", "payment__offer", "payment__offer__inquiry")
+    readonly_fields = tuple(
+        field.name for field in InquiryOfferPaymentDetails._meta.fields
+    ) + ("offer_reference", "inquiry_reference")
+    fields = readonly_fields
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.display(ordering="payment__reference_code", description="Payment")
+    def payment_reference(self, obj):
+        return obj.payment.reference_code
+
+    @admin.display(ordering="payment__offer__reference_code", description="Offer")
+    def offer_reference(self, obj):
+        return obj.payment.offer.reference_code
+
+    @admin.display(ordering="payment__offer__inquiry__reference_code", description="Inquiry")
+    def inquiry_reference(self, obj):
+        return obj.payment.offer.inquiry.reference_code
+
+
 @admin.register(Inquiry)
 class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     NEGATIVE_RESOLUTION_FIELDS = (
@@ -632,6 +725,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "reference_code",
         "submission_group_reference",
         "status",
+        "destination_summary",
         "negative_resolution_reason",
         "negative_resolved_at",
         "requester",
@@ -679,6 +773,17 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                     "submission_group_link",
                     "status",
                     "language",
+                )
+            },
+        ),
+        (
+            "Quotation destination",
+            {
+                "fields": (
+                    "destination_country",
+                    "destination_city",
+                    "destination_region",
+                    "destination_postal_code",
                 )
             },
         ),
@@ -733,6 +838,19 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         if obj is not None and obj.negative_resolved_at is not None:
             readonly_fields.extend(self.NEGATIVE_RESOLUTION_FIELDS)
         return tuple(dict.fromkeys(readonly_fields))
+
+    @admin.display(description="Destination")
+    def destination_summary(self, obj: Inquiry) -> str:
+        return ", ".join(
+            value
+            for value in (
+                obj.destination_postal_code,
+                obj.destination_city,
+                obj.destination_region,
+                obj.destination_country.name,
+            )
+            if value
+        ) or "—"
 
     @staticmethod
     def _render_validation_error(error: ValidationError) -> str:

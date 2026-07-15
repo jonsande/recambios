@@ -22,6 +22,7 @@ ALLOWED_HOSTS = config(
 
 # Application definition
 INSTALLED_APPS = [
+    "django_countries",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

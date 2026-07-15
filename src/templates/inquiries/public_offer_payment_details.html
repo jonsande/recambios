@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} | {{ site_brand_name }}{% endblock %}
+
+{% block content %}
+  <div class="page-stack">
+    <section class="section-shell-lg">
+      <p class="page-eyebrow">{% trans "Antes del pago" %}</p>
+      <h1 class="mt-2 page-title">{{ page_title }}</h1>
+      <p class="page-lead">{% trans "Complete la dirección de entrega y los datos necesarios para la facturación." %}</p>
+    </section>
+
+    {% if quoted_destination_missing %}
+      <section class="alert alert-warning" role="alert">
+        {% trans "Esta oferta histórica no tiene un destino cotizado completo. Contacte con nuestro equipo para revisarlo antes de pagar." %}
+      </section>
+    {% else %}
+      <section class="alert alert-warning">
+        <p>{% trans "La oferta y el envío se calcularon para este destino, que no puede cambiarse en este paso:" %}</p>
+        <p class="mt-1 font-semibold">{{ offer.quoted_destination_summary }}</p>
+        <p class="mt-1 text-sm">{% trans "Si necesita cambiar país, provincia/región o código postal, contacte con nuestro equipo para revisar el coste de envío." %}</p>
+      </section>
+
+      <form method="post" class="section-shell space-y-6" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+        <fieldset class="space-y-4">
+          <legend class="subsection-title">{% trans "Dirección de envío" %}</legend>
+          {% for field in form %}
+            {% if field.name|slice:":8" == "shipping" %}
+              <div>
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p id="{{ field.name }}-errors" class="form-error" role="alert">{{ field.errors|striptags }}</p>{% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </fieldset>
+
+        <fieldset class="space-y-4">
+          <legend class="subsection-title">{% trans "Datos de facturación" %}</legend>
+          {% for field in form %}
+            {% if field.name|slice:":7" == "billing" %}
+              <div>
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p id="{{ field.name }}-errors" class="form-error" role="alert">{{ field.errors|striptags }}</p>{% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+          <p class="text-sm text-text-muted">{% trans "Si la dirección coincide con la de envío, no es necesario repetirla; guardaremos una copia completa en el registro del pago." %}</p>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary">{% trans "Guardar y revisar" %}</button>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

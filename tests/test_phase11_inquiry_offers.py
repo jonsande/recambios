@@ -149,7 +149,14 @@ def make_inquiry(
         email=f"{username}@example.com",
         password="pass1234",
     )
-    return Inquiry.objects.create(user=user, status=status)
+    return Inquiry.objects.create(
+        user=user,
+        status=status,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
+    )
 
 
 def make_accepted_offer(

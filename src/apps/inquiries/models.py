@@ -10,6 +10,21 @@ from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django_countries.fields import CountryField
+
+
+def _normalize_destination(
+    country: object,
+    city: str,
+    region: str,
+    postal_code: str,
+) -> tuple[str, str, str, str]:
+    return (
+        str(country or "").strip().upper(),
+        city.strip(),
+        region.strip(),
+        postal_code.strip(),
+    )
 
 
 class InquirySubmissionGroup(models.Model):
@@ -45,6 +60,10 @@ class InquirySubmissionGroup(models.Model):
         default=Language.SPANISH,
     )
     notes_from_customer = models.TextField(blank=True)
+    destination_country = CountryField(blank=True, null=True)
+    destination_city = models.CharField(max_length=120, blank=True)
+    destination_region = models.CharField(max_length=120, blank=True)
+    destination_postal_code = models.CharField(max_length=32, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -107,6 +126,9 @@ class InquirySubmissionGroup(models.Model):
             "company_name",
             "tax_id",
             "notes_from_customer",
+            "destination_region",
+            "destination_city",
+            "destination_postal_code",
         ):
             value = getattr(self, field_name)
             if isinstance(value, str):
@@ -114,6 +136,7 @@ class InquirySubmissionGroup(models.Model):
 
         if self.guest_email:
             self.guest_email = self.guest_email.lower()
+        self.destination_country = str(self.destination_country or "").strip().upper() or None
         if not self.reference_code:
             self.reference_code = self.generate_reference_code()
 
@@ -194,6 +217,10 @@ class Inquiry(models.Model):
     )
     notes_from_customer = models.TextField(blank=True)
     internal_notes = models.TextField(blank=True)
+    destination_country = CountryField(blank=True, null=True)
+    destination_city = models.CharField(max_length=120, blank=True)
+    destination_region = models.CharField(max_length=120, blank=True)
+    destination_postal_code = models.CharField(max_length=32, blank=True)
     negative_resolution_reason = models.CharField(
         max_length=40,
         choices=NegativeResolutionReason.choices,
@@ -333,6 +360,9 @@ class Inquiry(models.Model):
             "tax_id",
             "negative_resolution_internal_notes",
             "negative_resolution_customer_message",
+            "destination_region",
+            "destination_city",
+            "destination_postal_code",
         )
         for field_name in string_fields:
             value = getattr(self, field_name)
@@ -341,6 +371,7 @@ class Inquiry(models.Model):
 
         if self.guest_email:
             self.guest_email = self.guest_email.lower()
+        self.destination_country = str(self.destination_country or "").strip().upper() or None
 
         if not self.reference_code:
             self.reference_code = self.generate_reference_code()
@@ -392,9 +423,14 @@ class InquiryOffer(models.Model):
         decimal_places=2,
         help_text=(
             "Final confirmed commercial total for this offer. "
-            "This is the source of truth for later payment preparation."
+            "This is the source of truth for later payment preparation and must include "
+            "shipping calculated for the quoted destination when applicable."
         ),
     )
+    quoted_destination_country = CountryField(blank=True, null=True)
+    quoted_destination_city = models.CharField(max_length=120, blank=True)
+    quoted_destination_region = models.CharField(max_length=120, blank=True)
+    quoted_destination_postal_code = models.CharField(max_length=32, blank=True)
     currency = models.CharField(
         max_length=3,
         default="EUR",
@@ -441,6 +477,28 @@ class InquiryOffer(models.Model):
     def is_ready_for_payment(self) -> bool:
         # Semantic alias kept intentionally for the future payment phase bridge.
         return self.status == self.Status.ACCEPTED
+
+    @property
+    def has_complete_quoted_destination(self) -> bool:
+        return bool(
+            self.quoted_destination_country
+            and self.quoted_destination_city
+            and self.quoted_destination_region
+            and self.quoted_destination_postal_code
+        )
+
+    @property
+    def quoted_destination_summary(self) -> str:
+        if not self.has_complete_quoted_destination:
+            return ""
+        return ", ".join(
+            (
+                self.quoted_destination_postal_code,
+                self.quoted_destination_city,
+                self.quoted_destination_region,
+                self.quoted_destination_country.name,
+            )
+        )
 
     @property
     def has_payment_record(self) -> bool:
@@ -552,6 +610,20 @@ class InquiryOffer(models.Model):
         if errors:
             raise ValidationError(errors)
 
+        destination = _normalize_destination(
+            self.inquiry.destination_country,
+            self.inquiry.destination_city,
+            self.inquiry.destination_region,
+            self.inquiry.destination_postal_code,
+        )
+        if not all(destination):
+            raise ValidationError(
+                {"inquiry": "A complete quotation destination is required before sending."}
+            )
+        self.quoted_destination_country = destination[0]
+        self.quoted_destination_city = destination[1]
+        self.quoted_destination_region = destination[2]
+        self.quoted_destination_postal_code = destination[3]
         now = timezone.now()
         (
             response_deadline_hours_snapshot,
@@ -671,6 +743,31 @@ class InquiryOffer(models.Model):
             errors["inquiry"] = (
                 "Offers cannot be created or updated for an inquiry resolved as not offerable."
             )
+
+        quoted_destination = _normalize_destination(
+            self.quoted_destination_country,
+            self.quoted_destination_city,
+            self.quoted_destination_region,
+            self.quoted_destination_postal_code,
+        )
+        if any(quoted_destination) and not all(quoted_destination):
+            errors["quoted_destination_country"] = (
+                "Quoted destination country, city, region and postal code must be "
+                "completed together."
+            )
+        if self.pk:
+            previous = type(self).objects.filter(pk=self.pk).first()
+            if previous and previous.has_complete_quoted_destination:
+                previous_destination = _normalize_destination(
+                    previous.quoted_destination_country,
+                    previous.quoted_destination_city,
+                    previous.quoted_destination_region,
+                    previous.quoted_destination_postal_code,
+                )
+                if quoted_destination != previous_destination:
+                    errors["quoted_destination_country"] = (
+                        "The quoted destination snapshot cannot be changed once established."
+                    )
 
         if not self.currency:
             errors["currency"] = "Currency is required."
@@ -818,6 +915,12 @@ class InquiryOffer(models.Model):
             value = getattr(self, field_name)
             if isinstance(value, str):
                 setattr(self, field_name, value.strip())
+        self.quoted_destination_country = (
+            str(self.quoted_destination_country or "").strip().upper() or None
+        )
+        self.quoted_destination_region = self.quoted_destination_region.strip()
+        self.quoted_destination_city = self.quoted_destination_city.strip()
+        self.quoted_destination_postal_code = self.quoted_destination_postal_code.strip()
 
         if not self.reference_code:
             self.reference_code = self.generate_reference_code()
@@ -1146,6 +1249,159 @@ class InquiryOfferPayment(models.Model):
         if not self.reference_code:
             self.reference_code = self.generate_reference_code()
 
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class InquiryOfferPaymentDetails(models.Model):
+    class BillingCustomerType(models.TextChoices):
+        PRIVATE = "private", "Private individual"
+        COMPANY = "company", "Company / legal entity"
+
+    payment = models.OneToOneField(
+        "inquiries.InquiryOfferPayment",
+        on_delete=models.CASCADE,
+        related_name="checkout_details",
+    )
+    shipping_recipient_name = models.CharField(max_length=180)
+    shipping_phone = models.CharField(max_length=50)
+    shipping_address_line_1 = models.CharField(max_length=255)
+    shipping_address_line_2 = models.CharField(max_length=255, blank=True)
+    shipping_city = models.CharField(max_length=120)
+    shipping_region = models.CharField(max_length=120)
+    shipping_postal_code = models.CharField(max_length=32)
+    shipping_country = CountryField()
+    billing_customer_type = models.CharField(
+        max_length=16,
+        choices=BillingCustomerType.choices,
+        default=BillingCustomerType.PRIVATE,
+    )
+    billing_same_as_shipping = models.BooleanField(default=True)
+    billing_name = models.CharField(max_length=180)
+    billing_tax_id = models.CharField(max_length=64, blank=True)
+    billing_address_line_1 = models.CharField(max_length=255)
+    billing_address_line_2 = models.CharField(max_length=255, blank=True)
+    billing_city = models.CharField(max_length=120)
+    billing_region = models.CharField(max_length=120)
+    billing_postal_code = models.CharField(max_length=32)
+    billing_country = CountryField()
+    completed_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "inquiry offer payment details"
+
+    def __str__(self) -> str:
+        return f"Checkout details for {self.payment.reference_code}"
+
+    @property
+    def is_complete(self) -> bool:
+        return self.completed_at is not None
+
+    @property
+    def matches_quoted_destination(self) -> bool:
+        offer = self.payment.offer
+        return offer.has_complete_quoted_destination and _normalize_destination(
+            self.shipping_country,
+            self.shipping_city,
+            self.shipping_region,
+            self.shipping_postal_code,
+        ) == _normalize_destination(
+            offer.quoted_destination_country,
+            offer.quoted_destination_city,
+            offer.quoted_destination_region,
+            offer.quoted_destination_postal_code,
+        )
+
+    @property
+    def delivery_destination_summary(self) -> str:
+        return ", ".join(
+            value
+            for value in (
+                self.shipping_city,
+                self.shipping_postal_code,
+                self.shipping_region,
+                self.shipping_country.name,
+            )
+            if value
+        )
+
+    def clean(self) -> None:
+        super().clean()
+        errors: dict[str, str] = {}
+        required_shipping = (
+            "shipping_recipient_name",
+            "shipping_phone",
+            "shipping_address_line_1",
+            "shipping_city",
+            "shipping_region",
+            "shipping_postal_code",
+            "shipping_country",
+        )
+        for field_name in required_shipping:
+            if not getattr(self, field_name):
+                errors[field_name] = "This shipping field is required."
+        if not self.billing_name:
+            errors["billing_name"] = "Billing name is required."
+        if (
+            self.billing_customer_type == self.BillingCustomerType.COMPANY
+            and not self.billing_tax_id
+        ):
+            errors["billing_tax_id"] = "Tax/VAT identifier is required for company billing."
+        for field_name in (
+            "billing_address_line_1",
+            "billing_city",
+            "billing_region",
+            "billing_postal_code",
+            "billing_country",
+        ):
+            if not getattr(self, field_name):
+                errors[field_name] = "This billing field is required."
+        if self.payment_id and not self.matches_quoted_destination:
+            errors["shipping_country"] = (
+                "Shipping country, region and postal code must match the quoted destination."
+            )
+        if self.pk:
+            previous = type(self).objects.select_related("payment").get(pk=self.pk)
+            if previous.payment.status == InquiryOfferPayment.Status.PAID:
+                for field in self._meta.concrete_fields:
+                    if field.name not in {"id", "created_at", "updated_at"} and (
+                        getattr(previous, field.name) != getattr(self, field.name)
+                    ):
+                        errors["__all__"] = "Paid checkout details are an immutable snapshot."
+                        break
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs) -> None:
+        string_fields = (
+            "shipping_recipient_name",
+            "shipping_phone",
+            "shipping_address_line_1",
+            "shipping_address_line_2",
+            "shipping_city",
+            "shipping_region",
+            "shipping_postal_code",
+            "billing_name",
+            "billing_tax_id",
+            "billing_address_line_1",
+            "billing_address_line_2",
+            "billing_city",
+            "billing_region",
+            "billing_postal_code",
+        )
+        for field_name in string_fields:
+            setattr(self, field_name, (getattr(self, field_name) or "").strip())
+        self.shipping_country = str(self.shipping_country or "").strip().upper()
+        self.billing_country = str(self.billing_country or "").strip().upper()
+        if self.billing_same_as_shipping:
+            self.billing_address_line_1 = self.shipping_address_line_1
+            self.billing_address_line_2 = self.shipping_address_line_2
+            self.billing_city = self.shipping_city
+            self.billing_region = self.shipping_region
+            self.billing_postal_code = self.shipping_postal_code
+            self.billing_country = self.shipping_country
         self.full_clean()
         super().save(*args, **kwargs)
 

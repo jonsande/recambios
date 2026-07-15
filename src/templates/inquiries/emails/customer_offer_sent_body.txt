@@ -3,6 +3,8 @@
 {% trans "Resumen de la oferta:" %}
 {% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
+{% if offer.has_complete_quoted_destination %}{% blocktrans with destination=offer.quoted_destination_summary %}Destino cotizado: {{ destination }}{% endblocktrans %}
+{% endif %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
 {% if offer_response_deadline_at %}{% blocktrans with response_deadline=offer_response_deadline_at %}Fecha límite para responder a la oferta: {{ response_deadline }}{% endblocktrans %}

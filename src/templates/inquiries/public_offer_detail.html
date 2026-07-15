@@ -36,6 +36,12 @@
     <section class="section-shell" aria-label="{% trans 'Resumen de oferta confirmada' %}">
       <h2 class="subsection-title">{% trans "Resumen de oferta" %}</h2>
       <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        {% if offer.has_complete_quoted_destination %}
+          <div class="panel-muted sm:col-span-2">
+            <dt class="font-medium text-text-muted">{% trans "Destino incluido en la cotización" %}</dt>
+            <dd class="mt-1 text-text">{{ offer.quoted_destination_summary }}</dd>
+          </div>
+        {% endif %}
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Referencia de oferta" %}</dt>
           <dd class="mt-1 text-base font-semibold text-text">{{ offer.reference_code }}</dd>

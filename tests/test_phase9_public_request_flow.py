@@ -203,6 +203,10 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Taller Central",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "compras@tallercentral.example",
             "phone": "+34 600 100 200",
             "company_name": "Taller Central SL",
@@ -220,6 +224,10 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
     assert submission_group.guest_name == "Taller Central"
     assert submission_group.guest_email == "compras@tallercentral.example"
     assert submission_group.notes_from_customer == "Confirmar plazo para esta semana"
+    assert submission_group.destination_country.code == "ES"
+    assert submission_group.destination_city == "Madrid"
+    assert submission_group.destination_region == "Madrid"
+    assert submission_group.destination_postal_code == "28001"
     assert submission_group.reference_code in response.url
 
     inquiries = list(
@@ -228,6 +236,10 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
     assert len(inquiries) == 2
     assert all(inquiry.status == Inquiry.Status.SUBMITTED for inquiry in inquiries)
     assert all(inquiry.items.count() == 1 for inquiry in inquiries)
+    assert all(inquiry.destination_country.code == "ES" for inquiry in inquiries)
+    assert all(inquiry.destination_city == "Madrid" for inquiry in inquiries)
+    assert all(inquiry.destination_region == "Madrid" for inquiry in inquiries)
+    assert all(inquiry.destination_postal_code == "28001" for inquiry in inquiries)
     assert all(inquiry.guest_name == "Taller Central" for inquiry in inquiries)
     assert all(
         inquiry.guest_email == "compras@tallercentral.example" for inquiry in inquiries
@@ -278,6 +290,10 @@ def test_grouped_submission_sends_one_customer_and_operational_email_per_inquiry
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente emails agrupados",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "grouped-emails@example.com",
             "phone": "",
             "company_name": "",
@@ -312,6 +328,10 @@ def test_registered_user_submission_uses_account_email_fallback(client, django_u
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Comprador Taller",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "",
             "phone": "+34 699 000 111",
             "company_name": "Autorecambios Norte",
@@ -347,6 +367,10 @@ def test_final_submit_is_only_event_creating_submitted_inquiry_and_emails(client
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente Final",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "cliente.final@example.com",
             "phone": "",
             "company_name": "",
@@ -405,6 +429,10 @@ def test_success_page_is_available_when_inquiry_moves_to_supplier_pending(client
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente Pending",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "cliente.pending@example.com",
             "phone": "",
             "company_name": "",
@@ -431,6 +459,10 @@ def test_submitted_inquiry_does_not_resend_emails_on_later_saves(client) -> None
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente sin duplicados",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "sin.duplicados@example.com",
             "phone": "",
             "company_name": "",
@@ -460,6 +492,10 @@ def test_grouped_inquiries_can_follow_independent_commercial_lifecycles(client) 
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente independiente",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "independiente@example.com",
             "phone": "",
             "company_name": "",
@@ -586,6 +622,10 @@ def test_submit_is_atomic_when_item_creation_fails(client, monkeypatch) -> None:
         "/es/solicitud/enviar/",
         data={
             "contact_name": "Cliente atómico",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
             "contact_email": "atomico@example.com",
             "phone": "",
             "company_name": "",
