@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: recambios\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 13:24+0200\n"
+"POT-Creation-Date: 2026-07-15 14:19+0200\n"
 "PO-Revision-Date: 2026-04-12 02:38+0200\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
@@ -71,12 +71,12 @@ msgstr "Request cart cleared."
 #: src/templates/catalog/partials/product_list_row.html:24
 #: src/templates/catalog/product_detail.html:24
 #: src/templates/inquiries/public_submit.html:23
-msgid "Referencia (OEM)"
-msgstr "Reference (OEM)"
+msgid "Código de Fabricante (OES/OE)"
+msgstr "Manufacturer Code (OES/OE)"
 
 #: src/apps/catalog/models.py:159
-msgid "Referencia OEM principal del producto."
-msgstr "Primary OEM reference of the product."
+msgid "Referencia OE principal del producto"
+msgstr "Primary OE reference of the product"
 
 #: src/apps/catalog/models.py:171
 #: src/templates/catalog/partials/product_card.html:32
@@ -86,8 +86,8 @@ msgid "Marca"
 msgstr "Brand"
 
 #: src/apps/catalog/models.py:173
-msgid "Marca fabricante asociada a la referencia OEM principal (no la marca del vehículo)."
-msgstr "Manufacturer brand associated with the primary OEM reference (not the vehicle brand)."
+msgid "Marca fabricante asociada a la referencia OE (no la marca del vehículo)"
+msgstr "Manufacturer brand associated with the OE reference (not the vehicle brand)"
 
 #: src/apps/catalog/urls.py:18
 msgid "categorias/"
@@ -2537,6 +2537,9 @@ msgstr "Published references and descriptions are reviewed continuously, but sup
 #: src/templates/pages/legal.html:29
 msgid "Para cualquier consulta comercial o legal, utiliza la página de contacto."
 msgstr "For any commercial or legal inquiry, use the contact page."
+
+#~ msgid "Referencia (OEM)"
+#~ msgstr "Reference (OEM)"
 
 #~ msgid "Recambios de Automoción"
 #~ msgstr "Automotive Spare Parts"

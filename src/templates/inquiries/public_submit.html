@@ -20,7 +20,7 @@
           {% for item in cart_items %}
             <li class="panel-muted text-sm text-text-muted">
               <p class="font-semibold text-text">{{ item.product.title }}</p>
-              <p class="mt-1">{% trans "Referencia (OEM)" %}: <span class="font-medium text-text">{{ item.product.sku }}</span></p>
+              <p class="mt-1">{% trans "Código de Fabricante (OES/OE)" %}: <span class="font-medium text-text">{{ item.product.sku }}</span></p>
               <p>{% trans "Cantidad" %}: <span class="font-medium text-text">{{ item.quantity }}</span></p>
               {% if item.note %}
                 <p class="mt-1">{% trans "Nota" %}: {{ item.note }}</p>

@@ -230,8 +230,12 @@ def test_product_admin_layout_order_and_slug_readonly(django_user_model) -> None
         "long_description",
     )
     form = product_admin.get_form(request)
-    assert form.base_fields["sku"].label == "Referencia (OEM)"
+    assert form.base_fields["sku"].label == "Código de Fabricante (OES/OE)"
+    assert form.base_fields["sku"].help_text == "Referencia OE principal del producto"
     assert form.base_fields["brand"].label == "Marca"
+    assert form.base_fields["brand"].help_text == (
+        "Marca fabricante asociada a la referencia OE (no la marca del vehículo)"
+    )
     assert "slug" in product_admin.get_readonly_fields(request)
 
 

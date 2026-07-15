@@ -155,8 +155,8 @@ class Product(models.Model):
     sku = models.CharField(
         max_length=64,
         unique=True,
-        verbose_name=_("Referencia (OEM)"),
-        help_text=_("Referencia OEM principal del producto."),
+        verbose_name=_("Código de Fabricante (OES/OE)"),
+        help_text=_("Referencia OE principal del producto"),
     )
     slug = models.SlugField(max_length=180, unique=True, editable=False)
     title = models.CharField(max_length=220)
@@ -170,7 +170,7 @@ class Product(models.Model):
         blank=True,
         verbose_name=_("Marca"),
         help_text=_(
-            "Marca fabricante asociada a la referencia OEM principal (no la marca del vehículo)."
+            "Marca fabricante asociada a la referencia OE (no la marca del vehículo)"
         ),
     )
     category = models.ForeignKey(

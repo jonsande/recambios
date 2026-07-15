@@ -127,12 +127,16 @@ def test_product_brand_can_be_empty_when_not_required() -> None:
 
 
 @pytest.mark.django_db
-def test_product_identity_fields_use_oem_reference_labels() -> None:
+def test_product_identity_fields_use_oe_reference_labels() -> None:
     sku_field = Product._meta.get_field("sku")
     brand_field = Product._meta.get_field("brand")
 
-    assert str(sku_field.verbose_name) == "Referencia (OEM)"
+    assert str(sku_field.verbose_name) == "Código de Fabricante (OES/OE)"
+    assert str(sku_field.help_text) == "Referencia OE principal del producto"
     assert str(brand_field.verbose_name) == "Marca"
+    assert str(brand_field.help_text) == (
+        "Marca fabricante asociada a la referencia OE (no la marca del vehículo)"
+    )
 
 
 @pytest.mark.django_db

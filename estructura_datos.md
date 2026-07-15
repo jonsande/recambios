@@ -89,8 +89,8 @@
 - `id`: identificador interno.
 - `supplier`: proveedor propietario del producto.
 - `supplier_product_code`: código de proveedor (opcional).
-- `sku`: referencia OEM principal única global (`Referencia (OEM)` en ES / `Reference (OEM)` en EN).
-- `brand`: marca fabricante asociada a la referencia OEM principal (`Marca` en ES / `Brand` en EN), opcional.
+- `sku`: referencia OE principal única global (`Código de Fabricante (OES/OE)` en ES / `Manufacturer Code (OES/OE)` en EN).
+- `brand`: marca fabricante asociada a la referencia OE (`Marca` en ES / `Brand` en EN), opcional.
 - `slug`: slug único autogenerado desde `sku`.
 - `title`: título del producto.
 - `short_description`: descripción corta.
