@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 
 from apps.users.roles import is_restricted_supplier_user
 
@@ -74,14 +75,14 @@ class GroupInquiryInline(admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         return False
 
-    @admin.display(description="Inquiry")
+    @admin.display(description=_("Solicitud"))
     def inquiry_link(self, obj: Inquiry):
         if not obj.pk:
             return "—"
         url = reverse("admin:inquiries_inquiry_change", args=(obj.pk,))
         return format_html('<a href="{}">{}</a>', url, obj.reference_code)
 
-    @admin.display(description="Product")
+    @admin.display(description=_("Producto"))
     def single_item(self, obj: Inquiry) -> str:
         item = obj.items.select_related("product").order_by("id").first()
         return f"{item.product.sku} · {item.product.title}" if item else "—"
@@ -132,9 +133,9 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "updated_at",
     )
     fieldsets = (
-        ("Submission", {"fields": ("reference_code", "language")}),
+        (_("Envío"), {"fields": ("reference_code", "language")}),
         (
-            "Requester snapshot",
+            _("Datos del cliente"),
             {
                 "fields": (
                     "user",
@@ -146,9 +147,9 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Customer notes", {"fields": ("notes_from_customer",)}),
+        (_("Notas del cliente"), {"fields": ("notes_from_customer",)}),
         (
-            "Quotation destination",
+            _("Destino de la oferta"),
             {
                 "fields": (
                     "destination_country",
@@ -158,7 +159,10 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
     inlines = (GroupInquiryInline,)
     date_hierarchy = "created_at"
@@ -169,15 +173,15 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(inquiries_count=Count("inquiries"))
 
-    @admin.display(description="Requester")
+    @admin.display(description=_("Cliente"))
     def requester(self, obj: InquirySubmissionGroup) -> str:
         return obj.requester_display
 
-    @admin.display(ordering="inquiries_count", description="Inquiries")
+    @admin.display(ordering="inquiries_count", description=_("Solicitudes"))
     def inquiry_count(self, obj: InquirySubmissionGroup) -> int:
         return obj.inquiries_count
 
-    @admin.display(description="Destination")
+    @admin.display(description=_("Destino"))
     def destination_summary(self, obj: InquirySubmissionGroup) -> str:
         return ", ".join(
             value
@@ -258,7 +262,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     )
     fieldsets = (
         (
-            "Offer",
+            _("Oferta comercial"),
             {
                 "fields": (
                     "reference_code",
@@ -269,7 +273,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Commercial Data",
+            _("Datos comerciales"),
             {
                 "fields": (
                     "confirmed_total",
@@ -281,7 +285,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Quoted destination",
+            _("Destino de la oferta"),
             {
                 "fields": (
                     "quoted_destination_country",
@@ -292,7 +296,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Lifecycle",
+            _("Ciclo de vida"),
             {
                 "fields": (
                     "sent_at",
@@ -305,7 +309,10 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -323,11 +330,11 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             )
         return tuple(dict.fromkeys(readonly_fields))
 
-    @admin.display(ordering="inquiry__reference_code", description="Inquiry")
+    @admin.display(ordering="inquiry__reference_code", description=_("Solicitud"))
     def inquiry_reference(self, obj: InquiryOffer) -> str:
         return obj.inquiry.reference_code
 
-    @admin.display(description="Payment")
+    @admin.display(description=_("Pago"))
     def payment_reference(self, obj: InquiryOffer) -> str:
         if not obj.has_payment_record:
             return "-"
@@ -342,7 +349,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             return "; ".join(parts)
         return "; ".join(error.messages)
 
-    @admin.action(description="Send selected offers to customers")
+    @admin.action(description=_("Enviar las ofertas seleccionadas a los clientes"))
     def mark_selected_as_sent(self, request, queryset):
         sent_count = 0
         skipped_count = 0
@@ -355,25 +362,29 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 details = self._render_validation_error(error)
                 self.message_user(
                     request,
-                    f"Offer {offer.reference_code} is not ready to send ({details}).",
+                    _("La oferta %(reference)s no está lista para enviar (%(details)s).")
+                    % {"reference": offer.reference_code, "details": details},
                     level=messages.ERROR,
                 )
             except ValueError:
                 skipped_count += 1
                 self.message_user(
                     request,
-                    f"Offer {offer.reference_code} cannot be sent from its current status.",
+                    _("La oferta %(reference)s no puede enviarse desde su estado actual.")
+                    % {"reference": offer.reference_code},
                     level=messages.WARNING,
                 )
             else:
                 sent_count += 1
 
         if sent_count:
-            self.message_user(request, f"Sent {sent_count} offer(s).")
+            self.message_user(
+                request, _("Ofertas enviadas: %(count)s.") % {"count": sent_count}
+            )
         if skipped_count and not sent_count:
-            self.message_user(request, "No offers were sent.", level=messages.WARNING)
+            self.message_user(request, _("No se envió ninguna oferta."), level=messages.WARNING)
 
-    @admin.action(description="Re-send offer email to customers")
+    @admin.action(description=_("Reenviar el correo de oferta a los clientes"))
     def resend_offer_email_to_customer(self, request, queryset):
         resent_count = 0
         skipped_count = 0
@@ -388,8 +399,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Offer {offer.reference_code} was skipped because "
-                        "manual re-send is only available for sent or accepted offers."
+                        _("Se omitió la oferta %(reference)s: solo pueden reenviarse "
+                          "ofertas enviadas o aceptadas.")
+                        % {"reference": offer.reference_code}
                     ),
                     level=messages.WARNING,
                 )
@@ -407,8 +419,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Offer {offer.reference_code} email could not be re-sent "
-                        "due to an email delivery error."
+                        _("No se pudo reenviar el correo de la oferta %(reference)s "
+                          "por un error de entrega.")
+                        % {"reference": offer.reference_code}
                     ),
                     level=messages.ERROR,
                 )
@@ -419,8 +432,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Offer {offer.reference_code} email could not be re-sent "
-                        "because the customer email is missing."
+                        _("No se pudo reenviar la oferta %(reference)s porque falta "
+                          "el correo electrónico del cliente.")
+                        % {"reference": offer.reference_code}
                     ),
                     level=messages.WARNING,
                 )
@@ -429,21 +443,23 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             resent_count += 1
 
         if resent_count:
-            self.message_user(request, f"Re-sent {resent_count} offer email(s).")
+            self.message_user(
+                request, _("Correos de oferta reenviados: %(count)s.") % {"count": resent_count}
+            )
         if failed_count and not resent_count:
             self.message_user(
                 request,
-                "No offer emails were re-sent due to delivery errors.",
+                _("No se reenvió ningún correo de oferta debido a errores de entrega."),
                 level=messages.ERROR,
             )
         elif skipped_count and not resent_count and not failed_count:
             self.message_user(
                 request,
-                "No offer emails were re-sent.",
+                _("No se reenvió ningún correo de oferta."),
                 level=messages.WARNING,
             )
 
-    @admin.action(description="Initiate payment for selected offers")
+    @admin.action(description=_("Iniciar el pago de las ofertas seleccionadas"))
     def initiate_payment_for_selected_offers(self, request, queryset):
         initiated_count = 0
         skipped_count = 0
@@ -457,8 +473,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Payment for offer {offer.reference_code} could not be initiated "
-                        f"({details})."
+                        _("No se pudo iniciar el pago de la oferta %(reference)s "
+                          "(%(details)s).")
+                        % {"reference": offer.reference_code, "details": details}
                     ),
                     level=messages.ERROR,
                 )
@@ -467,8 +484,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Payment for offer {offer.reference_code} could not be initiated "
-                        f"({error})."
+                        _("No se pudo iniciar el pago de la oferta %(reference)s "
+                          "(%(error)s).")
+                        % {"reference": offer.reference_code, "error": error}
                     ),
                     level=messages.WARNING,
                 )
@@ -476,11 +494,13 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 initiated_count += 1
 
         if initiated_count:
-            self.message_user(request, f"Initiated {initiated_count} payment record(s).")
+            self.message_user(
+                request, _("Pagos iniciados: %(count)s.") % {"count": initiated_count}
+            )
         if skipped_count and not initiated_count:
             self.message_user(
                 request,
-                "No payment records were initiated.",
+                _("No se inició ningún pago."),
                 level=messages.WARNING,
             )
 
@@ -545,7 +565,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     )
     fieldsets = (
         (
-            "Payment",
+            _("Pago"),
             {
                 "fields": (
                     "reference_code",
@@ -557,7 +577,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Provider",
+            _("Proveedor de pago"),
             {
                 "fields": (
                     "provider",
@@ -567,7 +587,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Lifecycle",
+            _("Ciclo de vida"),
             {
                 "fields": (
                     "initiated_at",
@@ -578,17 +598,20 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     def has_add_permission(self, request):
         return False
 
-    @admin.display(ordering="offer__reference_code", description="Offer")
+    @admin.display(ordering="offer__reference_code", description=_("Oferta"))
     def offer_reference(self, obj: InquiryOfferPayment) -> str:
         return obj.offer.reference_code
 
-    @admin.display(ordering="offer__inquiry__reference_code", description="Inquiry")
+    @admin.display(ordering="offer__inquiry__reference_code", description=_("Solicitud"))
     def inquiry_reference(self, obj: InquiryOfferPayment) -> str:
         return obj.offer.inquiry.reference_code
 
@@ -613,8 +636,13 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Payment {payment.reference_code} could not transition to "
-                        f"{transition_label} ({details})."
+                        _("El pago %(reference)s no pudo cambiar a %(status)s "
+                          "(%(details)s).")
+                        % {
+                            "reference": payment.reference_code,
+                            "status": transition_label,
+                            "details": details,
+                        }
                     ),
                     level=messages.ERROR,
                 )
@@ -623,8 +651,13 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Payment {payment.reference_code} could not transition to "
-                        f"{transition_label} ({error})."
+                        _("El pago %(reference)s no pudo cambiar a %(status)s "
+                          "(%(error)s).")
+                        % {
+                            "reference": payment.reference_code,
+                            "status": transition_label,
+                            "error": error,
+                        }
                     ),
                     level=messages.WARNING,
                 )
@@ -634,40 +667,42 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         if transitioned_count:
             self.message_user(
                 request,
-                f"Transitioned {transitioned_count} payment record(s) to {transition_label}.",
+                _("Pagos actualizados a %(status)s: %(count)s.")
+                % {"status": transition_label, "count": transitioned_count},
             )
         if skipped_count and not transitioned_count:
             self.message_user(
                 request,
-                f"No payment records were transitioned to {transition_label}.",
+                _("No se actualizó ningún pago a %(status)s.")
+                % {"status": transition_label},
                 level=messages.WARNING,
             )
 
-    @admin.action(description="Mark selected payments as Paid")
+    @admin.action(description=_("Marcar los pagos seleccionados como pagados"))
     def mark_selected_as_paid(self, request, queryset):
         self._transition_selected(
             request,
             queryset,
             transition_method="mark_paid",
-            transition_label="paid",
+            transition_label=_("pagado"),
         )
 
-    @admin.action(description="Mark selected payments as Failed")
+    @admin.action(description=_("Marcar los pagos seleccionados como fallidos"))
     def mark_selected_as_failed(self, request, queryset):
         self._transition_selected(
             request,
             queryset,
             transition_method="mark_failed",
-            transition_label="failed",
+            transition_label=_("fallido"),
         )
 
-    @admin.action(description="Mark selected payments as Cancelled")
+    @admin.action(description=_("Marcar los pagos seleccionados como cancelados"))
     def mark_selected_as_cancelled(self, request, queryset):
         self._transition_selected(
             request,
             queryset,
             transition_method="mark_cancelled",
-            transition_label="cancelled",
+            transition_label=_("cancelado"),
         )
 
 
@@ -700,15 +735,15 @@ class InquiryOfferPaymentDetailsAdmin(InternalInquiryAccessMixin, admin.ModelAdm
     def has_add_permission(self, request):
         return False
 
-    @admin.display(ordering="payment__reference_code", description="Payment")
+    @admin.display(ordering="payment__reference_code", description=_("Pago"))
     def payment_reference(self, obj):
         return obj.payment.reference_code
 
-    @admin.display(ordering="payment__offer__reference_code", description="Offer")
+    @admin.display(ordering="payment__offer__reference_code", description=_("Oferta"))
     def offer_reference(self, obj):
         return obj.payment.offer.reference_code
 
-    @admin.display(ordering="payment__offer__inquiry__reference_code", description="Inquiry")
+    @admin.display(ordering="payment__offer__inquiry__reference_code", description=_("Solicitud"))
     def inquiry_reference(self, obj):
         return obj.payment.offer.inquiry.reference_code
 
@@ -766,7 +801,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     actions = ("finalize_selected_as_not_offerable",)
     fieldsets = (
         (
-            "Inquiry",
+            _("Solicitud"),
             {
                 "fields": (
                     "reference_code",
@@ -777,7 +812,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Quotation destination",
+            _("Destino de la oferta"),
             {
                 "fields": (
                     "destination_country",
@@ -788,7 +823,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Requester",
+            _("Datos del cliente"),
             {
                 "fields": (
                     "user",
@@ -801,7 +836,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Follow-up",
+            _("Seguimiento"),
             {
                 "fields": (
                     "response_due_at",
@@ -810,7 +845,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Notes",
+            _("Notas"),
             {
                 "fields": (
                     "notes_from_customer",
@@ -819,7 +854,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Negative Resolution",
+            _("Resolución no ofertable"),
             {
                 "fields": (
                     "negative_resolution_reason",
@@ -829,7 +864,10 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -839,7 +877,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             readonly_fields.extend(self.NEGATIVE_RESOLUTION_FIELDS)
         return tuple(dict.fromkeys(readonly_fields))
 
-    @admin.display(description="Destination")
+    @admin.display(description=_("Destino"))
     def destination_summary(self, obj: Inquiry) -> str:
         return ", ".join(
             value
@@ -861,7 +899,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             return "; ".join(parts)
         return "; ".join(error.messages)
 
-    @admin.action(description="Finalize selected inquiries as Not Offerable")
+    @admin.action(description=_("Finalizar las solicitudes seleccionadas como no ofertables"))
     def finalize_selected_as_not_offerable(self, request, queryset):
         finalized_count = 0
         skipped_count = 0
@@ -875,8 +913,9 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Inquiry {inquiry.reference_code} could not be finalized "
-                        f"as not offerable ({details})."
+                        _("La solicitud %(reference)s no pudo finalizarse como no "
+                          "ofertable (%(details)s).")
+                        % {"reference": inquiry.reference_code, "details": details}
                     ),
                     level=messages.ERROR,
                 )
@@ -885,8 +924,9 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 self.message_user(
                     request,
                     (
-                        f"Inquiry {inquiry.reference_code} could not be finalized "
-                        f"as not offerable ({error})."
+                        _("La solicitud %(reference)s no pudo finalizarse como no "
+                          "ofertable (%(error)s).")
+                        % {"reference": inquiry.reference_code, "error": error}
                     ),
                     level=messages.WARNING,
                 )
@@ -896,12 +936,13 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         if finalized_count:
             self.message_user(
                 request,
-                f"Finalized {finalized_count} inquiry(ies) as not offerable.",
+                _("Solicitudes finalizadas como no ofertables: %(count)s.")
+                % {"count": finalized_count},
             )
         if skipped_count and not finalized_count:
             self.message_user(
                 request,
-                "No inquiries were finalized as not offerable.",
+                _("No se finalizó ninguna solicitud como no ofertable."),
                 level=messages.WARNING,
             )
 
@@ -909,18 +950,18 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(items_count=Count("items"))
 
-    @admin.display(description="Requester")
+    @admin.display(description=_("Cliente"))
     def requester(self, obj: Inquiry) -> str:
         return obj.requester_display
 
     @admin.display(
         ordering="submission_group__reference_code",
-        description="Submission group",
+        description=_("Grupo de solicitudes"),
     )
     def submission_group_reference(self, obj: Inquiry) -> str:
         return obj.submission_group.reference_code if obj.submission_group_id else "—"
 
-    @admin.display(description="Submission group")
+    @admin.display(description=_("Grupo de solicitudes"))
     def submission_group_link(self, obj: Inquiry):
         if not obj.submission_group_id:
             return "—"
@@ -930,7 +971,7 @@ class InquiryAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         )
         return format_html('<a href="{}">{}</a>', url, obj.submission_group.reference_code)
 
-    @admin.display(ordering="items_count", description="Items")
+    @admin.display(ordering="items_count", description=_("Artículos"))
     def item_count(self, obj: Inquiry) -> int:
         return obj.items_count
 

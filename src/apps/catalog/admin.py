@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.suppliers.access import get_active_supplier_ids_for_user, user_can_manage_supplier
 from apps.users.roles import is_restricted_supplier_user
@@ -111,9 +112,11 @@ class DraftScopedAdminMixin(SupplierScopedAdminMixin):
             product = getattr(obj, self.product_field_name)
             supplier_ids = set(self.supplier_ids_for_request(request))
             if product.supplier_id not in supplier_ids:
-                raise PermissionDenied("This product is outside your supplier scope.")
+                raise PermissionDenied(_("Este producto está fuera del ámbito del proveedor."))
             if product.publication_status != Product.PublicationStatus.DRAFT:
-                raise PermissionDenied("Only draft products can be edited by suppliers.")
+                raise PermissionDenied(
+                    _("Los proveedores solo pueden editar productos en borrador.")
+                )
         return super().save_model(request, obj, form, change)
 
 
@@ -163,7 +166,7 @@ class PartNumberTypeAdmin(ReferenceDataAdminMixin, admin.ModelAdmin):
 
 class PartNumberInline(admin.TabularInline):
     model = PartNumber
-    verbose_name_plural = "PART NUMBERS"
+    verbose_name_plural = _("Referencias de pieza")
     extra = 0
     fields = (
         "number_raw",
@@ -183,14 +186,14 @@ class PartNumberInline(admin.TabularInline):
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    verbose_name_plural = "PRODUCT IMAGES"
+    verbose_name_plural = _("Imágenes del producto")
     extra = 0
     fields = ("image", "alt_text", "sort_order", "is_primary")
 
 
 class ProductVehicleFitmentInline(admin.TabularInline):
     model = ProductVehicleFitment
-    verbose_name_plural = "PRODUCT VEHICLE FITMENTS"
+    verbose_name_plural = _("Compatibilidades con vehículos")
     extra = 0
     fields = ("vehicle", "fitment_notes", "source", "is_verified")
     autocomplete_fields = ("vehicle",)
@@ -246,7 +249,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     )
     fieldsets = (
         (
-            "Product Identity",
+            _("Identificación del producto"),
             {
                 "fields": (
                     "sku",
@@ -261,11 +264,11 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             },
         ),
         (
-            "Classification",
+            _("Clasificación"),
             {"fields": ("category", "condition", "is_active", "featured")},
         ),
         (
-            "Pricing",
+            _("Precio y venta"),
             {
                 "fields": (
                     "last_known_price",
@@ -276,12 +279,15 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 )
             },
         ),
-        ("Dimensions", {"fields": ("weight", "length", "width", "height")}),
+        (_("Dimensiones"), {"fields": ("weight", "length", "width", "height")}),
         (
-            "Publication",
+            _("Publicación"),
             {"fields": ("publication_status", "published_at", "price_visibility_mode")},
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     def has_change_permission(self, request, obj=None):
@@ -356,7 +362,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             if target_status not in allowed_statuses:
                 self.message_user(
                     request,
-                    "Supplier users cannot publish products.",
+                    _("Los usuarios de proveedor no pueden publicar productos."),
                     level=messages.ERROR,
                 )
                 return
@@ -369,7 +375,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         ):
             self.message_user(
                 request,
-                "You do not have permission to publish products.",
+                _("No tiene permiso para publicar productos."),
                 level=messages.ERROR,
             )
             return
@@ -387,44 +393,48 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         if updated_count:
             self.message_user(
                 request,
-                f"{action_label} applied to {updated_count} product(s).",
+                _("%(label)s aplicado a %(count)s producto(s).")
+                % {"label": action_label, "count": updated_count},
                 level=messages.SUCCESS,
             )
         if skipped_count:
             self.message_user(
                 request,
                 (
-                    f"Skipped {skipped_count} product(s) due to permission/status "
-                    "constraints or no changes."
+                    _(
+                        "Se omitieron %(count)s producto(s) por permisos, estado "
+                        "o ausencia de cambios."
+                    )
+                    % {"count": skipped_count}
                 ),
                 level=messages.WARNING,
             )
 
-    @admin.action(description="Set publication status to Draft")
+    @admin.action(description=_("Cambiar el estado de publicación a Borrador"))
     def mark_selected_as_draft(self, request, queryset):
         self._change_publication_status(
             request=request,
             queryset=queryset,
             target_status=Product.PublicationStatus.DRAFT,
-            action_label="Draft status",
+            action_label=_("Estado Borrador"),
         )
 
-    @admin.action(description="Set publication status to In Review")
+    @admin.action(description=_("Cambiar el estado de publicación a En revisión"))
     def mark_selected_as_in_review(self, request, queryset):
         self._change_publication_status(
             request=request,
             queryset=queryset,
             target_status=Product.PublicationStatus.REVIEW,
-            action_label="In review status",
+            action_label=_("Estado En revisión"),
         )
 
-    @admin.action(description="Set publication status to Published")
+    @admin.action(description=_("Cambiar el estado de publicación a Publicado"))
     def mark_selected_as_published(self, request, queryset):
         self._change_publication_status(
             request=request,
             queryset=queryset,
             target_status=Product.PublicationStatus.PUBLISHED,
-            action_label="Published status",
+            action_label=_("Estado Publicado"),
         )
 
     def save_model(self, request, obj, form, change):
@@ -433,18 +443,22 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         if is_restricted_supplier:
             supplier_ids = set(self.supplier_ids_for_request(request))
             if obj.supplier_id not in supplier_ids:
-                raise PermissionDenied("This product is outside your supplier scope.")
+                raise PermissionDenied(_("Este producto está fuera del ámbito del proveedor."))
             if change:
                 previous_status = Product.objects.only("publication_status").get(pk=obj.pk)
                 if previous_status.publication_status != Product.PublicationStatus.DRAFT:
-                    raise PermissionDenied("Only draft products can be edited by suppliers.")
+                    raise PermissionDenied(
+                        _("Los proveedores solo pueden editar productos en borrador.")
+                    )
             if obj.publication_status == Product.PublicationStatus.PUBLISHED:
-                raise PermissionDenied("Supplier users cannot publish products.")
+                raise PermissionDenied(_("Los usuarios de proveedor no pueden publicar productos."))
             if obj.publication_status not in {
                 Product.PublicationStatus.DRAFT,
                 Product.PublicationStatus.REVIEW,
             }:
-                raise PermissionDenied("Supplier users can only keep draft or submit for review.")
+                raise PermissionDenied(
+                    _("Los proveedores solo pueden guardar borradores o enviarlos a revisión.")
+                )
             obj.published_at = None
         else:
             if (
@@ -452,7 +466,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 and not request.user.has_perm("catalog.can_publish_product")
                 and not request.user.is_superuser
             ):
-                raise PermissionDenied("You do not have permission to publish products.")
+                raise PermissionDenied(_("No tiene permiso para publicar productos."))
             if (
                 obj.publication_status == Product.PublicationStatus.PUBLISHED
                 and not obj.published_at

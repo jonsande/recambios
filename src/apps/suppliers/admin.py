@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from django.db.models import Count, Q
+from django.utils.translation import gettext_lazy as _
 
 from apps.users.roles import is_restricted_supplier_user
 
@@ -69,7 +70,7 @@ class SupplierAdmin(admin.ModelAdmin):
     inlines = (SupplierUserAssignmentInline,)
     fieldsets = (
         (
-            "Supplier",
+            _("Proveedor"),
             {
                 "fields": (
                     "name",
@@ -80,7 +81,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Contact",
+            _("Contacto"),
             {
                 "fields": (
                     "country",
@@ -93,11 +94,12 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications",
+            _("Notificaciones automáticas al proveedor"),
             {
                 "description": (
-                    "If a custom template field is empty, the default email template is used. "
-                    "If an event-specific destination email is empty, orders_email is used."
+                    _("Si una plantilla personalizada está vacía, se utiliza la plantilla "
+                      "predeterminada. Si falta el correo específico del evento, se utiliza "
+                      "el correo de pedidos.")
                 ),
                 "fields": (
                     "auto_send_inquiry_submitted_notification",
@@ -109,12 +111,12 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Commercial Deadlines",
+            _("Plazos comerciales"),
             {
                 "description": (
-                    "These values define customer response/payment windows. "
-                    "When multiple suppliers are involved in an inquiry, the shortest "
-                    "configured window is applied."
+                    _("Estos valores definen los plazos de respuesta y pago del cliente. "
+                      "Si una solicitud incluye varios proveedores, se aplica el plazo "
+                      "configurado más corto.")
                 ),
                 "fields": (
                     "offer_response_deadline_hours",
@@ -123,7 +125,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Offer Sent",
+            _("Notificaciones automáticas: oferta enviada"),
             {
                 "fields": (
                     "auto_send_offer_sent_notification",
@@ -135,7 +137,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Offer Accepted",
+            _("Notificaciones automáticas: oferta aceptada"),
             {
                 "fields": (
                     "auto_send_offer_accepted_notification",
@@ -145,7 +147,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Offer Rejected",
+            _("Notificaciones automáticas: oferta rechazada"),
             {
                 "fields": (
                     "auto_send_offer_rejected_notification",
@@ -155,7 +157,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Payment Paid",
+            _("Notificaciones automáticas: pago confirmado"),
             {
                 "fields": (
                     "auto_send_payment_paid_notification",
@@ -165,7 +167,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Offer Expired",
+            _("Notificaciones automáticas: oferta caducada"),
             {
                 "fields": (
                     "auto_send_offer_expired_notification",
@@ -174,7 +176,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Automatic Supplier Notifications - Payment Expired",
+            _("Notificaciones automáticas: pago caducado"),
             {
                 "fields": (
                     "auto_send_payment_expired_notification",
@@ -183,7 +185,7 @@ class SupplierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Timestamps",
+            _("Fechas y auditoría"),
             {
                 "fields": (
                     "created_at",
@@ -198,7 +200,7 @@ class SupplierAdmin(admin.ModelAdmin):
         }
     }
 
-    @admin.display(description="Active Assignments", ordering="active_assignments_count")
+    @admin.display(description=_("Asignaciones activas"), ordering="active_assignments_count")
     def active_assignments_count(self, obj: Supplier) -> int:
         return obj.active_assignments_count
 

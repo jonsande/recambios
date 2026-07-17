@@ -21,23 +21,26 @@ def normalize_attribute_text(value: str) -> str:
 
 class Brand(models.Model):
     class BrandType(models.TextChoices):
-        VEHICLE = "vehicle", "Vehicle"
-        PARTS = "parts", "Parts"
-        BOTH = "both", "Both"
+        VEHICLE = "vehicle", _("Vehículos")
+        PARTS = "parts", _("Recambios")
+        BOTH = "both", _("Vehículos y recambios")
 
-    name = models.CharField(max_length=120, unique=True)
-    slug = models.SlugField(max_length=140, unique=True)
+    name = models.CharField(_("nombre"), max_length=120, unique=True)
+    slug = models.SlugField(_("slug"), max_length=140, unique=True)
     brand_type = models.CharField(
+        _("tipo de marca"),
         max_length=20,
         choices=BrandType.choices,
         default=BrandType.PARTS,
     )
-    country = models.CharField(max_length=100, blank=True)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    country = models.CharField(_("país"), max_length=100, blank=True)
+    is_active = models.BooleanField(_("activo"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("marca")
+        verbose_name_plural = _("marcas")
         ordering = ["name"]
         indexes = [
             models.Index(
@@ -51,22 +54,25 @@ class Brand(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=120)
-    slug = models.SlugField(max_length=140, unique=True)
+    name = models.CharField(_("nombre"), max_length=120)
+    slug = models.SlugField(_("slug"), max_length=140, unique=True)
     parent = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="children",
+        verbose_name=_("categoría superior"),
     )
-    description = models.TextField(blank=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    description = models.TextField(_("descripción"), blank=True)
+    sort_order = models.PositiveIntegerField(_("orden"), default=0)
+    is_active = models.BooleanField(_("activa"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("categoría")
+        verbose_name_plural = _("categorías")
         ordering = ["sort_order", "name"]
         constraints = [
             models.UniqueConstraint(
@@ -86,15 +92,17 @@ class Category(models.Model):
 
 
 class Condition(models.Model):
-    code = models.CharField(max_length=32, unique=True)
-    name = models.CharField(max_length=80, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    code = models.CharField(_("código"), max_length=32, unique=True)
+    name = models.CharField(_("nombre"), max_length=80, unique=True)
+    slug = models.SlugField(_("slug"), max_length=100, unique=True)
+    description = models.TextField(_("descripción"), blank=True)
+    is_active = models.BooleanField(_("activo"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("estado del producto")
+        verbose_name_plural = _("estados de los productos")
         ordering = ["name"]
         indexes = [
             models.Index(
@@ -110,14 +118,16 @@ class Condition(models.Model):
 class PartNumberType(models.Model):
     REQUIRED_BASE_CODES = ("OEM", "OES", "AIM")
 
-    code = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=80, blank=True)
-    sort_order = models.PositiveSmallIntegerField(default=0)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    code = models.CharField(_("código"), max_length=20, unique=True)
+    name = models.CharField(_("nombre"), max_length=80, blank=True)
+    sort_order = models.PositiveSmallIntegerField(_("orden"), default=0)
+    is_active = models.BooleanField(_("activo"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("tipo de referencia de pieza")
+        verbose_name_plural = _("tipos de referencia de pieza")
         ordering = ["sort_order", "code"]
         indexes = [
             models.Index(
@@ -138,30 +148,33 @@ class PartNumberType(models.Model):
 
 class Product(models.Model):
     class PublicationStatus(models.TextChoices):
-        DRAFT = "draft", "Draft"
-        REVIEW = "review", "In Review"
-        PUBLISHED = "published", "Published"
+        DRAFT = "draft", _("Borrador")
+        REVIEW = "review", _("En revisión")
+        PUBLISHED = "published", _("Publicado")
 
     class PriceVisibilityMode(models.TextChoices):
-        HIDDEN = "hidden", "Hidden"
-        VISIBLE_INFO = "visible_info", "Visible (Last Known Price)"
+        HIDDEN = "hidden", _("Precio oculto")
+        VISIBLE_INFO = "visible_info", _("Visible (último precio conocido)")
 
     supplier = models.ForeignKey(
         "suppliers.Supplier",
         on_delete=models.PROTECT,
         related_name="products",
+        verbose_name=_("proveedor"),
     )
-    supplier_product_code = models.CharField(max_length=64, null=True, blank=True)
+    supplier_product_code = models.CharField(
+        _("código de producto del proveedor"), max_length=64, null=True, blank=True
+    )
     sku = models.CharField(
         max_length=64,
         unique=True,
         verbose_name=_("Código de Fabricante (OES/OE)"),
         help_text=_("Referencia OE principal del producto"),
     )
-    slug = models.SlugField(max_length=180, unique=True, editable=False)
-    title = models.CharField(max_length=220)
-    short_description = models.CharField(max_length=280, blank=True)
-    long_description = models.TextField(blank=True)
+    slug = models.SlugField(_("slug"), max_length=180, unique=True, editable=False)
+    title = models.CharField(_("título"), max_length=220)
+    short_description = models.CharField(_("descripción breve"), max_length=280, blank=True)
+    long_description = models.TextField(_("descripción completa"), blank=True)
     brand = models.ForeignKey(
         "catalog.Brand",
         on_delete=models.PROTECT,
@@ -177,43 +190,65 @@ class Product(models.Model):
         "catalog.Category",
         on_delete=models.PROTECT,
         related_name="products",
+        verbose_name=_("categoría"),
     )
     condition = models.ForeignKey(
         "catalog.Condition",
         on_delete=models.PROTECT,
         related_name="products",
+        verbose_name=_("estado del producto"),
     )
     publication_status = models.CharField(
+        _("estado de publicación"),
         max_length=20,
         choices=PublicationStatus.choices,
         default=PublicationStatus.DRAFT,
         db_index=True,
     )
-    published_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(_("publicado el"), null=True, blank=True)
     price_visibility_mode = models.CharField(
+        _("visibilidad del precio"),
         max_length=20,
         choices=PriceVisibilityMode.choices,
         default=PriceVisibilityMode.HIDDEN,
         db_index=True,
     )
-    last_known_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    currency = models.CharField(max_length=3, default="EUR")
-    unit_of_sale = models.CharField(max_length=32, default="unit")
-    quantity = models.PositiveIntegerField(default=1)
-    unit_of_quantity = models.CharField(max_length=32, default="Pcs")
-    weight = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
-    length = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
-    width = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
-    height = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
-    featured = models.BooleanField(default=False, db_index=True)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    last_known_price = models.DecimalField(
+        _("último precio conocido"),
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    currency = models.CharField(_("moneda"), max_length=3, default="EUR")
+    unit_of_sale = models.CharField(_("unidad de venta"), max_length=32, default="unit")
+    quantity = models.PositiveIntegerField(_("cantidad"), default=1)
+    unit_of_quantity = models.CharField(
+        _("unidad de cantidad"), max_length=32, default="Pcs"
+    )
+    weight = models.DecimalField(
+        _("peso"), max_digits=10, decimal_places=3, null=True, blank=True
+    )
+    length = models.DecimalField(
+        _("largo"), max_digits=10, decimal_places=3, null=True, blank=True
+    )
+    width = models.DecimalField(
+        _("ancho"), max_digits=10, decimal_places=3, null=True, blank=True
+    )
+    height = models.DecimalField(
+        _("alto"), max_digits=10, decimal_places=3, null=True, blank=True
+    )
+    featured = models.BooleanField(_("destacado"), default=False, db_index=True)
+    is_active = models.BooleanField(_("activo"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("producto")
+        verbose_name_plural = _("productos")
         ordering = ["-updated_at"]
         permissions = [
-            ("can_publish_product", "Can publish product"),
+            ("can_publish_product", _("Puede publicar productos")),
         ]
         constraints = [
             models.UniqueConstraint(
@@ -322,6 +357,7 @@ class PartNumber(models.Model):
         "catalog.Product",
         on_delete=models.CASCADE,
         related_name="part_numbers",
+        verbose_name=_("producto"),
     )
     brand = models.ForeignKey(
         "catalog.Brand",
@@ -329,20 +365,26 @@ class PartNumber(models.Model):
         null=True,
         blank=True,
         related_name="part_numbers",
+        verbose_name=_("marca"),
     )
-    number_raw = models.CharField(max_length=128)
-    number_normalized = models.CharField(max_length=128, editable=False, db_index=True)
+    number_raw = models.CharField(_("referencia original"), max_length=128)
+    number_normalized = models.CharField(
+        _("referencia normalizada"), max_length=128, editable=False, db_index=True
+    )
     part_number_type = models.ForeignKey(
         "catalog.PartNumberType",
         on_delete=models.PROTECT,
         related_name="part_numbers",
+        verbose_name=_("tipo de referencia"),
     )
-    is_primary = models.BooleanField(default=False, db_index=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    is_primary = models.BooleanField(_("principal"), default=False, db_index=True)
+    notes = models.TextField(_("notas"), blank=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("referencia de pieza")
+        verbose_name_plural = _("referencias de pieza")
         ordering = ["number_normalized"]
         constraints = [
             models.UniqueConstraint(
@@ -373,27 +415,34 @@ class PartNumber(models.Model):
 
 class AttributeDefinition(models.Model):
     class DataType(models.TextChoices):
-        TEXT = "text", "Text"
-        NUMBER = "number", "Number"
-        BOOLEAN = "boolean", "Boolean"
+        TEXT = "text", _("Texto")
+        NUMBER = "number", _("Número")
+        BOOLEAN = "boolean", _("Sí/No")
 
-    name = models.CharField(max_length=120, unique=True)
-    slug = models.SlugField(max_length=140, unique=True)
+    name = models.CharField(_("nombre"), max_length=120, unique=True)
+    slug = models.SlugField(_("slug"), max_length=140, unique=True)
     data_type = models.CharField(
+        _("tipo de dato"),
         max_length=20,
         choices=DataType.choices,
         default=DataType.TEXT,
         db_index=True,
     )
-    unit = models.CharField(max_length=24, blank=True)
-    is_filterable = models.BooleanField(default=True, db_index=True)
-    is_visible_on_product = models.BooleanField(default=True, db_index=True)
-    allows_multiple_values = models.BooleanField(default=False, db_index=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    unit = models.CharField(_("unidad"), max_length=24, blank=True)
+    is_filterable = models.BooleanField(_("filtrable"), default=True, db_index=True)
+    is_visible_on_product = models.BooleanField(
+        _("visible en el producto"), default=True, db_index=True
+    )
+    allows_multiple_values = models.BooleanField(
+        _("admite varios valores"), default=False, db_index=True
+    )
+    sort_order = models.PositiveIntegerField(_("orden"), default=0)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("definición de atributo")
+        verbose_name_plural = _("definiciones de atributos")
         ordering = ["sort_order", "name"]
         indexes = [
             models.Index(
@@ -411,20 +460,28 @@ class ProductAttributeValue(models.Model):
         "catalog.Product",
         on_delete=models.CASCADE,
         related_name="attribute_values",
+        verbose_name=_("producto"),
     )
     attribute_definition = models.ForeignKey(
         "catalog.AttributeDefinition",
         on_delete=models.CASCADE,
         related_name="product_values",
+        verbose_name=_("atributo"),
     )
-    value_text = models.CharField(max_length=255, blank=True)
-    value_number = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
-    value_boolean = models.BooleanField(null=True, blank=True)
-    value_normalized = models.CharField(max_length=255, blank=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    value_text = models.CharField(_("valor de texto"), max_length=255, blank=True)
+    value_number = models.DecimalField(
+        _("valor numérico"), max_digits=14, decimal_places=4, null=True, blank=True
+    )
+    value_boolean = models.BooleanField(_("valor Sí/No"), null=True, blank=True)
+    value_normalized = models.CharField(
+        _("valor normalizado"), max_length=255, blank=True, db_index=True
+    )
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("valor de atributo de producto")
+        verbose_name_plural = _("valores de atributos de productos")
         ordering = ["attribute_definition__sort_order", "attribute_definition__name"]
         constraints = [
             models.CheckConstraint(
@@ -483,15 +540,22 @@ class ProductAttributeValue(models.Model):
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey("catalog.Product", on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="product_images/%Y/%m/")
-    alt_text = models.CharField(max_length=255, blank=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    is_primary = models.BooleanField(default=False, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    product = models.ForeignKey(
+        "catalog.Product",
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name=_("producto"),
+    )
+    image = models.ImageField(_("imagen"), upload_to="product_images/%Y/%m/")
+    alt_text = models.CharField(_("texto alternativo"), max_length=255, blank=True)
+    sort_order = models.PositiveIntegerField(_("orden"), default=0)
+    is_primary = models.BooleanField(_("principal"), default=False, db_index=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("imagen de producto")
+        verbose_name_plural = _("imágenes de productos")
         ordering = ["sort_order", "id"]
         constraints = [
             models.UniqueConstraint(

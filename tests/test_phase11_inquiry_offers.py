@@ -839,7 +839,7 @@ def test_admin_send_action_moves_draft_offer_to_sent(django_user_model) -> None:
 @pytest.mark.django_db
 def test_admin_send_action_uses_business_friendly_label() -> None:
     assert InquiryOfferAdmin.mark_selected_as_sent.short_description == (
-        "Send selected offers to customers"
+        "Enviar las ofertas seleccionadas a los clientes"
     )
 
 
@@ -930,9 +930,9 @@ def test_admin_manual_resend_action_sends_only_for_sent_or_accepted_without_stat
     assert draft_offer.status == InquiryOffer.Status.DRAFT
     assert rejected_offer.status == InquiryOffer.Status.REJECTED
     assert len(mail.outbox) == 2
-    assert any("Re-sent 2 offer email(s)." in message for message in captured_messages)
+    assert any("Correos de oferta reenviados: 2." in message for message in captured_messages)
     assert any(
-        "manual re-send is only available for sent or accepted offers" in message
+        "solo pueden reenviarse ofertas enviadas o aceptadas" in message
         for message in captured_messages
     )
 
@@ -1000,7 +1000,7 @@ def test_admin_action_reports_invalid_payment_initiation_cases(django_user_model
 
     assert not InquiryOfferPayment.objects.filter(offer=sent_offer).exists()
     assert any(
-        "could not be initiated" in message
+        "No se pudo iniciar" in message
         for message in captured_messages
     )
 
@@ -1041,7 +1041,7 @@ def test_payment_admin_actions_apply_and_block_invalid_transitions(
     )
     payment.refresh_from_db()
     assert payment.status == InquiryOfferPayment.Status.PAID
-    assert any("could not transition to failed" in message for message in captured_messages)
+    assert any("no pudo cambiar a fallido" in message for message in captured_messages)
 
 
 @pytest.mark.django_db
@@ -1104,7 +1104,7 @@ def test_admin_action_reports_invalid_negative_resolution(django_user_model) -> 
     assert inquiry.status == Inquiry.Status.IN_REVIEW
     assert inquiry.negative_resolved_at is None
     assert any(
-        "could not be finalized as not offerable" in message
+        "no pudo finalizarse como no ofertable" in message
         for message in captured_messages
     )
     assert any("negative_resolution_reason" in message for message in captured_messages)
@@ -1204,15 +1204,15 @@ def test_admin_send_action_reports_not_ready_offers(django_user_model) -> None:
     offer.refresh_from_db()
 
     assert offer.status == InquiryOffer.Status.DRAFT
-    assert any("not ready to send" in message for message in captured_messages)
+    assert any("no está lista para enviar" in message for message in captured_messages)
     assert any("lead_time_text" in message for message in captured_messages)
 
 
 @pytest.mark.django_db
 def test_confirmed_total_help_text_marks_payment_source_of_truth() -> None:
     help_text = InquiryOffer._meta.get_field("confirmed_total").help_text.lower()
-    assert "source of truth" in help_text
-    assert "payment preparation" in help_text
+    assert "referencia para preparar el pago" in help_text
+    assert "destino cotizado" in help_text
 
 
 @pytest.mark.django_db

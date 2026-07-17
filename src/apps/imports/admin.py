@@ -5,6 +5,7 @@ from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import path, reverse
+from django.utils.translation import gettext_lazy as _
 
 from apps.suppliers.access import get_active_supplier_ids_for_user, user_can_manage_supplier
 from apps.users.roles import is_internal_staff_user, is_restricted_supplier_user
@@ -22,9 +23,11 @@ class SupplierImportAdminForm(forms.ModelForm):
     def clean_original_file(self):
         original_file = self.cleaned_data.get("original_file")
         if original_file is None and not self.instance.pk:
-            raise forms.ValidationError("Upload an .xlsx file to create an import.")
+            raise forms.ValidationError(_("Suba un archivo .xlsx para crear una importación."))
         if original_file is not None and not original_file.name.lower().endswith(".xlsx"):
-            raise forms.ValidationError("Only .xlsx files are supported for v1 imports.")
+            raise forms.ValidationError(
+                _("Las importaciones de la v1 solo admiten archivos .xlsx.")
+            )
         return original_file
 
 
@@ -88,7 +91,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (
-            "Import File",
+            _("Archivo de importación"),
             {
                 "fields": (
                     "supplier",
@@ -98,7 +101,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Processing",
+            _("Procesamiento"),
             {
                 "fields": (
                     "import_status",
@@ -111,10 +114,13 @@ class SupplierImportAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        ("Audit", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            _("Fechas y auditoría"),
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
-    @admin.display(description="Notes")
+    @admin.display(description=_("Notas"))
     def processing_notes_short(self, obj: SupplierImport) -> str:
         if not obj.processing_notes:
             return "-"
@@ -163,12 +169,12 @@ class SupplierImportAdmin(admin.ModelAdmin):
             actions.pop("process_selected_imports", None)
         return actions
 
-    @admin.action(description="Process selected imports")
+    @admin.action(description=_("Procesar las importaciones seleccionadas"))
     def process_selected_imports(self, request, queryset):
         if not self._can_process_imports(request):
             self.message_user(
                 request,
-                "You do not have permission to process imports.",
+                _("No tiene permiso para procesar importaciones."),
                 level=messages.ERROR,
             )
             return
@@ -198,25 +204,28 @@ class SupplierImportAdmin(admin.ModelAdmin):
         if processed:
             self.message_user(
                 request,
-                f"Processed successfully: {processed}.",
+                _("Procesadas correctamente: %(count)s.") % {"count": processed},
                 level=messages.SUCCESS,
             )
         if completed_with_errors:
             self.message_user(
                 request,
-                f"Processed with row warnings/errors: {completed_with_errors}.",
+                _("Procesadas con avisos o errores de fila: %(count)s.")
+                % {"count": completed_with_errors},
                 level=messages.WARNING,
             )
         if failed:
             self.message_user(
                 request,
-                f"Failed imports: {failed}. Review processing notes.",
+                _("Importaciones fallidas: %(count)s. Revise las notas de procesamiento.")
+                % {"count": failed},
                 level=messages.ERROR,
             )
         if skipped:
             self.message_user(
                 request,
-                f"Skipped (status not eligible for manual processing): {skipped}.",
+                _("Omitidas por no admitir procesamiento manual en su estado: %(count)s.")
+                % {"count": skipped},
                 level=messages.INFO,
             )
 
@@ -285,7 +294,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
         if is_restricted_supplier_user(request.user):
             supplier_ids = set(self.supplier_ids_for_request(request))
             if obj.supplier_id not in supplier_ids:
-                raise PermissionDenied("This import is outside your supplier scope.")
+                raise PermissionDenied(_("Esta importación está fuera del ámbito del proveedor."))
             obj.uploaded_by = request.user
             obj.import_status = SupplierImport.ImportStatus.PENDING
             obj.total_rows = 0

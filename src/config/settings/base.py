@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "apps.common.middleware.AdminSpanishLanguageMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -115,6 +116,7 @@ TIME_ZONE = "Europe/Madrid"
 USE_I18N = True
 USE_TZ = True
 LOCALE_PATHS = [APPS_DIR / "locale"]
+ADMIN_LANGUAGE_CODE = "es"
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"

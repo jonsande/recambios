@@ -10,6 +10,7 @@ from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 
 
@@ -29,14 +30,15 @@ def _normalize_destination(
 
 class InquirySubmissionGroup(models.Model):
     class Language(models.TextChoices):
-        SPANISH = "es", "Spanish"
-        ENGLISH = "en", "English"
+        SPANISH = "es", _("Español")
+        ENGLISH = "en", _("Inglés")
 
     REFERENCE_PREFIX = "REQ"
     REFERENCE_RANDOM_LENGTH = 6
     REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
 
     reference_code = models.CharField(
+        _("código de referencia"),
         max_length=32,
         unique=True,
         db_index=True,
@@ -48,26 +50,32 @@ class InquirySubmissionGroup(models.Model):
         null=True,
         blank=True,
         related_name="inquiry_submission_groups",
+        verbose_name=_("usuario"),
     )
-    guest_name = models.CharField(max_length=150, blank=True)
-    guest_email = models.EmailField(blank=True)
-    guest_phone = models.CharField(max_length=50, blank=True)
-    company_name = models.CharField(max_length=180, blank=True)
-    tax_id = models.CharField(max_length=64, blank=True)
+    guest_name = models.CharField(_("nombre del cliente"), max_length=150, blank=True)
+    guest_email = models.EmailField(_("correo electrónico del cliente"), blank=True)
+    guest_phone = models.CharField(_("teléfono del cliente"), max_length=50, blank=True)
+    company_name = models.CharField(_("empresa"), max_length=180, blank=True)
+    tax_id = models.CharField(_("NIF / VAT"), max_length=64, blank=True)
     language = models.CharField(
+        _("idioma"),
         max_length=5,
         choices=Language.choices,
         default=Language.SPANISH,
     )
-    notes_from_customer = models.TextField(blank=True)
-    destination_country = CountryField(blank=True, null=True)
-    destination_city = models.CharField(max_length=120, blank=True)
-    destination_region = models.CharField(max_length=120, blank=True)
-    destination_postal_code = models.CharField(max_length=32, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    notes_from_customer = models.TextField(_("notas del cliente"), blank=True)
+    destination_country = CountryField(_("país de destino"), blank=True, null=True)
+    destination_city = models.CharField(_("ciudad de destino"), max_length=120, blank=True)
+    destination_region = models.CharField(_("provincia o región"), max_length=120, blank=True)
+    destination_postal_code = models.CharField(
+        _("código postal de destino"), max_length=32, blank=True
+    )
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("grupo de solicitudes")
+        verbose_name_plural = _("grupos de solicitudes")
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(
@@ -95,7 +103,7 @@ class InquirySubmissionGroup(models.Model):
     @classmethod
     def generate_reference_code(cls) -> str:
         date_part = timezone.localdate().strftime("%Y%m%d")
-        for _ in range(50):
+        for _attempt_index in range(50):
             suffix = get_random_string(
                 cls.REFERENCE_RANDOM_LENGTH,
                 allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
@@ -146,24 +154,24 @@ class InquirySubmissionGroup(models.Model):
 
 class Inquiry(models.Model):
     class Language(models.TextChoices):
-        SPANISH = "es", "Spanish"
-        ENGLISH = "en", "English"
+        SPANISH = "es", _("Español")
+        ENGLISH = "en", _("Inglés")
 
     class Status(models.TextChoices):
-        DRAFT = "draft", "Draft"
-        SUBMITTED = "submitted", "Submitted"
-        IN_REVIEW = "in_review", "In Review"
-        SUPPLIER_PENDING = "supplier_pending", "Supplier Pending"
-        RESPONDED = "responded", "Responded to Customer"
-        ACCEPTED = "accepted", "Accepted by Customer"
-        REJECTED = "rejected", "Rejected by Customer"
-        CLOSED = "closed", "Closed"
+        DRAFT = "draft", _("Borrador")
+        SUBMITTED = "submitted", _("Enviada")
+        IN_REVIEW = "in_review", _("En revisión")
+        SUPPLIER_PENDING = "supplier_pending", _("Pendiente del proveedor")
+        RESPONDED = "responded", _("Respondida al cliente")
+        ACCEPTED = "accepted", _("Aceptada por el cliente")
+        REJECTED = "rejected", _("Rechazada por el cliente")
+        CLOSED = "closed", _("Cerrada")
 
     class NegativeResolutionReason(models.TextChoices):
-        UNAVAILABLE = "unavailable", "Unavailable"
-        SUPPLIER_CANNOT_CONFIRM = "supplier_cannot_confirm", "Supplier Cannot Confirm"
-        LOGISTICS_NOT_POSSIBLE = "logistics_not_possible", "Logistics Not Possible"
-        OTHER = "other", "Other"
+        UNAVAILABLE = "unavailable", _("No disponible")
+        SUPPLIER_CANNOT_CONFIRM = "supplier_cannot_confirm", _("El proveedor no puede confirmar")
+        LOGISTICS_NOT_POSSIBLE = "logistics_not_possible", _("Logística no viable")
+        OTHER = "other", _("Otro motivo")
 
     REFERENCE_PREFIX = "INQ"
     REFERENCE_RANDOM_LENGTH = 6
@@ -180,6 +188,7 @@ class Inquiry(models.Model):
     }
 
     reference_code = models.CharField(
+        _("código de referencia"),
         max_length=32,
         unique=True,
         db_index=True,
@@ -191,6 +200,7 @@ class Inquiry(models.Model):
         null=True,
         blank=True,
         related_name="inquiries",
+        verbose_name=_("grupo de solicitudes"),
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -198,44 +208,62 @@ class Inquiry(models.Model):
         null=True,
         blank=True,
         related_name="inquiries",
+        verbose_name=_("usuario"),
     )
-    guest_name = models.CharField(max_length=150, blank=True)
-    guest_email = models.EmailField(blank=True)
-    guest_phone = models.CharField(max_length=50, blank=True)
-    company_name = models.CharField(max_length=180, blank=True)
-    tax_id = models.CharField(max_length=64, blank=True)
+    guest_name = models.CharField(_("nombre del cliente"), max_length=150, blank=True)
+    guest_email = models.EmailField(_("correo electrónico del cliente"), blank=True)
+    guest_phone = models.CharField(_("teléfono del cliente"), max_length=50, blank=True)
+    company_name = models.CharField(_("empresa"), max_length=180, blank=True)
+    tax_id = models.CharField(_("NIF / VAT"), max_length=64, blank=True)
     language = models.CharField(
+        _("idioma"),
         max_length=5,
         choices=Language.choices,
         default=Language.SPANISH,
     )
     status = models.CharField(
+        _("estado"),
         max_length=24,
         choices=Status.choices,
         default=Status.SUBMITTED,
         db_index=True,
     )
-    notes_from_customer = models.TextField(blank=True)
-    internal_notes = models.TextField(blank=True)
-    destination_country = CountryField(blank=True, null=True)
-    destination_city = models.CharField(max_length=120, blank=True)
-    destination_region = models.CharField(max_length=120, blank=True)
-    destination_postal_code = models.CharField(max_length=32, blank=True)
+    notes_from_customer = models.TextField(_("notas del cliente"), blank=True)
+    internal_notes = models.TextField(_("notas internas"), blank=True)
+    destination_country = CountryField(_("país de destino"), blank=True, null=True)
+    destination_city = models.CharField(_("ciudad de destino"), max_length=120, blank=True)
+    destination_region = models.CharField(_("provincia o región"), max_length=120, blank=True)
+    destination_postal_code = models.CharField(
+        _("código postal de destino"), max_length=32, blank=True
+    )
     negative_resolution_reason = models.CharField(
+        _("motivo de resolución no ofertable"),
         max_length=40,
         choices=NegativeResolutionReason.choices,
         blank=True,
         db_index=True,
     )
-    negative_resolution_internal_notes = models.TextField(blank=True)
-    negative_resolution_customer_message = models.TextField(blank=True)
-    negative_resolved_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    response_due_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    supplier_feedback_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    negative_resolution_internal_notes = models.TextField(
+        _("notas internas de la resolución"), blank=True
+    )
+    negative_resolution_customer_message = models.TextField(
+        _("mensaje de resolución para el cliente"), blank=True
+    )
+    negative_resolved_at = models.DateTimeField(
+        _("resuelta como no ofertable el"), null=True, blank=True, db_index=True
+    )
+    response_due_at = models.DateTimeField(
+        _("fecha límite de respuesta"), null=True, blank=True, db_index=True
+    )
+    supplier_feedback_at = models.DateTimeField(
+        _("respuesta del proveedor recibida el"), null=True, blank=True, db_index=True
+    )
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("solicitud")
+        verbose_name_plural = _("solicitudes")
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(
@@ -291,7 +319,8 @@ class Inquiry(models.Model):
 
         if self.pk and InquiryOffer.objects.filter(inquiry_id=self.pk).exists():
             errors["__all__"] = (
-                "Negative resolution cannot be finalized because this inquiry already has an offer."
+                _("No puede finalizarse la resolución no ofertable porque la solicitud "
+                  "ya tiene una oferta.")
             )
 
         if errors:
@@ -324,15 +353,15 @@ class Inquiry(models.Model):
         if self.negative_resolved_at is not None:
             if not self.negative_resolution_reason:
                 errors["negative_resolution_reason"] = (
-                    "Negative resolution reason is required when negative_resolved_at is set."
+                    _("Debe indicar el motivo de resolución no ofertable.")
                 )
             if self.status != self.Status.CLOSED:
                 errors["status"] = (
-                    "Negative resolution requires inquiry status to be 'closed'."
+                    _("La resolución no ofertable requiere que la solicitud esté cerrada.")
                 )
             if self.pk and InquiryOffer.objects.filter(inquiry_id=self.pk).exists():
                 errors["negative_resolved_at"] = (
-                    "Negative resolution cannot be stored when an offer already exists."
+                    _("No puede guardarse una resolución no ofertable si ya existe una oferta.")
                 )
 
         if errors:
@@ -341,7 +370,7 @@ class Inquiry(models.Model):
     @classmethod
     def generate_reference_code(cls) -> str:
         date_part = timezone.localdate().strftime("%Y%m%d")
-        for _ in range(50):
+        for _attempt_index in range(50):
             suffix = get_random_string(
                 cls.REFERENCE_RANDOM_LENGTH,
                 allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
@@ -382,11 +411,11 @@ class Inquiry(models.Model):
 
 class InquiryOffer(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", "Draft"
-        SENT = "sent", "Sent to Customer"
-        ACCEPTED = "accepted", "Accepted by Customer"
-        REJECTED = "rejected", "Rejected by Customer"
-        EXPIRED = "expired", "Expired"
+        DRAFT = "draft", _("Borrador")
+        SENT = "sent", _("Enviada al cliente")
+        ACCEPTED = "accepted", _("Aceptada por el cliente")
+        REJECTED = "rejected", _("Rechazada por el cliente")
+        EXPIRED = "expired", _("Caducada")
 
     REFERENCE_PREFIX = "OFF"
     REFERENCE_RANDOM_LENGTH = 6
@@ -405,52 +434,71 @@ class InquiryOffer(models.Model):
         "inquiries.Inquiry",
         on_delete=models.CASCADE,
         related_name="offer",
+        verbose_name=_("solicitud"),
     )
     reference_code = models.CharField(
+        _("código de referencia"),
         max_length=32,
         unique=True,
         db_index=True,
         editable=False,
     )
     status = models.CharField(
+        _("estado"),
         max_length=16,
         choices=Status.choices,
         default=Status.DRAFT,
         db_index=True,
     )
     confirmed_total = models.DecimalField(
+        _("total confirmado"),
         max_digits=12,
         decimal_places=2,
         help_text=(
-            "Final confirmed commercial total for this offer. "
-            "This is the source of truth for later payment preparation and must include "
-            "shipping calculated for the quoted destination when applicable."
+            _("Importe comercial final confirmado de la oferta. Es la referencia para "
+              "preparar el pago y debe incluir el envío calculado para el destino "
+              "cotizado cuando corresponda.")
         ),
     )
-    quoted_destination_country = CountryField(blank=True, null=True)
-    quoted_destination_city = models.CharField(max_length=120, blank=True)
-    quoted_destination_region = models.CharField(max_length=120, blank=True)
-    quoted_destination_postal_code = models.CharField(max_length=32, blank=True)
+    quoted_destination_country = CountryField(_("país cotizado"), blank=True, null=True)
+    quoted_destination_city = models.CharField(_("ciudad cotizada"), max_length=120, blank=True)
+    quoted_destination_region = models.CharField(
+        _("provincia o región cotizada"), max_length=120, blank=True
+    )
+    quoted_destination_postal_code = models.CharField(
+        _("código postal cotizado"), max_length=32, blank=True
+    )
     currency = models.CharField(
+        _("moneda"),
         max_length=3,
         default="EUR",
-        help_text="ISO 4217 currency code for the confirmed total amount.",
+        help_text=_("Código ISO 4217 de la moneda del total confirmado."),
     )
-    lead_time_text = models.CharField(max_length=255, blank=True)
-    internal_notes = models.TextField(blank=True)
-    customer_message = models.TextField(blank=True)
-    access_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
-    sent_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    offer_response_deadline_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    response_deadline_hours_snapshot = models.PositiveIntegerField(null=True, blank=True)
-    payment_deadline_hours_snapshot = models.PositiveIntegerField(null=True, blank=True)
-    accepted_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    rejected_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    expired_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    lead_time_text = models.CharField(_("plazo estimado"), max_length=255, blank=True)
+    internal_notes = models.TextField(_("notas internas"), blank=True)
+    customer_message = models.TextField(_("mensaje para el cliente"), blank=True)
+    access_token = models.UUIDField(
+        _("token de acceso"), default=uuid.uuid4, unique=True, editable=False, db_index=True
+    )
+    sent_at = models.DateTimeField(_("enviada el"), null=True, blank=True, db_index=True)
+    offer_response_deadline_at = models.DateTimeField(
+        _("fecha límite de respuesta"), null=True, blank=True, db_index=True
+    )
+    response_deadline_hours_snapshot = models.PositiveIntegerField(
+        _("horas de respuesta aplicadas"), null=True, blank=True
+    )
+    payment_deadline_hours_snapshot = models.PositiveIntegerField(
+        _("horas de pago aplicadas"), null=True, blank=True
+    )
+    accepted_at = models.DateTimeField(_("aceptada el"), null=True, blank=True, db_index=True)
+    rejected_at = models.DateTimeField(_("rechazada el"), null=True, blank=True, db_index=True)
+    expired_at = models.DateTimeField(_("caducada el"), null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("oferta")
+        verbose_name_plural = _("ofertas")
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(
@@ -563,7 +611,7 @@ class InquiryOffer(models.Model):
     @classmethod
     def generate_reference_code(cls) -> str:
         date_part = timezone.localdate().strftime("%Y%m%d")
-        for _ in range(50):
+        for _attempt_index in range(50):
             suffix = get_random_string(
                 cls.REFERENCE_RANDOM_LENGTH,
                 allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
@@ -894,7 +942,7 @@ class InquiryOffer(models.Model):
             and self.response_deadline_hours_snapshot < 1
         ):
             errors["response_deadline_hours_snapshot"] = (
-                "Response deadline snapshot must be at least 1 hour."
+                _("El plazo de respuesta aplicado debe ser de al menos una hora.")
             )
         if (
             self.payment_deadline_hours_snapshot is not None
@@ -931,10 +979,10 @@ class InquiryOffer(models.Model):
 
 class InquiryOfferPayment(models.Model):
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        PAID = "paid", "Paid"
-        FAILED = "failed", "Failed"
-        CANCELLED = "cancelled", "Cancelled"
+        PENDING = "pending", _("Pendiente")
+        PAID = "paid", _("Pagado")
+        FAILED = "failed", _("Fallido")
+        CANCELLED = "cancelled", _("Cancelado")
 
     REFERENCE_PREFIX = "PAY"
     REFERENCE_RANDOM_LENGTH = 6
@@ -950,33 +998,40 @@ class InquiryOfferPayment(models.Model):
         "inquiries.InquiryOffer",
         on_delete=models.CASCADE,
         related_name="payment",
+        verbose_name=_("oferta"),
     )
     reference_code = models.CharField(
+        _("código de referencia"),
         max_length=32,
         unique=True,
         db_index=True,
         editable=False,
     )
-    payable_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    currency = models.CharField(max_length=3, default="EUR")
+    payable_amount = models.DecimalField(_("importe a pagar"), max_digits=12, decimal_places=2)
+    currency = models.CharField(_("moneda"), max_length=3, default="EUR")
     status = models.CharField(
+        _("estado"),
         max_length=16,
         choices=Status.choices,
         default=Status.PENDING,
         db_index=True,
     )
-    provider = models.CharField(max_length=24, default="manual")
-    provider_reference = models.CharField(max_length=128, blank=True)
-    internal_notes = models.TextField(blank=True)
-    initiated_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    paid_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    failed_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    cancelled_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    payment_deadline_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    provider = models.CharField(_("proveedor de pago"), max_length=24, default="manual")
+    provider_reference = models.CharField(_("referencia del proveedor"), max_length=128, blank=True)
+    internal_notes = models.TextField(_("notas internas"), blank=True)
+    initiated_at = models.DateTimeField(_("iniciado el"), null=True, blank=True, db_index=True)
+    paid_at = models.DateTimeField(_("pagado el"), null=True, blank=True, db_index=True)
+    failed_at = models.DateTimeField(_("fallido el"), null=True, blank=True, db_index=True)
+    cancelled_at = models.DateTimeField(_("cancelado el"), null=True, blank=True, db_index=True)
+    payment_deadline_at = models.DateTimeField(
+        _("fecha límite de pago"), null=True, blank=True, db_index=True
+    )
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("pago")
+        verbose_name_plural = _("pagos")
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(
@@ -1020,7 +1075,7 @@ class InquiryOfferPayment(models.Model):
     @classmethod
     def generate_reference_code(cls) -> str:
         date_part = timezone.localdate().strftime("%Y%m%d")
-        for _ in range(50):
+        for _attempt_index in range(50):
             suffix = get_random_string(
                 cls.REFERENCE_RANDOM_LENGTH,
                 allowed_chars=cls.REFERENCE_ALLOWED_CHARS,
@@ -1255,42 +1310,53 @@ class InquiryOfferPayment(models.Model):
 
 class InquiryOfferPaymentDetails(models.Model):
     class BillingCustomerType(models.TextChoices):
-        PRIVATE = "private", "Private individual"
-        COMPANY = "company", "Company / legal entity"
+        PRIVATE = "private", _("Particular")
+        COMPANY = "company", _("Empresa o profesional")
 
     payment = models.OneToOneField(
         "inquiries.InquiryOfferPayment",
         on_delete=models.CASCADE,
         related_name="checkout_details",
+        verbose_name=_("pago"),
     )
-    shipping_recipient_name = models.CharField(max_length=180)
-    shipping_phone = models.CharField(max_length=50)
-    shipping_address_line_1 = models.CharField(max_length=255)
-    shipping_address_line_2 = models.CharField(max_length=255, blank=True)
-    shipping_city = models.CharField(max_length=120)
-    shipping_region = models.CharField(max_length=120)
-    shipping_postal_code = models.CharField(max_length=32)
-    shipping_country = CountryField()
+    shipping_recipient_name = models.CharField(_("destinatario del envío"), max_length=180)
+    shipping_phone = models.CharField(_("teléfono de envío"), max_length=50)
+    shipping_address_line_1 = models.CharField(_("dirección de envío"), max_length=255)
+    shipping_address_line_2 = models.CharField(
+        _("información adicional de envío"), max_length=255, blank=True
+    )
+    shipping_city = models.CharField(_("ciudad de envío"), max_length=120)
+    shipping_region = models.CharField(_("provincia o región de envío"), max_length=120)
+    shipping_postal_code = models.CharField(_("código postal de envío"), max_length=32)
+    shipping_country = CountryField(_("país de envío"))
     billing_customer_type = models.CharField(
+        _("tipo de cliente de facturación"),
         max_length=16,
         choices=BillingCustomerType.choices,
         default=BillingCustomerType.PRIVATE,
     )
-    billing_same_as_shipping = models.BooleanField(default=True)
-    billing_name = models.CharField(max_length=180)
-    billing_tax_id = models.CharField(max_length=64, blank=True)
-    billing_address_line_1 = models.CharField(max_length=255)
-    billing_address_line_2 = models.CharField(max_length=255, blank=True)
-    billing_city = models.CharField(max_length=120)
-    billing_region = models.CharField(max_length=120)
-    billing_postal_code = models.CharField(max_length=32)
-    billing_country = CountryField()
-    completed_at = models.DateTimeField(null=True, blank=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    billing_same_as_shipping = models.BooleanField(
+        _("facturación igual que envío"), default=True
+    )
+    billing_name = models.CharField(_("nombre o razón social de facturación"), max_length=180)
+    billing_tax_id = models.CharField(_("NIF / VAT de facturación"), max_length=64, blank=True)
+    billing_address_line_1 = models.CharField(_("dirección de facturación"), max_length=255)
+    billing_address_line_2 = models.CharField(
+        _("información adicional de facturación"), max_length=255, blank=True
+    )
+    billing_city = models.CharField(_("ciudad de facturación"), max_length=120)
+    billing_region = models.CharField(
+        _("provincia o región de facturación"), max_length=120
+    )
+    billing_postal_code = models.CharField(_("código postal de facturación"), max_length=32)
+    billing_country = CountryField(_("país de facturación"))
+    completed_at = models.DateTimeField(_("completado el"), null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
-        verbose_name_plural = "inquiry offer payment details"
+        verbose_name = _("datos de envío y facturación")
+        verbose_name_plural = _("datos de envío y facturación")
 
     def __str__(self) -> str:
         return f"Checkout details for {self.payment.reference_code}"
@@ -1411,24 +1477,29 @@ class InquiryItem(models.Model):
         "inquiries.Inquiry",
         on_delete=models.CASCADE,
         related_name="items",
+        verbose_name=_("solicitud"),
     )
     product = models.ForeignKey(
         "catalog.Product",
         on_delete=models.PROTECT,
         related_name="inquiry_items",
+        verbose_name=_("producto"),
     )
-    requested_quantity = models.PositiveIntegerField(default=1)
-    customer_note = models.TextField(blank=True)
+    requested_quantity = models.PositiveIntegerField(_("cantidad solicitada"), default=1)
+    customer_note = models.TextField(_("nota del cliente"), blank=True)
     last_known_price_snapshot = models.DecimalField(
+        _("último precio conocido al solicitar"),
         max_digits=12,
         decimal_places=2,
         null=True,
         blank=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("artículo solicitado")
+        verbose_name_plural = _("artículos solicitados")
         ordering = ["inquiry_id", "id"]
         constraints = [
             models.CheckConstraint(

@@ -1,25 +1,27 @@
 from django.db import models
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 
 class Vehicle(models.Model):
     class VehicleType(models.TextChoices):
-        CAR = "car", "Car"
-        MOTORCYCLE = "motorcycle", "Motorcycle"
-        TRUCK = "truck", "Truck"
-        VAN = "van", "Van"
-        OTHER = "other", "Other"
+        CAR = "car", _("Coche")
+        MOTORCYCLE = "motorcycle", _("Moto")
+        TRUCK = "truck", _("Camión")
+        VAN = "van", _("Furgoneta")
+        OTHER = "other", _("Otro")
 
     class FuelType(models.TextChoices):
-        GASOLINE = "gasoline", "Gasoline"
-        DIESEL = "diesel", "Diesel"
-        HYBRID = "hybrid", "Hybrid"
-        ELECTRIC = "electric", "Electric"
+        GASOLINE = "gasoline", _("Gasolina")
+        DIESEL = "diesel", _("Diésel")
+        HYBRID = "hybrid", _("Híbrido")
+        ELECTRIC = "electric", _("Eléctrico")
         LPG = "lpg", "LPG"
         CNG = "cng", "CNG"
-        OTHER = "other", "Other"
+        OTHER = "other", _("Otro")
 
     vehicle_type = models.CharField(
+        _("tipo de vehículo"),
         max_length=20,
         choices=VehicleType.choices,
         default=VehicleType.CAR,
@@ -28,23 +30,30 @@ class Vehicle(models.Model):
         "catalog.Brand",
         on_delete=models.PROTECT,
         related_name="vehicles",
+        verbose_name=_("marca"),
     )
-    model = models.CharField(max_length=120)
-    generation = models.CharField(max_length=120, blank=True)
-    variant = models.CharField(max_length=120, blank=True)
-    year_start = models.PositiveSmallIntegerField(null=True, blank=True)
-    year_end = models.PositiveSmallIntegerField(null=True, blank=True)
-    engine_code = models.CharField(max_length=80, blank=True)
-    fuel_type = models.CharField(max_length=20, choices=FuelType.choices, blank=True)
-    displacement_cc = models.PositiveIntegerField(null=True, blank=True)
-    power_hp = models.PositiveIntegerField(null=True, blank=True)
-    power_kw = models.PositiveIntegerField(null=True, blank=True)
-    notes = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    model = models.CharField(_("modelo"), max_length=120)
+    generation = models.CharField(_("generación"), max_length=120, blank=True)
+    variant = models.CharField(_("versión"), max_length=120, blank=True)
+    year_start = models.PositiveSmallIntegerField(_("año inicial"), null=True, blank=True)
+    year_end = models.PositiveSmallIntegerField(_("año final"), null=True, blank=True)
+    engine_code = models.CharField(_("código de motor"), max_length=80, blank=True)
+    fuel_type = models.CharField(
+        _("combustible"), max_length=20, choices=FuelType.choices, blank=True
+    )
+    displacement_cc = models.PositiveIntegerField(
+        _("cilindrada (cc)"), null=True, blank=True
+    )
+    power_hp = models.PositiveIntegerField(_("potencia (CV)"), null=True, blank=True)
+    power_kw = models.PositiveIntegerField(_("potencia (kW)"), null=True, blank=True)
+    notes = models.TextField(_("notas"), blank=True)
+    is_active = models.BooleanField(_("activo"), default=True, db_index=True)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("vehículo")
+        verbose_name_plural = _("vehículos")
         ordering = ["brand__name", "model", "generation", "variant", "year_start"]
         constraints = [
             models.CheckConstraint(
@@ -91,31 +100,36 @@ class Vehicle(models.Model):
 
 class ProductVehicleFitment(models.Model):
     class FitmentSource(models.TextChoices):
-        SUPPLIER = "supplier", "Supplier"
-        IMPORT = "import", "Import"
-        MANUAL = "manual", "Manual"
+        SUPPLIER = "supplier", _("Proveedor")
+        IMPORT = "import", _("Importación")
+        MANUAL = "manual", _("Manual")
 
     product = models.ForeignKey(
         "catalog.Product",
         on_delete=models.CASCADE,
         related_name="fitments",
+        verbose_name=_("producto"),
     )
     vehicle = models.ForeignKey(
         "vehicles.Vehicle",
         on_delete=models.CASCADE,
         related_name="fitments",
+        verbose_name=_("vehículo"),
     )
-    fitment_notes = models.TextField(blank=True)
+    fitment_notes = models.TextField(_("notas de compatibilidad"), blank=True)
     source = models.CharField(
+        _("origen"),
         max_length=20,
         choices=FitmentSource.choices,
         default=FitmentSource.IMPORT,
     )
-    is_verified = models.BooleanField(default=False, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    is_verified = models.BooleanField(_("verificada"), default=False, db_index=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("compatibilidad con vehículo")
+        verbose_name_plural = _("compatibilidades con vehículos")
         ordering = ["product__sku", "vehicle__brand__name", "vehicle__model"]
         constraints = [
             models.UniqueConstraint(

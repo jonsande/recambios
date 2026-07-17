@@ -207,17 +207,17 @@ def test_product_admin_layout_order_and_slug_readonly(django_user_model) -> None
     request = build_request(make_staff_user(django_user_model, "layout_staff"))
 
     assert [name for name, _ in product_admin.fieldsets] == [
-        "Product Identity",
-        "Classification",
-        "Pricing",
-        "Dimensions",
-        "Publication",
-        "Audit",
+        "Identificación del producto",
+        "Clasificación",
+        "Precio y venta",
+        "Dimensiones",
+        "Publicación",
+        "Fechas y auditoría",
     ]
     assert [inline.verbose_name_plural for inline in product_admin.inlines] == [
-        "PART NUMBERS",
-        "PRODUCT VEHICLE FITMENTS",
-        "PRODUCT IMAGES",
+        "Referencias de pieza",
+        "Compatibilidades con vehículos",
+        "Imágenes del producto",
     ]
     assert product_admin.fieldsets[0][1]["fields"] == (
         "sku",

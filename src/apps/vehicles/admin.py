@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
+from django.utils.translation import gettext_lazy as _
 
 from apps.catalog.models import Product
 from apps.suppliers.access import get_active_supplier_ids_for_user, user_can_manage_supplier
@@ -138,7 +139,7 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
         if is_restricted_supplier_user(request.user):
             self.message_user(
                 request,
-                "Supplier users cannot bulk-edit verification fields.",
+                _("Los usuarios de proveedor no pueden modificar en bloque la verificación."),
                 level=messages.ERROR,
             )
             return
@@ -151,13 +152,18 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
         if updated_count:
             self.message_user(
                 request,
-                f"{label} applied to {updated_count} fitment(s).",
+                _("%(label)s aplicado a %(count)s compatibilidad(es).")
+                % {"label": label, "count": updated_count},
                 level=messages.SUCCESS,
             )
         if skipped_count:
             self.message_user(
                 request,
-                f"Skipped {skipped_count} fitment(s) because no change was needed.",
+                _(
+                    "Se omitieron %(count)s compatibilidad(es) porque no "
+                    "requerían cambios."
+                )
+                % {"count": skipped_count},
                 level=messages.WARNING,
             )
 
@@ -165,7 +171,7 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
         if is_restricted_supplier_user(request.user):
             self.message_user(
                 request,
-                "Supplier users cannot bulk-edit source fields.",
+                _("Los usuarios de proveedor no pueden modificar en bloque el origen."),
                 level=messages.ERROR,
             )
             return
@@ -184,62 +190,65 @@ class ProductVehicleFitmentAdmin(admin.ModelAdmin):
         if skipped_count:
             self.message_user(
                 request,
-                f"Skipped {skipped_count} fitment(s) because no change was needed.",
+                _("Se omitieron %(count)s compatibilidad(es) porque no requerían cambios.")
+                % {"count": skipped_count},
                 level=messages.WARNING,
             )
 
-    @admin.action(description="Set selected fitments as verified")
+    @admin.action(description=_("Marcar las compatibilidades seleccionadas como verificadas"))
     def mark_selected_as_verified(self, request, queryset):
         self._bulk_update_is_verified(
             request=request,
             queryset=queryset,
             is_verified=True,
-            label="Verified status",
+            label=_("Estado verificado"),
         )
 
-    @admin.action(description="Set selected fitments as not verified")
+    @admin.action(description=_("Marcar las compatibilidades seleccionadas como no verificadas"))
     def mark_selected_as_unverified(self, request, queryset):
         self._bulk_update_is_verified(
             request=request,
             queryset=queryset,
             is_verified=False,
-            label="Not verified status",
+            label=_("Estado no verificado"),
         )
 
-    @admin.action(description="Set source to Supplier")
+    @admin.action(description=_("Establecer el origen como Proveedor"))
     def set_source_supplier(self, request, queryset):
         self._bulk_update_source(
             request=request,
             queryset=queryset,
             source=ProductVehicleFitment.FitmentSource.SUPPLIER,
-            label="Supplier source",
+            label=_("Origen Proveedor"),
         )
 
-    @admin.action(description="Set source to Import")
+    @admin.action(description=_("Establecer el origen como Importación"))
     def set_source_import(self, request, queryset):
         self._bulk_update_source(
             request=request,
             queryset=queryset,
             source=ProductVehicleFitment.FitmentSource.IMPORT,
-            label="Import source",
+            label=_("Origen Importación"),
         )
 
-    @admin.action(description="Set source to Manual")
+    @admin.action(description=_("Establecer el origen como Manual"))
     def set_source_manual(self, request, queryset):
         self._bulk_update_source(
             request=request,
             queryset=queryset,
             source=ProductVehicleFitment.FitmentSource.MANUAL,
-            label="Manual source",
+            label=_("Origen Manual"),
         )
 
     def save_model(self, request, obj, form, change):
         if is_restricted_supplier_user(request.user):
             supplier_ids = set(self.supplier_ids_for_request(request))
             if obj.product.supplier_id not in supplier_ids:
-                raise PermissionDenied("This product is outside your supplier scope.")
+                raise PermissionDenied(_("Este producto está fuera del ámbito del proveedor."))
             if obj.product.publication_status != obj.product.PublicationStatus.DRAFT:
-                raise PermissionDenied("Only draft products can be edited by suppliers.")
+                raise PermissionDenied(
+                    _("Los proveedores solo pueden editar productos en borrador.")
+                )
             obj.source = ProductVehicleFitment.FitmentSource.SUPPLIER
             obj.is_verified = False
         super().save_model(request, obj, form, change)

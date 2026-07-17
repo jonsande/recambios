@@ -1,19 +1,21 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class SupplierImport(models.Model):
     class ImportStatus(models.TextChoices):
-        PENDING = "pending", "Pending"
-        PROCESSING = "processing", "Processing"
-        COMPLETED = "completed", "Completed"
-        COMPLETED_WITH_ERRORS = "completed_with_errors", "Completed With Errors"
-        FAILED = "failed", "Failed"
+        PENDING = "pending", _("Pendiente")
+        PROCESSING = "processing", _("En proceso")
+        COMPLETED = "completed", _("Completada")
+        COMPLETED_WITH_ERRORS = "completed_with_errors", _("Completada con errores")
+        FAILED = "failed", _("Fallida")
 
     supplier = models.ForeignKey(
         "suppliers.Supplier",
         on_delete=models.PROTECT,
         related_name="imports",
+        verbose_name=_("proveedor"),
     )
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -21,24 +23,33 @@ class SupplierImport(models.Model):
         null=True,
         blank=True,
         related_name="supplier_imports",
+        verbose_name=_("subida por"),
     )
-    original_file = models.FileField(upload_to="supplier_imports/%Y/%m/%d/", null=True, blank=True)
+    original_file = models.FileField(
+        _("archivo original"),
+        upload_to="supplier_imports/%Y/%m/%d/",
+        null=True,
+        blank=True,
+    )
     import_status = models.CharField(
+        _("estado de importación"),
         max_length=24,
         choices=ImportStatus.choices,
         default=ImportStatus.PENDING,
         db_index=True,
     )
-    total_rows = models.PositiveIntegerField(default=0)
-    successful_rows = models.PositiveIntegerField(default=0)
-    failed_rows = models.PositiveIntegerField(default=0)
-    processing_notes = models.TextField(blank=True)
-    started_at = models.DateTimeField(null=True, blank=True)
-    finished_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    total_rows = models.PositiveIntegerField(_("filas totales"), default=0)
+    successful_rows = models.PositiveIntegerField(_("filas correctas"), default=0)
+    failed_rows = models.PositiveIntegerField(_("filas con error"), default=0)
+    processing_notes = models.TextField(_("notas de procesamiento"), blank=True)
+    started_at = models.DateTimeField(_("iniciada el"), null=True, blank=True)
+    finished_at = models.DateTimeField(_("finalizada el"), null=True, blank=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("importación de proveedor")
+        verbose_name_plural = _("importaciones de proveedores")
         ordering = ["-created_at"]
         indexes = [
             models.Index(
@@ -54,19 +65,21 @@ class SupplierImport(models.Model):
 
 class SupplierImportRow(models.Model):
     class ProcessingStatus(models.TextChoices):
-        PENDING = "pending", "Pending"
-        SUCCESS = "success", "Success"
-        SKIPPED = "skipped", "Skipped"
-        ERROR = "error", "Error"
+        PENDING = "pending", _("Pendiente")
+        SUCCESS = "success", _("Correcta")
+        SKIPPED = "skipped", _("Omitida")
+        ERROR = "error", _("Error")
 
     supplier_import = models.ForeignKey(
         "imports.SupplierImport",
         on_delete=models.CASCADE,
         related_name="rows",
+        verbose_name=_("importación de proveedor"),
     )
-    row_number = models.PositiveIntegerField()
-    raw_payload = models.JSONField(default=dict, blank=True)
+    row_number = models.PositiveIntegerField(_("número de fila"))
+    raw_payload = models.JSONField(_("datos originales"), default=dict, blank=True)
     processing_status = models.CharField(
+        _("estado de procesamiento"),
         max_length=20,
         choices=ProcessingStatus.choices,
         default=ProcessingStatus.PENDING,
@@ -78,12 +91,15 @@ class SupplierImportRow(models.Model):
         null=True,
         blank=True,
         related_name="import_rows",
+        verbose_name=_("producto vinculado"),
     )
-    error_message = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    error_message = models.TextField(_("mensaje de error"), blank=True)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
     class Meta:
+        verbose_name = _("fila de importación")
+        verbose_name_plural = _("filas de importación")
         ordering = ["supplier_import", "row_number"]
         constraints = [
             models.UniqueConstraint(
