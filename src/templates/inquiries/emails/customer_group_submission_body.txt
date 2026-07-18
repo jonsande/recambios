@@ -6,7 +6,7 @@
 {% with inquiry=inquiries.0 %}- {{ inquiry.sku }} | {{ inquiry.title }} | {% blocktrans with quantity=inquiry.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}{% if inquiry.customer_note %} | {% blocktrans with note=inquiry.customer_note %}Nota: {{ note }}{% endblocktrans %}{% endif %}{% endwith %}
 
 {% trans "Este correo confirma la recepción de su solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
-{% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, recibirá una oferta con un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar su pago.{% endblocktrans %}
+{% blocktrans with validity_hours=offer_validity_hours %}Si confirmamos disponibilidad, recibirá una oferta con una vigencia de {{ validity_hours }} horas para aceptarla y completar el pago.{% endblocktrans %}
 {% else %}{% blocktrans with reference=primary_reference %}Hemos recibido su solicitud de varios productos {{ reference }}.{% endblocktrans %}
 
 {% trans "Código general de la solicitud:" %} {{ primary_reference }}
@@ -18,7 +18,7 @@
 {% endfor %}
 
 {% trans "Cada producto podrá recibir su propia oferta o resolución. Este correo confirma la recepción de la solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
-{% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, cada oferta tendrá un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar su pago.{% endblocktrans %}
+{% blocktrans with validity_hours=offer_validity_hours %}Si confirmamos disponibilidad, cada oferta tendrá una vigencia de {{ validity_hours }} horas para aceptarla y completar el pago.{% endblocktrans %}
 {% endif %}
 
 {% if customer_reply_to_email %}

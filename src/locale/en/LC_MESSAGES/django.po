@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: recambios\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 12:40+0200\n"
+"POT-Creation-Date: 2026-07-18 22:58+0200\n"
 "PO-Revision-Date: 2026-04-12 02:38+0200\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
@@ -120,9 +120,9 @@ msgid "Publicación"
 msgstr ""
 
 #: src/apps/catalog/admin.py:288 src/apps/imports/admin.py:118
-#: src/apps/inquiries/admin.py:163 src/apps/inquiries/admin.py:313
-#: src/apps/inquiries/admin.py:602 src/apps/inquiries/admin.py:868
-#: src/apps/suppliers/admin.py:188
+#: src/apps/inquiries/admin.py:163 src/apps/inquiries/admin.py:311
+#: src/apps/inquiries/admin.py:600 src/apps/inquiries/admin.py:866
+#: src/apps/suppliers/admin.py:186
 msgid "Fechas y auditoría"
 msgstr ""
 
@@ -223,15 +223,15 @@ msgstr ""
 
 #: src/apps/catalog/models.py:37 src/apps/catalog/models.py:99
 #: src/apps/catalog/models.py:124 src/apps/catalog/models.py:242
-#: src/apps/suppliers/models.py:211 src/apps/vehicles/models.py:50
+#: src/apps/suppliers/models.py:205 src/apps/vehicles/models.py:50
 msgid "activo"
 msgstr ""
 
 #: src/apps/catalog/models.py:38 src/apps/catalog/models.py:100
 #: src/apps/catalog/models.py:125 src/apps/catalog/models.py:243
 #: src/apps/catalog/models.py:479 src/apps/inquiries/models.py:73
-#: src/apps/inquiries/models.py:1029 src/apps/inquiries/models.py:1354
-#: src/apps/inquiries/models.py:1497 src/apps/suppliers/models.py:212
+#: src/apps/inquiries/models.py:957 src/apps/inquiries/models.py:1256
+#: src/apps/inquiries/models.py:1396 src/apps/suppliers/models.py:206
 #: src/apps/vehicles/models.py:51
 msgid "creado el"
 msgstr ""
@@ -239,8 +239,8 @@ msgstr ""
 #: src/apps/catalog/models.py:39 src/apps/catalog/models.py:101
 #: src/apps/catalog/models.py:126 src/apps/catalog/models.py:244
 #: src/apps/catalog/models.py:480 src/apps/inquiries/models.py:74
-#: src/apps/inquiries/models.py:1030 src/apps/inquiries/models.py:1355
-#: src/apps/inquiries/models.py:1498 src/apps/suppliers/models.py:213
+#: src/apps/inquiries/models.py:958 src/apps/inquiries/models.py:1257
+#: src/apps/inquiries/models.py:1397 src/apps/suppliers/models.py:207
 #: src/apps/vehicles/models.py:52
 msgid "actualizado el"
 msgstr ""
@@ -275,23 +275,23 @@ msgstr "Technical description"
 msgid "orden"
 msgstr ""
 
-#: src/apps/catalog/models.py:69 src/apps/suppliers/models.py:240
+#: src/apps/catalog/models.py:69 src/apps/suppliers/models.py:234
 msgid "activa"
 msgstr ""
 
 #: src/apps/catalog/models.py:70 src/apps/catalog/models.py:382
 #: src/apps/catalog/models.py:440 src/apps/catalog/models.py:553
 #: src/apps/imports/models.py:47 src/apps/imports/models.py:97
-#: src/apps/inquiries/models.py:261 src/apps/inquiries/models.py:496
-#: src/apps/suppliers/models.py:241 src/apps/vehicles/models.py:127
+#: src/apps/inquiries/models.py:261 src/apps/inquiries/models.py:492
+#: src/apps/suppliers/models.py:235 src/apps/vehicles/models.py:127
 msgid "creada el"
 msgstr ""
 
 #: src/apps/catalog/models.py:71 src/apps/catalog/models.py:383
 #: src/apps/catalog/models.py:441 src/apps/catalog/models.py:554
 #: src/apps/imports/models.py:48 src/apps/imports/models.py:98
-#: src/apps/inquiries/models.py:262 src/apps/inquiries/models.py:497
-#: src/apps/suppliers/models.py:242 src/apps/vehicles/models.py:128
+#: src/apps/inquiries/models.py:262 src/apps/inquiries/models.py:493
+#: src/apps/suppliers/models.py:236 src/apps/vehicles/models.py:128
 msgid "actualizada el"
 msgstr ""
 
@@ -362,7 +362,7 @@ msgid "Visible (último precio conocido)"
 msgstr "Last known price"
 
 #: src/apps/catalog/models.py:163 src/apps/imports/models.py:18
-#: src/apps/suppliers/models.py:216 src/apps/suppliers/models.py:232
+#: src/apps/suppliers/models.py:210 src/apps/suppliers/models.py:226
 msgid "proveedor"
 msgstr ""
 
@@ -432,8 +432,8 @@ msgstr "Availability and pricing"
 msgid "último precio conocido"
 msgstr "Last known price"
 
-#: src/apps/catalog/models.py:223 src/apps/inquiries/models.py:472
-#: src/apps/inquiries/models.py:1011
+#: src/apps/catalog/models.py:223 src/apps/inquiries/models.py:471
+#: src/apps/inquiries/models.py:939
 msgid "moneda"
 msgstr ""
 
@@ -477,7 +477,7 @@ msgstr "Featured products"
 
 #: src/apps/catalog/models.py:247 src/apps/catalog/models.py:360
 #: src/apps/catalog/models.py:463 src/apps/catalog/models.py:547
-#: src/apps/inquiries/models.py:1486 src/apps/vehicles/models.py:111
+#: src/apps/inquiries/models.py:1385 src/apps/vehicles/models.py:111
 #, fuzzy
 #| msgid "productos/"
 msgid "producto"
@@ -741,8 +741,8 @@ msgstr "Spare parts catalog"
 msgid "Configuración base"
 msgstr "Base configuration"
 
-#: src/apps/checkout/apps.py:8 src/apps/inquiries/admin.py:337
-#: src/apps/inquiries/admin.py:568 src/apps/inquiries/admin.py:738
+#: src/apps/checkout/apps.py:8 src/apps/inquiries/admin.py:335
+#: src/apps/inquiries/admin.py:566 src/apps/inquiries/admin.py:736
 msgid "Pago"
 msgstr ""
 
@@ -768,7 +768,7 @@ msgstr "Scope of information"
 msgid "Procesamiento"
 msgstr ""
 
-#: src/apps/imports/admin.py:123 src/apps/inquiries/admin.py:848
+#: src/apps/imports/admin.py:123 src/apps/inquiries/admin.py:846
 #, fuzzy
 #| msgid "Nota"
 msgid "Notas"
@@ -813,7 +813,7 @@ msgid "Importaciones de proveedores"
 msgstr ""
 
 #: src/apps/imports/models.py:8 src/apps/imports/models.py:68
-#: src/apps/inquiries/models.py:982
+#: src/apps/inquiries/models.py:910
 #, fuzzy
 #| msgid "Importe pendiente"
 msgid "Pendiente"
@@ -937,9 +937,9 @@ msgstr "Scope of information"
 msgid "filas de importación"
 msgstr "Scope of information"
 
-#: src/apps/inquiries/admin.py:78 src/apps/inquiries/admin.py:333
-#: src/apps/inquiries/admin.py:614 src/apps/inquiries/admin.py:746
-#: src/apps/inquiries/admin.py:804
+#: src/apps/inquiries/admin.py:78 src/apps/inquiries/admin.py:331
+#: src/apps/inquiries/admin.py:612 src/apps/inquiries/admin.py:744
+#: src/apps/inquiries/admin.py:802
 msgid "Solicitud"
 msgstr "Request"
 
@@ -953,7 +953,7 @@ msgstr "Products"
 msgid "Envío"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:138 src/apps/inquiries/admin.py:826
+#: src/apps/inquiries/admin.py:138 src/apps/inquiries/admin.py:824
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "Datos del cliente"
@@ -965,14 +965,14 @@ msgstr "Customer notes:"
 msgid "Notas del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/admin.py:152 src/apps/inquiries/admin.py:288
-#: src/apps/inquiries/admin.py:815
+#: src/apps/inquiries/admin.py:152 src/apps/inquiries/admin.py:287
+#: src/apps/inquiries/admin.py:813
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Destino de la oferta"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/admin.py:176 src/apps/inquiries/admin.py:953
+#: src/apps/inquiries/admin.py:176 src/apps/inquiries/admin.py:951
 #, fuzzy
 #| msgid "Siguiente"
 msgid "Cliente"
@@ -984,38 +984,38 @@ msgstr "Next"
 msgid "Solicitudes"
 msgstr "Request"
 
-#: src/apps/inquiries/admin.py:184 src/apps/inquiries/admin.py:880
+#: src/apps/inquiries/admin.py:184 src/apps/inquiries/admin.py:878
 #, fuzzy
 #| msgid "Destinatario"
 msgid "Destino"
 msgstr "Recipient"
 
-#: src/apps/inquiries/admin.py:265
+#: src/apps/inquiries/admin.py:264
 #, fuzzy
 #| msgid "Oferta confirmada"
 msgid "Oferta comercial"
 msgstr "Confirmed offer"
 
-#: src/apps/inquiries/admin.py:276
+#: src/apps/inquiries/admin.py:275
 #, fuzzy
 #| msgid "Contacto comercial"
 msgid "Datos comerciales"
 msgstr "Commercial contact"
 
-#: src/apps/inquiries/admin.py:299 src/apps/inquiries/admin.py:590
+#: src/apps/inquiries/admin.py:298 src/apps/inquiries/admin.py:588
 msgid "Ciclo de vida"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:352
+#: src/apps/inquiries/admin.py:350
 msgid "Enviar las ofertas seleccionadas a los clientes"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:365
+#: src/apps/inquiries/admin.py:363
 #, python-format
 msgid "La oferta %(reference)s no está lista para enviar (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:373
+#: src/apps/inquiries/admin.py:371
 #, fuzzy, python-format
 #| msgid ""
 #| "Esta oferta ya tiene una respuesta registrada. Puede revisar su estado "
@@ -1025,147 +1025,147 @@ msgstr ""
 "This offer already has a registered response. You can review its current "
 "status."
 
-#: src/apps/inquiries/admin.py:382
+#: src/apps/inquiries/admin.py:380
 #, python-format
 msgid "Ofertas enviadas: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:385
+#: src/apps/inquiries/admin.py:383
 msgid "No se envió ninguna oferta."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:387
+#: src/apps/inquiries/admin.py:385
 msgid "Reenviar el correo de oferta a los clientes"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:402
+#: src/apps/inquiries/admin.py:400
 #, python-format
 msgid ""
 "Se omitió la oferta %(reference)s: solo pueden reenviarse ofertas enviadas o "
 "aceptadas."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:422
+#: src/apps/inquiries/admin.py:420
 #, python-format
 msgid ""
 "No se pudo reenviar el correo de la oferta %(reference)s por un error de "
 "entrega."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:435
+#: src/apps/inquiries/admin.py:433
 #, python-format
 msgid ""
 "No se pudo reenviar la oferta %(reference)s porque falta el correo "
 "electrónico del cliente."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:447
+#: src/apps/inquiries/admin.py:445
 #, python-format
 msgid "Correos de oferta reenviados: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:452
+#: src/apps/inquiries/admin.py:450
 msgid "No se reenvió ningún correo de oferta debido a errores de entrega."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:458
+#: src/apps/inquiries/admin.py:456
 msgid "No se reenvió ningún correo de oferta."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:462
+#: src/apps/inquiries/admin.py:460
 msgid "Iniciar el pago de las ofertas seleccionadas"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:476
+#: src/apps/inquiries/admin.py:474
 #, python-format
 msgid "No se pudo iniciar el pago de la oferta %(reference)s (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:487
+#: src/apps/inquiries/admin.py:485
 #, python-format
 msgid "No se pudo iniciar el pago de la oferta %(reference)s (%(error)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:498
+#: src/apps/inquiries/admin.py:496
 #, python-format
 msgid "Pagos iniciados: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:503
+#: src/apps/inquiries/admin.py:501
 msgid "No se inició ningún pago."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:580
+#: src/apps/inquiries/admin.py:578
 #, fuzzy
 #| msgid "Paso de pago"
 msgid "Proveedor de pago"
 msgstr "Payment step"
 
-#: src/apps/inquiries/admin.py:610 src/apps/inquiries/admin.py:742
+#: src/apps/inquiries/admin.py:608 src/apps/inquiries/admin.py:740
 msgid "Oferta"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:639
+#: src/apps/inquiries/admin.py:637
 #, python-format
 msgid "El pago %(reference)s no pudo cambiar a %(status)s (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:654
+#: src/apps/inquiries/admin.py:652
 #, python-format
 msgid "El pago %(reference)s no pudo cambiar a %(status)s (%(error)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:670
+#: src/apps/inquiries/admin.py:668
 #, python-format
 msgid "Pagos actualizados a %(status)s: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:676
+#: src/apps/inquiries/admin.py:674
 #, python-format
 msgid "No se actualizó ningún pago a %(status)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:681
+#: src/apps/inquiries/admin.py:679
 msgid "Marcar los pagos seleccionados como pagados"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:687
+#: src/apps/inquiries/admin.py:685
 msgid "pagado"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:690
+#: src/apps/inquiries/admin.py:688
 msgid "Marcar los pagos seleccionados como fallidos"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:696
+#: src/apps/inquiries/admin.py:694
 msgid "fallido"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:699
+#: src/apps/inquiries/admin.py:697
 msgid "Marcar los pagos seleccionados como cancelados"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:705
+#: src/apps/inquiries/admin.py:703
 msgid "cancelado"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:839
+#: src/apps/inquiries/admin.py:837
 #, fuzzy
 #| msgid "Siguiente"
 msgid "Seguimiento"
 msgstr "Next"
 
-#: src/apps/inquiries/admin.py:857
+#: src/apps/inquiries/admin.py:855
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Resolución no ofertable"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/admin.py:902
+#: src/apps/inquiries/admin.py:900
 msgid "Finalizar las solicitudes seleccionadas como no ofertables"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:916
+#: src/apps/inquiries/admin.py:914
 #, fuzzy, python-format
 #| msgid "Su solicitud %(reference)s ya tiene una oferta confirmada."
 msgid ""
@@ -1173,29 +1173,29 @@ msgid ""
 "(%(details)s)."
 msgstr "Your inquiry %(reference)s now has a confirmed offer."
 
-#: src/apps/inquiries/admin.py:927
+#: src/apps/inquiries/admin.py:925
 #, fuzzy, python-format
 #| msgid "Su solicitud %(reference)s ya tiene una oferta confirmada."
 msgid ""
 "La solicitud %(reference)s no pudo finalizarse como no ofertable (%(error)s)."
 msgstr "Your inquiry %(reference)s now has a confirmed offer."
 
-#: src/apps/inquiries/admin.py:939
+#: src/apps/inquiries/admin.py:937
 #, python-format
 msgid "Solicitudes finalizadas como no ofertables: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:945
+#: src/apps/inquiries/admin.py:943
 msgid "No se finalizó ninguna solicitud como no ofertable."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:959 src/apps/inquiries/admin.py:964
+#: src/apps/inquiries/admin.py:957 src/apps/inquiries/admin.py:962
 #, fuzzy
 #| msgid "Carrito de solicitud"
 msgid "Grupo de solicitudes"
 msgstr "Request cart"
 
-#: src/apps/inquiries/admin.py:974
+#: src/apps/inquiries/admin.py:972
 #, fuzzy
 #| msgid "Otros vehículos"
 msgid "Artículos"
@@ -1347,6 +1347,21 @@ msgstr "Billing country"
 msgid "Este campo es obligatorio para una dirección distinta."
 msgstr "This field is required when using a different billing address."
 
+#: src/apps/inquiries/migrations/0014_unify_offer_validity.py:59
+#: src/apps/inquiries/models.py:484
+msgid "fecha límite de vigencia"
+msgstr "validity deadline"
+
+#: src/apps/inquiries/migrations/0014_unify_offer_validity.py:68
+#: src/apps/inquiries/models.py:487
+msgid "horas de vigencia aplicadas"
+msgstr "applied validity hours"
+
+#: src/apps/inquiries/migrations/0014_unify_offer_validity.py:78
+#: src/apps/inquiries/models.py:955
+msgid "vencimiento de la sesión de pago"
+msgstr "payment session expiry"
+
 #: src/apps/inquiries/models.py:33 src/apps/inquiries/models.py:157
 msgid "Español"
 msgstr ""
@@ -1356,12 +1371,12 @@ msgid "Inglés"
 msgstr ""
 
 #: src/apps/inquiries/models.py:41 src/apps/inquiries/models.py:191
-#: src/apps/inquiries/models.py:440 src/apps/inquiries/models.py:1004
+#: src/apps/inquiries/models.py:439 src/apps/inquiries/models.py:932
 msgid "código de referencia"
 msgstr ""
 
 #: src/apps/inquiries/models.py:53 src/apps/inquiries/models.py:211
-#: src/apps/suppliers/models.py:238
+#: src/apps/suppliers/models.py:232
 msgid "usuario"
 msgstr ""
 
@@ -1485,15 +1500,15 @@ msgstr ""
 msgid "Otro motivo"
 msgstr ""
 
-#: src/apps/inquiries/models.py:225 src/apps/inquiries/models.py:447
-#: src/apps/inquiries/models.py:1013
+#: src/apps/inquiries/models.py:225 src/apps/inquiries/models.py:446
+#: src/apps/inquiries/models.py:941
 #, fuzzy
 #| msgid "Estado"
 msgid "estado"
 msgstr "Status"
 
-#: src/apps/inquiries/models.py:232 src/apps/inquiries/models.py:478
-#: src/apps/inquiries/models.py:1021
+#: src/apps/inquiries/models.py:232 src/apps/inquiries/models.py:477
+#: src/apps/inquiries/models.py:949
 msgid "notas internas"
 msgstr ""
 
@@ -1521,7 +1536,7 @@ msgstr "System messages"
 msgid "resuelta como no ofertable el"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/models.py:256 src/apps/inquiries/models.py:485
+#: src/apps/inquiries/models.py:256
 msgid "fecha límite de respuesta"
 msgstr ""
 
@@ -1531,8 +1546,8 @@ msgstr ""
 msgid "respuesta del proveedor recibida el"
 msgstr "Product references"
 
-#: src/apps/inquiries/models.py:265 src/apps/inquiries/models.py:437
-#: src/apps/inquiries/models.py:1480
+#: src/apps/inquiries/models.py:265 src/apps/inquiries/models.py:436
+#: src/apps/inquiries/models.py:1379
 #, fuzzy
 #| msgid "Solicitud"
 msgid "solicitud"
@@ -1576,316 +1591,300 @@ msgstr "Customer notes:"
 msgid "Caducada"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:454
+#: src/apps/inquiries/models.py:453
 #, fuzzy
 #| msgid "Importe total confirmado: %(total)s %(currency)s"
 msgid "total confirmado"
 msgstr "Confirmed total amount: %(total)s %(currency)s"
 
-#: src/apps/inquiries/models.py:458
+#: src/apps/inquiries/models.py:457
 msgid ""
 "Importe comercial final confirmado de la oferta. Es la referencia para "
 "preparar el pago y debe incluir el envío calculado para el destino cotizado "
 "cuando corresponda."
 msgstr ""
 
-#: src/apps/inquiries/models.py:463
+#: src/apps/inquiries/models.py:462
 #, fuzzy
 #| msgid "País cotizado"
 msgid "país cotizado"
 msgstr "Quoted country"
 
-#: src/apps/inquiries/models.py:464
+#: src/apps/inquiries/models.py:463
 #, fuzzy
 #| msgid "País cotizado"
 msgid "ciudad cotizada"
 msgstr "Quoted country"
 
-#: src/apps/inquiries/models.py:466
+#: src/apps/inquiries/models.py:465
 #, fuzzy
 #| msgid "Provincia / región / estado cotizado"
 msgid "provincia o región cotizada"
 msgstr "Quoted province / region / state"
 
-#: src/apps/inquiries/models.py:469
+#: src/apps/inquiries/models.py:468
 #, fuzzy
 #| msgid "Código postal cotizado"
 msgid "código postal cotizado"
 msgstr "Quoted postal code"
 
-#: src/apps/inquiries/models.py:475
+#: src/apps/inquiries/models.py:474
 msgid "Código ISO 4217 de la moneda del total confirmado."
 msgstr ""
 
-#: src/apps/inquiries/models.py:477
+#: src/apps/inquiries/models.py:476
 #, fuzzy
 #| msgid "Plazo estimado: %(lead_time)s"
 msgid "plazo estimado"
 msgstr "Estimated lead time: %(lead_time)s"
 
-#: src/apps/inquiries/models.py:479
+#: src/apps/inquiries/models.py:478
 #, fuzzy
 #| msgid "Mensajes del sistema"
 msgid "mensaje para el cliente"
 msgstr "System messages"
 
-#: src/apps/inquiries/models.py:481
+#: src/apps/inquiries/models.py:480
 msgid "token de acceso"
 msgstr ""
 
-#: src/apps/inquiries/models.py:483
+#: src/apps/inquiries/models.py:482
 msgid "enviada el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:488
-#, fuzzy
-#| msgid "Categorías destacadas"
-msgid "horas de respuesta aplicadas"
-msgstr "Featured categories"
-
-#: src/apps/inquiries/models.py:491
-msgid "horas de pago aplicadas"
-msgstr ""
-
-#: src/apps/inquiries/models.py:493
+#: src/apps/inquiries/models.py:489
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "aceptada el"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:494
+#: src/apps/inquiries/models.py:490
 #, fuzzy
 #| msgid "Oferta rechazada"
 msgid "rechazada el"
 msgstr "Offer rejected"
 
-#: src/apps/inquiries/models.py:495
+#: src/apps/inquiries/models.py:491
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "caducada el"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:500 src/apps/inquiries/models.py:1001
+#: src/apps/inquiries/models.py:496 src/apps/inquiries/models.py:929
 msgid "oferta"
 msgstr ""
 
-#: src/apps/inquiries/models.py:501
+#: src/apps/inquiries/models.py:497
 msgid "ofertas"
 msgstr ""
 
-#: src/apps/inquiries/models.py:945
-msgid "El plazo de respuesta aplicado debe ser de al menos una hora."
-msgstr ""
+#: src/apps/inquiries/models.py:880
+msgid "La vigencia aplicada debe ser de al menos una hora."
+msgstr "The applied validity must be at least one hour."
 
-#: src/apps/inquiries/models.py:983
+#: src/apps/inquiries/models.py:911
 msgid "Pagado"
 msgstr ""
 
-#: src/apps/inquiries/models.py:984
+#: src/apps/inquiries/models.py:912
 msgid "Fallido"
 msgstr ""
 
-#: src/apps/inquiries/models.py:985
+#: src/apps/inquiries/models.py:913
 msgid "Cancelado"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1010
+#: src/apps/inquiries/models.py:938
 msgid "importe a pagar"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1019
+#: src/apps/inquiries/models.py:947
 #, fuzzy
 #| msgid "Continuar al paso de pago"
 msgid "proveedor de pago"
 msgstr "Continue to payment step"
 
-#: src/apps/inquiries/models.py:1020
+#: src/apps/inquiries/models.py:948
 #, fuzzy
 #| msgid "Referencias del producto"
 msgid "referencia del proveedor"
 msgstr "Product references"
 
-#: src/apps/inquiries/models.py:1022
+#: src/apps/inquiries/models.py:950
 msgid "iniciado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1023
+#: src/apps/inquiries/models.py:951
 msgid "pagado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1024
+#: src/apps/inquiries/models.py:952
 msgid "fallido el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1025
+#: src/apps/inquiries/models.py:953
 msgid "cancelado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1027
-#, fuzzy
-#| msgid "Referencia de pago"
-msgid "fecha límite de pago"
-msgstr "Payment reference"
-
-#: src/apps/inquiries/models.py:1033 src/apps/inquiries/models.py:1320
+#: src/apps/inquiries/models.py:961 src/apps/inquiries/models.py:1222
 msgid "pago"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1034
+#: src/apps/inquiries/models.py:962
 msgid "pagos"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1313
+#: src/apps/inquiries/models.py:1215
 msgid "Particular"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1314
+#: src/apps/inquiries/models.py:1216
 msgid "Empresa o profesional"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1322
+#: src/apps/inquiries/models.py:1224
 #, fuzzy
 #| msgid "Destino para calcular el envío"
 msgid "destinatario del envío"
 msgstr "Destination for shipping calculation"
 
-#: src/apps/inquiries/models.py:1323
+#: src/apps/inquiries/models.py:1225
 #, fuzzy
 #| msgid "Teléfono del destinatario"
 msgid "teléfono de envío"
 msgstr "Recipient phone"
 
-#: src/apps/inquiries/models.py:1324
+#: src/apps/inquiries/models.py:1226
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "dirección de envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1326
+#: src/apps/inquiries/models.py:1228
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "información adicional de envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1328
+#: src/apps/inquiries/models.py:1230
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "ciudad de envío"
 msgstr "Payment reference"
 
-#: src/apps/inquiries/models.py:1329
+#: src/apps/inquiries/models.py:1231
 #, fuzzy
 #| msgid "Coincide con la dirección de envío"
 msgid "provincia o región de envío"
 msgstr "Same as the shipping address"
 
-#: src/apps/inquiries/models.py:1330
+#: src/apps/inquiries/models.py:1232
 #, fuzzy
 #| msgid "Código postal de destino"
 msgid "código postal de envío"
 msgstr "Destination postal code"
 
-#: src/apps/inquiries/models.py:1331
+#: src/apps/inquiries/models.py:1233
 #, fuzzy
 #| msgid "País de destino"
 msgid "país de envío"
 msgstr "Destination country"
 
-#: src/apps/inquiries/models.py:1333
+#: src/apps/inquiries/models.py:1235
 #, fuzzy
 #| msgid "Datos de entrega y facturación"
 msgid "tipo de cliente de facturación"
 msgstr "Delivery and billing details"
 
-#: src/apps/inquiries/models.py:1339
+#: src/apps/inquiries/models.py:1241
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "facturación igual que envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1341
+#: src/apps/inquiries/models.py:1243
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "nombre o razón social de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1342
+#: src/apps/inquiries/models.py:1244
 #, fuzzy
 #| msgid "Tipo de facturación"
 msgid "NIF / VAT de facturación"
 msgstr "Billing customer type"
 
-#: src/apps/inquiries/models.py:1343
+#: src/apps/inquiries/models.py:1245
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "dirección de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1345
+#: src/apps/inquiries/models.py:1247
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "información adicional de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1347
+#: src/apps/inquiries/models.py:1249
 #, fuzzy
 #| msgid "Identidad de facturación"
 msgid "ciudad de facturación"
 msgstr "Billing identity"
 
-#: src/apps/inquiries/models.py:1349
+#: src/apps/inquiries/models.py:1251
 #, fuzzy
 #| msgid "Provincia / región / estado de facturación"
 msgid "provincia o región de facturación"
 msgstr "Billing province / region / state"
 
-#: src/apps/inquiries/models.py:1351
+#: src/apps/inquiries/models.py:1253
 #, fuzzy
 #| msgid "Código postal de facturación"
 msgid "código postal de facturación"
 msgstr "Billing postal code"
 
-#: src/apps/inquiries/models.py:1352
+#: src/apps/inquiries/models.py:1254
 #, fuzzy
 #| msgid "País de facturación"
 msgid "país de facturación"
 msgstr "Billing country"
 
-#: src/apps/inquiries/models.py:1353
+#: src/apps/inquiries/models.py:1255
 msgid "completado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1358 src/apps/inquiries/models.py:1359
+#: src/apps/inquiries/models.py:1260 src/apps/inquiries/models.py:1261
 #, fuzzy
 #| msgid "Datos de envío y facturación"
 msgid "datos de envío y facturación"
 msgstr "Shipping and billing details"
 
-#: src/apps/inquiries/models.py:1488
+#: src/apps/inquiries/models.py:1387
 #, fuzzy
 #| msgid "Cantidad solicitada"
 msgid "cantidad solicitada"
 msgstr "Requested quantity"
 
-#: src/apps/inquiries/models.py:1489
+#: src/apps/inquiries/models.py:1388
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "nota del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:1491
+#: src/apps/inquiries/models.py:1390
 #, fuzzy
 #| msgid "Último precio conocido"
 msgid "último precio conocido al solicitar"
 msgstr "Last known price"
 
-#: src/apps/inquiries/models.py:1501
+#: src/apps/inquiries/models.py:1400
 #, fuzzy
 #| msgid "Ver carrito de solicitudes"
 msgid "artículo solicitado"
 msgstr "View request cart"
 
-#: src/apps/inquiries/models.py:1502
+#: src/apps/inquiries/models.py:1401
 #, fuzzy
 #| msgid "No hay artículos registrados."
 msgid "artículos solicitados"
@@ -1931,48 +1930,48 @@ msgid ""
 "continuar."
 msgstr "Your request cart is empty. Add at least one product to continue."
 
-#: src/apps/inquiries/views.py:72
+#: src/apps/inquiries/views.py:69
 #: src/templates/inquiries/public_submit.html:136
 msgid "Enviar solicitud"
 msgstr "Submit request"
 
-#: src/apps/inquiries/views.py:86
+#: src/apps/inquiries/views.py:82
 msgid "Su carrito de solicitudes está vacío. Añada productos antes de enviar."
 msgstr "Your request cart is empty. Add products before submitting."
 
-#: src/apps/inquiries/views.py:97
+#: src/apps/inquiries/views.py:93
 msgid ""
 "No se ha podido registrar su solicitud. Revise los datos del carrito e "
 "inténtelo de nuevo."
 msgstr "We could not register your request. Check cart data and try again."
 
-#: src/apps/inquiries/views.py:116
+#: src/apps/inquiries/views.py:112
 #, python-format
 msgid "Solicitud enviada correctamente. Código de consulta: %(reference)s"
 msgstr "Request submitted successfully. Inquiry code: %(reference)s"
 
-#: src/apps/inquiries/views.py:119
+#: src/apps/inquiries/views.py:115
 #, python-format
 msgid ""
 "Solicitud enviada correctamente. Código general de la solicitud: "
 "%(reference)s"
 msgstr "Request submitted successfully. General request code: %(reference)s"
 
-#: src/apps/inquiries/views.py:237
+#: src/apps/inquiries/views.py:240
 msgid "Solicitud enviada"
 msgstr "Request submitted"
 
-#: src/apps/inquiries/views.py:286
+#: src/apps/inquiries/views.py:287
 #, fuzzy
 #| msgid "Oferta confirmada disponible: %(reference)s"
 msgid "Oferta no disponible"
 msgstr "Confirmed offer available: %(reference)s"
 
-#: src/apps/inquiries/views.py:291
+#: src/apps/inquiries/views.py:292
 msgid "Oferta confirmada"
 msgstr "Confirmed offer"
 
-#: src/apps/inquiries/views.py:292
+#: src/apps/inquiries/views.py:293
 msgid "Revise el importe confirmado y el plazo estimado antes de responder."
 msgstr "Review the confirmed amount and estimated lead time before responding."
 
@@ -1984,11 +1983,11 @@ msgstr "Offer accepted"
 msgid "Ha aceptado esta oferta. El siguiente paso es la gestión del pago."
 msgstr "You have accepted this offer. The next step is payment processing."
 
-#: src/apps/inquiries/views.py:301
+#: src/apps/inquiries/views.py:298
 msgid "Oferta rechazada"
 msgstr "Offer rejected"
 
-#: src/apps/inquiries/views.py:303
+#: src/apps/inquiries/views.py:300
 msgid ""
 "Ha rechazado esta oferta. Si necesita revisar alternativas, puede contactar "
 "con nuestro equipo."
@@ -1996,25 +1995,25 @@ msgstr ""
 "You have rejected this offer. If you need to review alternatives, you can "
 "contact our team."
 
-#: src/apps/inquiries/views.py:307
+#: src/apps/inquiries/views.py:304
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "Oferta caducada"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/views.py:309 src/apps/inquiries/views.py:338
-#: src/apps/inquiries/views.py:592
+#: src/apps/inquiries/views.py:306 src/apps/inquiries/views.py:334
+#: src/apps/inquiries/views.py:588
 #: src/templates/inquiries/public_offer_detail.html:32
 msgid ""
-"El plazo para responder a esta oferta ha vencido. Si sigue habiendo "
-"disponibilidad, puede solicitar una nueva oferta."
+"La vigencia de esta oferta ha finalizado. Si sigue habiendo disponibilidad, "
+"puede solicitar una nueva oferta."
 msgstr ""
 
-#: src/apps/inquiries/views.py:330
+#: src/apps/inquiries/views.py:326
 msgid "La respuesta seleccionada no es válida."
 msgstr "The selected response is not valid."
 
-#: src/apps/inquiries/views.py:350
+#: src/apps/inquiries/views.py:346
 msgid ""
 "Esta oferta ya tiene una respuesta registrada. Puede revisar su estado "
 "actual."
@@ -2022,42 +2021,42 @@ msgstr ""
 "This offer already has a registered response. You can review its current "
 "status."
 
-#: src/apps/inquiries/views.py:360
+#: src/apps/inquiries/views.py:356
 msgid "Oferta aceptada. A continuación verá el siguiente paso para el pago."
 msgstr "Offer accepted. You will now see the next payment step."
 
-#: src/apps/inquiries/views.py:368
+#: src/apps/inquiries/views.py:364
 msgid "Ha rechazado la oferta."
 msgstr "You have rejected the offer."
 
-#: src/apps/inquiries/views.py:403
+#: src/apps/inquiries/views.py:399
 msgid "Este pago ya no admite cambios en los datos de envío."
 msgstr "This payment no longer allows shipping detail changes."
 
-#: src/apps/inquiries/views.py:408
+#: src/apps/inquiries/views.py:404
 msgid "Falta el destino cotizado. Contacte con nuestro equipo antes de pagar."
 msgstr "The quoted destination is missing. Contact our team before paying."
 
-#: src/apps/inquiries/views.py:413
+#: src/apps/inquiries/views.py:409
 msgid "Datos de envío y facturación guardados."
 msgstr "Shipping and billing details saved."
 
-#: src/apps/inquiries/views.py:423
+#: src/apps/inquiries/views.py:419
 msgid "Datos de envío y facturación"
 msgstr "Shipping and billing details"
 
-#: src/apps/inquiries/views.py:465 src/apps/inquiries/views.py:485
+#: src/apps/inquiries/views.py:461 src/apps/inquiries/views.py:481
 msgid "Complete y revise los datos de envío y facturación antes de pagar."
 msgstr "Complete and review the shipping and billing details before paying."
 
-#: src/apps/inquiries/views.py:495
+#: src/apps/inquiries/views.py:491
 #: src/templates/inquiries/public_offer_payment_cancel.html:17
 msgid ""
-"El plazo para pagar esta oferta ha vencido. Si sigue habiendo "
-"disponibilidad, solicite una nueva oferta."
+"La vigencia de esta oferta ha finalizado. Si sigue habiendo disponibilidad, "
+"solicite una nueva oferta."
 msgstr ""
 
-#: src/apps/inquiries/views.py:504
+#: src/apps/inquiries/views.py:500
 #, fuzzy
 #| msgid ""
 #| "Esta oferta fue rechazada. Si necesita revisar alternativas, contacte con "
@@ -2069,7 +2068,7 @@ msgstr ""
 "This offer was rejected. If you need to review alternatives, contact our "
 "team."
 
-#: src/apps/inquiries/views.py:523
+#: src/apps/inquiries/views.py:519
 #, fuzzy
 #| msgid ""
 #| "El modelo indicado no está disponible para este contexto de "
@@ -2079,7 +2078,7 @@ msgid ""
 "notificado."
 msgstr "The selected model is not available for this compatibility context."
 
-#: src/apps/inquiries/views.py:536
+#: src/apps/inquiries/views.py:532
 #, fuzzy
 #| msgid ""
 #| "No se ha podido registrar su solicitud. Revise los datos del carrito e "
@@ -2089,11 +2088,11 @@ msgid ""
 "minutos."
 msgstr "We could not register your request. Check cart data and try again."
 
-#: src/apps/inquiries/views.py:548
+#: src/apps/inquiries/views.py:544
 msgid "Paso de pago"
 msgstr "Payment step"
 
-#: src/apps/inquiries/views.py:576
+#: src/apps/inquiries/views.py:572
 msgid ""
 "Esta oferta aún está pendiente de su respuesta. Acepte la oferta para "
 "avanzar al pago."
@@ -2101,7 +2100,7 @@ msgstr ""
 "This offer is still awaiting your response. Accept the offer to proceed to "
 "payment."
 
-#: src/apps/inquiries/views.py:584
+#: src/apps/inquiries/views.py:580
 msgid ""
 "Esta oferta fue rechazada. Si necesita revisar alternativas, contacte con "
 "nuestro equipo."
@@ -2109,21 +2108,21 @@ msgstr ""
 "This offer was rejected. If you need to review alternatives, contact our "
 "team."
 
-#: src/apps/inquiries/views.py:599
+#: src/apps/inquiries/views.py:595
 msgid "Esta oferta todavía no está disponible para continuar al paso de pago."
 msgstr "This offer is not yet available to continue to the payment step."
 
-#: src/apps/inquiries/views.py:634 src/apps/inquiries/views.py:684
+#: src/apps/inquiries/views.py:630 src/apps/inquiries/views.py:680
 msgid "No se ha encontrado un pago activo para esta oferta."
 msgstr ""
 
-#: src/apps/inquiries/views.py:648
+#: src/apps/inquiries/views.py:644
 #, fuzzy
 #| msgid "Configuración base"
 msgid "Confirmación de pago"
 msgstr "Base configuration"
 
-#: src/apps/inquiries/views.py:698
+#: src/apps/inquiries/views.py:694
 msgid "Pago no completado"
 msgstr ""
 
@@ -2165,11 +2164,11 @@ msgstr "Quick search"
 msgid "SEO"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:73 src/apps/vehicles/models.py:103
+#: src/apps/suppliers/admin.py:72 src/apps/vehicles/models.py:103
 msgid "Proveedor"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:84 src/templates/base.html:65
+#: src/apps/suppliers/admin.py:83 src/templates/base.html:65
 #: src/templates/base.html:142 src/templates/base.html:254
 #: src/templates/inquiries/public_success.html:76
 #: src/templates/pages/contact.html:5 src/templates/pages/contact.html:10
@@ -2177,60 +2176,98 @@ msgstr ""
 msgid "Contacto"
 msgstr "Contact"
 
-#: src/apps/suppliers/admin.py:97
+#: src/apps/suppliers/admin.py:96
 msgid "Notificaciones automáticas al proveedor"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:100
+#: src/apps/suppliers/admin.py:99
 msgid ""
 "Si una plantilla personalizada está vacía, se utiliza la plantilla "
 "predeterminada. Si falta el correo específico del evento, se utiliza el "
 "correo de pedidos."
 msgstr ""
 
-#: src/apps/suppliers/admin.py:114
+#: src/apps/suppliers/admin.py:113
 #, fuzzy
 #| msgid "Contacto comercial"
 msgid "Plazos comerciales"
 msgstr "Commercial contact"
 
-#: src/apps/suppliers/admin.py:117
+#: src/apps/suppliers/admin.py:116
 msgid ""
 "Estos valores definen los plazos de respuesta y pago del cliente. Si una "
 "solicitud incluye varios proveedores, se aplica el plazo configurado más "
 "corto."
 msgstr ""
 
-#: src/apps/suppliers/admin.py:128
+#: src/apps/suppliers/admin.py:126
 msgid "Notificaciones automáticas: oferta enviada"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:140
+#: src/apps/suppliers/admin.py:138
 msgid "Notificaciones automáticas: oferta aceptada"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:150
+#: src/apps/suppliers/admin.py:148
 msgid "Notificaciones automáticas: oferta rechazada"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:160
+#: src/apps/suppliers/admin.py:158
 msgid "Notificaciones automáticas: pago confirmado"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:170
+#: src/apps/suppliers/admin.py:168
 msgid "Notificaciones automáticas: oferta caducada"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:179
+#: src/apps/suppliers/admin.py:177
 msgid "Notificaciones automáticas: pago caducado"
 msgstr ""
 
-#: src/apps/suppliers/admin.py:203
+#: src/apps/suppliers/admin.py:201
 msgid "Asignaciones activas"
 msgstr ""
 
 #: src/apps/suppliers/apps.py:8
 msgid "Proveedores"
+msgstr ""
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:22
+#: src/apps/suppliers/models.py:84
+msgid ""
+"Número máximo de horas desde el envío para aceptar la oferta y completar el "
+"pago."
+msgstr ""
+"Maximum number of hours from sending to accept the offer and complete "
+"payment."
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:25
+#: src/apps/suppliers/models.py:81
+msgid "horas de vigencia de la oferta"
+msgstr "offer validity hours"
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:38
+#: src/apps/suppliers/models.py:120
+msgid ""
+"Activa el aviso automático al proveedor cuando una oferta caduca sin "
+"aceptación."
+msgstr ""
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:41
+#: src/apps/suppliers/models.py:117
+msgid "enviar automáticamente al caducar una oferta"
+msgstr ""
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:50
+#: src/apps/suppliers/models.py:127
+msgid ""
+"Activa el aviso automático al proveedor cuando caduca una oferta aceptada "
+"sin pago."
+msgstr ""
+
+#: src/apps/suppliers/migrations/0010_unify_offer_validity.py:53
+#: src/apps/suppliers/models.py:124
+msgid "enviar automáticamente al caducar un pago"
 msgstr ""
 
 #: src/apps/suppliers/models.py:11
@@ -2341,195 +2378,157 @@ msgid ""
 "correo de pedidos."
 msgstr ""
 
-#: src/apps/suppliers/models.py:81
-#, fuzzy
-#| msgid "Responder a la oferta"
-msgid "horas para responder a la oferta"
-msgstr "Respond to this offer"
-
-#: src/apps/suppliers/models.py:84
-msgid ""
-"Número máximo de horas para que el cliente acepte o rechace una oferta "
-"enviada."
-msgstr ""
-
-#: src/apps/suppliers/models.py:88
-msgid "horas para pagar una oferta aceptada"
-msgstr ""
-
-#: src/apps/suppliers/models.py:91
-msgid "Número máximo de horas para pagar después de aceptar una oferta."
-msgstr ""
-
-#: src/apps/suppliers/models.py:95
+#: src/apps/suppliers/models.py:89
 msgid "enviar automáticamente al enviar una oferta"
 msgstr ""
 
-#: src/apps/suppliers/models.py:98
+#: src/apps/suppliers/models.py:92
 msgid "Activa el aviso automático al proveedor cuando se envía una oferta."
 msgstr ""
 
-#: src/apps/suppliers/models.py:102
+#: src/apps/suppliers/models.py:96
 #, fuzzy
 #| msgid "El cliente ha aceptado una oferta."
 msgid "enviar automáticamente al aceptar una oferta"
 msgstr "The customer has accepted an offer."
 
-#: src/apps/suppliers/models.py:105
+#: src/apps/suppliers/models.py:99
 msgid ""
 "Activa el aviso automático al proveedor cuando el cliente acepta una oferta."
 msgstr ""
 
-#: src/apps/suppliers/models.py:109
+#: src/apps/suppliers/models.py:103
 #, fuzzy
 #| msgid "El cliente ha rechazado una oferta."
 msgid "enviar automáticamente al rechazar una oferta"
 msgstr "The customer has rejected an offer."
 
-#: src/apps/suppliers/models.py:112
+#: src/apps/suppliers/models.py:106
 msgid ""
 "Activa el aviso automático al proveedor cuando el cliente rechaza una oferta."
 msgstr ""
 
-#: src/apps/suppliers/models.py:116
+#: src/apps/suppliers/models.py:110
 msgid "enviar automáticamente al confirmar un pago"
 msgstr ""
 
-#: src/apps/suppliers/models.py:119
+#: src/apps/suppliers/models.py:113
 msgid "Activa el aviso automático al proveedor cuando se confirma el pago."
 msgstr ""
 
-#: src/apps/suppliers/models.py:123
-msgid "enviar automáticamente al caducar una oferta"
-msgstr ""
-
-#: src/apps/suppliers/models.py:126
-msgid ""
-"Activa el aviso automático al proveedor cuando una oferta caduca sin "
-"respuesta."
-msgstr ""
-
-#: src/apps/suppliers/models.py:130
-msgid "enviar automáticamente al caducar un pago"
-msgstr ""
-
-#: src/apps/suppliers/models.py:133
-msgid "Activa el aviso automático al proveedor cuando caduca el plazo de pago."
-msgstr ""
-
-#: src/apps/suppliers/models.py:137
+#: src/apps/suppliers/models.py:131
 msgid "enviar automáticamente al recibir una solicitud"
 msgstr ""
 
-#: src/apps/suppliers/models.py:140
+#: src/apps/suppliers/models.py:134
 msgid "Activa el aviso automático al proveedor al recibir una solicitud."
 msgstr ""
 
-#: src/apps/suppliers/models.py:144
+#: src/apps/suppliers/models.py:138
 #, fuzzy
 #| msgid "Se ha generado una nueva solicitud."
 msgid "enviar copia interna de nuevas solicitudes"
 msgstr "A new spare parts inquiry has been submitted."
 
-#: src/apps/suppliers/models.py:147
+#: src/apps/suppliers/models.py:141
 msgid ""
 "Envía una copia interna oculta de los avisos automáticos de nuevas "
 "solicitudes."
 msgstr ""
 
-#: src/apps/suppliers/models.py:151
+#: src/apps/suppliers/models.py:145
 msgid "enviar copia interna de ofertas enviadas"
 msgstr ""
 
-#: src/apps/suppliers/models.py:154
+#: src/apps/suppliers/models.py:148
 msgid "Envía una copia interna oculta de los avisos de ofertas enviadas."
 msgstr ""
 
-#: src/apps/suppliers/models.py:158
+#: src/apps/suppliers/models.py:152
 msgid "enviar copia interna de ofertas aceptadas"
 msgstr ""
 
-#: src/apps/suppliers/models.py:161
+#: src/apps/suppliers/models.py:155
 msgid "Envía una copia interna oculta de los avisos de ofertas aceptadas."
 msgstr ""
 
-#: src/apps/suppliers/models.py:165
+#: src/apps/suppliers/models.py:159
 msgid "enviar copia interna de ofertas rechazadas"
 msgstr ""
 
-#: src/apps/suppliers/models.py:168
+#: src/apps/suppliers/models.py:162
 msgid "Envía una copia interna oculta de los avisos de ofertas rechazadas."
 msgstr ""
 
-#: src/apps/suppliers/models.py:172
+#: src/apps/suppliers/models.py:166
 msgid "enviar copia interna de pagos confirmados"
 msgstr ""
 
-#: src/apps/suppliers/models.py:175
+#: src/apps/suppliers/models.py:169
 msgid "Envía una copia interna oculta de los avisos de pagos confirmados."
 msgstr ""
 
-#: src/apps/suppliers/models.py:179
+#: src/apps/suppliers/models.py:173
 #, fuzzy
 #| msgid "Se ha generado una nueva solicitud."
 msgid "plantilla del asunto para nuevas solicitudes"
 msgstr "A new spare parts inquiry has been submitted."
 
-#: src/apps/suppliers/models.py:182
+#: src/apps/suppliers/models.py:176
 msgid ""
 "Plantilla opcional del asunto. Admite variables de Django como inquiry, "
 "supplier e items."
 msgstr ""
 
-#: src/apps/suppliers/models.py:187
+#: src/apps/suppliers/models.py:181
 #, fuzzy
 #| msgid "Se ha generado una nueva solicitud."
 msgid "plantilla del cuerpo para nuevas solicitudes"
 msgstr "A new spare parts inquiry has been submitted."
 
-#: src/apps/suppliers/models.py:190
+#: src/apps/suppliers/models.py:184
 msgid ""
 "Plantilla opcional del cuerpo. Admite variables de Django como inquiry, "
 "supplier e items."
 msgstr ""
 
-#: src/apps/suppliers/models.py:195
+#: src/apps/suppliers/models.py:189
 msgid "plantilla del asunto para ofertas enviadas"
 msgstr ""
 
-#: src/apps/suppliers/models.py:198
+#: src/apps/suppliers/models.py:192
 msgid ""
 "Plantilla opcional del asunto. Admite variables de Django como offer, "
 "inquiry, supplier e items."
 msgstr ""
 
-#: src/apps/suppliers/models.py:203
+#: src/apps/suppliers/models.py:197
 msgid "plantilla del cuerpo para ofertas enviadas"
 msgstr ""
 
-#: src/apps/suppliers/models.py:206
+#: src/apps/suppliers/models.py:200
 msgid ""
 "Plantilla opcional del cuerpo. Admite variables de Django como offer, "
 "inquiry, supplier e items."
 msgstr ""
 
-#: src/apps/suppliers/models.py:210
+#: src/apps/suppliers/models.py:204
 #, fuzzy
 #| msgid "Datos de contacto"
 msgid "teléfono de contacto"
 msgstr "Contact details"
 
-#: src/apps/suppliers/models.py:217
+#: src/apps/suppliers/models.py:211
 msgid "proveedores"
 msgstr ""
 
-#: src/apps/suppliers/models.py:245
+#: src/apps/suppliers/models.py:239
 #, fuzzy
 #| msgid "Paginación de productos"
 msgid "asignación de usuario a proveedor"
 msgstr "Product pagination"
 
-#: src/apps/suppliers/models.py:246
+#: src/apps/suppliers/models.py:240
 msgid "asignaciones de usuarios a proveedores"
 msgstr ""
 
@@ -3567,13 +3566,11 @@ msgstr ""
 #: src/templates/inquiries/emails/customer_group_submission_body.txt:9
 #, python-format
 msgid ""
-"Si confirmamos disponibilidad, recibirá una oferta con un plazo máximo de "
-"%(offer_hours)s horas para aceptarla o rechazarla y, una vez aceptada, "
-"dispondrá de un máximo de %(payment_hours)s horas para completar su pago."
+"Si confirmamos disponibilidad, recibirá una oferta con una vigencia de "
+"%(validity_hours)s horas para aceptarla y completar el pago."
 msgstr ""
-"If we confirm availability, you will receive an offer with a maximum of "
-"%(offer_hours)s hours to accept or reject it and, once accepted, you will "
-"have up to %(payment_hours)s hours to complete payment."
+"If we confirm availability, you will receive an offer valid for "
+"%(validity_hours)s hours to accept it and complete payment."
 
 #: src/templates/inquiries/emails/customer_group_submission_body.txt:10
 #, python-format
@@ -3619,13 +3616,11 @@ msgstr ""
 #: src/templates/inquiries/emails/customer_group_submission_body.txt:21
 #, python-format
 msgid ""
-"Si confirmamos disponibilidad, cada oferta tendrá un plazo máximo de "
-"%(offer_hours)s horas para aceptarla o rechazarla y, una vez aceptada, "
-"dispondrá de un máximo de %(payment_hours)s horas para completar su pago."
+"Si confirmamos disponibilidad, cada oferta tendrá una vigencia de "
+"%(validity_hours)s horas para aceptarla y completar el pago."
 msgstr ""
-"If we confirm availability, each offer will have a maximum of "
-"%(offer_hours)s hours to be accepted or rejected and, once accepted, you "
-"will have up to %(payment_hours)s hours to complete payment."
+"If we confirm availability, each offer will be valid for %(validity_hours)s "
+"hours to accept it and complete payment."
 
 #: src/templates/inquiries/emails/customer_group_submission_body.txt:25
 #, python-format
@@ -3710,10 +3705,8 @@ msgid "Actualización de su solicitud: %(reference)s"
 msgstr "Inquiry update: %(reference)s"
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:2
-msgid ""
-"La oferta asociada a su solicitud ha caducado por falta de respuesta dentro "
-"del plazo establecido."
-msgstr ""
+msgid "La vigencia de la oferta asociada a su solicitud ha finalizado."
+msgstr "The offer associated with your inquiry is no longer valid."
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:4
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:5
@@ -3742,10 +3735,13 @@ msgid "Referencia de oferta: %(offer_reference)s"
 msgstr "Offer reference: %(offer_reference)s"
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:6
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:10
+#: src/templates/inquiries/emails/customer_payment_expired_body.txt:7
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:6
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:7
 #, python-format
-msgid "Fecha límite de respuesta: %(deadline)s"
-msgstr ""
+msgid "Oferta válida hasta: %(deadline)s"
+msgstr "Offer valid until: %(deadline)s"
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:9
 msgid ""
@@ -3754,22 +3750,21 @@ msgid ""
 msgstr ""
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:10
-#: src/templates/inquiries/emails/customer_payment_expired_body.txt:11
+#: src/templates/inquiries/emails/customer_payment_expired_body.txt:12
 msgid "Puede revisar el estado de la oferta aquí:"
 msgstr ""
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:14
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:23
-#: src/templates/inquiries/emails/customer_payment_expired_body.txt:15
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:22
+#: src/templates/inquiries/emails/customer_payment_expired_body.txt:16
 #, python-format
 msgid "Si necesita ayuda, responda a %(reply_to)s indicando sus referencias."
 msgstr "If you need help, reply to %(reply_to)s and include your references."
 
 #: src/templates/inquiries/emails/customer_offer_expired_subject.txt:1
-#, fuzzy, python-format
-#| msgid "Oferta aceptada por cliente: %(reference)s"
+#, python-format
 msgid "Oferta caducada: %(reference)s"
-msgstr "Offer accepted by customer: %(reference)s"
+msgstr "Offer expired: %(reference)s"
 
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:2
 #, python-format
@@ -3795,24 +3790,12 @@ msgstr "Confirmed total amount: %(total)s %(currency)s"
 msgid "Plazo estimado: %(lead_time)s"
 msgstr "Estimated lead time: %(lead_time)s"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:10
-#, python-format
-msgid "Fecha límite para responder a la oferta: %(response_deadline)s"
-msgstr ""
-
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:11
 #, python-format
-msgid "Ventana máxima de respuesta: %(response_hours)s horas"
-msgstr ""
+msgid "Vigencia de la oferta: %(validity_hours)s horas"
+msgstr "Offer validity: %(validity_hours)s hours"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:12
-#, python-format
-msgid ""
-"Si acepta la oferta, tendrá un máximo de %(payment_hours)s horas para "
-"completar el pago."
-msgstr ""
-
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:14
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:13
 msgid ""
 "La disponibilidad final se confirma en el momento de tramitación del pago. "
 "Si hubiera un cambio relevante, le contactaremos antes de continuar."
@@ -3820,23 +3803,20 @@ msgstr ""
 "Final availability is confirmed at the time of payment processing. If there "
 "is any relevant change, we will contact you before continuing."
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:16
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:15
 msgid "Mensaje comercial:"
 msgstr "Commercial message:"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:19
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:18
 msgid ""
 "Revise la oferta y responda (aceptar o rechazar) desde este enlace seguro:"
 msgstr ""
 "Review the offer and respond (accept or reject) using this secure link:"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:21
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:20
 msgid ""
-"Este correo no incluye pago online en esta fase. Tras su aceptación, le "
-"guiaremos con el siguiente paso."
+"Tras su aceptación, le guiaremos al pago sin ampliar la vigencia indicada."
 msgstr ""
-"This email does not include online payment at this stage. After acceptance, "
-"we will guide you through the next step."
 
 #: src/templates/inquiries/emails/customer_offer_sent_subject.txt:1
 #, python-format
@@ -3844,7 +3824,9 @@ msgid "Oferta confirmada disponible: %(reference)s"
 msgstr "Confirmed offer available: %(reference)s"
 
 #: src/templates/inquiries/emails/customer_payment_expired_body.txt:2
-msgid "El plazo para completar el pago de su oferta aceptada ha vencido."
+msgid ""
+"La vigencia de su oferta aceptada ha finalizado sin que se completara el "
+"pago."
 msgstr ""
 
 #: src/templates/inquiries/emails/customer_payment_expired_body.txt:6
@@ -3856,23 +3838,21 @@ msgstr ""
 msgid "Referencia de pago: %(payment_reference)s"
 msgstr "Offer reference: %(offer_reference)s"
 
-#: src/templates/inquiries/emails/customer_payment_expired_body.txt:7
-#: src/templates/inquiries/emails/internal_payment_expired_body.txt:7
+#: src/templates/inquiries/emails/customer_payment_expired_body.txt:8
 #, python-format
-msgid "Fecha límite de pago: %(deadline)s"
-msgstr ""
+msgid "La sesión de pago iniciada estuvo disponible hasta: %(deadline)s"
+msgstr "The initiated payment session was available until: %(deadline)s"
 
-#: src/templates/inquiries/emails/customer_payment_expired_body.txt:10
+#: src/templates/inquiries/emails/customer_payment_expired_body.txt:11
 msgid ""
 "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta y "
 "continuar el proceso desde el inicio."
 msgstr ""
 
 #: src/templates/inquiries/emails/customer_payment_expired_subject.txt:1
-#, fuzzy, python-format
-#| msgid "Referencia: %(reference)s"
-msgid "Plazo de pago vencido: %(reference)s"
-msgstr "Reference: %(reference)s"
+#, python-format
+msgid "Oferta aceptada caducada: %(reference)s"
+msgstr "Accepted offer expired: %(reference)s"
 
 #: src/templates/inquiries/emails/customer_payment_paid_body.txt:2
 #, fuzzy
@@ -3956,10 +3936,11 @@ msgstr ""
 #: src/templates/inquiries/emails/customer_submission_body.txt:14
 #, python-format
 msgid ""
-"Si confirmamos disponibilidad, la oferta tendrá un plazo máximo de "
-"%(offer_hours)s horas para aceptarla o rechazarla y, una vez aceptada, "
-"dispondrá de un máximo de %(payment_hours)s horas para completar el pago."
+"Si confirmamos disponibilidad, la oferta tendrá una vigencia de "
+"%(validity_hours)s horas para aceptarla y completar el pago."
 msgstr ""
+"If we confirm availability, the offer will be valid for %(validity_hours)s "
+"hours to accept it and complete payment."
 
 #: src/templates/inquiries/emails/customer_submission_body.txt:17
 #, python-format
@@ -3985,13 +3966,13 @@ msgstr "Acceptance date: %(accepted_at)s"
 
 #: src/templates/inquiries/emails/internal_offer_accepted_body.txt:8
 #, python-format
-msgid "Ventana máxima para pago tras aceptación: %(hours)s horas"
-msgstr ""
+msgid "La oferta y su pago siguen vigentes hasta: %(deadline)s"
+msgstr "The offer and its payment remain valid until: %(deadline)s"
 
 #: src/templates/inquiries/emails/internal_offer_accepted_body.txt:10
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:10
 #: src/templates/inquiries/emails/internal_offer_rejected_body.txt:8
-#: src/templates/inquiries/emails/internal_payment_expired_body.txt:11
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:12
 #: src/templates/inquiries/emails/internal_payment_paid_body.txt:15
 #, python-format
 msgid "Email del cliente: %(email)s"
@@ -4000,7 +3981,7 @@ msgstr "Customer email: %(email)s"
 #: src/templates/inquiries/emails/internal_offer_accepted_body.txt:13
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:13
 #: src/templates/inquiries/emails/internal_offer_rejected_body.txt:11
-#: src/templates/inquiries/emails/internal_payment_expired_body.txt:14
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:15
 #: src/templates/inquiries/emails/internal_payment_paid_body.txt:18
 msgid "Enlace público de la oferta:"
 msgstr "Public offer link:"
@@ -4016,8 +3997,8 @@ msgstr "Offer accepted by customer: %(reference)s"
 
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:2
 msgid ""
-"La oferta ha pasado automáticamente a estado caducada por vencimiento de "
-"plazo de respuesta."
+"La oferta ha pasado automáticamente a estado caducada al finalizar su "
+"vigencia."
 msgstr ""
 
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:8
@@ -4027,7 +4008,7 @@ msgid "Fecha de caducidad aplicada: %(expired_at)s"
 msgstr "Acceptance date: %(accepted_at)s"
 
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:16
-#: src/templates/inquiries/emails/internal_payment_expired_body.txt:17
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:18
 msgid ""
 "Se ha enviado aviso al cliente para que solicite una nueva oferta en caso de "
 "mantener interés y disponibilidad."
@@ -4063,10 +4044,16 @@ msgstr "Offer rejected by customer: %(reference)s"
 
 #: src/templates/inquiries/emails/internal_payment_expired_body.txt:2
 msgid ""
-"El pago pendiente se ha cancelado automáticamente por vencimiento de plazo."
+"La oferta aceptada ha caducado y su pago pendiente se ha cancelado "
+"automáticamente."
 msgstr ""
 
-#: src/templates/inquiries/emails/internal_payment_expired_body.txt:9
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:8
+#, python-format
+msgid "Vencimiento técnico de Checkout: %(deadline)s"
+msgstr ""
+
+#: src/templates/inquiries/emails/internal_payment_expired_body.txt:10
 #, fuzzy, python-format
 #| msgid "Fecha de aceptación: %(accepted_at)s"
 msgid "Fecha de cancelación aplicada: %(cancelled_at)s"
@@ -4250,68 +4237,41 @@ msgid "Pendiente de confirmar"
 msgstr ""
 
 #: src/templates/inquiries/public_offer_detail.html:68
-msgid "Fecha límite para responder"
-msgstr ""
+#: src/templates/inquiries/public_offer_payment_placeholder.html:68
+msgid "Oferta válida hasta"
+msgstr "Offer valid until"
 
 #: src/templates/inquiries/public_offer_detail.html:74
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
-"                    Ventana de respuesta: %(hours)s horas\n"
+"                    Vigencia de la oferta: %(hours)s horas\n"
 "                  "
 msgstr ""
 "\n"
-"                  1 published product\n"
-"                "
+"                    Offer validity: %(hours)s hours\n"
+"                  "
 
 #: src/templates/inquiries/public_offer_detail.html:80
-#: src/templates/inquiries/public_offer_detail.html:94
 #: src/templates/inquiries/public_offer_payment_placeholder.html:73
 msgid "Pendiente de definir"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_detail.html:85
-msgid "Plazo para pagar tras aceptación"
-msgstr ""
-
-#: src/templates/inquiries/public_offer_detail.html:90
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "              Página %(current)s de %(total)s\n"
-#| "            "
-msgid ""
-"\n"
-"                %(hours)s horas desde la aceptación\n"
-"              "
-msgstr ""
-"\n"
-"              Page %(current)s of %(total)s\n"
-"            "
-
-#: src/templates/inquiries/public_offer_detail.html:102
+#: src/templates/inquiries/public_offer_detail.html:88
 #, fuzzy
 #| msgid "Mensaje comercial:"
 msgid "Mensaje comercial"
 msgstr "Commercial message:"
 
-#: src/templates/inquiries/public_offer_detail.html:103
+#: src/templates/inquiries/public_offer_detail.html:89
 msgid "Mensaje de nuestro equipo"
 msgstr "Message from our team"
 
-#: src/templates/inquiries/public_offer_detail.html:108
+#: src/templates/inquiries/public_offer_detail.html:94
 msgid "Aviso de disponibilidad"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_detail.html:109
+#: src/templates/inquiries/public_offer_detail.html:95
 msgid ""
 "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación "
 "del pago. Si hubiera un cambio relevante, le contactaremos antes de "
@@ -4321,17 +4281,17 @@ msgstr ""
 "processing. If there is any relevant change, we will contact you before "
 "continuing."
 
-#: src/templates/inquiries/public_offer_detail.html:113
+#: src/templates/inquiries/public_offer_detail.html:99
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Respuesta de oferta"
 msgstr "Offer summary:"
 
-#: src/templates/inquiries/public_offer_detail.html:114
+#: src/templates/inquiries/public_offer_detail.html:100
 msgid "Responder a la oferta"
 msgstr "Respond to this offer"
 
-#: src/templates/inquiries/public_offer_detail.html:116
+#: src/templates/inquiries/public_offer_detail.html:102
 msgid ""
 "Revise los datos y seleccione la opción que corresponda. Si acepta, pasará "
 "al siguiente paso de pago."
@@ -4339,11 +4299,11 @@ msgstr ""
 "Review the details and select the corresponding option. If you accept, you "
 "will proceed to the payment step."
 
-#: src/templates/inquiries/public_offer_detail.html:126
+#: src/templates/inquiries/public_offer_detail.html:112
 msgid "Aceptar oferta y proceder al pago"
 msgstr "Accept offer and proceed to payment"
 
-#: src/templates/inquiries/public_offer_detail.html:134
+#: src/templates/inquiries/public_offer_detail.html:120
 msgid "Rechazar oferta"
 msgstr "Reject offer"
 
@@ -4517,55 +4477,56 @@ msgstr "Offer summary:"
 msgid "Importe pendiente"
 msgstr "Amount pending"
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:68
-msgid "Fecha límite de pago"
-msgstr ""
+#: src/templates/inquiries/public_offer_payment_placeholder.html:77
+#, python-format
+msgid "La sesión de Stripe iniciada estará disponible hasta %(deadline)s."
+msgstr "The initiated Stripe session will be available until %(deadline)s."
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:82
+#: src/templates/inquiries/public_offer_payment_placeholder.html:87
 msgid "Este pago ya figura como confirmado en nuestro sistema."
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:85
+#: src/templates/inquiries/public_offer_payment_placeholder.html:90
 #, fuzzy
 #| msgid "Aplicaciones del producto"
 msgid "Acciones de pago"
 msgstr "Product applications"
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:86
+#: src/templates/inquiries/public_offer_payment_placeholder.html:91
 #, fuzzy
 #| msgid "Continuar al paso de pago"
 msgid "Continuar a Stripe Checkout"
 msgstr "Continue to payment step"
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:88
+#: src/templates/inquiries/public_offer_payment_placeholder.html:93
 msgid ""
 "Al continuar, será redirigido a Stripe para finalizar el pago. No "
 "almacenamos datos de tarjeta en esta plataforma."
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:93
+#: src/templates/inquiries/public_offer_payment_placeholder.html:98
 msgid "Proceder al pago seguro"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:100
+#: src/templates/inquiries/public_offer_payment_placeholder.html:105
 msgid ""
-"El plazo de pago de esta oferta ha vencido. Si sigue habiendo "
-"disponibilidad, solicite una nueva oferta para continuar."
+"La vigencia de esta oferta ha finalizado. Si sigue habiendo disponibilidad, "
+"solicite una nueva oferta para continuar."
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:105
+#: src/templates/inquiries/public_offer_payment_placeholder.html:110
 msgid ""
 "Este pago no está en estado pendiente y no puede iniciarse desde esta "
 "pantalla."
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:111
+#: src/templates/inquiries/public_offer_payment_placeholder.html:116
 msgid ""
 "La página de retorno desde Stripe no es la fuente final de confirmación. El "
 "estado definitivo se valida mediante notificación técnica de la pasarela."
 msgstr ""
 
-#: src/templates/inquiries/public_offer_payment_placeholder.html:120
+#: src/templates/inquiries/public_offer_payment_placeholder.html:125
 msgid "Volver al detalle de la oferta"
 msgstr "Back to the offer detail"
 
@@ -4688,12 +4649,14 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                Si confirmamos disponibilidad, recibirá una oferta con un "
-"plazo máximo de %(offer_hours)s horas para aceptarla o rechazarla; tras su "
-"aceptación, el plazo máximo para completar el pago será de %(payment_hours)s "
-"horas.\n"
+"                Si confirmamos disponibilidad, recibirá una oferta con una "
+"vigencia de %(validity_hours)s horas para aceptarla y completar el pago.\n"
 "              "
 msgstr ""
+"\n"
+"                If we confirm availability, you will receive an offer valid "
+"for %(validity_hours)s hours to accept it and complete payment.\n"
+"              "
 
 #: src/templates/inquiries/public_success.html:9
 #, fuzzy
@@ -4712,7 +4675,9 @@ msgid_plural ""
 "Hemos registrado %(request_count)s consultas, una para cada producto "
 "solicitado."
 msgstr[0] "We have registered one product inquiry."
-msgstr[1] "We have registered %(request_count)s inquiries, one for each requested product."
+msgstr[1] ""
+"We have registered %(request_count)s inquiries, one for each requested "
+"product."
 
 #: src/templates/inquiries/public_success.html:22
 msgid "Código general de la solicitud"
@@ -4949,6 +4914,41 @@ msgstr ""
 msgid ""
 "Para cualquier consulta comercial o legal, utiliza la página de contacto."
 msgstr "For any commercial or legal inquiry, use the contact page."
+
+#~ msgid "Vencimiento de la sesión de pago"
+#~ msgstr "Payment session expiry"
+
+#~ msgid "Ventana técnica de la sesión de Stripe ya iniciada."
+#~ msgstr "Technical window for the Stripe session already started."
+
+#~ msgid "Coincide con la vigencia de la oferta."
+#~ msgstr "It matches the offer validity."
+
+#~ msgid ""
+#~ "Este correo no incluye pago online en esta fase. Tras su aceptación, le "
+#~ "guiaremos con el siguiente paso."
+#~ msgstr ""
+#~ "This email does not include online payment at this stage. After "
+#~ "acceptance, we will guide you through the next step."
+
+#, fuzzy, python-format
+#~| msgid "Referencia: %(reference)s"
+#~ msgid "Plazo de pago vencido: %(reference)s"
+#~ msgstr "Reference: %(reference)s"
+
+#, fuzzy, python-format
+#~| msgid ""
+#~| "\n"
+#~| "              Página %(current)s de %(total)s\n"
+#~| "            "
+#~ msgid ""
+#~ "\n"
+#~ "                %(hours)s horas desde la aceptación\n"
+#~ "              "
+#~ msgstr ""
+#~ "\n"
+#~ "              Page %(current)s of %(total)s\n"
+#~ "            "
 
 #~ msgid ""
 #~ "Use referencia OEM, referencias cruzadas o términos de vehículo para "

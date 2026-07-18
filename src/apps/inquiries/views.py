@@ -63,17 +63,13 @@ class PublicInquirySubmitView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cart_items = get_request_cart_items(self.request.session)
-        (
-            offer_response_deadline_hours,
-            payment_deadline_hours,
-        ) = _resolve_deadline_hours_for_cart_items(cart_items)
+        offer_validity_hours = _resolve_validity_hours_for_cart_items(cart_items)
         context.update(
             {
                 "page_title": _("Enviar solicitud"),
                 "cart_items": cart_items,
                 "total_quantity": sum(item.quantity for item in cart_items),
-                "offer_response_deadline_hours": offer_response_deadline_hours,
-                "payment_deadline_hours": payment_deadline_hours,
+                "offer_validity_hours": offer_validity_hours,
             }
         )
         return context
@@ -295,13 +291,9 @@ class PublicInquiryOfferDetailView(TemplateView):
 
         page_title = _("Oferta confirmada")
         page_intro = _("Revise el importe confirmado y el plazo estimado antes de responder.")
-        payment_deadline_at = None
         if self.offer.status == InquiryOffer.Status.ACCEPTED:
             page_title = _("Oferta aceptada")
             page_intro = _("Ha aceptado esta oferta. El siguiente paso es la gestión del pago.")
-            payment = InquiryOfferPayment.objects.filter(offer_id=self.offer.pk).first()
-            if payment is not None:
-                payment_deadline_at = payment.payment_deadline_at
         elif self.offer.status == InquiryOffer.Status.REJECTED:
             page_title = _("Oferta rechazada")
             page_intro = _(
@@ -311,7 +303,7 @@ class PublicInquiryOfferDetailView(TemplateView):
         elif self.offer.status == InquiryOffer.Status.EXPIRED:
             page_title = _("Oferta caducada")
             page_intro = _(
-                "El plazo para responder a esta oferta ha vencido. Si sigue habiendo "
+                "La vigencia de esta oferta ha finalizado. Si sigue habiendo "
                 "disponibilidad, puede solicitar una nueva oferta."
             )
 
@@ -324,7 +316,6 @@ class PublicInquiryOfferDetailView(TemplateView):
                 "is_accepted": self.offer.status == InquiryOffer.Status.ACCEPTED,
                 "is_rejected": self.offer.status == InquiryOffer.Status.REJECTED,
                 "is_expired": self.offer.status == InquiryOffer.Status.EXPIRED,
-                "payment_deadline_at": payment_deadline_at,
             }
         )
         return context
@@ -340,7 +331,7 @@ class PublicInquiryOfferDetailView(TemplateView):
             messages.info(
                 request,
                 _(
-                    "El plazo para responder a esta oferta ha vencido. "
+                    "La vigencia de esta oferta ha finalizado. "
                     "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta."
                 ),
             )
@@ -497,7 +488,7 @@ class PublicInquiryOfferPaymentView(TemplateView):
             messages.info(
                 request,
                 _(
-                    "El plazo para pagar esta oferta ha vencido. "
+                    "La vigencia de esta oferta ha finalizado. "
                     "Si sigue habiendo disponibilidad, solicite una nueva oferta."
                 ),
             )
@@ -555,7 +546,7 @@ class PublicInquiryOfferPaymentView(TemplateView):
                 "payment": self.payment,
                 "is_paid": self.payment.status == InquiryOfferPayment.Status.PAID,
                 "can_start_checkout": self.payment.status == InquiryOfferPayment.Status.PENDING,
-                "payment_deadline_at": self.payment.payment_deadline_at,
+                "checkout_expires_at": self.payment.checkout_expires_at,
                 "details": self.details,
             }
         )
@@ -594,7 +585,7 @@ class PublicInquiryOfferPaymentView(TemplateView):
             messages.info(
                 request,
                 _(
-                    "El plazo para responder a esta oferta ha vencido. "
+                    "La vigencia de esta oferta ha finalizado. "
                     "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta."
                 ),
             )
@@ -749,20 +740,15 @@ def _resolve_inquiry_language() -> str:
     return Inquiry.Language.SPANISH
 
 
-def _resolve_deadline_hours_for_cart_items(cart_items) -> tuple[int, int]:
-    response_candidates: list[int] = []
-    payment_candidates: list[int] = []
+def _resolve_validity_hours_for_cart_items(cart_items) -> int:
+    candidates: list[int] = []
     seen_supplier_ids: set[int] = set()
     for item in cart_items:
         supplier = item.product.supplier
         if supplier.pk is None or supplier.pk in seen_supplier_ids:
             continue
         seen_supplier_ids.add(supplier.pk)
-        if supplier.offer_response_deadline_hours > 0:
-            response_candidates.append(supplier.offer_response_deadline_hours)
-        if supplier.accepted_payment_deadline_hours > 0:
-            payment_candidates.append(supplier.accepted_payment_deadline_hours)
+        if supplier.offer_validity_hours > 0:
+            candidates.append(supplier.offer_validity_hours)
 
-    response_deadline_hours = min(response_candidates) if response_candidates else 24
-    payment_deadline_hours = min(payment_candidates) if payment_candidates else 24
-    return response_deadline_hours, payment_deadline_hours
+    return min(candidates) if candidates else 24

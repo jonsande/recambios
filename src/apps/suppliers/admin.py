@@ -25,8 +25,7 @@ class SupplierAdmin(admin.ModelAdmin):
         "code",
         "country",
         "orders_email",
-        "offer_response_deadline_hours",
-        "accepted_payment_deadline_hours",
+        "offer_validity_hours",
         "auto_send_inquiry_submitted_notification",
         "auto_send_offer_sent_notification",
         "auto_send_offer_accepted_notification",
@@ -119,8 +118,7 @@ class SupplierAdmin(admin.ModelAdmin):
                       "configurado más corto.")
                 ),
                 "fields": (
-                    "offer_response_deadline_hours",
-                    "accepted_payment_deadline_hours",
+                    "offer_validity_hours",
                 ),
             },
         ),

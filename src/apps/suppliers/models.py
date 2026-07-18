@@ -77,18 +77,12 @@ class Supplier(models.Model):
               "el correo de pedidos.")
         ),
     )
-    offer_response_deadline_hours = models.PositiveIntegerField(
-        _("horas para responder a la oferta"),
+    offer_validity_hours = models.PositiveIntegerField(
+        _("horas de vigencia de la oferta"),
         default=24,
         help_text=(
-            _("Número máximo de horas para que el cliente acepte o rechace una oferta enviada.")
-        ),
-    )
-    accepted_payment_deadline_hours = models.PositiveIntegerField(
-        _("horas para pagar una oferta aceptada"),
-        default=24,
-        help_text=(
-            _("Número máximo de horas para pagar después de aceptar una oferta.")
+            _("Número máximo de horas desde el envío para aceptar la oferta "
+              "y completar el pago.")
         ),
     )
     auto_send_offer_sent_notification = models.BooleanField(
@@ -123,14 +117,14 @@ class Supplier(models.Model):
         _("enviar automáticamente al caducar una oferta"),
         default=False,
         help_text=(
-            _("Activa el aviso automático al proveedor cuando una oferta caduca sin respuesta.")
+            _("Activa el aviso automático al proveedor cuando una oferta caduca sin aceptación.")
         ),
     )
     auto_send_payment_expired_notification = models.BooleanField(
         _("enviar automáticamente al caducar un pago"),
         default=False,
         help_text=(
-            _("Activa el aviso automático al proveedor cuando caduca el plazo de pago.")
+            _("Activa el aviso automático al proveedor cuando caduca una oferta aceptada sin pago.")
         ),
     )
     auto_send_inquiry_submitted_notification = models.BooleanField(

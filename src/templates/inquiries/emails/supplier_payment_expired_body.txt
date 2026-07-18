@@ -1,13 +1,15 @@
-Supplier notification regarding expired payment window
+Supplier notification regarding an accepted offer that expired without payment
 
 Payment reference: {{ payment.reference_code }}
 Offer reference: {{ offer.reference_code }}
 Inquiry reference: {{ inquiry.reference_code }}
 Supplier: {{ supplier.name }} ({{ supplier.code }})
-Payment deadline reached at: {{ payment_deadline_at }}
+Offer validity ended at: {{ valid_until }}
+{% if checkout_expires_at %}Checkout session expired at: {{ checkout_expires_at }}
+{% endif %}
 Cancelled at: {{ payment.cancelled_at }}
 
-The customer accepted the offer but did not complete payment within the agreed payment window.
+The customer accepted the offer but did not complete payment within its validity or active Checkout window.
 Please release any temporary reservation associated with this request and share any relevant availability update.
 
 Items for your supplier account:

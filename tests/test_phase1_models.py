@@ -99,8 +99,7 @@ def test_supplier_notification_fields_default_to_disabled_and_empty_templates() 
     assert supplier.payment_paid_notification_email == ""
     assert supplier.offer_expired_notification_email == ""
     assert supplier.payment_expired_notification_email == ""
-    assert supplier.offer_response_deadline_hours == 24
-    assert supplier.accepted_payment_deadline_hours == 24
+    assert supplier.offer_validity_hours == 24
     assert supplier.inquiry_submitted_email_subject_template == ""
     assert supplier.inquiry_submitted_email_body_template == ""
     assert supplier.offer_sent_email_subject_template == ""

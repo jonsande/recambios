@@ -65,12 +65,17 @@
           <dd class="mt-1"><span class="badge badge-neutral">{{ payment.get_status_display }}</span></dd>
         </div>
         <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Fecha límite de pago" %}</dt>
+          <dt class="font-medium text-text-muted">{% trans "Oferta válida hasta" %}</dt>
           <dd class="mt-1 text-text">
-            {% if payment_deadline_at %}
-              {{ payment_deadline_at }}
+            {% if offer.valid_until %}
+              {{ offer.valid_until }}
             {% else %}
               {% trans "Pendiente de definir" %}
+            {% endif %}
+            {% if checkout_expires_at and checkout_expires_at != offer.valid_until %}
+              <span class="block text-xs text-text-muted">
+                {% blocktrans with deadline=checkout_expires_at %}La sesión de Stripe iniciada estará disponible hasta {{ deadline }}.{% endblocktrans %}
+              </span>
             {% endif %}
           </dd>
         </div>
@@ -97,7 +102,7 @@
     {% elif payment.status == "cancelled" %}
       <section class="alert alert-warning">
         <p>
-          {% trans "El plazo de pago de esta oferta ha vencido. Si sigue habiendo disponibilidad, solicite una nueva oferta para continuar." %}
+          {% trans "La vigencia de esta oferta ha finalizado. Si sigue habiendo disponibilidad, solicite una nueva oferta para continuar." %}
         </p>
       </section>
     {% else %}

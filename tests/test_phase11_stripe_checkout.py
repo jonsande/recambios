@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -10,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.catalog.models import Brand, Category, Condition, Product
+from apps.inquiries.deadlines import expire_due_inquiry_deadlines
 from apps.inquiries.forms import InquiryOfferPaymentDetailsForm
 from apps.inquiries.models import (
     Inquiry,
@@ -35,8 +37,7 @@ def make_supplier(
     auto_send_payment_paid_notification: bool = False,
     payment_paid_notification_email: str = "",
     send_payment_paid_notification_internal_copy: bool = False,
-    offer_response_deadline_hours: int = 24,
-    accepted_payment_deadline_hours: int = 24,
+    offer_validity_hours: int = 24,
     auto_send_payment_expired_notification: bool = False,
     payment_expired_notification_email: str = "",
 ) -> Supplier:
@@ -47,8 +48,7 @@ def make_supplier(
         auto_send_payment_paid_notification=auto_send_payment_paid_notification,
         payment_paid_notification_email=payment_paid_notification_email,
         send_payment_paid_notification_internal_copy=send_payment_paid_notification_internal_copy,
-        offer_response_deadline_hours=offer_response_deadline_hours,
-        accepted_payment_deadline_hours=accepted_payment_deadline_hours,
+        offer_validity_hours=offer_validity_hours,
         auto_send_payment_expired_notification=auto_send_payment_expired_notification,
         payment_expired_notification_email=payment_expired_notification_email,
     )
@@ -59,7 +59,7 @@ def make_product(sku: str, *, supplier: Supplier | None = None) -> Product:
     brand = Brand.objects.create(name=f"Brand {sku}", slug=f"brand-{sku.lower()}")
     category = Category.objects.create(name=f"Category {sku}", slug=f"category-{sku.lower()}")
     condition = Condition.objects.create(
-        code=f"cond-{sku.lower()}",
+        code=f"cond-{sku.lower()}"[:32],
         name=f"Condition {sku}",
         slug=f"condition-{sku.lower()}",
     )
@@ -146,6 +146,73 @@ def test_checkout_session_creation_persists_stripe_provider_reference(django_use
     assert result.reused_existing_session is False
     assert payment.provider == STRIPE_PROVIDER
     assert payment.provider_reference == "cs_test_123"
+    assert payment.checkout_expires_at == offer.valid_until
+
+
+@pytest.mark.django_db
+def test_checkout_started_in_last_30_minutes_gets_minimum_technical_window(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_min_window")
+    offer.valid_until = timezone.now() + timedelta(minutes=10)
+    offer.save(update_fields=["valid_until"])
+    session = {
+        "id": "cs_test_min_window",
+        "url": "https://checkout.stripe.com/c/pay/cs_test_min_window",
+    }
+
+    with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
+        "apps.inquiries.payments._create_checkout_session",
+        return_value=session,
+    ) as create_mock:
+        before = timezone.now()
+        result = create_or_reuse_checkout_session_for_offer(offer, language_code="es")
+        after = timezone.now()
+
+    payment = result.payment
+    assert before + timedelta(minutes=30) <= payment.checkout_expires_at
+    assert payment.checkout_expires_at <= after + timedelta(minutes=30)
+    assert create_mock.call_args.kwargs["expires_at"] == payment.checkout_expires_at
+
+
+@pytest.mark.django_db
+def test_checkout_cannot_start_after_offer_validity(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_expired_offer")
+    offer.valid_until = timezone.now() - timedelta(seconds=1)
+    offer.save(update_fields=["valid_until"])
+
+    with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"), patch(
+        "apps.inquiries.payments._create_checkout_session"
+    ) as create_mock:
+        with pytest.raises(ValueError, match="validity"):
+            create_or_reuse_checkout_session_for_offer(offer, language_code="es")
+
+    create_mock.assert_not_called()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_active_checkout_window_defers_accepted_offer_expiry(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_expiry_deferred")
+    payment = offer.payment
+    now = timezone.now()
+    offer.valid_until = now - timedelta(minutes=1)
+    offer.save(update_fields=["valid_until"])
+    payment.checkout_expires_at = now + timedelta(minutes=20)
+    payment.save(update_fields=["checkout_expires_at"])
+
+    active_summary = expire_due_inquiry_deadlines(now=now)
+    offer.refresh_from_db()
+    payment.refresh_from_db()
+    assert active_summary == {"offers_expired": 0, "payments_expired": 0}
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+
+    expired_summary = expire_due_inquiry_deadlines(now=now + timedelta(minutes=21))
+    offer.refresh_from_db()
+    payment.refresh_from_db()
+    assert expired_summary == {"offers_expired": 1, "payments_expired": 1}
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert payment.status == InquiryOfferPayment.Status.CANCELLED
 
 
 @pytest.mark.django_db
@@ -416,10 +483,13 @@ def test_webhook_paid_event_marks_payment_as_paid(django_user_model) -> None:
         provider_reference="cs_test_pending",
         save=True,
     )
+    payment.checkout_expires_at = offer.valid_until
+    payment.save(update_fields=["checkout_expires_at"])
 
     changed = process_stripe_checkout_event(
         {
             "type": "checkout.session.completed",
+            "created": int(timezone.now().timestamp()),
             "data": {
                 "object": {
                     "id": "cs_test_paid",
@@ -442,6 +512,70 @@ def test_webhook_paid_event_marks_payment_as_paid(django_user_model) -> None:
 
 
 @pytest.mark.django_db(transaction=True)
+def test_late_webhook_restores_payment_completed_before_checkout_expiry(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_late_webhook")
+    payment = offer.payment
+    checkout_expiry = timezone.now() - timedelta(minutes=1)
+    payment.checkout_expires_at = checkout_expiry
+    payment.save(update_fields=["checkout_expires_at"])
+    offer.valid_until = checkout_expiry - timedelta(minutes=10)
+    offer.save(update_fields=["valid_until"])
+    expire_due_inquiry_deadlines()
+
+    changed = process_stripe_checkout_event(
+        {
+            "type": "checkout.session.completed",
+            "created": int((checkout_expiry - timedelta(seconds=1)).timestamp()),
+            "data": {
+                "object": {
+                    "id": "cs_test_late_webhook",
+                    "payment_status": "paid",
+                    "metadata": {"payment_reference": payment.reference_code},
+                }
+            },
+        }
+    )
+
+    payment.refresh_from_db()
+    offer.refresh_from_db()
+    offer.inquiry.refresh_from_db()
+    assert changed is True
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert offer.inquiry.status == Inquiry.Status.ACCEPTED
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_payment_event_created_after_checkout_expiry(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_late_payment")
+    payment = offer.payment
+    payment.checkout_expires_at = timezone.now() - timedelta(seconds=2)
+    payment.save(update_fields=["checkout_expires_at"])
+
+    changed = process_stripe_checkout_event(
+        {
+            "type": "checkout.session.completed",
+            "created": int(timezone.now().timestamp()),
+            "data": {
+                "object": {
+                    "id": "cs_test_too_late",
+                    "payment_status": "paid",
+                    "metadata": {"payment_reference": payment.reference_code},
+                }
+            },
+        }
+    )
+
+    payment.refresh_from_db()
+    assert changed is False
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+
+
+@pytest.mark.django_db(transaction=True)
 def test_paid_internal_notification_is_sent_exactly_once(django_user_model, settings) -> None:
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
     settings.SERVER_EMAIL = "notifications@example.com"
@@ -454,9 +588,12 @@ def test_paid_internal_notification_is_sent_exactly_once(django_user_model, sett
         provider_reference="cs_test_pending_once",
         save=True,
     )
+    payment.checkout_expires_at = offer.valid_until
+    payment.save(update_fields=["checkout_expires_at"])
 
     event = {
         "type": "checkout.session.completed",
+        "created": int(timezone.now().timestamp()),
         "data": {
             "object": {
                 "id": "cs_test_paid_once",
@@ -519,8 +656,11 @@ def test_paid_supplier_notification_is_sent_once_when_enabled_via_webhook(
         provider_reference="cs_test_supplier_pending",
         save=True,
     )
+    payment.checkout_expires_at = offer.valid_until
+    payment.save(update_fields=["checkout_expires_at"])
     event = {
         "type": "checkout.session.completed",
+        "created": int(timezone.now().timestamp()),
         "data": {
             "object": {
                 "id": "cs_test_supplier_paid_once",
@@ -580,6 +720,7 @@ def test_relevant_stripe_event_without_matching_payment_logs_warning(caplog) -> 
         changed = process_stripe_checkout_event(
             {
                 "type": "checkout.session.completed",
+                "created": int(timezone.now().timestamp()),
                 "data": {
                     "object": {
                         "id": "cs_unknown",
@@ -613,8 +754,11 @@ def test_customer_paid_email_failure_does_not_rollback_paid_state(
         provider_reference="cs_test_customer_fail",
         save=True,
     )
+    payment.checkout_expires_at = offer.valid_until
+    payment.save(update_fields=["checkout_expires_at"])
     event = {
         "type": "checkout.session.completed",
+        "created": int(timezone.now().timestamp()),
         "data": {
             "object": {
                 "id": "cs_test_customer_fail_paid",

@@ -1,9 +1,9 @@
 {% load i18n %}
-{% trans "La oferta asociada a su solicitud ha caducado por falta de respuesta dentro del plazo establecido." %}
+{% trans "La vigencia de la oferta asociada a su solicitud ha finalizado." %}
 
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% blocktrans with offer_reference=offer.reference_code %}Referencia de oferta: {{ offer_reference }}{% endblocktrans %}
-{% if offer.offer_response_deadline_at %}{% blocktrans with deadline=offer.offer_response_deadline_at %}Fecha límite de respuesta: {{ deadline }}{% endblocktrans %}
+{% if offer.valid_until %}{% blocktrans with deadline=offer.valid_until %}Oferta válida hasta: {{ deadline }}{% endblocktrans %}
 {% endif %}
 
 {% trans "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta para continuar con la compra." %}

@@ -20,7 +20,13 @@ from django.utils import timezone, translation
 from apps.catalog.models import Brand, Category, Condition, Product
 from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin, InquiryOfferPaymentAdmin
 from apps.inquiries.deadlines import expire_due_inquiry_deadlines
-from apps.inquiries.models import Inquiry, InquiryItem, InquiryOffer, InquiryOfferPayment
+from apps.inquiries.models import (
+    Inquiry,
+    InquiryItem,
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquiryOfferPaymentDetails,
+)
 from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF
 
@@ -37,8 +43,7 @@ def make_supplier(
     payment_paid_notification_email: str = "",
     offer_expired_notification_email: str = "",
     payment_expired_notification_email: str = "",
-    offer_response_deadline_hours: int = 24,
-    accepted_payment_deadline_hours: int = 24,
+    offer_validity_hours: int = 24,
     auto_send_offer_sent_notification: bool = False,
     auto_send_inquiry_submitted_notification: bool = False,
     auto_send_offer_accepted_notification: bool = False,
@@ -69,8 +74,7 @@ def make_supplier(
         payment_paid_notification_email=payment_paid_notification_email,
         offer_expired_notification_email=offer_expired_notification_email,
         payment_expired_notification_email=payment_expired_notification_email,
-        offer_response_deadline_hours=offer_response_deadline_hours,
-        accepted_payment_deadline_hours=accepted_payment_deadline_hours,
+        offer_validity_hours=offer_validity_hours,
         auto_send_offer_sent_notification=auto_send_offer_sent_notification,
         auto_send_inquiry_submitted_notification=auto_send_inquiry_submitted_notification,
         auto_send_offer_accepted_notification=auto_send_offer_accepted_notification,
@@ -277,13 +281,11 @@ def test_mark_sent_uses_shortest_supplier_deadlines_and_sets_snapshots(
 ) -> None:
     supplier_a = make_supplier(
         code="SUP-DEADLINE-A",
-        offer_response_deadline_hours=48,
-        accepted_payment_deadline_hours=72,
+        offer_validity_hours=48,
     )
     supplier_b = make_supplier(
         code="SUP-DEADLINE-B",
-        offer_response_deadline_hours=24,
-        accepted_payment_deadline_hours=36,
+        offer_validity_hours=24,
     )
     inquiry = make_inquiry(
         django_user_model,
@@ -310,9 +312,8 @@ def test_mark_sent_uses_shortest_supplier_deadlines_and_sets_snapshots(
     offer.mark_sent(save=True)
     offer.refresh_from_db()
 
-    assert offer.response_deadline_hours_snapshot == 24
-    assert offer.payment_deadline_hours_snapshot == 36
-    assert offer.offer_response_deadline_at == offer.sent_at + timedelta(hours=24)
+    assert offer.validity_hours_snapshot == 24
+    assert offer.valid_until == offer.sent_at + timedelta(hours=24)
 
 
 @pytest.mark.django_db
@@ -345,8 +346,7 @@ def test_mark_expired_transitions_offer_and_inquiry_to_rejected(django_user_mode
 def test_mark_accepted_creates_pending_payment_with_deadline_snapshot(django_user_model) -> None:
     supplier = make_supplier(
         code="SUP-ACCEPT-DEADLINE",
-        offer_response_deadline_hours=24,
-        accepted_payment_deadline_hours=12,
+        offer_validity_hours=24,
     )
     inquiry = make_inquiry(
         django_user_model,
@@ -370,7 +370,8 @@ def test_mark_accepted_creates_pending_payment_with_deadline_snapshot(django_use
     payment = InquiryOfferPayment.objects.get(offer=offer)
 
     assert payment.status == InquiryOfferPayment.Status.PENDING
-    assert payment.payment_deadline_at == offer.accepted_at + timedelta(hours=12)
+    assert payment.checkout_expires_at is None
+    assert offer.valid_until == offer.sent_at + timedelta(hours=24)
 
 
 @pytest.mark.django_db
@@ -1290,6 +1291,8 @@ def test_public_offer_sent_token_shows_offer_data_and_actions(client, django_use
         or "Accept offer and proceed to payment" in content
     )
     assert "Rechazar oferta" in content or "Reject offer" in content
+    assert "Vigencia de la oferta: 24 horas" in content
+    assert "Vencimiento de la sesión de pago" not in content
     assert "btn btn-primary" in content
     assert "btn btn-secondary" in content
     assert (
@@ -1322,7 +1325,7 @@ def test_customer_accept_flow_redirects_to_payment_placeholder_and_prevents_dupl
         kwargs={"access_token": offer.access_token},
     )
     payment_url = reverse(
-        "inquiries:public_inquiry_offer_payment_placeholder",
+        "inquiries:public_inquiry_offer_payment_details",
         kwargs={"access_token": offer.access_token},
     )
 
@@ -1450,6 +1453,8 @@ def test_public_offer_state_specific_copy_supports_english(client, django_user_m
 
         assert sent_response.status_code == 200
         assert "Confirmed offer" in sent_content
+        assert "Offer validity: 24 hours" in sent_content
+        assert "Total validity from sending" not in sent_content
         assert "Respond to this offer" in sent_content
         assert "Accept offer and proceed to payment" in sent_content
         assert "Reject offer" in sent_content
@@ -1468,7 +1473,21 @@ def test_public_payment_placeholder_renders_for_accepted_offer(client, django_us
         username="offer_public_payment_placeholder",
         confirmed_total=Decimal("555.20"),
     )
-    InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+    payment = InquiryOfferPayment.ensure_pending_from_offer(offer, save=True)
+    InquiryOfferPaymentDetails.objects.create(
+        payment=payment,
+        shipping_recipient_name="Cliente",
+        shipping_phone="+34 600 000 000",
+        shipping_address_line_1="Calle Mayor 1",
+        shipping_city="Madrid",
+        shipping_region="Madrid",
+        shipping_postal_code="28001",
+        shipping_country="ES",
+        billing_name="Cliente",
+        billing_tax_id="12345678Z",
+        billing_same_as_shipping=True,
+        completed_at=timezone.now(),
+    )
     with translation.override("es"):
         payment_url = reverse(
             "inquiries:public_inquiry_offer_payment_placeholder",
@@ -1560,8 +1579,8 @@ def test_public_offer_runtime_guard_expires_due_offer_and_blocks_response(
         lead_time_text="5 days",
     )
     offer.mark_sent(save=True)
-    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=5)
-    offer.save(update_fields=["offer_response_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=5)
+    offer.save(update_fields=["valid_until"])
     url = reverse(
         "inquiries:public_inquiry_offer_detail",
         kwargs={"access_token": offer.access_token},
@@ -1598,19 +1617,19 @@ def test_public_payment_runtime_guard_cancels_due_pending_payment(
         confirmed_total=Decimal("630.00"),
     )
     payment = InquiryOfferPayment.objects.get(offer=offer)
-    payment.payment_deadline_at = timezone.now() - timedelta(minutes=5)
-    payment.save(update_fields=["payment_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=5)
+    offer.save(update_fields=["valid_until"])
     payment_url = reverse(
         "inquiries:public_inquiry_offer_payment_placeholder",
         kwargs={"access_token": offer.access_token},
     )
 
     mail.outbox.clear()
-    get_response = client.get(payment_url)
+    get_response = client.get(payment_url, follow=True)
     payment.refresh_from_db()
     assert get_response.status_code == 200
     assert payment.status == InquiryOfferPayment.Status.CANCELLED
-    assert "plazo de pago" in get_response.content.decode().lower()
+    assert "vigencia" in get_response.content.decode().lower()
     assert len(mail.outbox) == 2
 
     post_response = client.post(payment_url)
@@ -1664,8 +1683,8 @@ def test_expire_due_inquiry_deadlines_expires_offer_once_and_sends_expected_emai
         lead_time_text="4 days",
     )
     offer.mark_sent(save=True)
-    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
-    offer.save(update_fields=["offer_response_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["valid_until"])
 
     mail.outbox.clear()
     first_summary = expire_due_inquiry_deadlines()
@@ -1710,8 +1729,8 @@ def test_offer_expired_supplier_notification_uses_orders_email_fallback(
         lead_time_text="5 days",
     )
     offer.mark_sent(save=True)
-    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
-    offer.save(update_fields=["offer_response_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["valid_until"])
 
     mail.outbox.clear()
     expire_due_inquiry_deadlines()
@@ -1749,18 +1768,22 @@ def test_expire_due_inquiry_deadlines_cancels_payment_once_and_sends_expected_em
     offer.mark_sent(save=True)
     offer.mark_accepted(save=True)
     payment = InquiryOfferPayment.objects.get(offer=offer)
-    payment.payment_deadline_at = timezone.now() - timedelta(minutes=1)
-    payment.save(update_fields=["payment_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["valid_until"])
 
     mail.outbox.clear()
     first_summary = expire_due_inquiry_deadlines()
     second_summary = expire_due_inquiry_deadlines()
     payment.refresh_from_db()
+    offer.refresh_from_db()
+    inquiry.refresh_from_db()
 
-    assert first_summary["offers_expired"] == 0
+    assert first_summary["offers_expired"] == 1
     assert first_summary["payments_expired"] == 1
     assert second_summary["payments_expired"] == 0
     assert payment.status == InquiryOfferPayment.Status.CANCELLED
+    assert offer.status == InquiryOffer.Status.EXPIRED
+    assert inquiry.status == Inquiry.Status.REJECTED
     assert len(mail.outbox) == 3
     assert any(email.to == ["payment_expire_deadline_service@example.com"] for email in mail.outbox)
     assert any(email.to == ["ops@example.com"] for email in mail.outbox)
@@ -1784,8 +1807,8 @@ def test_expire_inquiry_deadlines_management_command_runs_expiry(
         lead_time_text="3 days",
     )
     offer.mark_sent(save=True)
-    offer.offer_response_deadline_at = timezone.now() - timedelta(minutes=1)
-    offer.save(update_fields=["offer_response_deadline_at"])
+    offer.valid_until = timezone.now() - timedelta(minutes=1)
+    offer.save(update_fields=["valid_until"])
 
     out = StringIO()
     call_command("expire_inquiry_deadlines", stdout=out)
@@ -1864,8 +1887,8 @@ def test_offer_sent_email_contains_tokenized_public_url_and_summary(
     assert "EUR" in email.body
     assert "5-7 dias laborables" in email.body
     assert "Disponibilidad confirmada para el lote solicitado." in email.body
-    assert "Fecha límite para responder a la oferta:" in email.body
-    assert "Si acepta la oferta, tendrá un máximo de" in email.body
+    assert "Oferta válida hasta:" in email.body
+    assert "La aceptación no amplía el plazo" not in email.body
     assert (
         "La disponibilidad final se confirma en el momento de tramitación del pago."
         in email.body
@@ -1889,6 +1912,10 @@ def test_offer_sent_email_recipient_prefers_registered_user_email(
         guest_name="Guest Name",
         guest_email="guest-fallback@example.com",
         status=Inquiry.Status.IN_REVIEW,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
     )
     offer = InquiryOffer.objects.create(
         inquiry=inquiry,
@@ -1913,6 +1940,10 @@ def test_offer_sent_email_recipient_falls_back_to_guest_email(
         guest_name="Guest Buyer",
         guest_email="guest-offer@example.com",
         status=Inquiry.Status.IN_REVIEW,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
     )
     offer = InquiryOffer.objects.create(
         inquiry=inquiry,
@@ -1943,6 +1974,10 @@ def test_offer_sent_email_missing_recipient_does_not_break_status_transition(
     inquiry = Inquiry.objects.create(
         user=user,
         status=Inquiry.Status.IN_REVIEW,
+        destination_country="ES",
+        destination_city="Madrid",
+        destination_region="Madrid",
+        destination_postal_code="28001",
     )
     offer = InquiryOffer.objects.create(
         inquiry=inquiry,

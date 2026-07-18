@@ -182,7 +182,7 @@ class Inquiry(models.Model):
         Status.IN_REVIEW: (Status.SUPPLIER_PENDING, Status.RESPONDED, Status.CLOSED),
         Status.SUPPLIER_PENDING: (Status.IN_REVIEW, Status.RESPONDED, Status.CLOSED),
         Status.RESPONDED: (Status.ACCEPTED, Status.REJECTED, Status.CLOSED),
-        Status.ACCEPTED: (Status.CLOSED,),
+        Status.ACCEPTED: (Status.REJECTED, Status.CLOSED),
         Status.REJECTED: (Status.CLOSED,),
         Status.CLOSED: (),
     }
@@ -420,12 +420,11 @@ class InquiryOffer(models.Model):
     REFERENCE_PREFIX = "OFF"
     REFERENCE_RANDOM_LENGTH = 6
     REFERENCE_ALLOWED_CHARS = string.ascii_uppercase + string.digits
-    DEFAULT_OFFER_RESPONSE_DEADLINE_HOURS = 24
-    DEFAULT_ACCEPTED_PAYMENT_DEADLINE_HOURS = 24
+    DEFAULT_OFFER_VALIDITY_HOURS = 24
     STATUS_TRANSITIONS = {
         Status.DRAFT: (Status.SENT,),
         Status.SENT: (Status.ACCEPTED, Status.REJECTED, Status.EXPIRED),
-        Status.ACCEPTED: (),
+        Status.ACCEPTED: (Status.EXPIRED,),
         Status.REJECTED: (),
         Status.EXPIRED: (),
     }
@@ -481,14 +480,11 @@ class InquiryOffer(models.Model):
         _("token de acceso"), default=uuid.uuid4, unique=True, editable=False, db_index=True
     )
     sent_at = models.DateTimeField(_("enviada el"), null=True, blank=True, db_index=True)
-    offer_response_deadline_at = models.DateTimeField(
-        _("fecha límite de respuesta"), null=True, blank=True, db_index=True
+    valid_until = models.DateTimeField(
+        _("fecha límite de vigencia"), null=True, blank=True, db_index=True
     )
-    response_deadline_hours_snapshot = models.PositiveIntegerField(
-        _("horas de respuesta aplicadas"), null=True, blank=True
-    )
-    payment_deadline_hours_snapshot = models.PositiveIntegerField(
-        _("horas de pago aplicadas"), null=True, blank=True
+    validity_hours_snapshot = models.PositiveIntegerField(
+        _("horas de vigencia aplicadas"), null=True, blank=True
     )
     accepted_at = models.DateTimeField(_("aceptada el"), null=True, blank=True, db_index=True)
     rejected_at = models.DateTimeField(_("rechazada el"), null=True, blank=True, db_index=True)
@@ -509,8 +505,8 @@ class InquiryOffer(models.Model):
         indexes = [
             models.Index(fields=["status", "sent_at"], name="inq_offer_status_sent_idx"),
             models.Index(
-                fields=["status", "offer_response_deadline_at"],
-                name="inq_offer_status_respdl_idx",
+                fields=["status", "valid_until"],
+                name="inq_offer_status_valid_idx",
             ),
             models.Index(
                 fields=["status", "created_at"],
@@ -555,12 +551,12 @@ class InquiryOffer(models.Model):
         return InquiryOfferPayment.objects.filter(offer_id=self.pk).exists()
 
     @property
-    def is_response_deadline_expired(self) -> bool:
-        if self.status != self.Status.SENT:
+    def is_validity_expired(self) -> bool:
+        if self.status not in {self.Status.SENT, self.Status.ACCEPTED}:
             return False
-        if self.offer_response_deadline_at is None:
+        if self.valid_until is None:
             return False
-        return timezone.now() >= self.offer_response_deadline_at
+        return timezone.now() >= self.valid_until
 
     def _build_send_readiness_errors(self) -> dict[str, str]:
         errors: dict[str, str] = {}
@@ -630,26 +626,15 @@ class InquiryOffer(models.Model):
         self.inquiry.save(update_fields=["status", "updated_at"])
 
     @classmethod
-    def resolve_deadline_hours_for_inquiry(cls, inquiry: Inquiry) -> tuple[int, int]:
-        supplier_deadline_rows = inquiry.items.values_list(
-            "product__supplier__offer_response_deadline_hours",
-            "product__supplier__accepted_payment_deadline_hours",
-        ).distinct()
-        response_candidates: list[int] = []
-        payment_candidates: list[int] = []
-        for response_hours, payment_hours in supplier_deadline_rows:
-            if isinstance(response_hours, int) and response_hours > 0:
-                response_candidates.append(response_hours)
-            if isinstance(payment_hours, int) and payment_hours > 0:
-                payment_candidates.append(payment_hours)
-
-        response_deadline_hours = min(response_candidates) if response_candidates else (
-            cls.DEFAULT_OFFER_RESPONSE_DEADLINE_HOURS
-        )
-        payment_deadline_hours = min(payment_candidates) if payment_candidates else (
-            cls.DEFAULT_ACCEPTED_PAYMENT_DEADLINE_HOURS
-        )
-        return response_deadline_hours, payment_deadline_hours
+    def resolve_validity_hours_for_inquiry(cls, inquiry: Inquiry) -> int:
+        candidates = [
+            hours
+            for hours in inquiry.items.values_list(
+                "product__supplier__offer_validity_hours", flat=True
+            ).distinct()
+            if isinstance(hours, int) and hours > 0
+        ]
+        return min(candidates) if candidates else cls.DEFAULT_OFFER_VALIDITY_HOURS
 
     def mark_sent(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.SENT):
@@ -673,17 +658,11 @@ class InquiryOffer(models.Model):
         self.quoted_destination_region = destination[2]
         self.quoted_destination_postal_code = destination[3]
         now = timezone.now()
-        (
-            response_deadline_hours_snapshot,
-            payment_deadline_hours_snapshot,
-        ) = self.resolve_deadline_hours_for_inquiry(self.inquiry)
+        validity_hours_snapshot = self.resolve_validity_hours_for_inquiry(self.inquiry)
         self.status = self.Status.SENT
         self.sent_at = now
-        self.offer_response_deadline_at = now + timedelta(
-            hours=response_deadline_hours_snapshot
-        )
-        self.response_deadline_hours_snapshot = response_deadline_hours_snapshot
-        self.payment_deadline_hours_snapshot = payment_deadline_hours_snapshot
+        self.valid_until = now + timedelta(hours=validity_hours_snapshot)
+        self.validity_hours_snapshot = validity_hours_snapshot
         self.accepted_at = None
         self.rejected_at = None
         self.expired_at = None
@@ -696,22 +675,16 @@ class InquiryOffer(models.Model):
     def mark_accepted(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.ACCEPTED):
             raise ValueError("Only sent offers can be accepted by the customer.")
-        if self.is_response_deadline_expired:
-            raise ValueError("Offer response deadline has expired.")
+        if self.is_validity_expired:
+            raise ValueError("Offer validity has expired.")
 
         now = timezone.now()
-        if not self.response_deadline_hours_snapshot or not self.payment_deadline_hours_snapshot:
-            (
-                response_deadline_hours_snapshot,
-                payment_deadline_hours_snapshot,
-            ) = self.resolve_deadline_hours_for_inquiry(self.inquiry)
-            self.response_deadline_hours_snapshot = response_deadline_hours_snapshot
-            self.payment_deadline_hours_snapshot = payment_deadline_hours_snapshot
-            if self.offer_response_deadline_at is None:
+        if not self.validity_hours_snapshot:
+            validity_hours_snapshot = self.resolve_validity_hours_for_inquiry(self.inquiry)
+            self.validity_hours_snapshot = validity_hours_snapshot
+            if self.valid_until is None:
                 sent_anchor = self.sent_at or now
-                self.offer_response_deadline_at = sent_anchor + timedelta(
-                    hours=response_deadline_hours_snapshot
-                )
+                self.valid_until = sent_anchor + timedelta(hours=validity_hours_snapshot)
 
         self.status = self.Status.ACCEPTED
         self.sent_at = self.sent_at or now
@@ -728,22 +701,16 @@ class InquiryOffer(models.Model):
     def mark_rejected(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.REJECTED):
             raise ValueError("Only sent offers can be rejected by the customer.")
-        if self.is_response_deadline_expired:
-            raise ValueError("Offer response deadline has expired.")
+        if self.is_validity_expired:
+            raise ValueError("Offer validity has expired.")
 
         now = timezone.now()
-        if not self.response_deadline_hours_snapshot or not self.payment_deadline_hours_snapshot:
-            (
-                response_deadline_hours_snapshot,
-                payment_deadline_hours_snapshot,
-            ) = self.resolve_deadline_hours_for_inquiry(self.inquiry)
-            self.response_deadline_hours_snapshot = response_deadline_hours_snapshot
-            self.payment_deadline_hours_snapshot = payment_deadline_hours_snapshot
-            if self.offer_response_deadline_at is None:
+        if not self.validity_hours_snapshot:
+            validity_hours_snapshot = self.resolve_validity_hours_for_inquiry(self.inquiry)
+            self.validity_hours_snapshot = validity_hours_snapshot
+            if self.valid_until is None:
                 sent_anchor = self.sent_at or now
-                self.offer_response_deadline_at = sent_anchor + timedelta(
-                    hours=response_deadline_hours_snapshot
-                )
+                self.valid_until = sent_anchor + timedelta(hours=validity_hours_snapshot)
 
         self.status = self.Status.REJECTED
         self.sent_at = self.sent_at or now
@@ -758,28 +725,26 @@ class InquiryOffer(models.Model):
 
     def mark_expired(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.EXPIRED):
-            raise ValueError("Only sent offers can be expired.")
+            raise ValueError("Only sent or accepted offers can be expired.")
 
         now = timezone.now()
-        if not self.response_deadline_hours_snapshot or not self.payment_deadline_hours_snapshot:
-            (
-                response_deadline_hours_snapshot,
-                payment_deadline_hours_snapshot,
-            ) = self.resolve_deadline_hours_for_inquiry(self.inquiry)
-            self.response_deadline_hours_snapshot = response_deadline_hours_snapshot
-            self.payment_deadline_hours_snapshot = payment_deadline_hours_snapshot
+        was_accepted = self.status == self.Status.ACCEPTED
+        if not self.validity_hours_snapshot:
+            self.validity_hours_snapshot = self.resolve_validity_hours_for_inquiry(self.inquiry)
         self.status = self.Status.EXPIRED
         self.sent_at = self.sent_at or now
-        if self.offer_response_deadline_at is None:
-            self.offer_response_deadline_at = self.sent_at + timedelta(
-                hours=self.response_deadline_hours_snapshot
-            )
+        if self.valid_until is None:
+            self.valid_until = self.sent_at + timedelta(hours=self.validity_hours_snapshot)
         self.expired_at = now
-        self.accepted_at = None
+        if not was_accepted:
+            self.accepted_at = None
         self.rejected_at = None
 
         if save:
             with transaction.atomic():
+                payment = InquiryOfferPayment.objects.filter(offer_id=self.pk).first()
+                if payment is not None and payment.status == InquiryOfferPayment.Status.PENDING:
+                    payment.mark_cancelled(save=True)
                 self.save()
                 self._sync_inquiry_status(Inquiry.Status.REJECTED)
 
@@ -824,27 +789,23 @@ class InquiryOffer(models.Model):
 
         if (
             self.pk
-            and self.status != self.Status.ACCEPTED
+            and self.status not in {self.Status.ACCEPTED, self.Status.EXPIRED}
             and InquiryOfferPayment.objects.filter(offer_id=self.pk).exists()
         ):
             errors["status"] = (
-                "Offers with an initiated payment record must stay in accepted status."
+                "Offers with an initiated payment record must stay accepted or expired."
             )
 
         if self.status == self.Status.DRAFT:
             if self.sent_at is not None:
                 errors["sent_at"] = "Draft offers cannot have sent_at."
-            if self.offer_response_deadline_at is not None:
-                errors["offer_response_deadline_at"] = (
-                    "Draft offers cannot define offer_response_deadline_at."
+            if self.valid_until is not None:
+                errors["valid_until"] = (
+                    "Draft offers cannot define valid_until."
                 )
-            if self.response_deadline_hours_snapshot is not None:
-                errors["response_deadline_hours_snapshot"] = (
-                    "Draft offers cannot define response_deadline_hours_snapshot."
-                )
-            if self.payment_deadline_hours_snapshot is not None:
-                errors["payment_deadline_hours_snapshot"] = (
-                    "Draft offers cannot define payment_deadline_hours_snapshot."
+            if self.validity_hours_snapshot is not None:
+                errors["validity_hours_snapshot"] = (
+                    "Draft offers cannot define validity_hours_snapshot."
                 )
             if self.accepted_at is not None:
                 errors["accepted_at"] = "Draft offers cannot have accepted_at."
@@ -855,17 +816,11 @@ class InquiryOffer(models.Model):
         elif self.status == self.Status.SENT:
             if self.sent_at is None:
                 errors["sent_at"] = "Sent offers must define sent_at."
-            if self.offer_response_deadline_at is None:
-                errors["offer_response_deadline_at"] = (
-                    "Sent offers must define offer_response_deadline_at."
-                )
-            if self.response_deadline_hours_snapshot is None:
-                errors["response_deadline_hours_snapshot"] = (
-                    "Sent offers must define response_deadline_hours_snapshot."
-                )
-            if self.payment_deadline_hours_snapshot is None:
-                errors["payment_deadline_hours_snapshot"] = (
-                    "Sent offers must define payment_deadline_hours_snapshot."
+            if self.valid_until is None:
+                errors["valid_until"] = "Sent offers must define valid_until."
+            if self.validity_hours_snapshot is None:
+                errors["validity_hours_snapshot"] = (
+                    "Sent offers must define validity_hours_snapshot."
                 )
             if self.accepted_at is not None:
                 errors["accepted_at"] = "Sent offers cannot have accepted_at."
@@ -876,17 +831,11 @@ class InquiryOffer(models.Model):
         elif self.status == self.Status.ACCEPTED:
             if self.sent_at is None:
                 errors["sent_at"] = "Accepted offers must define sent_at."
-            if self.offer_response_deadline_at is None:
-                errors["offer_response_deadline_at"] = (
-                    "Accepted offers must define offer_response_deadline_at."
-                )
-            if self.response_deadline_hours_snapshot is None:
-                errors["response_deadline_hours_snapshot"] = (
-                    "Accepted offers must define response_deadline_hours_snapshot."
-                )
-            if self.payment_deadline_hours_snapshot is None:
-                errors["payment_deadline_hours_snapshot"] = (
-                    "Accepted offers must define payment_deadline_hours_snapshot."
+            if self.valid_until is None:
+                errors["valid_until"] = "Accepted offers must define valid_until."
+            if self.validity_hours_snapshot is None:
+                errors["validity_hours_snapshot"] = (
+                    "Accepted offers must define validity_hours_snapshot."
                 )
             if self.accepted_at is None:
                 errors["accepted_at"] = "Accepted offers must define accepted_at."
@@ -897,17 +846,11 @@ class InquiryOffer(models.Model):
         elif self.status == self.Status.REJECTED:
             if self.sent_at is None:
                 errors["sent_at"] = "Rejected offers must define sent_at."
-            if self.offer_response_deadline_at is None:
-                errors["offer_response_deadline_at"] = (
-                    "Rejected offers must define offer_response_deadline_at."
-                )
-            if self.response_deadline_hours_snapshot is None:
-                errors["response_deadline_hours_snapshot"] = (
-                    "Rejected offers must define response_deadline_hours_snapshot."
-                )
-            if self.payment_deadline_hours_snapshot is None:
-                errors["payment_deadline_hours_snapshot"] = (
-                    "Rejected offers must define payment_deadline_hours_snapshot."
+            if self.valid_until is None:
+                errors["valid_until"] = "Rejected offers must define valid_until."
+            if self.validity_hours_snapshot is None:
+                errors["validity_hours_snapshot"] = (
+                    "Rejected offers must define validity_hours_snapshot."
                 )
             if self.rejected_at is None:
                 errors["rejected_at"] = "Rejected offers must define rejected_at."
@@ -918,38 +861,23 @@ class InquiryOffer(models.Model):
         elif self.status == self.Status.EXPIRED:
             if self.sent_at is None:
                 errors["sent_at"] = "Expired offers must define sent_at."
-            if self.offer_response_deadline_at is None:
-                errors["offer_response_deadline_at"] = (
-                    "Expired offers must define offer_response_deadline_at."
-                )
-            if self.response_deadline_hours_snapshot is None:
-                errors["response_deadline_hours_snapshot"] = (
-                    "Expired offers must define response_deadline_hours_snapshot."
-                )
-            if self.payment_deadline_hours_snapshot is None:
-                errors["payment_deadline_hours_snapshot"] = (
-                    "Expired offers must define payment_deadline_hours_snapshot."
+            if self.valid_until is None:
+                errors["valid_until"] = "Expired offers must define valid_until."
+            if self.validity_hours_snapshot is None:
+                errors["validity_hours_snapshot"] = (
+                    "Expired offers must define validity_hours_snapshot."
                 )
             if self.expired_at is None:
                 errors["expired_at"] = "Expired offers must define expired_at."
-            if self.accepted_at is not None:
-                errors["accepted_at"] = "Expired offers cannot have accepted_at."
             if self.rejected_at is not None:
                 errors["rejected_at"] = "Expired offers cannot have rejected_at."
 
         if (
-            self.response_deadline_hours_snapshot is not None
-            and self.response_deadline_hours_snapshot < 1
+            self.validity_hours_snapshot is not None
+            and self.validity_hours_snapshot < 1
         ):
-            errors["response_deadline_hours_snapshot"] = (
-                _("El plazo de respuesta aplicado debe ser de al menos una hora.")
-            )
-        if (
-            self.payment_deadline_hours_snapshot is not None
-            and self.payment_deadline_hours_snapshot < 1
-        ):
-            errors["payment_deadline_hours_snapshot"] = (
-                "Payment deadline snapshot must be at least 1 hour."
+            errors["validity_hours_snapshot"] = (
+                _("La vigencia aplicada debe ser de al menos una hora.")
             )
 
         if errors:
@@ -1023,8 +951,8 @@ class InquiryOfferPayment(models.Model):
     paid_at = models.DateTimeField(_("pagado el"), null=True, blank=True, db_index=True)
     failed_at = models.DateTimeField(_("fallido el"), null=True, blank=True, db_index=True)
     cancelled_at = models.DateTimeField(_("cancelado el"), null=True, blank=True, db_index=True)
-    payment_deadline_at = models.DateTimeField(
-        _("fecha límite de pago"), null=True, blank=True, db_index=True
+    checkout_expires_at = models.DateTimeField(
+        _("vencimiento de la sesión de pago"), null=True, blank=True, db_index=True
     )
     created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
@@ -1049,8 +977,8 @@ class InquiryOfferPayment(models.Model):
                 name="inq_pay_status_created_idx",
             ),
             models.Index(
-                fields=["status", "payment_deadline_at"],
-                name="inq_pay_status_deadl_idx",
+                fields=["status", "checkout_expires_at"],
+                name="inq_pay_status_checkout_idx",
             ),
         ]
 
@@ -1065,12 +993,12 @@ class InquiryOfferPayment(models.Model):
         return next_status in self.allowed_next_statuses(self.status)
 
     @property
-    def is_payment_deadline_expired(self) -> bool:
+    def is_checkout_expired(self) -> bool:
         if self.status != self.Status.PENDING:
             return False
-        if self.payment_deadline_at is None:
+        if self.checkout_expires_at is None:
             return False
-        return timezone.now() >= self.payment_deadline_at
+        return timezone.now() >= self.checkout_expires_at
 
     @classmethod
     def generate_reference_code(cls) -> str:
@@ -1100,15 +1028,6 @@ class InquiryOfferPayment(models.Model):
 
         existing_payment = cls.objects.filter(offer_id=offer.pk).first()
         if existing_payment is not None:
-            if (
-                existing_payment.status == cls.Status.PENDING
-                and existing_payment.payment_deadline_at is None
-            ):
-                existing_payment.payment_deadline_at = cls._build_payment_deadline_at_for_offer(
-                    offer
-                )
-                if save:
-                    existing_payment.save(update_fields=["payment_deadline_at", "updated_at"])
             return existing_payment
 
         payment = cls(
@@ -1120,7 +1039,7 @@ class InquiryOfferPayment(models.Model):
             provider_reference=provider_reference,
             internal_notes=internal_notes,
             initiated_at=timezone.now(),
-            payment_deadline_at=cls._build_payment_deadline_at_for_offer(offer),
+            checkout_expires_at=None,
         )
         if save:
             with transaction.atomic():
@@ -1147,15 +1066,6 @@ class InquiryOfferPayment(models.Model):
 
         existing_payment = cls.objects.filter(offer_id=offer.pk).first()
         if existing_payment is not None:
-            if (
-                existing_payment.status == cls.Status.PENDING
-                and existing_payment.payment_deadline_at is None
-            ):
-                existing_payment.payment_deadline_at = cls._build_payment_deadline_at_for_offer(
-                    offer
-                )
-                if save:
-                    existing_payment.save(update_fields=["payment_deadline_at", "updated_at"])
             return existing_payment
 
         payment = cls(
@@ -1167,7 +1077,7 @@ class InquiryOfferPayment(models.Model):
             provider_reference=provider_reference,
             internal_notes=internal_notes,
             initiated_at=timezone.now(),
-            payment_deadline_at=cls._build_payment_deadline_at_for_offer(offer),
+            checkout_expires_at=None,
         )
         if not save:
             payment.full_clean()
@@ -1183,15 +1093,6 @@ class InquiryOfferPayment(models.Model):
             except IntegrityError:
                 return cls.objects.get(offer_id=offer.pk)
         return payment
-
-    @staticmethod
-    def _build_payment_deadline_at_for_offer(offer: InquiryOffer):
-        payment_deadline_hours = (
-            offer.payment_deadline_hours_snapshot
-            or InquiryOffer.DEFAULT_ACCEPTED_PAYMENT_DEADLINE_HOURS
-        )
-        accepted_anchor = offer.accepted_at or timezone.now()
-        return accepted_anchor + timedelta(hours=payment_deadline_hours)
 
     def mark_paid(self, *, save: bool = True) -> None:
         if not self.can_transition_to(self.Status.PAID):
@@ -1242,8 +1143,11 @@ class InquiryOfferPayment(models.Model):
         super().clean()
         errors = {}
 
-        if self.offer_id and self.offer.status != InquiryOffer.Status.ACCEPTED:
-            errors["offer"] = "Payment records can only be created from accepted offers."
+        if self.offer_id and self.offer.status not in {
+            InquiryOffer.Status.ACCEPTED,
+            InquiryOffer.Status.EXPIRED,
+        }:
+            errors["offer"] = "Payment records can only belong to accepted or expired offers."
 
         if not self.currency:
             errors["currency"] = "Currency is required."
@@ -1253,8 +1157,6 @@ class InquiryOfferPayment(models.Model):
         if self.status == self.Status.PENDING:
             if self.initiated_at is None:
                 errors["initiated_at"] = "Pending payments must define initiated_at."
-            if self.payment_deadline_at is None:
-                errors["payment_deadline_at"] = "Pending payments must define payment_deadline_at."
             if self.paid_at is not None:
                 errors["paid_at"] = "Pending payments cannot define paid_at."
             if self.failed_at is not None:

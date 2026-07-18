@@ -7,9 +7,8 @@
 {% endif %}
 {% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
-{% if offer_response_deadline_at %}{% blocktrans with response_deadline=offer_response_deadline_at %}Fecha límite para responder a la oferta: {{ response_deadline }}{% endblocktrans %}
-{% endif %}{% if offer_response_deadline_hours %}{% blocktrans with response_hours=offer_response_deadline_hours %}Ventana máxima de respuesta: {{ response_hours }} horas{% endblocktrans %}
-{% endif %}{% if payment_deadline_hours %}{% blocktrans with payment_hours=payment_deadline_hours %}Si acepta la oferta, tendrá un máximo de {{ payment_hours }} horas para completar el pago.{% endblocktrans %}
+{% if valid_until %}{% blocktrans with deadline=valid_until %}Oferta válida hasta: {{ deadline }}{% endblocktrans %}
+{% endif %}{% if offer_validity_hours %}{% blocktrans with validity_hours=offer_validity_hours %}Vigencia de la oferta: {{ validity_hours }} horas{% endblocktrans %}
 {% endif %}
 {% trans "La disponibilidad final se confirma en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
 {% if offer.customer_message %}
@@ -18,7 +17,7 @@
 {% endif %}
 {% trans "Revise la oferta y responda (aceptar o rechazar) desde este enlace seguro:" %}
 {{ offer_public_url }}
-{% trans "Este correo no incluye pago online en esta fase. Tras su aceptación, le guiaremos con el siguiente paso." %}
+{% trans "Tras su aceptación, le guiaremos al pago sin ampliar la vigencia indicada." %}
 {% if customer_reply_to_email %}
 {% blocktrans with reply_to=customer_reply_to_email %}Si necesita ayuda, responda a {{ reply_to }} indicando sus referencias.{% endblocktrans %}
 {% endif %}

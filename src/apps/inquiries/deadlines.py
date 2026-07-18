@@ -21,8 +21,11 @@ logger = logging.getLogger(__name__)
 def expire_due_inquiry_deadlines(*, now=None) -> dict[str, int]:
     reference_now = now or timezone.now()
     expired_offer_ids = _expire_due_offers(reference_now)
-    expired_payment_ids = _expire_due_payments(reference_now)
-    _send_offer_expired_notifications(expired_offer_ids)
+    expired_payment_ids = _expired_payment_ids(expired_offer_ids)
+    payment_offer_ids = _offer_ids_with_payments(expired_payment_ids)
+    _send_offer_expired_notifications(
+        [offer_id for offer_id in expired_offer_ids if offer_id not in payment_offer_ids]
+    )
     _send_payment_expired_notifications(expired_payment_ids)
     return {
         "offers_expired": len(expired_offer_ids),
@@ -35,24 +38,37 @@ def expire_offer_if_due(offer: InquiryOffer, *, now=None) -> bool:
     expired_offer_ids = _expire_due_offers(reference_now, offer_ids=[offer.pk])
     if not expired_offer_ids:
         return False
-    _send_offer_expired_notifications(expired_offer_ids)
+    expired_payment_ids = _expired_payment_ids(expired_offer_ids)
+    if expired_payment_ids:
+        _send_payment_expired_notifications(expired_payment_ids)
+    else:
+        _send_offer_expired_notifications(expired_offer_ids)
     return True
 
 
 def expire_payment_if_due(payment: InquiryOfferPayment, *, now=None) -> bool:
     reference_now = now or timezone.now()
-    expired_payment_ids = _expire_due_payments(reference_now, payment_ids=[payment.pk])
-    if not expired_payment_ids:
+    expired_offer_ids = _expire_due_offers(reference_now, offer_ids=[payment.offer_id])
+    if not expired_offer_ids:
         return False
+    expired_payment_ids = _expired_payment_ids(expired_offer_ids)
+    payment_offer_ids = _offer_ids_with_payments(expired_payment_ids)
+    _send_offer_expired_notifications(
+        [offer_id for offer_id in expired_offer_ids if offer_id not in payment_offer_ids]
+    )
     _send_payment_expired_notifications(expired_payment_ids)
     return True
 
 
 def _expire_due_offers(reference_now, *, offer_ids: list[int | None] | None = None) -> list[int]:
-    queryset = InquiryOffer.objects.select_related("inquiry").select_for_update().filter(
-        status=InquiryOffer.Status.SENT,
-        offer_response_deadline_at__isnull=False,
-        offer_response_deadline_at__lte=reference_now,
+    queryset = (
+        InquiryOffer.objects.select_related("inquiry")
+        .select_for_update()
+        .filter(
+            status__in=[InquiryOffer.Status.SENT, InquiryOffer.Status.ACCEPTED],
+            valid_until__isnull=False,
+            valid_until__lte=reference_now,
+        )
     )
     if offer_ids is not None:
         valid_offer_ids = [offer_id for offer_id in offer_ids if isinstance(offer_id, int)]
@@ -63,6 +79,15 @@ def _expire_due_offers(reference_now, *, offer_ids: list[int | None] | None = No
     expired_offer_ids: list[int] = []
     with transaction.atomic():
         for offer in queryset:
+            payment = getattr(offer, "payment", None)
+            if (
+                offer.status == InquiryOffer.Status.ACCEPTED
+                and payment is not None
+                and payment.status == InquiryOfferPayment.Status.PENDING
+                and payment.checkout_expires_at is not None
+                and payment.checkout_expires_at > reference_now
+            ):
+                continue
             try:
                 offer.mark_expired(save=True)
             except ValueError:
@@ -72,38 +97,21 @@ def _expire_due_offers(reference_now, *, offer_ids: list[int | None] | None = No
     return expired_offer_ids
 
 
-def _expire_due_payments(
-    reference_now,
-    *,
-    payment_ids: list[int | None] | None = None,
-) -> list[int]:
-    queryset = (
-        InquiryOfferPayment.objects.select_related("offer", "offer__inquiry")
-        .select_for_update()
-        .filter(
-            status=InquiryOfferPayment.Status.PENDING,
-            payment_deadline_at__isnull=False,
-            payment_deadline_at__lte=reference_now,
+def _expired_payment_ids(expired_offer_ids: list[int]) -> list[int]:
+    return list(
+        InquiryOfferPayment.objects.filter(
+            offer_id__in=expired_offer_ids,
+            status=InquiryOfferPayment.Status.CANCELLED,
+        ).values_list("id", flat=True)
+    )
+
+
+def _offer_ids_with_payments(payment_ids: list[int]) -> set[int]:
+    return set(
+        InquiryOfferPayment.objects.filter(pk__in=payment_ids).values_list(
+            "offer_id", flat=True
         )
     )
-    if payment_ids is not None:
-        valid_payment_ids = [
-            payment_id for payment_id in payment_ids if isinstance(payment_id, int)
-        ]
-        if not valid_payment_ids:
-            return []
-        queryset = queryset.filter(pk__in=valid_payment_ids)
-
-    expired_payment_ids: list[int] = []
-    with transaction.atomic():
-        for payment in queryset:
-            try:
-                payment.mark_cancelled(save=True)
-            except ValueError:
-                continue
-            expired_payment_ids.append(payment.pk)
-
-    return expired_payment_ids
 
 
 def _send_offer_expired_notifications(expired_offer_ids: list[int]) -> None:

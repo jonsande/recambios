@@ -3,10 +3,10 @@ Supplier notification regarding expired customer offer
 Offer reference: {{ offer.reference_code }}
 Inquiry reference: {{ inquiry.reference_code }}
 Supplier: {{ supplier.name }} ({{ supplier.code }})
-Response deadline reached at: {{ offer_response_deadline_at }}
+Offer validity ended at: {{ valid_until }}
 Expired at: {{ offer.expired_at }}
 
-The customer did not respond within the agreed response window and the offer is now expired.
+The customer did not accept and pay within the agreed validity and the offer is now expired.
 Please release any temporary reservation associated with this request and share any relevant availability update.
 
 Items for your supplier account:

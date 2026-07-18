@@ -1540,10 +1540,7 @@ def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
         }
         for item in inquiry.items.select_related("product").order_by("id")
     ]
-    (
-        offer_response_deadline_hours,
-        payment_deadline_hours,
-    ) = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
+    offer_validity_hours = InquiryOffer.resolve_validity_hours_for_inquiry(inquiry)
 
     return {
         "inquiry": inquiry,
@@ -1553,8 +1550,7 @@ def _build_inquiry_email_context(inquiry: Inquiry) -> dict:
         "requester_phone": inquiry.guest_phone,
         "company_name": inquiry.company_name,
         "tax_id": inquiry.tax_id,
-        "offer_response_deadline_hours": offer_response_deadline_hours,
-        "payment_deadline_hours": payment_deadline_hours,
+        "offer_validity_hours": offer_validity_hours,
         "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
@@ -1574,15 +1570,12 @@ def _build_submission_group_email_context(
         .order_by("id")
     )
     inquiry_rows = []
-    response_deadlines = []
-    payment_deadlines = []
+    validity_deadlines = []
     for inquiry in inquiries:
         item = inquiry.items.order_by("id").first()
         if item is None:
             continue
-        response_hours, payment_hours = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
-        response_deadlines.append(response_hours)
-        payment_deadlines.append(payment_hours)
+        validity_deadlines.append(InquiryOffer.resolve_validity_hours_for_inquiry(inquiry))
         inquiry_rows.append(
             {
                 "reference_code": inquiry.reference_code,
@@ -1605,8 +1598,7 @@ def _build_submission_group_email_context(
         ),
         "requester_name": requester_name,
         "requester_email": requester_email,
-        "offer_response_deadline_hours": min(response_deadlines) if response_deadlines else 24,
-        "payment_deadline_hours": min(payment_deadlines) if payment_deadlines else 24,
+        "offer_validity_hours": min(validity_deadlines) if validity_deadlines else 24,
         "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
@@ -1618,9 +1610,8 @@ def _build_offer_sent_email_context(offer: InquiryOffer) -> dict:
         "offer": offer,
         "requester_email": requester_email,
         "offer_public_url": _build_offer_public_url(offer),
-        "offer_response_deadline_hours": offer.response_deadline_hours_snapshot,
-        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
-        "offer_response_deadline_at": offer.offer_response_deadline_at,
+        "offer_validity_hours": offer.validity_hours_snapshot,
+        "valid_until": offer.valid_until,
         "customer_reply_to_email": _resolve_customer_reply_to_display(),
     }
 
@@ -1663,16 +1654,12 @@ def _build_supplier_inquiry_submitted_email_context(
     supplier: Supplier,
     supplier_items: list[dict],
 ) -> dict:
-    (
-        offer_response_deadline_hours,
-        payment_deadline_hours,
-    ) = InquiryOffer.resolve_deadline_hours_for_inquiry(inquiry)
+    offer_validity_hours = InquiryOffer.resolve_validity_hours_for_inquiry(inquiry)
     return {
         "inquiry": inquiry,
         "supplier": supplier,
         "items": supplier_items,
-        "offer_response_deadline_hours": offer_response_deadline_hours,
-        "payment_deadline_hours": payment_deadline_hours,
+        "offer_validity_hours": offer_validity_hours,
     }
 
 
@@ -1687,9 +1674,8 @@ def _build_supplier_offer_sent_email_context(
         "inquiry": offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
-        "offer_response_deadline_hours": offer.response_deadline_hours_snapshot,
-        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
-        "offer_response_deadline_at": offer.offer_response_deadline_at,
+        "offer_validity_hours": offer.validity_hours_snapshot,
+        "valid_until": offer.valid_until,
     }
 
 
@@ -1706,7 +1692,7 @@ def _build_supplier_offer_response_email_context(
         "supplier": supplier,
         "items": supplier_items,
         "response_status": response_status,
-        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
+        "valid_until": offer.valid_until,
     }
 
 
@@ -1722,7 +1708,8 @@ def _build_supplier_payment_paid_email_context(
         "inquiry": payment.offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
-        "payment_deadline_at": payment.payment_deadline_at,
+        "valid_until": payment.offer.valid_until,
+        "checkout_expires_at": payment.checkout_expires_at,
     }
 
 
@@ -1737,8 +1724,7 @@ def _build_supplier_offer_expired_email_context(
         "inquiry": offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
-        "offer_response_deadline_at": offer.offer_response_deadline_at,
-        "payment_deadline_hours": offer.payment_deadline_hours_snapshot,
+        "valid_until": offer.valid_until,
     }
 
 
@@ -1754,7 +1740,8 @@ def _build_supplier_payment_expired_email_context(
         "inquiry": payment.offer.inquiry,
         "supplier": supplier,
         "items": supplier_items,
-        "payment_deadline_at": payment.payment_deadline_at,
+        "valid_until": payment.offer.valid_until,
+        "checkout_expires_at": payment.checkout_expires_at,
     }
 
 

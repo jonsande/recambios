@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from types import SimpleNamespace
 from typing import Any
@@ -23,6 +24,7 @@ RELEVANT_STRIPE_EVENT_TYPES = {
 }
 # V1 scope: conservative payment-method set for predictable production behavior.
 STRIPE_V1_CHECKOUT_PAYMENT_METHOD_TYPES = ("card",)
+STRIPE_MINIMUM_CHECKOUT_LIFETIME = timedelta(minutes=30)
 ZERO_DECIMAL_CURRENCIES = {
     "bif",
     "clp",
@@ -84,6 +86,10 @@ def create_or_reuse_checkout_session_for_offer(
     """
     _require_stripe_secret_key()
 
+    now = timezone.now()
+    if offer.valid_until is None or now >= offer.valid_until:
+        raise ValueError("Offer validity has expired.")
+
     payment = InquiryOfferPayment.ensure_pending_from_offer(
         offer,
         provider=STRIPE_PROVIDER,
@@ -98,8 +104,9 @@ def create_or_reuse_checkout_session_for_offer(
         )
         if payment.status != InquiryOfferPayment.Status.PENDING:
             raise ValueError("Only pending payments can be processed through Stripe Checkout.")
-        if payment.payment_deadline_at and timezone.now() >= payment.payment_deadline_at:
-            raise ValueError("Payment deadline has expired for this offer.")
+        now = timezone.now()
+        if payment.offer.valid_until is None or now >= payment.offer.valid_until:
+            raise ValueError("Offer validity has expired.")
         try:
             details = payment.checkout_details
         except InquiryOfferPaymentDetails.DoesNotExist as error:
@@ -114,7 +121,15 @@ def create_or_reuse_checkout_session_for_offer(
             payment.provider = STRIPE_PROVIDER
             payment.save(update_fields=["provider", "updated_at"])
 
-        created_session = _create_checkout_session(payment, language_code=language_code)
+        checkout_expires_at = max(
+            payment.offer.valid_until,
+            now + STRIPE_MINIMUM_CHECKOUT_LIFETIME,
+        )
+        created_session = _create_checkout_session(
+            payment,
+            language_code=language_code,
+            expires_at=checkout_expires_at,
+        )
         session_id = str(_get_attr(created_session, "id", ""))
         session_url = str(_get_attr(created_session, "url", ""))
         if not session_id or not session_url:
@@ -124,7 +139,15 @@ def create_or_reuse_checkout_session_for_offer(
 
         payment.provider = STRIPE_PROVIDER
         payment.provider_reference = session_id
-        payment.save(update_fields=["provider", "provider_reference", "updated_at"])
+        payment.checkout_expires_at = checkout_expires_at
+        payment.save(
+            update_fields=[
+                "provider",
+                "provider_reference",
+                "checkout_expires_at",
+                "updated_at",
+            ]
+        )
 
         return StripeCheckoutSessionResult(
             payment=payment,
@@ -189,6 +212,7 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
 
     session_id = str(payload.get("id", "")).strip()
     payment_status = str(payload.get("payment_status", "")).strip().lower()
+    event_created = _stripe_timestamp(event.get("created"))
 
     with transaction.atomic():
         payment = (
@@ -212,6 +236,26 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
             event_type == "checkout.session.completed" and payment_status == "paid"
         )
         if is_paid_transition:
+            if (
+                payment.checkout_expires_at is None
+                or event_created is None
+                or event_created > payment.checkout_expires_at
+            ):
+                logger.warning(
+                    "Stripe paid event rejected outside checkout validity (payment=%s).",
+                    payment.reference_code,
+                )
+                return False
+            if payment.status == InquiryOfferPayment.Status.CANCELLED:
+                offer = payment.offer
+                offer.status = InquiryOffer.Status.ACCEPTED
+                offer.expired_at = None
+                offer.save(update_fields=["status", "expired_at", "updated_at"])
+                inquiry = offer.inquiry
+                inquiry.status = inquiry.Status.ACCEPTED
+                inquiry.save(update_fields=["status", "updated_at"])
+                payment.status = InquiryOfferPayment.Status.PENDING
+                payment.cancelled_at = None
             payment.mark_paid(save=False)
             payment.save()
             return True
@@ -226,6 +270,7 @@ def _create_checkout_session(
     payment: InquiryOfferPayment,
     *,
     language_code: str | None,
+    expires_at,
 ) -> Any:
     stripe = _load_stripe_module()
     stripe.api_key = _require_stripe_secret_key()
@@ -249,6 +294,7 @@ def _create_checkout_session(
             payment_method_types=list(STRIPE_V1_CHECKOUT_PAYMENT_METHOD_TYPES),
             success_url=success_url,
             cancel_url=cancel_url,
+            expires_at=int(expires_at.timestamp()),
             client_reference_id=payment.reference_code,
             metadata={
                 "payment_reference": payment.reference_code,
@@ -277,6 +323,13 @@ def _create_checkout_session(
         )
     except stripe.error.StripeError as error:
         raise StripeCheckoutSessionError("Stripe checkout session creation failed.") from error
+
+
+def _stripe_timestamp(value: Any):
+    try:
+        return datetime.fromtimestamp(int(value), tz=timezone.get_current_timezone())
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def _resolve_payment_from_checkout_payload(payload: dict[str, Any]) -> InquiryOfferPayment | None:
