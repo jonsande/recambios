@@ -102,14 +102,29 @@ class PublicInquirySubmitView(FormView):
 
         clear_request_cart(self.request.session)
 
+        inquiries = list(submission_group.inquiries.order_by("id"))
+        is_single_inquiry = len(inquiries) == 1
+        public_reference = (
+            inquiries[0].reference_code
+            if is_single_inquiry
+            else submission_group.reference_code
+        )
+
         messages.success(
             self.request,
-            _("Solicitud enviada correctamente. Referencia de envío: %(reference)s")
-            % {"reference": submission_group.reference_code},
+            (
+                _("Solicitud enviada correctamente. Código de consulta: %(reference)s")
+                if is_single_inquiry
+                else _(
+                    "Solicitud enviada correctamente. "
+                    "Código general de la solicitud: %(reference)s"
+                )
+            )
+            % {"reference": public_reference},
         )
         return redirect(
             "inquiries:public_inquiry_success",
-            reference_code=submission_group.reference_code,
+            reference_code=public_reference,
         )
 
     def _create_submitted_inquiries(
@@ -182,6 +197,25 @@ class PublicInquirySuccessView(TemplateView):
             .distinct()
             .first()
         )
+        referenced_inquiry = None
+        if submission_group is None:
+            referenced_inquiry = (
+                Inquiry.objects.select_related("submission_group")
+                .filter(
+                    reference_code=reference_code,
+                    status__in=visible_statuses,
+                    submission_group__isnull=False,
+                )
+                .first()
+            )
+            if referenced_inquiry is not None:
+                submission_group = (
+                    InquirySubmissionGroup.objects.prefetch_related(
+                        "inquiries__items__product"
+                    )
+                    .filter(pk=referenced_inquiry.submission_group_id)
+                    .first()
+                )
         legacy_inquiry = None
         if submission_group is None:
             legacy_inquiry = Inquiry.objects.filter(
@@ -192,12 +226,27 @@ class PublicInquirySuccessView(TemplateView):
             if legacy_inquiry is None:
                 raise Http404
 
+        inquiry_count = submission_group.inquiries.count() if submission_group else 1
+        is_single_inquiry = inquiry_count == 1
+        primary_inquiry = None
+        if submission_group and is_single_inquiry:
+            primary_inquiry = submission_group.inquiries.all()[0]
+
+        if primary_inquiry:
+            submission_reference = primary_inquiry.reference_code
+        elif submission_group:
+            submission_reference = submission_group.reference_code
+        else:
+            submission_reference = reference_code
+
         context.update(
             {
                 "page_title": _("Solicitud enviada"),
-                "submission_reference": reference_code,
+                "submission_reference": submission_reference,
                 "submission_group": submission_group,
-                "inquiry_count": submission_group.inquiries.count() if submission_group else 1,
+                "inquiry_count": inquiry_count,
+                "is_single_inquiry": is_single_inquiry,
+                "primary_inquiry": primary_inquiry,
                 "is_legacy_inquiry": legacy_inquiry is not None,
             }
         )

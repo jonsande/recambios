@@ -9,17 +9,17 @@
       <p class="page-eyebrow">{% trans "Solicitud registrada" %}</p>
       <h1 class="mt-2 page-title">{{ page_title }}</h1>
       <p class="page-lead">
-        {% if is_legacy_inquiry %}
+        {% if is_legacy_inquiry or is_single_inquiry %}
           {% trans "Hemos recibido su solicitud correctamente." %}
         {% else %}
-          {% blocktrans count request_count=inquiry_count %}Hemos creado una solicitud independiente para el producto enviado.{% plural %}Hemos creado {{ request_count }} solicitudes independientes, una para cada producto enviado.{% endblocktrans %}
+          {% blocktrans count request_count=inquiry_count %}Hemos registrado una consulta de producto.{% plural %}Hemos registrado {{ request_count }} consultas, una para cada producto solicitado.{% endblocktrans %}
         {% endif %}
       </p>
 
       <div class="mt-5 grid gap-3 sm:grid-cols-2">
         <article class="panel-muted">
           <p class="meta-copy">
-            {% if is_legacy_inquiry %}{% trans "Referencia de solicitud" %}{% else %}{% trans "Referencia del envío" %}{% endif %}
+            {% if is_legacy_inquiry %}{% trans "Referencia de solicitud" %}{% elif is_single_inquiry %}{% trans "Código de consulta" %}{% else %}{% trans "Código general de la solicitud" %}{% endif %}
           </p>
           <p class="mt-1 text-xl font-bold tracking-tight text-primary-strong">{{ submission_reference }}</p>
         </article>
@@ -30,24 +30,31 @@
       </div>
 
       <p class="mt-5 text-sm text-text-muted">
-        {% if is_legacy_inquiry %}
+        {% if is_legacy_inquiry or is_single_inquiry %}
           {% trans "Nuestro equipo revisará disponibilidad, precio final y plazo y le responderá por los canales de contacto indicados." %}
         {% else %}
-          {% trans "Nuestro equipo revisará cada producto por separado. Cada solicitud podrá recibir su propia oferta o resolución y avanzar de forma independiente." %}
+          {% trans "El código general identifica la solicitud completa. Cada producto tiene además su propio código de consulta y podrá recibir una oferta o resolución independiente." %}
         {% endif %}
       </p>
 
       {% if submission_group %}
         <section class="mt-5" aria-labelledby="created-inquiries-heading">
           <h2 id="created-inquiries-heading" class="text-base font-semibold text-text">
-            {% trans "Solicitudes creadas" %}
+            {% if is_single_inquiry %}{% trans "Producto solicitado" %}{% else %}{% trans "Consultas por producto" %}{% endif %}
           </h2>
           <ul class="mt-3 grid gap-2">
             {% for inquiry in submission_group.inquiries.all %}
               <li class="panel-muted">
-                <span class="font-semibold text-primary-strong">{{ inquiry.reference_code }}</span>
+                {% if not is_single_inquiry %}
+                  <span class="meta-copy">{% trans "Código de consulta" %}</span>
+                  <span class="mt-1 block font-semibold text-primary-strong">{{ inquiry.reference_code }}</span>
+                {% endif %}
                 {% with item=inquiry.items.all|first %}
-                  {% if item %}<span class="text-sm text-text-muted"> · {{ item.product.title }}</span>{% endif %}
+                  {% if item %}
+                    <span class="{% if not is_single_inquiry %}mt-1 {% endif %}block text-sm text-text-muted">
+                      {{ item.product.title }} · {{ item.product.sku }}
+                    </span>
+                  {% endif %}
                 {% endwith %}
               </li>
             {% endfor %}

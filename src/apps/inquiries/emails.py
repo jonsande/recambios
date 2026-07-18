@@ -1597,6 +1597,12 @@ def _build_submission_group_email_context(
     return {
         "submission_group": submission_group,
         "inquiries": inquiry_rows,
+        "is_single_submission": len(inquiry_rows) == 1,
+        "primary_reference": (
+            inquiry_rows[0]["reference_code"]
+            if len(inquiry_rows) == 1
+            else submission_group.reference_code
+        ),
         "requester_name": requester_name,
         "requester_email": requester_email,
         "offer_response_deadline_hours": min(response_deadlines) if response_deadlines else 24,

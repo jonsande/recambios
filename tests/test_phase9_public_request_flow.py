@@ -263,6 +263,8 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
     assert len(customer_emails) == 1
     assert submission_group.reference_code in customer_emails[0].subject
     assert all(inquiry.reference_code in customer_emails[0].body for inquiry in inquiries)
+    assert "Código general de la solicitud:" in customer_emails[0].body
+    assert "Consultas por producto:" in customer_emails[0].body
     assert "request_cart_v1" not in client.session
 
 
@@ -384,15 +386,72 @@ def test_final_submit_is_only_event_creating_submitted_inquiry_and_emails(client
     assert InquirySubmissionGroup.objects.count() == 1
     assert len(mail.outbox) == 2
 
+    inquiry = Inquiry.objects.get()
+    submission_group = InquirySubmissionGroup.objects.get()
+    assert inquiry.reference_code in response.url
+    assert submission_group.reference_code not in response.url
+
     success_response = client.get(response.url)
     assert success_response.status_code == 200
     content = success_response.content.decode()
-    submission_group = InquirySubmissionGroup.objects.get()
-    assert submission_group.reference_code in content
-    assert "Referencia del envío" in content
-    assert "Solicitudes creadas" in content
-    assert "avanzar de forma independiente" in content
+    assert inquiry.reference_code in content
+    assert submission_group.reference_code not in content
+    assert "Código de consulta" in content
+    assert "Producto solicitado" in content
+    assert "podrá recibir una oferta o resolución independiente" not in content
+
+    customer_email = next(
+        message for message in mail.outbox if message.to == ["cliente.final@example.com"]
+    )
+    assert inquiry.reference_code in customer_email.subject
+    assert inquiry.reference_code in customer_email.body
+    assert submission_group.reference_code not in customer_email.subject
+    assert submission_group.reference_code not in customer_email.body
+    assert "Producto solicitado:" in customer_email.body
+    assert "cada producto" not in customer_email.body
+    assert "Cada solicitud podrá avanzar" not in customer_email.body
     assert len(mail.outbox) == 2
+
+
+@pytest.mark.usefixtures("email_settings")
+def test_multi_product_success_explains_general_and_product_codes(client) -> None:
+    products = [
+        make_public_product(sku="SKU-P9-CODES-1"),
+        make_public_product(sku="SKU-P9-CODES-2"),
+    ]
+    for product in products:
+        client.post(
+            f"/es/solicitud/carrito/anadir/{product.id}/",
+            data={"quantity": "1"},
+        )
+
+    response = client.post(
+        "/es/solicitud/enviar/",
+        data={
+            "contact_name": "Cliente códigos",
+            "destination_country": "ES",
+            "destination_city": "Madrid",
+            "destination_region": "Madrid",
+            "destination_postal_code": "28001",
+            "contact_email": "codigos@example.com",
+            "phone": "",
+            "company_name": "",
+            "tax_id": "",
+            "notes_from_customer": "",
+        },
+    )
+
+    submission_group = InquirySubmissionGroup.objects.get()
+    inquiries = list(submission_group.inquiries.order_by("id"))
+    assert submission_group.reference_code in response.url
+
+    success_response = client.get(response.url)
+    content = success_response.content.decode()
+    assert "Código general de la solicitud" in content
+    assert "Consultas por producto" in content
+    assert submission_group.reference_code in content
+    assert all(inquiry.reference_code in content for inquiry in inquiries)
+    assert all(inquiry.items.get().product.sku in content for inquiry in inquiries)
 
 
 @pytest.mark.usefixtures("email_settings")

@@ -1,17 +1,26 @@
 {% load i18n %}
-{% blocktrans with reference=submission_group.reference_code %}Hemos recibido su envío de solicitudes {{ reference }}.{% endblocktrans %}
+{% if is_single_submission %}{% blocktrans with reference=primary_reference %}Hemos recibido su solicitud {{ reference }}.{% endblocktrans %}
 
-{% trans "Gracias por su consulta. Hemos creado una solicitud independiente para cada producto para poder gestionar su disponibilidad, oferta y posible pago por separado." %}
-{% blocktrans with reference=submission_group.reference_code %}Referencia del envío: {{ reference }}{% endblocktrans %}
+{% trans "Código de consulta:" %} {{ primary_reference }}
+{% trans "Producto solicitado:" %}
+{% with inquiry=inquiries.0 %}- {{ inquiry.sku }} | {{ inquiry.title }} | {% blocktrans with quantity=inquiry.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}{% if inquiry.customer_note %} | {% blocktrans with note=inquiry.customer_note %}Nota: {{ note }}{% endblocktrans %}{% endif %}{% endwith %}
 
-{% trans "Solicitudes creadas:" %}
-{% for inquiry in inquiries %}- {{ inquiry.reference_code }} | {{ inquiry.sku }} | {{ inquiry.title }} | {% blocktrans with quantity=inquiry.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}{% if inquiry.customer_note %} | {% blocktrans with note=inquiry.customer_note %}Nota: {{ note }}{% endblocktrans %}{% endif %}
-{% empty %}{% trans "No hay solicitudes registradas." %}
+{% trans "Este correo confirma la recepción de su solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
+{% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, recibirá una oferta con un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar su pago.{% endblocktrans %}
+{% else %}{% blocktrans with reference=primary_reference %}Hemos recibido su solicitud de varios productos {{ reference }}.{% endblocktrans %}
+
+{% trans "Código general de la solicitud:" %} {{ primary_reference }}
+{% trans "Hemos asignado un código de consulta a cada producto para poder gestionar su disponibilidad, oferta y posible pago por separado." %}
+
+{% trans "Consultas por producto:" %}
+{% for inquiry in inquiries %}- {% trans "Código de consulta" %}: {{ inquiry.reference_code }} | {{ inquiry.sku }} | {{ inquiry.title }} | {% blocktrans with quantity=inquiry.quantity %}Cantidad: {{ quantity }}{% endblocktrans %}{% if inquiry.customer_note %} | {% blocktrans with note=inquiry.customer_note %}Nota: {{ note }}{% endblocktrans %}{% endif %}
+{% empty %}{% trans "No hay consultas registradas." %}
 {% endfor %}
 
-{% trans "Cada solicitud podrá avanzar de forma independiente. Este correo confirma su recepción; no constituye confirmación de stock, precio final ni plazo final." %}
+{% trans "Cada producto podrá recibir su propia oferta o resolución. Este correo confirma la recepción de la solicitud; no constituye confirmación de stock, precio final ni plazo final." %}
 {% blocktrans with offer_hours=offer_response_deadline_hours payment_hours=payment_deadline_hours %}Si confirmamos disponibilidad, cada oferta tendrá un plazo máximo de {{ offer_hours }} horas para aceptarla o rechazarla y, una vez aceptada, dispondrá de un máximo de {{ payment_hours }} horas para completar su pago.{% endblocktrans %}
+{% endif %}
 
 {% if customer_reply_to_email %}
-{% blocktrans with reply_to=customer_reply_to_email reference=submission_group.reference_code %}Si necesita ampliar datos, responda a {{ reply_to }} indicando la referencia de envío {{ reference }}.{% endblocktrans %}
+{% if is_single_submission %}{% blocktrans with reply_to=customer_reply_to_email reference=primary_reference %}Si necesita ampliar datos, responda a {{ reply_to }} indicando el código de consulta {{ reference }}.{% endblocktrans %}{% else %}{% blocktrans with reply_to=customer_reply_to_email reference=primary_reference %}Si necesita ampliar datos sobre la solicitud completa, responda a {{ reply_to }} indicando el código general {{ reference }}.{% endblocktrans %}{% endif %}
 {% endif %}

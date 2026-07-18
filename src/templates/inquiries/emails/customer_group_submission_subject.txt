@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktrans with reference=submission_group.reference_code %}Hemos recibido su envío de solicitudes {{ reference }}{% endblocktrans %}
+{% load i18n %}{% if is_single_submission %}{% blocktrans with reference=primary_reference %}Hemos recibido su solicitud {{ reference }}{% endblocktrans %}{% else %}{% blocktrans with reference=primary_reference %}Hemos recibido su solicitud de varios productos {{ reference }}{% endblocktrans %}{% endif %}
