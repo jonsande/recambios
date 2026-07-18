@@ -1339,7 +1339,7 @@ class InquiryOfferPaymentDetails(models.Model):
         _("facturación igual que envío"), default=True
     )
     billing_name = models.CharField(_("nombre o razón social de facturación"), max_length=180)
-    billing_tax_id = models.CharField(_("NIF / VAT de facturación"), max_length=64, blank=True)
+    billing_tax_id = models.CharField(_("NIF / VAT de facturación"), max_length=64)
     billing_address_line_1 = models.CharField(_("dirección de facturación"), max_length=255)
     billing_address_line_2 = models.CharField(
         _("información adicional de facturación"), max_length=255, blank=True
@@ -1410,11 +1410,8 @@ class InquiryOfferPaymentDetails(models.Model):
                 errors[field_name] = "This shipping field is required."
         if not self.billing_name:
             errors["billing_name"] = "Billing name is required."
-        if (
-            self.billing_customer_type == self.BillingCustomerType.COMPANY
-            and not self.billing_tax_id
-        ):
-            errors["billing_tax_id"] = "Tax/VAT identifier is required for company billing."
+        if not self.billing_tax_id:
+            errors["billing_tax_id"] = "Tax/VAT identifier is required for billing."
         for field_name in (
             "billing_address_line_1",
             "billing_city",

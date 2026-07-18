@@ -203,7 +203,7 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
             "billing_customer_type": _("Tipo de facturación"),
             "billing_same_as_shipping": _("La dirección de facturación coincide con la de envío"),
             "billing_name": _("Nombre de facturación / razón social"),
-            "billing_tax_id": _("NIF/CIF/VAT (opcional para particulares)"),
+            "billing_tax_id": _("NIF/CIF/VAT"),
             "billing_address_line_1": _("Dirección de facturación, línea 1"),
             "billing_address_line_2": _("Dirección de facturación, línea 2 (opcional)"),
             "billing_city": _("Ciudad / localidad de facturación"),
@@ -303,12 +303,6 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
                         name,
                         _("Este campo es obligatorio para una dirección distinta."),
                     )
-        if (
-            cleaned.get("billing_customer_type")
-            == InquiryOfferPaymentDetails.BillingCustomerType.COMPANY
-            and not (cleaned.get("billing_tax_id") or "").strip()
-        ):
-            self.add_error("billing_tax_id", _("El NIF/CIF/VAT es obligatorio para empresas."))
         return cleaned
 
     def save(self, commit=True):

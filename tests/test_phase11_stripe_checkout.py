@@ -117,6 +117,7 @@ def make_accepted_offer(
         shipping_postal_code="28001",
         shipping_country="ES",
         billing_name=user.get_username(),
+        billing_tax_id="12345678Z",
         billing_same_as_shipping=True,
         completed_at=timezone.now(),
     )
@@ -162,6 +163,41 @@ def test_checkout_details_form_prefills_locked_quoted_destination(django_user_mo
     assert form.fields["shipping_city"].disabled is True
     assert form.fields["shipping_region"].disabled is True
     assert form.fields["shipping_postal_code"].disabled is True
+
+
+@pytest.mark.django_db
+def test_checkout_details_form_requires_billing_tax_id(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="billing_tax_id_required")
+    offer.payment.checkout_details.delete()
+    form = InquiryOfferPaymentDetailsForm(
+        payment=offer.payment,
+        data={
+            "shipping_recipient_name": "María García",
+            "shipping_phone": "+34 600 000 000",
+            "shipping_address_line_1": "Calle Mayor 1",
+            "shipping_city": "Madrid",
+            "shipping_region": "Madrid",
+            "shipping_postal_code": "28001",
+            "shipping_country": "ES",
+            "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE,
+            "billing_same_as_shipping": "on",
+            "billing_name": "María García",
+            "billing_tax_id": "",
+        },
+    )
+
+    assert form.is_valid() is False
+    assert "billing_tax_id" in form.errors
+
+
+@pytest.mark.django_db
+def test_checkout_details_model_requires_billing_tax_id(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="billing_tax_id_model")
+    details = offer.payment.checkout_details
+    details.billing_tax_id = ""
+
+    with pytest.raises(ValidationError, match="Tax/VAT identifier is required for billing"):
+        details.save()
 
 
 @pytest.mark.django_db

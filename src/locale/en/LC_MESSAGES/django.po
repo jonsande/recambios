@@ -1316,8 +1316,8 @@ msgid "Nombre de facturación / razón social"
 msgstr "Billing name / legal name"
 
 #: src/apps/inquiries/forms.py:206
-msgid "NIF/CIF/VAT (opcional para particulares)"
-msgstr "Tax/VAT ID (optional for private individuals)"
+msgid "NIF/CIF/VAT"
+msgstr "Tax/VAT ID"
 
 #: src/apps/inquiries/forms.py:207
 msgid "Dirección de facturación, línea 1"
@@ -1346,10 +1346,6 @@ msgstr "Billing country"
 #: src/apps/inquiries/forms.py:304
 msgid "Este campo es obligatorio para una dirección distinta."
 msgstr "This field is required when using a different billing address."
-
-#: src/apps/inquiries/forms.py:311
-msgid "El NIF/CIF/VAT es obligatorio para empresas."
-msgstr "A tax/VAT ID is required for companies."
 
 #: src/apps/inquiries/models.py:33 src/apps/inquiries/models.py:157
 msgid "Español"
