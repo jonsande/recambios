@@ -3366,10 +3366,6 @@ msgstr ""
 msgid "Formulario de búsqueda y filtros de catálogo"
 msgstr "Catalog search and filter form"
 
-#: src/templates/catalog/product_list.html:66
-msgid "Buscar por referencia OEM o referencia"
-msgstr "Search by OEM reference or reference"
-
 #: src/templates/catalog/product_list.html:73
 msgid "Ej.: 06A145710N, 038145209A, A3 8P"
 msgstr "Example: 06A145710N, 038145209A, A3 8P"
@@ -3740,8 +3736,8 @@ msgstr "Offer summary:"
 
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:6
 #, python-format
-msgid "Destino cotizado: %(destination)s"
-msgstr "Quoted destination: %(destination)s"
+msgid "Dirección de envío: %(destination)s"
+msgstr "Shipping address: %(destination)s"
 
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:8
 #, python-format
@@ -4729,30 +4725,26 @@ msgid "Volver al catálogo"
 msgstr "Back to brands"
 
 #: src/templates/pages/about.html:17
-#, fuzzy, python-format
-#| msgid ""
-#| "Recambios Técnicos es una plataforma orientada a la localización y "
-#| "consulta de recambios de automoción con enfoque técnico. Nuestro objetivo "
-#| "es ofrecer información clara de producto para particulares, talleres y "
-#| "profesionales."
 msgid ""
-"%(brand)s es una plataforma orientada a la localización y consulta de "
-"recambios de automoción con enfoque técnico. Nuestro objetivo es ofrecer "
-"información clara de producto para particulares, talleres y profesionales."
+"Somos un agente independiente dedicado a la localización, consulta y venta "
+"a particulares y profesionales de recambios de automoción. Nuestro objetivo "
+"es ofrecer información clara de producto para particulares, talleres y "
+"profesionales, y conseguir precios mejores."
 msgstr ""
-"Technical Spare Parts is a platform focused on locating and consulting "
-"automotive spare parts with a technical approach. Our goal is to provide "
-"clear product information for individuals, workshops, and professionals."
+"We are an independent agent dedicated to sourcing, advising on, and selling "
+"automotive spare parts to individuals and professionals. Our goal is to "
+"provide clear product information for individuals, workshops, and "
+"professionals, and to secure better prices."
 
 #: src/templates/pages/about.html:20
 msgid ""
 "El flujo comercial en esta fase es de consulta previa: la disponibilidad, el "
-"precio final y el plazo se validan manualmente antes de cualquier "
-"confirmación."
+"precio final y el plazo de entrega se validan manualmente y de forma "
+"personalizada para cada producto solicitado."
 msgstr ""
-"The commercial flow in this phase is based on prior consultation: "
-"availability, final price, and lead time are manually validated before any "
-"confirmation."
+"At this stage, the commercial process begins with an inquiry: availability, "
+"final price, and delivery time are validated manually and individually for "
+"each requested product."
 
 #: src/templates/pages/contact.html:22
 msgid "Producto seleccionado"
@@ -4826,14 +4818,13 @@ msgstr "Quick search"
 
 #: src/templates/pages/home.html:50
 msgid ""
-"Busque por referencia, OEM o término técnico y acceda al listado filtrado."
-msgstr ""
+"Busque por referencia o término técnico y acceda al listado filtrado."
+msgstr "Search by reference or technical term and view the filtered results."
 
+#: src/templates/catalog/product_list.html:63
 #: src/templates/pages/home.html:54
-#, fuzzy
-#| msgid "Referencia de pago"
 msgid "Referencia o término"
-msgstr "Payment reference"
+msgstr "Reference or term"
 
 #: src/templates/pages/home.html:60
 #, fuzzy

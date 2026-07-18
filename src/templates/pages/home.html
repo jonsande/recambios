@@ -27,31 +27,16 @@
               {% trans "Buscar por vehículo compatible" %}
             </a>
           </div>
-
-          <div class="info-grid">
-            <article class="info-item">
-              <p class="info-value">{% trans "OEM y equivalencias" %}</p>
-              <p class="info-label">{% trans "Búsqueda técnica prioritaria" %}</p>
-            </article>
-            <article class="info-item">
-              <p class="info-value">{% trans "Solicite una oferta" %}</p>
-              <p class="info-label">{% trans "Confirmación comercial previa" %}</p>
-            </article>
-            <article class="info-item">
-              <p class="info-value">{% trans "Agente independiente" %}</p>
-              <p class="info-label">{% trans "MEJORES PRECIOS Y TRATO PERSONALIZADO" %}</p>
-            </article>
-          </div>
         </div>
 
         <aside class="section-shell">
           <h2 class="subsection-title">{% trans "Búsqueda rápida" %}</h2>
           <p class="mt-2 text-sm text-text-muted">
-            {% trans "Busque por referencia, OEM o término técnico y acceda al listado filtrado." %}
+            {% trans "Busque por referencia o término técnico y acceda al listado filtrado." %}
           </p>
           <form method="get" action="{% url 'catalog:product_list' %}" class="mt-4 space-y-3">
             <div>
-              <label for="home-q" class="form-label">{% trans "Referencia o término" %}</label>
+              <label for="home-q" class="sr-only">{% trans "Referencia o término" %}</label>
               <input
                 id="home-q"
                 name="q"
