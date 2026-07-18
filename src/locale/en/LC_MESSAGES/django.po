@@ -190,7 +190,6 @@ msgstr "Other vehicles"
 
 #: src/apps/catalog/models.py:25
 #, fuzzy
-#| msgid "Recambios Técnicos"
 msgid "Recambios"
 msgstr "Technical Spare Parts"
 

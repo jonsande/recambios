@@ -140,7 +140,7 @@ EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
 EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=10, cast=int)
 DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL",
-    default="Recambios Tecnicos <noreply@recambiostecnicos.local>",
+    default="bocamotor <noreply@bocamotor.local>",
 )
 SERVER_EMAIL = config("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 
@@ -164,7 +164,7 @@ STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
 
 SITE_BRAND_NAME = config(
     "SITE_BRAND_NAME",
-    default="Recambios Técnicos",
+    default="bocamotor",
 )
 SITE_BRAND_NAME_ES = config(
     "SITE_BRAND_NAME_ES",
