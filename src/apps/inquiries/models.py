@@ -3,6 +3,7 @@ from __future__ import annotations
 import string
 import uuid
 from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -461,6 +462,29 @@ class InquiryOffer(models.Model):
               "cotizado cuando corresponda.")
         ),
     )
+    product_price = models.DecimalField(
+        _("precio del producto sin IVA"),
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=_("Precio neto del producto antes de aplicar el IVA indicado."),
+    )
+    shipping_price = models.DecimalField(
+        _("gastos de envío sin IVA"),
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text=_("Importe neto del envío antes de aplicar el IVA indicado."),
+    )
+    product_vat_applicable = models.BooleanField(_("aplicar IVA al producto"), default=True)
+    product_vat_rate = models.DecimalField(
+        _("IVA del producto (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
+    )
+    shipping_vat_applicable = models.BooleanField(_("aplicar IVA al envío"), default=True)
+    shipping_vat_rate = models.DecimalField(
+        _("IVA del envío (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
+    )
     quoted_destination_country = CountryField(_("país cotizado"), blank=True, null=True)
     quoted_destination_city = models.CharField(_("ciudad cotizada"), max_length=120, blank=True)
     quoted_destination_region = models.CharField(
@@ -510,6 +534,21 @@ class InquiryOffer(models.Model):
                 condition=Q(confirmed_total__gte=0),
                 name="inq_offer_total_gte_0_ck",
             ),
+            models.CheckConstraint(
+                condition=Q(product_price__gte=0) | Q(product_price__isnull=True),
+                name="inq_offer_product_gte_0_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(shipping_price__gte=0), name="inq_offer_shipping_gte_0_ck"
+            ),
+            models.CheckConstraint(
+                condition=Q(product_vat_rate__gte=0) & Q(product_vat_rate__lte=100),
+                name="inq_offer_product_vat_range_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(shipping_vat_rate__gte=0) & Q(shipping_vat_rate__lte=100),
+                name="inq_offer_shipping_vat_range_ck",
+            ),
         ]
         indexes = [
             models.Index(fields=["status", "sent_at"], name="inq_offer_status_sent_idx"),
@@ -525,6 +564,28 @@ class InquiryOffer(models.Model):
 
     def __str__(self) -> str:
         return self.reference_code
+
+    @staticmethod
+    def _gross_amount(amount: Decimal | None, applies_vat: bool, rate: Decimal) -> Decimal:
+        amount = amount or Decimal("0.00")
+        rate = rate or Decimal("0.00")
+        multiplier = Decimal("1.00") + (rate / Decimal("100") if applies_vat else 0)
+        return (amount * multiplier).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    @property
+    def product_price_with_vat(self) -> Decimal:
+        return self._gross_amount(
+            self.product_price, self.product_vat_applicable, self.product_vat_rate
+        )
+
+    @property
+    def shipping_price_with_vat(self) -> Decimal:
+        return self._gross_amount(
+            self.shipping_price, self.shipping_vat_applicable, self.shipping_vat_rate
+        )
+
+    def calculate_confirmed_total(self) -> Decimal:
+        return self.product_price_with_vat + self.shipping_price_with_vat
 
     @property
     def is_ready_for_payment(self) -> bool:
@@ -569,7 +630,7 @@ class InquiryOffer(models.Model):
 
     def _build_send_readiness_errors(self) -> dict[str, str]:
         errors: dict[str, str] = {}
-        confirmed_total = self.confirmed_total
+        confirmed_total = self.calculate_confirmed_total()
         if confirmed_total is None:
             errors["confirmed_total"] = "A confirmed total amount is required before sending."
         elif confirmed_total <= 0:
@@ -818,6 +879,17 @@ class InquiryOffer(models.Model):
         elif len(self.currency) != 3:
             errors["currency"] = "Currency must be a 3-letter code."
 
+        if self.product_price is None:
+            errors["product_price"] = "A product price is required."
+        for field_name in ("product_price", "shipping_price"):
+            value = getattr(self, field_name)
+            if value is not None and value < 0:
+                errors[field_name] = "Price cannot be negative."
+        for field_name in ("product_vat_rate", "shipping_vat_rate"):
+            value = getattr(self, field_name)
+            if value is None or not Decimal("0") <= value <= Decimal("100"):
+                errors[field_name] = "VAT rate must be between 0 and 100."
+
         if (
             self.pk
             and self.status not in {
@@ -926,6 +998,19 @@ class InquiryOffer(models.Model):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs) -> None:
+        update_fields = kwargs.get("update_fields")
+        if self.product_price is None and self.confirmed_total is not None:
+            # Compatibility for callers and historical rows created with the old total-only API.
+            self.product_price = self.confirmed_total
+            self.product_vat_applicable = False
+        elif update_fields and "confirmed_total" in update_fields:
+            self.product_price = self.confirmed_total
+            self.product_vat_applicable = False
+        self.confirmed_total = self.calculate_confirmed_total()
+        if update_fields is not None:
+            kwargs["update_fields"] = tuple(
+                set(update_fields) | {"confirmed_total", "product_price", "product_vat_applicable"}
+            )
         if isinstance(self.currency, str):
             self.currency = self.currency.strip().upper()
 

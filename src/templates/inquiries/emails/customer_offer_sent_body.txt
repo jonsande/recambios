@@ -5,7 +5,9 @@
 {% blocktrans with inquiry_reference=inquiry.reference_code %}Referencia de solicitud: {{ inquiry_reference }}{% endblocktrans %}
 {% if offer.has_complete_quoted_destination %}{% blocktrans with destination=offer.quoted_destination_summary %}Dirección de envío: {{ destination }}{% endblocktrans %}
 {% endif %}
-{% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }}{% endblocktrans %}
+{% blocktrans with price=offer.product_price_with_vat currency=offer.currency %}Precio del producto (IVA incluido): {{ price }} {{ currency }}{% endblocktrans %}
+{% blocktrans with shipping=offer.shipping_price_with_vat currency=offer.currency %}Gastos de envío (IVA incluido): {{ shipping }} {{ currency }}{% endblocktrans %}
+{% blocktrans with total=offer.confirmed_total currency=offer.currency %}Importe total confirmado: {{ total }} {{ currency }} (IVA incluido){% endblocktrans %}
 {% blocktrans with lead_time=offer.lead_time_text %}Plazo estimado: {{ lead_time }}{% endblocktrans %}
 {% if valid_until %}{% blocktrans with deadline=valid_until %}Oferta válida hasta: {{ deadline }}{% endblocktrans %}
 {% endif %}{% if offer_validity_hours %}{% blocktrans with validity_hours=offer_validity_hours %}Vigencia de la oferta: {{ validity_hours }} horas{% endblocktrans %}

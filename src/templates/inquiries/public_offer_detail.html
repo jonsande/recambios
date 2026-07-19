@@ -60,7 +60,15 @@
           <dd class="mt-1 text-base font-semibold text-text">{{ offer.inquiry.reference_code }}</dd>
         </div>
         <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Importe total confirmado" %}</dt>
+          <dt class="font-medium text-text-muted">{% trans "Precio del producto (IVA incluido)" %}</dt>
+          <dd class="mt-1 text-text">{{ offer.product_price_with_vat }} {{ offer.currency }}</dd>
+        </div>
+        <div class="panel-muted">
+          <dt class="font-medium text-text-muted">{% trans "Gastos de envío (IVA incluido)" %}</dt>
+          <dd class="mt-1 text-text">{{ offer.shipping_price_with_vat }} {{ offer.currency }}</dd>
+        </div>
+        <div class="panel-muted sm:col-span-2">
+          <dt class="font-medium text-text-muted">{% trans "Precio total (IVA incluido)" %}</dt>
           <dd class="mt-1 text-2xl font-bold tracking-tight text-primary-strong">{{ offer.confirmed_total }} {{ offer.currency }}</dd>
         </div>
         <div class="panel-muted">

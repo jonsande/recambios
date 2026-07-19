@@ -203,6 +203,12 @@ class InquirySubmissionGroupAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
 class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     LOCKED_AFTER_SEND_FIELDS = (
         "confirmed_total",
+        "product_price",
+        "shipping_price",
+        "product_vat_applicable",
+        "product_vat_rate",
+        "shipping_vat_applicable",
+        "shipping_vat_rate",
         "currency",
         "quoted_destination_summary",
         "lead_time_text",
@@ -249,6 +255,8 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     readonly_fields = (
         "reference_code",
         "status",
+        "confirmed_total_display",
+        "confirmed_total",
         "access_token",
         "sent_at",
         "valid_until",
@@ -283,7 +291,13 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
             _("Datos comerciales"),
             {
                 "fields": (
-                    "confirmed_total",
+                    "product_price",
+                    "product_vat_applicable",
+                    "product_vat_rate",
+                    "shipping_price",
+                    "shipping_vat_applicable",
+                    "shipping_vat_rate",
+                    "confirmed_total_display",
                     "currency",
                     "lead_time_text",
                     "customer_message",
@@ -338,6 +352,10 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 )
             )
         return tuple(dict.fromkeys(readonly_fields))
+
+    @admin.display(description=_("Precio total con IVA"))
+    def confirmed_total_display(self, obj: InquiryOffer) -> str:
+        return f"{obj.confirmed_total} {obj.currency}" if obj else "—"
 
     @admin.display(ordering="inquiry__reference_code", description=_("Solicitud"))
     def inquiry_reference(self, obj: InquiryOffer) -> str:
