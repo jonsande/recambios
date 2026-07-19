@@ -1334,6 +1334,11 @@ msgstr "Billing customer type"
 msgid "La dirección de facturación coincide con la de envío"
 msgstr "Billing address is the same as shipping"
 
+#: src/apps/inquiries/forms.py
+#: src/templates/inquiries/public_offer_payment_details.html
+msgid "La dirección de facturación debe coincidir con la dirección de envío mientras esta opción esté seleccionada."
+msgstr "The billing address must match the shipping address while this option is selected."
+
 #: src/apps/inquiries/forms.py:205
 msgid "Nombre de facturación / razón social"
 msgstr "Billing name / legal name"

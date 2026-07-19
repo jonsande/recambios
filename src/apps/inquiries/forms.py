@@ -280,9 +280,19 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
         if cleaned.get("billing_same_as_shipping"):
+            shipping_address_line_1 = cleaned.get("shipping_address_line_1")
+            billing_address_line_1 = cleaned.get("billing_address_line_1")
+            if billing_address_line_1 != shipping_address_line_1:
+                self.add_error(
+                    "billing_address_line_1",
+                    _(
+                        "La dirección de facturación debe coincidir con la dirección "
+                        "de envío mientras esta opción esté seleccionada."
+                    ),
+                )
             cleaned.update(
                 {
-                    "billing_address_line_1": cleaned.get("shipping_address_line_1"),
+                    "billing_address_line_1": shipping_address_line_1,
                     "billing_address_line_2": cleaned.get("shipping_address_line_2"),
                     "billing_city": cleaned.get("shipping_city"),
                     "billing_region": cleaned.get("shipping_region"),

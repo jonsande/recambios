@@ -22,7 +22,13 @@
         <p class="mt-1 text-sm">{% trans "Si necesita cambiar país, provincia/región o código postal, contacte con nuestro equipo para revisar el coste de envío." %}</p>
       </section>
 
-      <form method="post" class="section-shell space-y-6" novalidate>
+      <form
+        method="post"
+        class="section-shell space-y-6"
+        novalidate
+        data-billing-address-form
+        data-address-mismatch-message="{% trans 'La dirección de facturación debe coincidir con la dirección de envío mientras esta opción esté seleccionada.' %}"
+      >
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 
@@ -50,6 +56,12 @@
               </div>
             {% endif %}
           {% endfor %}
+          <p
+            class="form-error hidden"
+            role="alert"
+            aria-live="assertive"
+            data-address-mismatch-error
+          ></p>
           <p class="text-sm text-text-muted">{% trans "Si la dirección coincide con la de envío, no es necesario repetirla; guardaremos una copia completa en el registro del pago." %}</p>
         </fieldset>
 
@@ -57,4 +69,45 @@
       </form>
     {% endif %}
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (() => {
+      const form = document.querySelector("[data-billing-address-form]");
+      if (!form) return;
+
+      const sameAddress = form.querySelector("#id_billing_same_as_shipping");
+      const shippingLine1 = form.querySelector("#id_shipping_address_line_1");
+      const billingLine1 = form.querySelector("#id_billing_address_line_1");
+      const mismatchError = form.querySelector("[data-address-mismatch-error]");
+      if (!sameAddress || !shippingLine1 || !billingLine1 || !mismatchError) return;
+
+      const clearMismatchError = () => {
+        mismatchError.textContent = "";
+        mismatchError.classList.add("hidden");
+        billingLine1.removeAttribute("aria-invalid");
+      };
+
+      const copyShippingLine1 = () => {
+        if (!sameAddress.checked) return;
+        billingLine1.value = shippingLine1.value;
+        clearMismatchError();
+      };
+
+      shippingLine1.addEventListener("input", copyShippingLine1);
+      sameAddress.addEventListener("change", copyShippingLine1);
+      form.addEventListener("submit", (event) => {
+        if (!sameAddress.checked || billingLine1.value === shippingLine1.value) return;
+        event.preventDefault();
+        mismatchError.textContent = form.dataset.addressMismatchMessage;
+        mismatchError.classList.remove("hidden");
+        billingLine1.setAttribute("aria-invalid", "true");
+        billingLine1.focus();
+      });
+
+      copyShippingLine1();
+    })();
+  </script>
 {% endblock %}

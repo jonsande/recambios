@@ -322,6 +322,51 @@ def test_checkout_details_form_requires_billing_tax_id(django_user_model) -> Non
 
 
 @pytest.mark.django_db
+def test_checkout_details_form_rejects_mismatched_billing_address_when_same(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="billing_address_mismatch")
+    details = offer.payment.checkout_details
+    form = InquiryOfferPaymentDetailsForm(
+        payment=offer.payment,
+        instance=details,
+        data={
+            "shipping_recipient_name": "María García",
+            "shipping_phone": "+34 600 000 000",
+            "shipping_address_line_1": "Calle Mayor 1",
+            "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE,
+            "billing_same_as_shipping": "on",
+            "billing_name": "María García",
+            "billing_tax_id": "12345678Z",
+            "billing_address_line_1": "Calle Menor 2",
+        },
+    )
+
+    assert form.is_valid() is False
+    assert "billing_address_line_1" in form.errors
+    assert "debe coincidir con la dirección de envío" in str(
+        form.errors["billing_address_line_1"]
+    )
+
+
+@pytest.mark.django_db
+def test_checkout_details_page_includes_billing_address_sync(client, django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="billing_address_sync")
+
+    response = client.get(
+        reverse(
+            "inquiries:public_inquiry_offer_payment_details",
+            kwargs={"access_token": offer.access_token},
+        )
+    )
+
+    assert response.status_code == 200
+    assert b'data-billing-address-form' in response.content
+    assert b'shippingLine1.addEventListener("input", copyShippingLine1)' in response.content
+    assert b'role="alert"' in response.content
+
+
+@pytest.mark.django_db
 def test_checkout_details_model_requires_billing_tax_id(django_user_model) -> None:
     offer = make_accepted_offer(django_user_model, username="billing_tax_id_model")
     details = offer.payment.checkout_details
