@@ -20,6 +20,7 @@ from django.utils import timezone, translation
 from apps.catalog.models import Brand, Category, Condition, Product
 from apps.inquiries.admin import InquiryAdmin, InquiryOfferAdmin, InquiryOfferPaymentAdmin
 from apps.inquiries.deadlines import expire_due_inquiry_deadlines
+from apps.inquiries.emails import send_customer_offer_cancelled_email
 from apps.inquiries.models import (
     Inquiry,
     InquiryItem,
@@ -340,6 +341,47 @@ def test_mark_expired_transitions_offer_and_inquiry_to_rejected(django_user_mode
     assert inquiry.status == Inquiry.Status.REJECTED
     with pytest.raises(ValueError):
         offer.mark_accepted(save=True)
+
+
+@pytest.mark.django_db
+def test_mark_cancelled_closes_offer_and_cancels_pending_payment(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="offer_cancelled")
+    offer.cancellation_internal_reason = "Supplier reports no stock"
+    offer.cancellation_customer_message = "El producto ha dejado de estar disponible."
+
+    offer.mark_cancelled(save=True)
+    offer.refresh_from_db()
+    offer.inquiry.refresh_from_db()
+    offer.payment.refresh_from_db()
+
+    assert offer.status == InquiryOffer.Status.CANCELLED
+    assert offer.cancelled_at is not None
+    assert offer.inquiry.status == Inquiry.Status.CLOSED
+    assert offer.payment.status == InquiryOfferPayment.Status.CANCELLED
+    with pytest.raises(ValueError):
+        offer.mark_accepted(save=True)
+
+
+@pytest.mark.django_db
+def test_offer_cancellation_requires_reasons_and_notifies_customer(
+    django_user_model, settings
+) -> None:
+    settings.DEFAULT_FROM_EMAIL = "sales@example.com"
+    offer = make_accepted_offer(django_user_model, username="offer_cancel_email")
+
+    with pytest.raises(ValidationError):
+        offer.mark_cancelled(save=True)
+
+    offer.cancellation_internal_reason = "Supplier reports no stock"
+    offer.cancellation_customer_message = "El producto ya no está disponible."
+    offer.mark_cancelled(save=True)
+
+    assert send_customer_offer_cancelled_email(offer) is True
+    assert len(mail.outbox) == 1
+    assert offer.reference_code in mail.outbox[0].subject
+    assert "Esta oferta ha sido cancelada internamente." in mail.outbox[0].body
+    assert "ya no está disponible" in mail.outbox[0].body
+    assert "Si sigue interesado en este producto" in mail.outbox[0].body
 
 
 @pytest.mark.django_db
@@ -1251,6 +1293,33 @@ def test_public_offer_draft_token_shows_unavailable_without_offer_data(
     assert str(offer.confirmed_total) not in content
     assert offer.reference_code not in content
     assert inquiry.reference_code not in content
+
+
+@pytest.mark.django_db
+def test_public_cancelled_offer_shows_only_relevant_terminal_state(
+    client,
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="offer_public_cancelled")
+    offer.cancellation_internal_reason = "Supplier reports no stock"
+    offer.cancellation_customer_message = "El producto ya no está disponible."
+    offer.mark_cancelled(save=True)
+    url = reverse(
+        "inquiries:public_inquiry_offer_detail",
+        kwargs={"access_token": offer.access_token},
+    )
+
+    with translation.override("es"):
+        response = client.get(url)
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "Oferta cancelada" in content
+    assert "Oferta comercial confirmada" not in content
+    assert "Esta oferta ha sido cancelada internamente." in content
+    assert "Oferta válida hasta" not in content
+    assert "Aviso de disponibilidad" not in content
+    assert "La oferta está sujeta a disponibilidad efectiva" not in content
 
 
 @pytest.mark.django_db

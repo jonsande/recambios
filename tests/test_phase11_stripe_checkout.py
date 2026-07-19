@@ -21,10 +21,12 @@ from apps.inquiries.models import (
 )
 from apps.inquiries.payments import (
     STRIPE_PROVIDER,
+    StripeCheckoutSessionError,
     StripeCheckoutSessionResult,
     StripeConfigurationError,
     StripeWebhookPayloadError,
     StripeWebhookSignatureError,
+    cancel_offer_with_remote_checkout_expiration,
     create_or_reuse_checkout_session_for_offer,
     process_stripe_checkout_event,
 )
@@ -122,6 +124,68 @@ def make_accepted_offer(
         completed_at=timezone.now(),
     )
     return offer
+
+
+@pytest.mark.django_db
+def test_offer_cancellation_expires_active_remote_checkout_session(
+    django_user_model,
+    settings,
+) -> None:
+    settings.STRIPE_SECRET_KEY = "sk_test_cancel_remote"
+    offer = make_accepted_offer(django_user_model, username="stripe_cancel_remote")
+    payment = offer.payment
+    payment.provider = STRIPE_PROVIDER
+    payment.provider_reference = "cs_test_cancel_remote"
+    payment.save(update_fields=["provider", "provider_reference", "updated_at"])
+    offer.cancellation_internal_reason = "Supplier reports no stock"
+    offer.cancellation_customer_message = "El producto ya no está disponible."
+    offer.save()
+
+    with (
+        patch(
+            "stripe.checkout.Session.retrieve",
+            return_value={"id": "cs_test_cancel_remote", "status": "open"},
+        ) as retrieve_session,
+        patch(
+            "stripe.checkout.Session.expire",
+            return_value={"id": "cs_test_cancel_remote", "status": "expired"},
+        ) as expire_session,
+    ):
+        cancelled_offer = cancel_offer_with_remote_checkout_expiration(offer)
+
+    retrieve_session.assert_called_once_with("cs_test_cancel_remote")
+    expire_session.assert_called_once_with("cs_test_cancel_remote")
+    assert cancelled_offer.status == InquiryOffer.Status.CANCELLED
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.CANCELLED
+
+
+@pytest.mark.django_db
+def test_offer_cancellation_is_blocked_when_remote_expiration_fails(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="stripe_cancel_failure")
+    payment = offer.payment
+    payment.provider = STRIPE_PROVIDER
+    payment.provider_reference = "cs_test_cancel_failure"
+    payment.save(update_fields=["provider", "provider_reference", "updated_at"])
+    offer.cancellation_internal_reason = "Supplier reports no stock"
+    offer.cancellation_customer_message = "El producto ya no está disponible."
+    offer.save()
+
+    with (
+        patch(
+            "apps.inquiries.payments._expire_stripe_checkout_session",
+            side_effect=StripeCheckoutSessionError("Stripe unavailable"),
+        ),
+        pytest.raises(StripeCheckoutSessionError),
+    ):
+        cancel_offer_with_remote_checkout_expiration(offer)
+
+    offer.refresh_from_db()
+    payment.refresh_from_db()
+    assert offer.status == InquiryOffer.Status.ACCEPTED
+    assert payment.status == InquiryOfferPayment.Status.PENDING
 
 
 @pytest.mark.django_db

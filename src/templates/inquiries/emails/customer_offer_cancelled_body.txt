@@ -1,0 +1,12 @@
+{% load i18n %}
+{% blocktrans with name=inquiry.requester_display %}Hola {{ name }},{% endblocktrans %}
+
+{% trans "Esta oferta ha sido cancelada internamente." %}
+{% blocktrans with offer_reference=offer.reference_code inquiry_reference=inquiry.reference_code %}Referencia de oferta: {{ offer_reference }}. Referencia de solicitud: {{ inquiry_reference }}.{% endblocktrans %}
+
+{{ offer.cancellation_customer_message }}
+
+{% trans "Puede consultar su estado aquí:" %}
+{{ offer_public_url }}
+
+{% if customer_reply_to_email %}{% blocktrans with reply_to=customer_reply_to_email %}Si sigue interesado en este producto, o busca una alternativa, responda a este correo o contacte con {{ reply_to }}.{% endblocktrans %}{% else %}{% trans "Si sigue interesado en este producto, o busca una alternativa, responda a este correo." %}{% endif %}

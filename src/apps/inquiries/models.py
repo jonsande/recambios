@@ -416,6 +416,7 @@ class InquiryOffer(models.Model):
         ACCEPTED = "accepted", _("Aceptada por el cliente")
         REJECTED = "rejected", _("Rechazada por el cliente")
         EXPIRED = "expired", _("Caducada")
+        CANCELLED = "cancelled", _("Cancelada")
 
     REFERENCE_PREFIX = "OFF"
     REFERENCE_RANDOM_LENGTH = 6
@@ -423,10 +424,11 @@ class InquiryOffer(models.Model):
     DEFAULT_OFFER_VALIDITY_HOURS = 24
     STATUS_TRANSITIONS = {
         Status.DRAFT: (Status.SENT,),
-        Status.SENT: (Status.ACCEPTED, Status.REJECTED, Status.EXPIRED),
-        Status.ACCEPTED: (Status.EXPIRED,),
+        Status.SENT: (Status.ACCEPTED, Status.REJECTED, Status.EXPIRED, Status.CANCELLED),
+        Status.ACCEPTED: (Status.EXPIRED, Status.CANCELLED),
         Status.REJECTED: (),
         Status.EXPIRED: (),
+        Status.CANCELLED: (),
     }
 
     inquiry = models.OneToOneField(
@@ -489,6 +491,13 @@ class InquiryOffer(models.Model):
     accepted_at = models.DateTimeField(_("aceptada el"), null=True, blank=True, db_index=True)
     rejected_at = models.DateTimeField(_("rechazada el"), null=True, blank=True, db_index=True)
     expired_at = models.DateTimeField(_("caducada el"), null=True, blank=True, db_index=True)
+    cancelled_at = models.DateTimeField(_("cancelada el"), null=True, blank=True, db_index=True)
+    cancellation_internal_reason = models.TextField(
+        _("motivo interno de cancelación"), blank=True
+    )
+    cancellation_customer_message = models.TextField(
+        _("mensaje de cancelación para el cliente"), blank=True
+    )
     created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
 
@@ -748,6 +757,28 @@ class InquiryOffer(models.Model):
                 self.save()
                 self._sync_inquiry_status(Inquiry.Status.REJECTED)
 
+    def mark_cancelled(self, *, save: bool = True) -> None:
+        if not self.can_transition_to(self.Status.CANCELLED):
+            raise ValueError("Only sent or accepted offers can be cancelled.")
+        if not (self.cancellation_internal_reason or "").strip():
+            raise ValidationError(
+                {"cancellation_internal_reason": _("Debe indicar el motivo de cancelación.")}
+            )
+        if not (self.cancellation_customer_message or "").strip():
+            raise ValidationError(
+                {"cancellation_customer_message": _("Debe indicar el mensaje para el cliente.")}
+            )
+
+        self.status = self.Status.CANCELLED
+        self.cancelled_at = timezone.now()
+        if save:
+            with transaction.atomic():
+                payment = InquiryOfferPayment.objects.filter(offer_id=self.pk).first()
+                if payment is not None and payment.status == InquiryOfferPayment.Status.PENDING:
+                    payment.mark_cancelled(save=True)
+                self.save()
+                self._sync_inquiry_status(Inquiry.Status.CLOSED)
+
     def clean(self) -> None:
         super().clean()
         errors = {}
@@ -789,7 +820,9 @@ class InquiryOffer(models.Model):
 
         if (
             self.pk
-            and self.status not in {self.Status.ACCEPTED, self.Status.EXPIRED}
+            and self.status not in {
+                self.Status.ACCEPTED, self.Status.EXPIRED, self.Status.CANCELLED
+            }
             and InquiryOfferPayment.objects.filter(offer_id=self.pk).exists()
         ):
             errors["status"] = (
@@ -871,6 +904,15 @@ class InquiryOffer(models.Model):
                 errors["expired_at"] = "Expired offers must define expired_at."
             if self.rejected_at is not None:
                 errors["rejected_at"] = "Expired offers cannot have rejected_at."
+        elif self.status == self.Status.CANCELLED:
+            if self.sent_at is None:
+                errors["sent_at"] = "Cancelled offers must define sent_at."
+            if self.cancelled_at is None:
+                errors["cancelled_at"] = "Cancelled offers must define cancelled_at."
+            if not self.cancellation_internal_reason:
+                errors["cancellation_internal_reason"] = "A cancellation reason is required."
+            if not self.cancellation_customer_message:
+                errors["cancellation_customer_message"] = "A customer message is required."
 
         if (
             self.validity_hours_snapshot is not None
@@ -887,7 +929,10 @@ class InquiryOffer(models.Model):
         if isinstance(self.currency, str):
             self.currency = self.currency.strip().upper()
 
-        for field_name in ("lead_time_text", "internal_notes", "customer_message"):
+        for field_name in (
+            "lead_time_text", "internal_notes", "customer_message",
+            "cancellation_internal_reason", "cancellation_customer_message",
+        ):
             value = getattr(self, field_name)
             if isinstance(value, str):
                 setattr(self, field_name, value.strip())

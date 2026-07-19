@@ -306,6 +306,9 @@ class PublicInquiryOfferDetailView(TemplateView):
                 "La vigencia de esta oferta ha finalizado. Si sigue habiendo "
                 "disponibilidad, puede solicitar una nueva oferta."
             )
+        elif self.offer.status == InquiryOffer.Status.CANCELLED:
+            page_title = _("Oferta cancelada")
+            page_intro = ""
 
         context.update(
             {
@@ -316,6 +319,7 @@ class PublicInquiryOfferDetailView(TemplateView):
                 "is_accepted": self.offer.status == InquiryOffer.Status.ACCEPTED,
                 "is_rejected": self.offer.status == InquiryOffer.Status.REJECTED,
                 "is_expired": self.offer.status == InquiryOffer.Status.EXPIRED,
+                "is_cancelled": self.offer.status == InquiryOffer.Status.CANCELLED,
             }
         )
         return context
@@ -588,6 +592,11 @@ class PublicInquiryOfferPaymentView(TemplateView):
                     "La vigencia de esta oferta ha finalizado. "
                     "Si sigue habiendo disponibilidad, puede solicitar una nueva oferta."
                 ),
+            )
+        elif offer.status == InquiryOffer.Status.CANCELLED:
+            messages.info(
+                request,
+                _("Esta oferta ha sido cancelada y ya no admite pagos."),
             )
         else:
             messages.info(

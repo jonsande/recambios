@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.users.roles import is_restricted_supplier_user
 
-from .emails import send_customer_offer_sent_email
+from .emails import send_customer_offer_cancelled_email, send_customer_offer_sent_email
 from .models import (
     Inquiry,
     InquiryItem,
@@ -17,6 +17,10 @@ from .models import (
     InquiryOfferPayment,
     InquiryOfferPaymentDetails,
     InquirySubmissionGroup,
+)
+from .payments import (
+    StripeCheckoutSessionError,
+    cancel_offer_with_remote_checkout_expiration,
 )
 
 logger = logging.getLogger(__name__)
@@ -217,6 +221,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "accepted_at",
         "rejected_at",
         "expired_at",
+        "cancelled_at",
         "updated_at",
     )
     list_filter = (
@@ -227,6 +232,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "accepted_at",
         "rejected_at",
         "expired_at",
+        "cancelled_at",
         "created_at",
     )
     search_fields = (
@@ -250,6 +256,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "accepted_at",
         "rejected_at",
         "expired_at",
+        "cancelled_at",
         "created_at",
         "updated_at",
     )
@@ -258,6 +265,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "mark_selected_as_sent",
         "resend_offer_email_to_customer",
         "initiate_payment_for_selected_offers",
+        "cancel_selected_offers",
     )
     fieldsets = (
         (
@@ -280,6 +288,8 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                     "lead_time_text",
                     "customer_message",
                     "internal_notes",
+                    "cancellation_internal_reason",
+                    "cancellation_customer_message",
                 )
             },
         ),
@@ -304,6 +314,7 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                     "accepted_at",
                     "rejected_at",
                     "expired_at",
+                    "cancelled_at",
                 )
             },
         ),
@@ -501,6 +512,49 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 _("No se inició ningún pago."),
                 level=messages.WARNING,
             )
+
+    @admin.action(description=_("Cancelar las ofertas y notificar a los clientes"))
+    def cancel_selected_offers(self, request, queryset):
+        cancelled_count = 0
+        skipped_count = 0
+        for offer in queryset.select_related("inquiry", "inquiry__user"):
+            try:
+                offer = cancel_offer_with_remote_checkout_expiration(offer)
+            except (ValidationError, ValueError, StripeCheckoutSessionError) as error:
+                skipped_count += 1
+                details = (
+                    self._render_validation_error(error)
+                    if isinstance(error, ValidationError)
+                    else str(error)
+                )
+                self.message_user(
+                    request,
+                    _("No se canceló la oferta %(reference)s (%(details)s).")
+                    % {"reference": offer.reference_code, "details": details},
+                    level=messages.WARNING,
+                )
+                continue
+            try:
+                send_customer_offer_cancelled_email(offer)
+            except Exception:
+                logger.exception(
+                    "Failed to send offer cancellation email (offer=%s).",
+                    offer.reference_code,
+                )
+                self.message_user(
+                    request,
+                    _("La oferta %(reference)s se canceló, pero falló el correo al cliente.")
+                    % {"reference": offer.reference_code},
+                    level=messages.ERROR,
+                )
+            cancelled_count += 1
+        if cancelled_count:
+            self.message_user(
+                request,
+                _("Ofertas canceladas: %(count)s.") % {"count": cancelled_count},
+            )
+        elif skipped_count:
+            self.message_user(request, _("No se canceló ninguna oferta."), level=messages.WARNING)
 
 
 @admin.register(InquiryOfferPayment)

@@ -6,9 +6,11 @@
 {% block content %}
   <div class="page-stack">
     <section class="section-shell-lg">
-      <p class="page-eyebrow">{% trans "Oferta comercial confirmada" %}</p>
-      <h1 class="mt-2 page-title">{{ page_title }}</h1>
-      <p class="page-lead">{{ page_intro }}</p>
+      {% if not is_cancelled %}
+        <p class="page-eyebrow">{% trans "Oferta comercial confirmada" %}</p>
+      {% endif %}
+      <h1 class="{% if not is_cancelled %}mt-2 {% endif %}page-title">{{ page_title }}</h1>
+      {% if page_intro %}<p class="page-lead">{{ page_intro }}</p>{% endif %}
     </section>
 
     {% if is_accepted %}
@@ -31,9 +33,16 @@
       <section class="alert alert-warning" aria-live="polite">
         {% trans "La vigencia de esta oferta ha finalizado. Si sigue habiendo disponibilidad, puede solicitar una nueva oferta." %}
       </section>
+    {% elif is_cancelled %}
+      <section class="alert alert-warning" aria-live="polite">
+        <p>{% trans "Esta oferta ha sido cancelada internamente." %}</p>
+        {% if offer.cancellation_customer_message %}
+          <p class="mt-2">{{ offer.cancellation_customer_message }}</p>
+        {% endif %}
+      </section>
     {% endif %}
 
-    <section class="section-shell" aria-label="{% trans 'Resumen de oferta confirmada' %}">
+    <section class="section-shell" aria-label="{% trans 'Resumen de oferta' %}">
       <h2 class="subsection-title">{% trans "Resumen de oferta" %}</h2>
       <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         {% if offer.has_complete_quoted_destination %}
@@ -65,21 +74,26 @@
           </dd>
         </div>
         <div class="panel-muted">
-          <dt class="font-medium text-text-muted">{% trans "Oferta válida hasta" %}</dt>
-          <dd class="mt-1 text-text">
-            {% if offer.valid_until %}
-              {{ offer.valid_until }}
-              {% if offer.validity_hours_snapshot %}
-                <span class="block text-xs text-text-muted">
-                  {% blocktrans with hours=offer.validity_hours_snapshot %}
-                    Vigencia de la oferta: {{ hours }} horas
-                  {% endblocktrans %}
-                </span>
+          {% if is_cancelled %}
+            <dt class="font-medium text-text-muted">{% trans "Oferta cancelada" %}</dt>
+            <dd class="mt-1 text-text">
+              {% if offer.cancelled_at %}{{ offer.cancelled_at }}{% else %}{{ offer.get_status_display }}{% endif %}
+            </dd>
+          {% else %}
+            <dt class="font-medium text-text-muted">{% trans "Oferta válida hasta" %}</dt>
+            <dd class="mt-1 text-text">
+              {% if offer.valid_until %}
+                {{ offer.valid_until }}
+                {% if offer.validity_hours_snapshot %}
+                  <span class="block text-xs text-text-muted">
+                    {% blocktrans with hours=offer.validity_hours_snapshot %}Vigencia de la oferta: {{ hours }} horas{% endblocktrans %}
+                  </span>
+                {% endif %}
+              {% else %}
+                {% trans "Pendiente de definir" %}
               {% endif %}
-            {% else %}
-              {% trans "Pendiente de definir" %}
-            {% endif %}
-          </dd>
+            </dd>
+          {% endif %}
         </div>
       </dl>
     </section>
@@ -91,9 +105,11 @@
       </section>
     {% endif %}
 
-    <section class="alert alert-warning" aria-label="{% trans 'Aviso de disponibilidad' %}">
-      {% trans "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
-    </section>
+    {% if not is_cancelled %}
+      <section class="alert alert-warning" aria-label="{% trans 'Aviso de disponibilidad' %}">
+        {% trans "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación del pago. Si hubiera un cambio relevante, le contactaremos antes de continuar." %}
+      </section>
+    {% endif %}
 
     {% if can_respond %}
       <section class="section-shell" aria-label="{% trans 'Respuesta de oferta' %}">

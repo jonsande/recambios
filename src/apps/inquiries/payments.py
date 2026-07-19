@@ -73,6 +73,30 @@ class StripeCheckoutSessionResult:
     reused_existing_session: bool
 
 
+def cancel_offer_with_remote_checkout_expiration(offer: InquiryOffer) -> InquiryOffer:
+    """Cancel an offer only after making any active Stripe Checkout URL unusable."""
+    with transaction.atomic():
+        locked_offer = (
+            InquiryOffer.objects.select_related("inquiry")
+            .select_for_update()
+            .get(pk=offer.pk)
+        )
+        payment = (
+            InquiryOfferPayment.objects.select_for_update()
+            .filter(offer_id=locked_offer.pk)
+            .first()
+        )
+        if (
+            payment is not None
+            and payment.status == InquiryOfferPayment.Status.PENDING
+            and payment.provider == STRIPE_PROVIDER
+            and payment.provider_reference
+        ):
+            _expire_stripe_checkout_session(payment.provider_reference)
+        locked_offer.mark_cancelled(save=True)
+    return locked_offer
+
+
 def create_or_reuse_checkout_session_for_offer(
     offer: InquiryOffer,
     *,
@@ -236,6 +260,12 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
             event_type == "checkout.session.completed" and payment_status == "paid"
         )
         if is_paid_transition:
+            if payment.offer.status == InquiryOffer.Status.CANCELLED:
+                logger.error(
+                    "Stripe paid event rejected for commercially cancelled offer (payment=%s).",
+                    payment.reference_code,
+                )
+                return False
             if (
                 payment.checkout_expires_at is None
                 or event_created is None
@@ -323,6 +353,36 @@ def _create_checkout_session(
         )
     except stripe.error.StripeError as error:
         raise StripeCheckoutSessionError("Stripe checkout session creation failed.") from error
+
+
+def _expire_stripe_checkout_session(session_id: str) -> None:
+    stripe = _load_stripe_module()
+    stripe.api_key = _require_stripe_secret_key()
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        status = str(_get_attr(session, "status", "")).strip().lower()
+        if status == "expired":
+            return
+        if status == "complete":
+            raise StripeCheckoutSessionError(
+                "Stripe Checkout Session is already complete; reconcile the payment "
+                "before cancelling the offer."
+            )
+        if status != "open":
+            raise StripeCheckoutSessionError(
+                "Stripe Checkout Session status could not be confirmed as open or expired."
+            )
+        expired_session = stripe.checkout.Session.expire(session_id)
+        if str(_get_attr(expired_session, "status", "")).strip().lower() != "expired":
+            raise StripeCheckoutSessionError(
+                "Stripe did not confirm that the Checkout Session was expired."
+            )
+    except StripeCheckoutSessionError:
+        raise
+    except stripe.error.StripeError as error:
+        raise StripeCheckoutSessionError(
+            "Stripe Checkout Session expiration failed."
+        ) from error
 
 
 def _stripe_timestamp(value: Any):
