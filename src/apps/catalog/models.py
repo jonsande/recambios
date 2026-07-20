@@ -1,9 +1,10 @@
 import hashlib
 import re
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import models, transaction
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -219,6 +220,20 @@ class Product(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
+        help_text=_("Precio unitario sin IVA."),
+    )
+    product_vat_rate = models.DecimalField(
+        _("IVA del producto (%)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("21.00"),
+        help_text=_("Porcentaje de IVA que se aplica al último precio conocido."),
+    )
+    last_known_price_updated_at = models.DateTimeField(
+        _("último precio conocido actualizado el"),
+        null=True,
+        blank=True,
+        editable=False,
     )
     currency = models.CharField(_("moneda"), max_length=3, default="EUR")
     unit_of_sale = models.CharField(_("unidad de venta"), max_length=32, default="unit")
@@ -243,6 +258,15 @@ class Product(models.Model):
     created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizado el"), auto_now=True)
 
+    @property
+    def last_known_price_with_vat(self) -> Decimal | None:
+        if self.last_known_price is None:
+            return None
+        multiplier = Decimal("1.00") + (self.product_vat_rate / Decimal("100"))
+        return (self.last_known_price * multiplier).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
     class Meta:
         verbose_name = _("producto")
         verbose_name_plural = _("productos")
@@ -263,6 +287,10 @@ class Product(models.Model):
             models.CheckConstraint(
                 condition=Q(quantity__gte=1),
                 name="catalog_product_quantity_gte_1_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(product_vat_rate__gte=0) & Q(product_vat_rate__lte=100),
+                name="catalog_product_vat_range_ck",
             ),
         ]
         indexes = [
@@ -347,6 +375,18 @@ class Product(models.Model):
             target_part_number.save()
 
     def save(self, *args, **kwargs) -> None:
+        price_changed = self._state.adding and self.last_known_price is not None
+        if not self._state.adding and self.pk:
+            previous_price = type(self).objects.filter(pk=self.pk).values_list(
+                "last_known_price", flat=True
+            ).first()
+            price_changed = previous_price != self.last_known_price
+        if price_changed:
+            self.last_known_price_updated_at = timezone.now()
+            if kwargs.get("update_fields") is not None:
+                kwargs["update_fields"] = tuple(
+                    set(kwargs["update_fields"]) | {"last_known_price_updated_at"}
+                )
         self.slug = self._build_slug_from_sku()
         super().save(*args, **kwargs)
         self.sync_primary_oem_part_number()

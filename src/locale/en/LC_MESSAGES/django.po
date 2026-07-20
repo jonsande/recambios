@@ -4954,12 +4954,8 @@ msgid "CATÁLOGO"
 msgstr "CATALOG"
 
 #: src/templates/pages/home.html:105
-msgid ""
-"Presentación pública inicial del catálogo. Para precio final y plazo siempre "
-"se requiere confirmación previa."
-msgstr ""
-"Initial public catalog presentation. Final price and lead time always "
-"require prior confirmation."
+msgid "Para precio final y plazo siempre se requiere confirmación previa."
+msgstr "Final price and lead time always require prior confirmation."
 
 #: src/templates/pages/home.html:116
 msgid "No hay productos públicos disponibles."
@@ -5149,3 +5145,24 @@ msgstr "For any commercial or legal inquiry, use the contact page."
 
 #~ msgid "MEJORES PRECIOS Y TRATO PERSONALIZADO"
 #~ msgstr "BEST PRICES AND PERSONALIZED SERVICE"
+
+msgid "Precio unitario sin IVA."
+msgstr "Unit price excluding VAT."
+
+msgid "Porcentaje de IVA que se aplica al último precio conocido."
+msgstr "VAT percentage applied to the last known price."
+
+msgid "último precio conocido actualizado el"
+msgstr "last known price updated at"
+
+msgid "actualizar el último precio conocido del producto"
+msgstr "update the product's last known price"
+
+msgid "Al enviar la oferta, actualiza el último precio conocido de la web pública con el precio unitario sin IVA (precio del producto dividido entre la cantidad solicitada), junto con su porcentaje de IVA."
+msgstr "When the offer is sent, updates the last known price on the public website with the unit price excluding VAT (product price divided by the requested quantity), together with its VAT percentage."
+
+msgid "IVA incluido. Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo."
+msgstr "VAT included. Indicative price subject to confirmation of availability, final amount and lead time."
+
+msgid "IVA incluido. Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo."
+msgstr "VAT included. This value is for information only and does not constitute a final offer. Availability, final price and lead time are validated before confirming any transaction."

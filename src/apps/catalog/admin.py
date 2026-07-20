@@ -240,7 +240,12 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
     list_select_related = ("supplier", "brand", "category", "condition")
     autocomplete_fields = ("supplier", "brand", "category", "condition")
     inlines = (PartNumberInline, ProductVehicleFitmentInline, ProductImageInline)
-    readonly_fields = ("slug", "created_at", "updated_at")
+    readonly_fields = (
+        "slug",
+        "last_known_price_updated_at",
+        "created_at",
+        "updated_at",
+    )
     date_hierarchy = "updated_at"
     actions = (
         "mark_selected_as_draft",
@@ -272,6 +277,8 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "last_known_price",
+                    "product_vat_rate",
+                    "last_known_price_updated_at",
                     "currency",
                     "unit_of_sale",
                     "quantity",

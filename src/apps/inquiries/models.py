@@ -481,6 +481,15 @@ class InquiryOffer(models.Model):
     product_vat_rate = models.DecimalField(
         _("IVA del producto (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
     )
+    update_product_last_known_price = models.BooleanField(
+        _("actualizar el último precio conocido del producto"),
+        default=True,
+        help_text=_(
+            "Al enviar la oferta, actualiza el último precio conocido de la web pública "
+            "con el precio unitario sin IVA (precio del producto dividido entre la "
+            "cantidad solicitada), junto con su porcentaje de IVA."
+        ),
+    )
     shipping_vat_applicable = models.BooleanField(_("aplicar IVA al envío"), default=True)
     shipping_vat_rate = models.DecimalField(
         _("IVA del envío (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
@@ -740,6 +749,37 @@ class InquiryOffer(models.Model):
         if save:
             with transaction.atomic():
                 self.save()
+                if self.update_product_last_known_price:
+                    items = list(
+                        self.inquiry.items.select_related("product").order_by("pk")[:2]
+                    )
+                    if len(items) == 1:
+                        item = items[0]
+                        unit_price = (self.product_price / item.requested_quantity).quantize(
+                            Decimal("0.01"), rounding=ROUND_HALF_UP
+                        )
+                        product = item.product
+                        product.last_known_price = unit_price
+                        product.product_vat_rate = (
+                            self.product_vat_rate
+                            if self.product_vat_applicable
+                            else Decimal("0.00")
+                        )
+                        product.currency = self.currency
+                        product.price_visibility_mode = (
+                            product.PriceVisibilityMode.VISIBLE_INFO
+                        )
+                        product.last_known_price_updated_at = now
+                        product.save(
+                            update_fields=(
+                                "last_known_price",
+                                "product_vat_rate",
+                                "currency",
+                                "price_visibility_mode",
+                                "last_known_price_updated_at",
+                                "updated_at",
+                            )
+                        )
                 self._sync_inquiry_status(Inquiry.Status.RESPONDED)
 
     def mark_accepted(self, *, save: bool = True) -> None:

@@ -44,10 +44,10 @@
           {% trans "Último precio conocido" %}
         </p>
         <p class="mt-1 text-xl font-semibold text-primary-strong">
-          {{ product.last_known_price }} {{ product.currency }}
+          {{ product.last_known_price_with_vat }} {{ product.currency }}
         </p>
         <p class="mt-2 text-xs text-text-muted">
-          {% trans "Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo." %}
+          {% trans "IVA incluido. Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo." %}
         </p>
       {% endif %}
     </div>

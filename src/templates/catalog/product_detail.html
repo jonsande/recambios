@@ -51,9 +51,9 @@
           <h2 class="section-title">{% trans "Disponibilidad y precio" %}</h2>
           {% if product.price_visibility_mode == "visible_info" and product.last_known_price %}
             <p class="meta-copy mt-3">{% trans "Último precio conocido" %}</p>
-            <p class="mt-1 text-3xl font-bold tracking-tight text-primary-strong">{{ product.last_known_price }} {{ product.currency }}</p>
+            <p class="mt-1 text-3xl font-bold tracking-tight text-primary-strong">{{ product.last_known_price_with_vat }} {{ product.currency }}</p>
             <p class="mt-3 text-sm text-text-muted">
-              {% trans "Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo." %}
+              {% trans "IVA incluido. Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo." %}
             </p>
           {% else %}
             <p class="mt-3 text-sm text-text-muted">
