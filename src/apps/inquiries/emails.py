@@ -1681,8 +1681,8 @@ def _build_supplier_inquiry_submitted_email_context(
 ) -> dict:
     offer_validity_hours = InquiryOffer.resolve_validity_hours_for_inquiry(inquiry)
     return {
-        "inquiry": inquiry,
-        "supplier": supplier,
+        "inquiry": _supplier_safe_inquiry_context(inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "offer_validity_hours": offer_validity_hours,
     }
@@ -1695,9 +1695,9 @@ def _build_supplier_offer_sent_email_context(
     supplier_items: list[dict],
 ) -> dict:
     return {
-        "offer": offer,
-        "inquiry": offer.inquiry,
-        "supplier": supplier,
+        "offer": _supplier_safe_offer_context(offer),
+        "inquiry": _supplier_safe_inquiry_context(offer.inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "offer_validity_hours": offer.validity_hours_snapshot,
         "valid_until": offer.valid_until,
@@ -1712,9 +1712,9 @@ def _build_supplier_offer_response_email_context(
     response_status: str,
 ) -> dict:
     return {
-        "offer": offer,
-        "inquiry": offer.inquiry,
-        "supplier": supplier,
+        "offer": _supplier_safe_offer_context(offer),
+        "inquiry": _supplier_safe_inquiry_context(offer.inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "response_status": response_status,
         "valid_until": offer.valid_until,
@@ -1728,10 +1728,10 @@ def _build_supplier_payment_paid_email_context(
     supplier_items: list[dict],
 ) -> dict:
     return {
-        "payment": payment,
-        "offer": payment.offer,
-        "inquiry": payment.offer.inquiry,
-        "supplier": supplier,
+        "payment": _supplier_safe_payment_context(payment),
+        "offer": _supplier_safe_offer_context(payment.offer),
+        "inquiry": _supplier_safe_inquiry_context(payment.offer.inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "valid_until": payment.offer.valid_until,
         "checkout_expires_at": payment.checkout_expires_at,
@@ -1745,9 +1745,9 @@ def _build_supplier_offer_expired_email_context(
     supplier_items: list[dict],
 ) -> dict:
     return {
-        "offer": offer,
-        "inquiry": offer.inquiry,
-        "supplier": supplier,
+        "offer": _supplier_safe_offer_context(offer),
+        "inquiry": _supplier_safe_inquiry_context(offer.inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "valid_until": offer.valid_until,
     }
@@ -1760,13 +1760,48 @@ def _build_supplier_payment_expired_email_context(
     supplier_items: list[dict],
 ) -> dict:
     return {
-        "payment": payment,
-        "offer": payment.offer,
-        "inquiry": payment.offer.inquiry,
-        "supplier": supplier,
+        "payment": _supplier_safe_payment_context(payment),
+        "offer": _supplier_safe_offer_context(payment.offer),
+        "inquiry": _supplier_safe_inquiry_context(payment.offer.inquiry),
+        "supplier": _supplier_safe_supplier_context(supplier),
         "items": supplier_items,
         "valid_until": payment.offer.valid_until,
         "checkout_expires_at": payment.checkout_expires_at,
+    }
+
+
+def _supplier_safe_inquiry_context(inquiry: Inquiry) -> dict:
+    """Expose only non-commercial inquiry data to supplier email templates."""
+    return {
+        "reference_code": inquiry.reference_code,
+        "language": inquiry.language,
+    }
+
+
+def _supplier_safe_supplier_context(supplier: Supplier) -> dict:
+    return {
+        "name": supplier.name,
+        "code": supplier.code,
+    }
+
+
+def _supplier_safe_offer_context(offer: InquiryOffer) -> dict:
+    """Keep customer pricing and related ORM objects out of supplier templates."""
+    return {
+        "reference_code": offer.reference_code,
+        "accepted_at": offer.accepted_at,
+        "rejected_at": offer.rejected_at,
+        "expired_at": offer.expired_at,
+    }
+
+
+def _supplier_safe_payment_context(payment: InquiryOfferPayment) -> dict:
+    """Expose payment state without customer-facing amounts or currency."""
+    return {
+        "reference_code": payment.reference_code,
+        "paid_at": payment.paid_at,
+        "cancelled_at": payment.cancelled_at,
+        "provider_reference": payment.provider_reference,
     }
 
 

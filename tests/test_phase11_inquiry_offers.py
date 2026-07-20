@@ -2250,6 +2250,7 @@ def test_supplier_offer_notification_uses_supplier_custom_templates(
         offer_sent_email_body_template=(
             "Custom offer body for {{ supplier.name }}: "
             "{% for item in items %}{{ item.sku }} x{{ item.quantity }} {% endfor %}"
+            "customer total={{ offer.confirmed_total }}"
         ),
     )
     inquiry = make_inquiry(
@@ -2275,6 +2276,8 @@ def test_supplier_offer_notification_uses_supplier_custom_templates(
     assert supplier_email.subject == f"CUSTOM offer {offer.reference_code} / SUP-SUPPLIER-CUSTOM"
     assert "Custom offer body for Supplier SUP-SUPPLIER-CUSTOM" in supplier_email.body
     assert "SKU-SUPPLIER-CUSTOM x4" in supplier_email.body
+    assert "210.00" not in supplier_email.body
+    assert "customer total=" in supplier_email.body
     assert "A customer-facing offer has already been sent" not in supplier_email.body
     internal_copy_email = next(email for email in mail.outbox if email.to == ["ops@example.com"])
     assert supplier_email.subject in internal_copy_email.body
@@ -2770,6 +2773,9 @@ def test_supplier_payment_paid_notification_is_sent_with_event_specific_recipien
     assert supplier_email.body in internal_email.body
     assert "Customer payment confirmed - prepare fulfillment:" in supplier_email.subject
     assert "SKU-SUPPLIER-PAID" in supplier_email.body
+    assert "Paid amount:" not in supplier_email.body
+    assert "490.00" not in supplier_email.body
+    assert payment.currency not in supplier_email.body
     assert not any(
         email.to == ["orders.paid.default@supplier.example"] for email in mail.outbox
     )
