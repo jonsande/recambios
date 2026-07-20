@@ -17,8 +17,6 @@ msgstr ""
 
 #: src/apps/cart/apps.py:8 src/apps/cart/views.py:33
 #: src/templates/base.html:247
-#, fuzzy
-#| msgid "Carrito de solicitud"
 msgid "Carrito de solicitudes"
 msgstr "Request cart"
 
@@ -180,7 +178,7 @@ msgstr ""
 
 #: src/apps/catalog/apps.py:8 src/templates/catalog/product_list.html:12
 msgid "Catálogo"
-msgstr ""
+msgstr "Catalog"
 
 #: src/apps/catalog/models.py:24 src/apps/vehicles/apps.py:8
 #, fuzzy
@@ -2794,10 +2792,8 @@ msgid "Saltar al contenido principal"
 msgstr "Skip to main content"
 
 #: src/templates/base.html:29
-#, fuzzy
-#| msgid "Inicio"
 msgid "Ir al inicio"
-msgstr "Home"
+msgstr "Go to home page"
 
 #: src/templates/base.html:41
 msgid "Navegación principal"
@@ -2824,83 +2820,67 @@ msgstr "About"
 
 #: src/templates/base.html:71 src/templates/base.html:148
 msgid "Cart"
-msgstr ""
+msgstr "Cart"
 
 #: src/templates/base.html:73 src/templates/base.html:150
 msgid "Carrito"
-msgstr ""
+msgstr "Cart"
 
 #: src/templates/base.html:83 src/templates/base.html:160
 msgid "Selector de idioma"
-msgstr ""
+msgstr "Language selector"
 
 #: src/templates/base.html:109
 msgid "Abrir o cerrar navegación"
-msgstr ""
+msgstr "Open or close navigation"
 
 #: src/templates/base.html:118
-#, fuzzy
-#| msgid "Navegación principal"
 msgid "Navegación principal móvil"
-msgstr "Main navigation"
+msgstr "Mobile main navigation"
 
 #: src/templates/base.html:195
 msgid "Mensajes del sistema"
 msgstr "System messages"
 
 #: src/templates/base.html:206
-#, fuzzy
-#| msgid "Condición"
 msgid "Confirmación"
-msgstr "Condition"
+msgstr "Confirmation"
 
 #: src/templates/base.html:208
 msgid "Aviso"
-msgstr ""
+msgstr "Notice"
 
 #: src/templates/base.html:210
-#, fuzzy
-#| msgid "Información general"
 msgid "Información"
-msgstr "General information"
+msgstr "Information"
 
 #: src/templates/base.html:239
-#, fuzzy
-#| msgid ""
-#| "Este valor es informativo y no constituye una oferta final. Antes de "
-#| "confirmar cualquier operación se valida disponibilidad, precio final y "
-#| "plazo."
 msgid ""
 "Plataforma de recambios con búsqueda por referencias y validación comercial "
 "previa de disponibilidad, precio final y plazo."
 msgstr ""
-"This value is informative and does not constitute a final offer. Before "
-"confirming any operation, availability, final price, and lead time are "
-"validated."
+"Spare parts platform with reference search and prior commercial validation "
+"of availability, final price, and lead time."
 
 #: src/templates/base.html:243
-#, fuzzy
-#| msgid "Navegación principal"
 msgid "Navegación"
-msgstr "Main navigation"
+msgstr "Navigation"
 
 #: src/templates/base.html:245
-#, fuzzy
-#| msgid "Catálogo de recambios"
 msgid "Catálogo de productos"
-msgstr "Spare parts catalog"
+msgstr "Product catalog"
 
 #: src/templates/base.html:251
 msgid "Soporte"
-msgstr ""
+msgstr "Support"
 
 #: src/templates/base.html:252
 msgid "¿Necesita una referencia concreta o validación técnica?"
-msgstr ""
+msgstr "Do you need a specific reference or technical validation?"
 
 #: src/templates/base.html:255
 msgid "Aviso legal"
-msgstr ""
+msgstr "Legal notice"
 
 #: src/templates/cart/request_cart.html:9
 #, fuzzy
@@ -3035,21 +3015,17 @@ msgid ""
 "con el filtrado por modelo y año.\n"
 "      "
 msgstr ""
+"\n"
+"        Selected type: %(vehicle_type)s. Choose a make to continue filtering "
+"by model and year.\n"
+"      "
 
 #: src/templates/catalog/compatibility_brands.html:25
 msgid "Seleccione marca de vehículo"
 msgstr "Select vehicle brand"
 
 #: src/templates/catalog/compatibility_brands.html:36
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
 "                1 producto publicado compatible\n"
@@ -3060,12 +3036,12 @@ msgid_plural ""
 "              "
 msgstr[0] ""
 "\n"
-"                  1 published product\n"
-"                "
+"                1 compatible published product\n"
+"              "
 msgstr[1] ""
 "\n"
-"                  %(total)s published products\n"
-"                "
+"                %(total)s compatible published products\n"
+"              "
 
 #: src/templates/catalog/compatibility_model_year.html:13
 msgid "Volver a marcas"
@@ -3079,16 +3055,18 @@ msgid ""
 "año para ver productos compatibles.\n"
 "      "
 msgstr ""
+"\n"
+"        Selected context: %(vehicle_type)s · %(brand)s. Select a model and "
+"year to view compatible products.\n"
+"      "
 
 #: src/templates/catalog/compatibility_model_year.html:25
 msgid "Modelo y año"
 msgstr "Model and year"
 
 #: src/templates/catalog/compatibility_model_year.html:27
-#, fuzzy
-#| msgid "Compatibilidad por modelo y año"
 msgid "Formulario de compatibilidad por modelo y año"
-msgstr "Compatibility by model and year"
+msgstr "Model and year compatibility form"
 
 #: src/templates/catalog/compatibility_model_year.html:30
 msgid "Modelo"
@@ -3111,6 +3089,10 @@ msgid ""
 "%(end)s.\n"
 "            "
 msgstr ""
+"\n"
+"              Range observed in published compatibilities: %(start)s-"
+"%(end)s.\n"
+"            "
 
 #: src/templates/catalog/compatibility_model_year.html:65
 #, python-format
@@ -3120,6 +3102,9 @@ msgid ""
 "%(start)s.\n"
 "            "
 msgstr ""
+"\n"
+"              Range observed in published compatibilities: from %(start)s.\n"
+"            "
 
 #: src/templates/catalog/compatibility_model_year.html:69
 #, python-format
@@ -3129,6 +3114,9 @@ msgid ""
 "%(end)s.\n"
 "            "
 msgstr ""
+"\n"
+"              Range observed in published compatibilities: up to %(end)s.\n"
+"            "
 
 #: src/templates/catalog/compatibility_model_year.html:73
 msgid ""
@@ -3175,15 +3163,7 @@ msgid "Seleccione tipo de vehículo"
 msgstr "Select vehicle type"
 
 #: src/templates/catalog/compatibility_vehicle_types.html:27
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
 "                  1 producto publicado con compatibilidad\n"
@@ -3194,11 +3174,11 @@ msgid_plural ""
 "                "
 msgstr[0] ""
 "\n"
-"                  1 published product\n"
+"                  1 published product with compatibility\n"
 "                "
 msgstr[1] ""
 "\n"
-"                  %(total)s published products\n"
+"                  %(total)s published products with compatibility\n"
 "                "
 
 #: src/templates/catalog/compatibility_vehicle_types.html:38
@@ -3275,7 +3255,7 @@ msgstr "View technical details"
 #: src/templates/catalog/product_detail.html:9
 #: src/templates/catalog/product_list.html:9
 msgid "Ruta de navegación"
-msgstr ""
+msgstr "Breadcrumb"
 
 #: src/templates/catalog/product_detail.html:10
 #: src/templates/catalog/product_list.html:10 src/templates/pages/home.html:4
@@ -3283,10 +3263,8 @@ msgid "Inicio"
 msgstr "Home"
 
 #: src/templates/catalog/product_detail.html:16
-#, fuzzy
-#| msgid "Aplicaciones del producto"
 msgid "Ficha técnica de producto"
-msgstr "Product applications"
+msgstr "Product technical sheet"
 
 #: src/templates/catalog/product_detail.html:38
 #: src/templates/catalog/product_list.html:114
@@ -3328,30 +3306,27 @@ msgid "Ver carrito de solicitudes"
 msgstr "View request cart"
 
 #: src/templates/catalog/product_detail.html:125
-#, fuzzy
-#| msgid "Contacto comercial"
 msgid "Proceso comercial"
-msgstr "Commercial contact"
+msgstr "Commercial process"
 
 #: src/templates/catalog/product_detail.html:127
 msgid "1. Envíe la solicitud con la referencia y cantidad."
-msgstr ""
+msgstr "1. Submit the request with the reference and quantity."
 
 #: src/templates/catalog/product_detail.html:128
-#, fuzzy
-#| msgid "Confirmar disponibilidad y plazo"
 msgid "2. El equipo valida disponibilidad real y plazo."
-msgstr "Confirm availability and lead time"
+msgstr "2. The team validates actual availability and lead time."
 
 #: src/templates/catalog/product_detail.html:129
 msgid "3. Reciba confirmación para decidir la operación."
-msgstr ""
+msgstr "3. Receive confirmation before deciding whether to proceed."
 
 #: src/templates/catalog/product_detail.html:132
 msgid ""
 "El importe final confirmado puede variar respecto al último precio conocido "
 "mostrado."
 msgstr ""
+"The confirmed final amount may differ from the last known price shown."
 
 #: src/templates/catalog/product_detail.html:140
 msgid "Descripción técnica"
@@ -3383,23 +3358,23 @@ msgstr "Compatibility verified"
 
 #: src/templates/catalog/product_list.html:18
 msgid "Catálogo técnico publicado"
-msgstr ""
+msgstr "Published technical catalog"
 
 #: src/templates/catalog/product_list.html:24
 msgid ""
 "El precio es meramente orientativo (responde al último precio conseguido "
 "para el producto) y siempre sujeto a validación comercial."
 msgstr ""
+"The price is indicative only (based on the latest price obtained for the "
+"product) and is always subject to commercial validation."
 
 #: src/templates/catalog/product_list.html:30
 msgid "Explorar por compatibilidad de vehículo"
 msgstr "Browse by vehicle compatibility"
 
 #: src/templates/catalog/product_list.html:36
-#, fuzzy
-#| msgid "Compatibilidad seleccionada"
 msgid "Contexto de compatibilidad activo"
-msgstr "Selected compatibility"
+msgstr "Active compatibility context"
 
 #: src/templates/catalog/product_list.html:37
 msgid "Compatibilidad seleccionada"
@@ -3458,43 +3433,25 @@ msgstr "Clear filters"
 
 #: src/templates/catalog/product_list.html:198
 msgid "Resultados de catálogo"
-msgstr ""
+msgstr "Catalog results"
 
 #: src/templates/catalog/product_list.html:202
-#, fuzzy
-#| msgid "Estado"
 msgid "Resultados"
-msgstr "Status"
+msgstr "Results"
 
 #: src/templates/catalog/product_list.html:205
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
 "                  %(total)s productos publicados encontrados\n"
 "                "
 msgstr ""
 "\n"
-"                  1 published product\n"
+"                  %(total)s published products found\n"
 "                "
 
 #: src/templates/catalog/product_list.html:209
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
 "                  1 producto publicado encontrado\n"
@@ -3505,32 +3462,28 @@ msgid_plural ""
 "                "
 msgstr[0] ""
 "\n"
-"                  1 published product\n"
+"                  1 published product found\n"
 "                "
 msgstr[1] ""
 "\n"
-"                  %(total)s published products\n"
+"                  %(total)s published products found\n"
 "                "
 
 #: src/templates/catalog/product_list.html:218
 msgid "Modo de visualización de resultados"
-msgstr ""
+msgstr "Results display mode"
 
 #: src/templates/catalog/product_list.html:229
 msgid "Fichas"
-msgstr ""
+msgstr "Cards"
 
 #: src/templates/catalog/product_list.html:241
-#, fuzzy
-#| msgid "Estado"
 msgid "Listado"
-msgstr "Status"
+msgstr "List"
 
 #: src/templates/catalog/product_list.html:255
-#, fuzzy
-#| msgid "Limpiar filtros"
 msgid "Quitar filtros"
-msgstr "Clear filters"
+msgstr "Remove filters"
 
 #: src/templates/catalog/product_list.html:277
 msgid "Paginación de productos"
@@ -3541,19 +3494,15 @@ msgid "Anterior"
 msgstr "Previous"
 
 #: src/templates/catalog/product_list.html:293
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "              Página %(current)s de %(total)s\n"
-#| "            "
+#, python-format
 msgid ""
 "\n"
 "                  Página %(current)s de %(total)s\n"
 "                "
 msgstr ""
 "\n"
-"              Page %(current)s of %(total)s\n"
-"            "
+"                  Page %(current)s of %(total)s\n"
+"                "
 
 #: src/templates/catalog/product_list.html:308
 msgid "Siguiente"
@@ -4884,26 +4833,23 @@ msgid "Busque por referencia o término técnico y acceda al listado filtrado."
 msgstr "Search by reference or technical term and view the filtered results."
 
 #: src/templates/pages/home.html:45
-#, fuzzy
-#| msgid "Ej.: 06A145710N, 038145209A, A3 8P"
 msgid "Ej.: 038145209A, alternador, A3 8P"
-msgstr "Example: 06A145710N, 038145209A, A3 8P"
+msgstr "Example: 038145209A, alternator, A3 8P"
 
 #: src/templates/pages/home.html:49
 msgid "Buscar recambio"
-msgstr ""
+msgstr "Search for a spare part"
 
 #: src/templates/pages/home.html:53
 msgid ""
 "Los resultados muestran productos publicados y su estado de consulta "
 "comercial."
 msgstr ""
+"The results show published products and their commercial inquiry status."
 
 #: src/templates/pages/home.html:62
-#, fuzzy
-#| msgid "Navegación principal"
 msgid "Navegación por familias"
-msgstr "Main navigation"
+msgstr "Browse by product families"
 
 #: src/templates/pages/home.html:63
 msgid "Categorías destacadas"
@@ -4914,15 +4860,7 @@ msgid "Ver todas"
 msgstr "View all"
 
 #: src/templates/pages/home.html:83
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                  1 producto publicado\n"
-#| "                "
-#| msgid_plural ""
-#| "\n"
-#| "                  %(total)s productos publicados\n"
-#| "                "
+#, python-format
 msgid ""
 "\n"
 "                    1 producto publicado\n"
