@@ -17,10 +17,14 @@ from .models import (
     InquiryOfferPayment,
     InquiryOfferPaymentDetails,
     InquirySubmissionGroup,
+    InvoiceIssuerConfiguration,
+    PaymentInvoiceLineSnapshot,
+    PaymentInvoiceSnapshot,
 )
 from .payments import (
     StripeCheckoutSessionError,
     cancel_offer_with_remote_checkout_expiration,
+    confirm_payment,
 )
 
 logger = logging.getLogger(__name__)
@@ -207,9 +211,11 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "shipping_price",
         "product_vat_applicable",
         "product_vat_rate",
+        "product_tax_exemption_reason",
         "update_product_last_known_price",
         "shipping_vat_applicable",
         "shipping_vat_rate",
+        "shipping_tax_exemption_reason",
         "currency",
         "quoted_destination_summary",
         "lead_time_text",
@@ -295,10 +301,12 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                     "product_price",
                     "product_vat_applicable",
                     "product_vat_rate",
+                    "product_tax_exemption_reason",
                     "update_product_last_known_price",
                     "shipping_price",
                     "shipping_vat_applicable",
                     "shipping_vat_rate",
+                    "shipping_tax_exemption_reason",
                     "confirmed_total_display",
                     "currency",
                     "lead_time_text",
@@ -342,7 +350,9 @@ class InquiryOfferAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
-        if obj is not None and obj.status != InquiryOffer.Status.DRAFT:
+        if obj is not None and obj.status == InquiryOffer.Status.DRAFT:
+            readonly_fields = [field for field in readonly_fields if field != "confirmed_total"]
+        elif obj is not None:
             readonly_fields.extend(self.LOCKED_AFTER_SEND_FIELDS)
         if obj is not None and obj.has_complete_quoted_destination:
             readonly_fields.extend(
@@ -588,6 +598,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "currency",
         "provider",
         "provider_reference",
+        "provider_transaction_reference",
         "initiated_at",
         "checkout_expires_at",
         "paid_at",
@@ -611,6 +622,7 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "offer__reference_code",
         "offer__inquiry__reference_code",
         "provider_reference",
+        "provider_transaction_reference",
     )
     ordering = ("-created_at",)
     list_select_related = ("offer", "offer__inquiry")
@@ -628,6 +640,8 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         "cancelled_at",
         "created_at",
         "updated_at",
+        "invoice_snapshot_summary",
+        "invoice_lines_summary",
     )
     date_hierarchy = "created_at"
     actions = (
@@ -654,9 +668,14 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
                 "fields": (
                     "provider",
                     "provider_reference",
+                    "provider_transaction_reference",
                     "internal_notes",
                 )
             },
+        ),
+        (
+            _("Datos preparados para facturar"),
+            {"fields": ("invoice_snapshot_summary", "invoice_lines_summary")},
         ),
         (
             _("Ciclo de vida"),
@@ -687,6 +706,33 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
     def inquiry_reference(self, obj: InquiryOfferPayment) -> str:
         return obj.offer.inquiry.reference_code
 
+    @admin.display(description=_("Resumen fiscal"))
+    def invoice_snapshot_summary(self, obj):
+        snapshot = getattr(obj, "invoice_snapshot", None)
+        if snapshot is None:
+            return _("Todavía no existe snapshot fiscal.")
+        return format_html(
+            "{}<br>{}: {} · {}<br>{}: {}<br>{}: {} + {} = {} {}<br>{}: {} · {}",
+            snapshot.customer_name,
+            _("NIF/VAT"), snapshot.customer_tax_id, snapshot.customer_email,
+            _("Domicilio"), snapshot.customer_address_line_1,
+            _("Totales"), snapshot.net_total, snapshot.tax_total,
+            snapshot.grand_total, snapshot.currency,
+            _("Emisor"), snapshot.issuer_legal_name, snapshot.issuer_tax_id,
+        )
+
+    @admin.display(description=_("Líneas fiscales"))
+    def invoice_lines_summary(self, obj):
+        snapshot = getattr(obj, "invoice_snapshot", None)
+        if snapshot is None:
+            return "—"
+        rows = [
+            f"{line.description}: {line.quantity} × {line.unit_net_price} · "
+            f"IVA {line.tax_rate}% ({line.tax_amount}) · {line.gross_amount} {snapshot.currency}"
+            for line in snapshot.lines.all()
+        ]
+        return format_html("<br>".join("{}" for _row in rows), *rows)
+
     def _transition_selected(
         self,
         request,
@@ -699,9 +745,11 @@ class InquiryOfferPaymentAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
         skipped_count = 0
 
         for payment in queryset.select_related("offer", "offer__inquiry"):
-            transition = getattr(payment, transition_method)
             try:
-                transition(save=True)
+                if transition_method == "mark_paid":
+                    confirm_payment(payment)
+                else:
+                    getattr(payment, transition_method)(save=True)
             except ValidationError as error:
                 skipped_count += 1
                 details = InquiryOfferAdmin._render_validation_error(error)
@@ -818,6 +866,77 @@ class InquiryOfferPaymentDetailsAdmin(InternalInquiryAccessMixin, admin.ModelAdm
     @admin.display(ordering="payment__offer__inquiry__reference_code", description=_("Solicitud"))
     def inquiry_reference(self, obj):
         return obj.payment.offer.inquiry.reference_code
+
+
+@admin.register(InvoiceIssuerConfiguration)
+class InvoiceIssuerConfigurationAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    fieldsets = (
+        (_("Identidad fiscal"), {"fields": ("legal_name", "tax_id")}),
+        (_("Domicilio fiscal"), {"fields": (
+            "address_line_1", "address_line_2", "city", "region", "postal_code", "country",
+        )}),
+        (_("Contacto"), {"fields": ("email", "phone")}),
+    )
+
+    def has_add_permission(self, request):
+        return (
+            not InvoiceIssuerConfiguration.objects.exists()
+            and super().has_add_permission(request)
+        )
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class PaymentInvoiceLineSnapshotInline(admin.TabularInline):
+    model = PaymentInvoiceLineSnapshot
+    extra = 0
+    can_delete = False
+    fields = tuple(field.name for field in PaymentInvoiceLineSnapshot._meta.fields)
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PaymentInvoiceSnapshot)
+class PaymentInvoiceSnapshotAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    list_display = ("payment_reference", "customer_name", "grand_total", "currency", "paid_at")
+    search_fields = (
+        "payment_reference",
+        "offer_reference",
+        "inquiry_reference",
+        "customer_name",
+        "customer_tax_id",
+    )
+    fields = tuple(field.name for field in PaymentInvoiceSnapshot._meta.fields)
+    readonly_fields = fields
+    inlines = (PaymentInvoiceLineSnapshotInline,)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_view_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PaymentInvoiceLineSnapshot)
+class PaymentInvoiceLineSnapshotAdmin(InternalInquiryAccessMixin, admin.ModelAdmin):
+    list_display = ("snapshot", "line_type", "description", "quantity", "gross_amount")
+    fields = tuple(field.name for field in PaymentInvoiceLineSnapshot._meta.fields)
+    readonly_fields = fields
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_view_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Inquiry)

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: recambios\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 11:46+0200\n"
+"POT-Creation-Date: 2026-07-20 14:02+0200\n"
 "PO-Revision-Date: 2026-04-12 02:38+0200\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
@@ -65,12 +65,12 @@ msgstr "Product removed from the request cart."
 msgid "Carrito de solicitud vaciado."
 msgstr "Request cart cleared."
 
-#: src/apps/catalog/admin.py:115 src/apps/catalog/admin.py:446
+#: src/apps/catalog/admin.py:115 src/apps/catalog/admin.py:453
 #: src/apps/vehicles/admin.py:247
 msgid "Este producto está fuera del ámbito del proveedor."
 msgstr ""
 
-#: src/apps/catalog/admin.py:118 src/apps/catalog/admin.py:451
+#: src/apps/catalog/admin.py:118 src/apps/catalog/admin.py:458
 #: src/apps/vehicles/admin.py:250
 msgid "Los proveedores solo pueden editar productos en borrador."
 msgstr ""
@@ -93,86 +93,86 @@ msgstr "Product references"
 msgid "Compatibilidades con vehículos"
 msgstr "Vehicle compatibility"
 
-#: src/apps/catalog/admin.py:252
+#: src/apps/catalog/admin.py:257
 #, fuzzy
 #| msgid "Paginación de productos"
 msgid "Identificación del producto"
 msgstr "Product pagination"
 
-#: src/apps/catalog/admin.py:267
+#: src/apps/catalog/admin.py:272
 #, fuzzy
 #| msgid "Condición"
 msgid "Clasificación"
 msgstr "Condition"
 
-#: src/apps/catalog/admin.py:271
+#: src/apps/catalog/admin.py:276
 msgid "Precio y venta"
 msgstr ""
 
-#: src/apps/catalog/admin.py:282
+#: src/apps/catalog/admin.py:289
 msgid "Dimensiones"
 msgstr ""
 
-#: src/apps/catalog/admin.py:284
+#: src/apps/catalog/admin.py:291
 msgid "Publicación"
 msgstr ""
 
-#: src/apps/catalog/admin.py:288 src/apps/imports/admin.py:118
-#: src/apps/inquiries/admin.py:167 src/apps/inquiries/admin.py:322
-#: src/apps/inquiries/admin.py:654 src/apps/inquiries/admin.py:920
+#: src/apps/catalog/admin.py:295 src/apps/imports/admin.py:118
+#: src/apps/inquiries/admin.py:171 src/apps/inquiries/admin.py:346
+#: src/apps/inquiries/admin.py:693 src/apps/inquiries/admin.py:1059
 #: src/apps/suppliers/admin.py:186
 msgid "Fechas y auditoría"
 msgstr ""
 
-#: src/apps/catalog/admin.py:365 src/apps/catalog/admin.py:454
+#: src/apps/catalog/admin.py:372 src/apps/catalog/admin.py:461
 msgid "Los usuarios de proveedor no pueden publicar productos."
 msgstr ""
 
-#: src/apps/catalog/admin.py:378 src/apps/catalog/admin.py:469
+#: src/apps/catalog/admin.py:385 src/apps/catalog/admin.py:476
 msgid "No tiene permiso para publicar productos."
 msgstr ""
 
-#: src/apps/catalog/admin.py:396
+#: src/apps/catalog/admin.py:403
 #, python-format
 msgid "%(label)s aplicado a %(count)s producto(s)."
 msgstr ""
 
-#: src/apps/catalog/admin.py:405
+#: src/apps/catalog/admin.py:412
 #, python-format
 msgid ""
 "Se omitieron %(count)s producto(s) por permisos, estado o ausencia de "
 "cambios."
 msgstr ""
 
-#: src/apps/catalog/admin.py:413
+#: src/apps/catalog/admin.py:420
 msgid "Cambiar el estado de publicación a Borrador"
 msgstr ""
 
-#: src/apps/catalog/admin.py:419
+#: src/apps/catalog/admin.py:426
 #, fuzzy
 #| msgid "Paso de pago"
 msgid "Estado Borrador"
 msgstr "Payment step"
 
-#: src/apps/catalog/admin.py:422
+#: src/apps/catalog/admin.py:429
 msgid "Cambiar el estado de publicación a En revisión"
 msgstr ""
 
-#: src/apps/catalog/admin.py:428
+#: src/apps/catalog/admin.py:435
 msgid "Estado En revisión"
 msgstr ""
 
-#: src/apps/catalog/admin.py:431
+#: src/apps/catalog/admin.py:438
 msgid "Cambiar el estado de publicación a Publicado"
 msgstr ""
 
-#: src/apps/catalog/admin.py:437
+#: src/apps/catalog/admin.py:444
 #, fuzzy
 #| msgid "Paso de pago"
 msgid "Estado Publicado"
 msgstr "Payment step"
 
-#: src/apps/catalog/admin.py:460
+#: src/apps/catalog/admin.py:467
 msgid "Los proveedores solo pueden guardar borradores o enviarlos a revisión."
 msgstr ""
 
@@ -180,195 +180,199 @@ msgstr ""
 msgid "Catálogo"
 msgstr "Catalog"
 
-#: src/apps/catalog/models.py:24 src/apps/vehicles/apps.py:8
+#: src/apps/catalog/models.py:25 src/apps/vehicles/apps.py:8
 #, fuzzy
 #| msgid "Otros vehículos"
 msgid "Vehículos"
 msgstr "Other vehicles"
 
-#: src/apps/catalog/models.py:25
+#: src/apps/catalog/models.py:26
 #, fuzzy
 msgid "Recambios"
 msgstr "Technical Spare Parts"
 
-#: src/apps/catalog/models.py:26
+#: src/apps/catalog/models.py:27
 #, fuzzy
 #| msgid "Categorías de recambios"
 msgid "Vehículos y recambios"
 msgstr "Spare part categories"
 
-#: src/apps/catalog/models.py:28 src/apps/catalog/models.py:57
-#: src/apps/catalog/models.py:96 src/apps/catalog/models.py:122
-#: src/apps/catalog/models.py:422 src/apps/suppliers/models.py:7
+#: src/apps/catalog/models.py:29 src/apps/catalog/models.py:58
+#: src/apps/catalog/models.py:97 src/apps/catalog/models.py:123
+#: src/apps/catalog/models.py:462 src/apps/suppliers/models.py:7
 msgid "nombre"
 msgstr ""
 
-#: src/apps/catalog/models.py:29 src/apps/catalog/models.py:58
-#: src/apps/catalog/models.py:97 src/apps/catalog/models.py:174
-#: src/apps/catalog/models.py:423 src/apps/suppliers/models.py:8
+#: src/apps/catalog/models.py:30 src/apps/catalog/models.py:59
+#: src/apps/catalog/models.py:98 src/apps/catalog/models.py:175
+#: src/apps/catalog/models.py:463 src/apps/suppliers/models.py:8
 msgid "slug"
 msgstr ""
 
-#: src/apps/catalog/models.py:31
+#: src/apps/catalog/models.py:32
 #, fuzzy
 #| msgid "Tipo de facturación"
 msgid "tipo de marca"
 msgstr "Billing customer type"
 
-#: src/apps/catalog/models.py:36 src/apps/suppliers/models.py:10
+#: src/apps/catalog/models.py:37 src/apps/inquiries/models.py:1641
+#: src/apps/suppliers/models.py:10
 msgid "país"
 msgstr ""
 
-#: src/apps/catalog/models.py:37 src/apps/catalog/models.py:99
-#: src/apps/catalog/models.py:124 src/apps/catalog/models.py:242
+#: src/apps/catalog/models.py:38 src/apps/catalog/models.py:100
+#: src/apps/catalog/models.py:125 src/apps/catalog/models.py:257
 #: src/apps/suppliers/models.py:205 src/apps/vehicles/models.py:50
 msgid "activo"
 msgstr ""
 
-#: src/apps/catalog/models.py:38 src/apps/catalog/models.py:100
-#: src/apps/catalog/models.py:125 src/apps/catalog/models.py:243
-#: src/apps/catalog/models.py:479 src/apps/inquiries/models.py:73
-#: src/apps/inquiries/models.py:1002 src/apps/inquiries/models.py:1301
-#: src/apps/inquiries/models.py:1441 src/apps/suppliers/models.py:206
-#: src/apps/vehicles/models.py:51
+#: src/apps/catalog/models.py:39 src/apps/catalog/models.py:101
+#: src/apps/catalog/models.py:126 src/apps/catalog/models.py:258
+#: src/apps/catalog/models.py:519 src/apps/inquiries/models.py:74
+#: src/apps/inquiries/models.py:1160 src/apps/inquiries/models.py:1473
+#: src/apps/inquiries/models.py:1725 src/apps/inquiries/models.py:1818
+#: src/apps/suppliers/models.py:206 src/apps/vehicles/models.py:51
 msgid "creado el"
 msgstr ""
 
-#: src/apps/catalog/models.py:39 src/apps/catalog/models.py:101
-#: src/apps/catalog/models.py:126 src/apps/catalog/models.py:244
-#: src/apps/catalog/models.py:480 src/apps/inquiries/models.py:74
-#: src/apps/inquiries/models.py:1003 src/apps/inquiries/models.py:1302
-#: src/apps/inquiries/models.py:1442 src/apps/suppliers/models.py:207
+#: src/apps/catalog/models.py:40 src/apps/catalog/models.py:102
+#: src/apps/catalog/models.py:127 src/apps/catalog/models.py:259
+#: src/apps/catalog/models.py:520 src/apps/inquiries/models.py:75
+#: src/apps/inquiries/models.py:1161 src/apps/inquiries/models.py:1474
+#: src/apps/inquiries/models.py:1819 src/apps/suppliers/models.py:207
 #: src/apps/vehicles/models.py:52
 msgid "actualizado el"
 msgstr ""
 
-#: src/apps/catalog/models.py:42 src/apps/catalog/models.py:368
+#: src/apps/catalog/models.py:43 src/apps/catalog/models.py:408
 #: src/apps/vehicles/models.py:33
 #, fuzzy
 #| msgid "Marca"
 msgid "marca"
 msgstr "Brand"
 
-#: src/apps/catalog/models.py:43
+#: src/apps/catalog/models.py:44
 #, fuzzy
 #| msgid "Marca"
 msgid "marcas"
 msgstr "Brand"
 
-#: src/apps/catalog/models.py:65
+#: src/apps/catalog/models.py:66
 #, fuzzy
 #| msgid "Categorías"
 msgid "categoría superior"
 msgstr "Categories"
 
-#: src/apps/catalog/models.py:67 src/apps/catalog/models.py:98
+#: src/apps/catalog/models.py:68 src/apps/catalog/models.py:99
+#: src/apps/inquiries/models.py:1757
 #, fuzzy
 #| msgid "Descripción técnica"
 msgid "descripción"
 msgstr "Technical description"
 
-#: src/apps/catalog/models.py:68 src/apps/catalog/models.py:123
-#: src/apps/catalog/models.py:439 src/apps/catalog/models.py:551
+#: src/apps/catalog/models.py:69 src/apps/catalog/models.py:124
+#: src/apps/catalog/models.py:479 src/apps/catalog/models.py:591
 msgid "orden"
 msgstr ""
 
-#: src/apps/catalog/models.py:69 src/apps/suppliers/models.py:234
+#: src/apps/catalog/models.py:70 src/apps/suppliers/models.py:234
 msgid "activa"
 msgstr ""
 
-#: src/apps/catalog/models.py:70 src/apps/catalog/models.py:382
-#: src/apps/catalog/models.py:440 src/apps/catalog/models.py:553
+#: src/apps/catalog/models.py:71 src/apps/catalog/models.py:422
+#: src/apps/catalog/models.py:480 src/apps/catalog/models.py:593
 #: src/apps/imports/models.py:47 src/apps/imports/models.py:97
-#: src/apps/inquiries/models.py:261 src/apps/inquiries/models.py:501
+#: src/apps/inquiries/models.py:262 src/apps/inquiries/models.py:540
+#: src/apps/inquiries/models.py:1644 src/apps/inquiries/models.py:1769
 #: src/apps/suppliers/models.py:235 src/apps/vehicles/models.py:127
 msgid "creada el"
 msgstr ""
 
-#: src/apps/catalog/models.py:71 src/apps/catalog/models.py:383
-#: src/apps/catalog/models.py:441 src/apps/catalog/models.py:554
+#: src/apps/catalog/models.py:72 src/apps/catalog/models.py:423
+#: src/apps/catalog/models.py:481 src/apps/catalog/models.py:594
 #: src/apps/imports/models.py:48 src/apps/imports/models.py:98
-#: src/apps/inquiries/models.py:262 src/apps/inquiries/models.py:502
-#: src/apps/suppliers/models.py:236 src/apps/vehicles/models.py:128
+#: src/apps/inquiries/models.py:263 src/apps/inquiries/models.py:541
+#: src/apps/inquiries/models.py:1645 src/apps/suppliers/models.py:236
+#: src/apps/vehicles/models.py:128
 msgid "actualizada el"
 msgstr ""
 
-#: src/apps/catalog/models.py:74 src/apps/catalog/models.py:193
+#: src/apps/catalog/models.py:75 src/apps/catalog/models.py:194
 #, fuzzy
 #| msgid "Categoría"
 msgid "categoría"
 msgstr "Category"
 
-#: src/apps/catalog/models.py:75
+#: src/apps/catalog/models.py:76
 #, fuzzy
 #| msgid "Categorías"
 msgid "categorías"
 msgstr "Categories"
 
-#: src/apps/catalog/models.py:95 src/apps/catalog/models.py:121
+#: src/apps/catalog/models.py:96 src/apps/catalog/models.py:122
 #: src/apps/suppliers/models.py:9
 msgid "código"
 msgstr ""
 
-#: src/apps/catalog/models.py:104 src/apps/catalog/models.py:199
+#: src/apps/catalog/models.py:105 src/apps/catalog/models.py:200
 #, fuzzy
 #| msgid "Volver al listado de productos"
 msgid "estado del producto"
 msgstr "Back to product list"
 
-#: src/apps/catalog/models.py:105
+#: src/apps/catalog/models.py:106
 #, fuzzy
 #| msgid "Volver al listado de productos"
 msgid "estados de los productos"
 msgstr "Back to product list"
 
-#: src/apps/catalog/models.py:129
+#: src/apps/catalog/models.py:130
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "tipo de referencia de pieza"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:130
+#: src/apps/catalog/models.py:131
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "tipos de referencia de pieza"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:151 src/apps/inquiries/models.py:161
-#: src/apps/inquiries/models.py:414
+#: src/apps/catalog/models.py:152 src/apps/inquiries/models.py:162
+#: src/apps/inquiries/models.py:415
 msgid "Borrador"
 msgstr ""
 
-#: src/apps/catalog/models.py:152 src/apps/inquiries/models.py:163
+#: src/apps/catalog/models.py:153 src/apps/inquiries/models.py:164
 #, fuzzy
 #| msgid "Mensaje comercial:"
 msgid "En revisión"
 msgstr "Commercial message:"
 
-#: src/apps/catalog/models.py:153
+#: src/apps/catalog/models.py:154
 msgid "Publicado"
 msgstr ""
 
-#: src/apps/catalog/models.py:156
+#: src/apps/catalog/models.py:157
 msgid "Precio oculto"
 msgstr ""
 
-#: src/apps/catalog/models.py:157
+#: src/apps/catalog/models.py:158
 #, fuzzy
 #| msgid "Último precio conocido"
 msgid "Visible (último precio conocido)"
 msgstr "Last known price"
 
-#: src/apps/catalog/models.py:163 src/apps/imports/models.py:18
+#: src/apps/catalog/models.py:164 src/apps/imports/models.py:18
 #: src/apps/suppliers/models.py:210 src/apps/suppliers/models.py:226
 msgid "proveedor"
 msgstr ""
 
-#: src/apps/catalog/models.py:166
+#: src/apps/catalog/models.py:167
 msgid "código de producto del proveedor"
 msgstr ""
 
-#: src/apps/catalog/models.py:171 src/templates/cart/request_cart.html:32
+#: src/apps/catalog/models.py:172 src/templates/cart/request_cart.html:32
 #: src/templates/catalog/partials/product_card.html:28
 #: src/templates/catalog/partials/product_list_row.html:24
 #: src/templates/catalog/product_detail.html:24
@@ -376,260 +380,278 @@ msgstr ""
 msgid "Código de Fabricante (OES/OE)"
 msgstr "Manufacturer Code (OES/OE)"
 
-#: src/apps/catalog/models.py:172
+#: src/apps/catalog/models.py:173
 msgid "Referencia OE principal del producto"
 msgstr "Primary OE reference of the product"
 
-#: src/apps/catalog/models.py:175
+#: src/apps/catalog/models.py:176
 msgid "título"
 msgstr ""
 
-#: src/apps/catalog/models.py:176
+#: src/apps/catalog/models.py:177
 #, fuzzy
 #| msgid "Descripción técnica"
 msgid "descripción breve"
 msgstr "Technical description"
 
-#: src/apps/catalog/models.py:177
+#: src/apps/catalog/models.py:178
 #, fuzzy
 #| msgid "Descripción técnica"
 msgid "descripción completa"
 msgstr "Technical description"
 
-#: src/apps/catalog/models.py:184
+#: src/apps/catalog/models.py:185
 #: src/templates/catalog/partials/product_card.html:32
 #: src/templates/catalog/partials/product_list_row.html:28
 #: src/templates/catalog/product_detail.html:28
 msgid "Marca"
 msgstr "Brand"
 
-#: src/apps/catalog/models.py:186
+#: src/apps/catalog/models.py:187
 msgid "Marca fabricante asociada a la referencia OE (no la marca del vehículo)"
 msgstr ""
 "Manufacturer brand associated with the OE reference (not the vehicle brand)"
 
-#: src/apps/catalog/models.py:202
+#: src/apps/catalog/models.py:203
 #, fuzzy
 #| msgid "Identidad de facturación"
 msgid "estado de publicación"
 msgstr "Billing identity"
 
-#: src/apps/catalog/models.py:208
+#: src/apps/catalog/models.py:209
 msgid "publicado el"
 msgstr ""
 
-#: src/apps/catalog/models.py:210
+#: src/apps/catalog/models.py:211
 #, fuzzy
 #| msgid "Disponibilidad y precio"
 msgid "visibilidad del precio"
 msgstr "Availability and pricing"
 
-#: src/apps/catalog/models.py:217
+#: src/apps/catalog/models.py:218
 #, fuzzy
 #| msgid "Último precio conocido"
 msgid "último precio conocido"
 msgstr "Last known price"
 
-#: src/apps/catalog/models.py:223 src/apps/inquiries/models.py:473
-#: src/apps/inquiries/models.py:984
+#: src/apps/catalog/models.py:223
+msgid "Precio unitario sin IVA."
+msgstr "Unit price excluding VAT."
+
+#: src/apps/catalog/models.py:226 src/apps/inquiries/models.py:485
+#, fuzzy
+#| msgid "Referencias del producto"
+msgid "IVA del producto (%)"
+msgstr "Product references"
+
+#: src/apps/catalog/models.py:230
+msgid "Porcentaje de IVA que se aplica al último precio conocido."
+msgstr "VAT percentage applied to the last known price."
+
+#: src/apps/catalog/models.py:233
+msgid "último precio conocido actualizado el"
+msgstr "last known price updated at"
+
+#: src/apps/catalog/models.py:238 src/apps/inquiries/models.py:512
+#: src/apps/inquiries/models.py:1139 src/apps/inquiries/models.py:1696
 msgid "moneda"
 msgstr ""
 
-#: src/apps/catalog/models.py:224
+#: src/apps/catalog/models.py:239
 msgid "unidad de venta"
 msgstr ""
 
-#: src/apps/catalog/models.py:225
+#: src/apps/catalog/models.py:240 src/apps/inquiries/models.py:1758
 #, fuzzy
 #| msgid "Cantidad"
 msgid "cantidad"
 msgstr "Quantity"
 
-#: src/apps/catalog/models.py:227
+#: src/apps/catalog/models.py:242
 #, fuzzy
 #| msgid "Ciudad / localidad"
 msgid "unidad de cantidad"
 msgstr "City / locality"
 
-#: src/apps/catalog/models.py:230
+#: src/apps/catalog/models.py:245
 msgid "peso"
 msgstr ""
 
-#: src/apps/catalog/models.py:233
+#: src/apps/catalog/models.py:248
 msgid "largo"
 msgstr ""
 
-#: src/apps/catalog/models.py:236
+#: src/apps/catalog/models.py:251
 msgid "ancho"
 msgstr ""
 
-#: src/apps/catalog/models.py:239
+#: src/apps/catalog/models.py:254
 msgid "alto"
 msgstr ""
 
-#: src/apps/catalog/models.py:241
+#: src/apps/catalog/models.py:256
 #, fuzzy
 #| msgid "Productos destacados"
 msgid "destacado"
 msgstr "Featured products"
 
-#: src/apps/catalog/models.py:247 src/apps/catalog/models.py:360
-#: src/apps/catalog/models.py:463 src/apps/catalog/models.py:547
-#: src/apps/inquiries/models.py:1430 src/apps/vehicles/models.py:111
+#: src/apps/catalog/models.py:271 src/apps/catalog/models.py:400
+#: src/apps/catalog/models.py:503 src/apps/catalog/models.py:587
+#: src/apps/inquiries/models.py:1807 src/apps/vehicles/models.py:111
 #, fuzzy
 #| msgid "productos/"
 msgid "producto"
 msgstr "products/"
 
-#: src/apps/catalog/models.py:248
+#: src/apps/catalog/models.py:272
 #, fuzzy
 #| msgid "productos/"
 msgid "productos"
 msgstr "products/"
 
-#: src/apps/catalog/models.py:251
+#: src/apps/catalog/models.py:275
 #, fuzzy
 #| msgid "Ver productos"
 msgid "Puede publicar productos"
 msgstr "View products"
 
-#: src/apps/catalog/models.py:370
+#: src/apps/catalog/models.py:410
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "referencia original"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:372
+#: src/apps/catalog/models.py:412
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "referencia normalizada"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:378
+#: src/apps/catalog/models.py:418
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "tipo de referencia"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:380 src/apps/catalog/models.py:552
+#: src/apps/catalog/models.py:420 src/apps/catalog/models.py:592
 #, fuzzy
 #| msgid "Principal"
 msgid "principal"
 msgstr "Primary"
 
-#: src/apps/catalog/models.py:381 src/apps/vehicles/models.py:49
+#: src/apps/catalog/models.py:421 src/apps/vehicles/models.py:49
 msgid "notas"
 msgstr ""
 
-#: src/apps/catalog/models.py:386
+#: src/apps/catalog/models.py:426
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "referencia de pieza"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:387
+#: src/apps/catalog/models.py:427
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "referencias de pieza"
 msgstr "Payment reference"
 
-#: src/apps/catalog/models.py:418
+#: src/apps/catalog/models.py:458
 msgid "Texto"
 msgstr ""
 
-#: src/apps/catalog/models.py:419
+#: src/apps/catalog/models.py:459
 msgid "Número"
 msgstr ""
 
-#: src/apps/catalog/models.py:420
+#: src/apps/catalog/models.py:460
 msgid "Sí/No"
 msgstr ""
 
-#: src/apps/catalog/models.py:425
+#: src/apps/catalog/models.py:465
 #, fuzzy
 #| msgid "Tipo de vehículo"
 msgid "tipo de dato"
 msgstr "Vehicle type"
 
-#: src/apps/catalog/models.py:431
+#: src/apps/catalog/models.py:471
 #, fuzzy
 #| msgid "Cantidad"
 msgid "unidad"
 msgstr "Quantity"
 
-#: src/apps/catalog/models.py:432
+#: src/apps/catalog/models.py:472
 msgid "filtrable"
 msgstr ""
 
-#: src/apps/catalog/models.py:434
+#: src/apps/catalog/models.py:474
 #, fuzzy
 #| msgid "Paginación de productos"
 msgid "visible en el producto"
 msgstr "Product pagination"
 
-#: src/apps/catalog/models.py:437
+#: src/apps/catalog/models.py:477
 msgid "admite varios valores"
 msgstr ""
 
-#: src/apps/catalog/models.py:444
+#: src/apps/catalog/models.py:484
 #, fuzzy
 #| msgid "Paginación de productos"
 msgid "definición de atributo"
 msgstr "Product pagination"
 
-#: src/apps/catalog/models.py:445
+#: src/apps/catalog/models.py:485
 msgid "definiciones de atributos"
 msgstr ""
 
-#: src/apps/catalog/models.py:469
+#: src/apps/catalog/models.py:509
 msgid "atributo"
 msgstr ""
 
-#: src/apps/catalog/models.py:471
+#: src/apps/catalog/models.py:511
 #, fuzzy
 #| msgid "Volver al listado de productos"
 msgid "valor de texto"
 msgstr "Back to product list"
 
-#: src/apps/catalog/models.py:473
+#: src/apps/catalog/models.py:513
 msgid "valor numérico"
 msgstr ""
 
-#: src/apps/catalog/models.py:475
+#: src/apps/catalog/models.py:515
 msgid "valor Sí/No"
 msgstr ""
 
-#: src/apps/catalog/models.py:477
+#: src/apps/catalog/models.py:517
 msgid "valor normalizado"
 msgstr ""
 
-#: src/apps/catalog/models.py:483
+#: src/apps/catalog/models.py:523
 #, fuzzy
 #| msgid "Volver al listado de productos"
 msgid "valor de atributo de producto"
 msgstr "Back to product list"
 
-#: src/apps/catalog/models.py:484
+#: src/apps/catalog/models.py:524
 #, fuzzy
 #| msgid "Volver al listado de productos"
 msgid "valores de atributos de productos"
 msgstr "Back to product list"
 
-#: src/apps/catalog/models.py:549
+#: src/apps/catalog/models.py:589
 msgid "imagen"
 msgstr ""
 
-#: src/apps/catalog/models.py:550
+#: src/apps/catalog/models.py:590
 msgid "texto alternativo"
 msgstr ""
 
-#: src/apps/catalog/models.py:557
+#: src/apps/catalog/models.py:597
 #, fuzzy
 #| msgid "Paginación de productos"
 msgid "imagen de producto"
 msgstr "Product pagination"
 
-#: src/apps/catalog/models.py:558
+#: src/apps/catalog/models.py:598
 #, fuzzy
 #| msgid "Catálogo de recambios"
 msgid "imágenes de productos"
@@ -739,8 +761,8 @@ msgstr "Spare parts catalog"
 msgid "Configuración base"
 msgstr "Base configuration"
 
-#: src/apps/checkout/apps.py:8 src/apps/inquiries/admin.py:346
-#: src/apps/inquiries/admin.py:620 src/apps/inquiries/admin.py:790
+#: src/apps/checkout/apps.py:8 src/apps/inquiries/admin.py:376
+#: src/apps/inquiries/admin.py:654 src/apps/inquiries/admin.py:858
 msgid "Pago"
 msgstr ""
 
@@ -766,7 +788,7 @@ msgstr "Scope of information"
 msgid "Procesamiento"
 msgstr ""
 
-#: src/apps/imports/admin.py:123 src/apps/inquiries/admin.py:900
+#: src/apps/imports/admin.py:123 src/apps/inquiries/admin.py:1039
 #, fuzzy
 #| msgid "Nota"
 msgid "Notas"
@@ -811,7 +833,7 @@ msgid "Importaciones de proveedores"
 msgstr ""
 
 #: src/apps/imports/models.py:8 src/apps/imports/models.py:68
-#: src/apps/inquiries/models.py:955
+#: src/apps/inquiries/models.py:1110
 #, fuzzy
 #| msgid "Importe pendiente"
 msgid "Pendiente"
@@ -935,85 +957,91 @@ msgstr "Scope of information"
 msgid "filas de importación"
 msgstr "Scope of information"
 
-#: src/apps/inquiries/admin.py:82 src/apps/inquiries/admin.py:342
-#: src/apps/inquiries/admin.py:666 src/apps/inquiries/admin.py:798
-#: src/apps/inquiries/admin.py:856
+#: src/apps/inquiries/admin.py:86 src/apps/inquiries/admin.py:372
+#: src/apps/inquiries/admin.py:705 src/apps/inquiries/admin.py:866
+#: src/apps/inquiries/admin.py:995
 msgid "Solicitud"
 msgstr "Request"
 
-#: src/apps/inquiries/admin.py:89
+#: src/apps/inquiries/admin.py:93 src/apps/inquiries/models.py:1746
 #, fuzzy
 #| msgid "Productos"
 msgid "Producto"
 msgstr "Products"
 
-#: src/apps/inquiries/admin.py:140
+#: src/apps/inquiries/admin.py:144
 msgid "Envío"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:142 src/apps/inquiries/admin.py:878
+#: src/apps/inquiries/admin.py:146 src/apps/inquiries/admin.py:1017
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "Datos del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/admin.py:154
+#: src/apps/inquiries/admin.py:158
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "Notas del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/admin.py:156 src/apps/inquiries/admin.py:297
-#: src/apps/inquiries/admin.py:867
+#: src/apps/inquiries/admin.py:160 src/apps/inquiries/admin.py:321
+#: src/apps/inquiries/admin.py:1006
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Destino de la oferta"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/admin.py:180 src/apps/inquiries/admin.py:1005
+#: src/apps/inquiries/admin.py:184 src/apps/inquiries/admin.py:1144
 #, fuzzy
 #| msgid "Siguiente"
 msgid "Cliente"
 msgstr "Next"
 
-#: src/apps/inquiries/admin.py:184
+#: src/apps/inquiries/admin.py:188
 #, fuzzy
 #| msgid "Solicitud"
 msgid "Solicitudes"
 msgstr "Request"
 
-#: src/apps/inquiries/admin.py:188 src/apps/inquiries/admin.py:932
+#: src/apps/inquiries/admin.py:192 src/apps/inquiries/admin.py:1071
 #, fuzzy
 #| msgid "Destinatario"
 msgid "Destino"
 msgstr "Recipient"
 
-#: src/apps/inquiries/admin.py:272
+#: src/apps/inquiries/admin.py:287
 #, fuzzy
 #| msgid "Oferta confirmada"
 msgid "Oferta comercial"
 msgstr "Confirmed offer"
 
-#: src/apps/inquiries/admin.py:283
+#: src/apps/inquiries/admin.py:298
 #, fuzzy
 #| msgid "Contacto comercial"
 msgid "Datos comerciales"
 msgstr "Commercial contact"
 
-#: src/apps/inquiries/admin.py:308 src/apps/inquiries/admin.py:642
+#: src/apps/inquiries/admin.py:332 src/apps/inquiries/admin.py:681
 msgid "Ciclo de vida"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:361
+#: src/apps/inquiries/admin.py:368
+#, fuzzy
+#| msgid "Precio unitario sin IVA."
+msgid "Precio total con IVA"
+msgstr "Unit price excluding VAT."
+
+#: src/apps/inquiries/admin.py:391
 msgid "Enviar las ofertas seleccionadas a los clientes"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:374
+#: src/apps/inquiries/admin.py:404
 #, python-format
 msgid "La oferta %(reference)s no está lista para enviar (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:382
+#: src/apps/inquiries/admin.py:412
 #, fuzzy, python-format
 #| msgid ""
 #| "Esta oferta ya tiene una respuesta registrada. Puede revisar su estado "
@@ -1023,170 +1051,226 @@ msgstr ""
 "This offer already has a registered response. You can review its current "
 "status."
 
-#: src/apps/inquiries/admin.py:391
+#: src/apps/inquiries/admin.py:421
 #, python-format
 msgid "Ofertas enviadas: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:394
+#: src/apps/inquiries/admin.py:424
 msgid "No se envió ninguna oferta."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:396
+#: src/apps/inquiries/admin.py:426
 msgid "Reenviar el correo de oferta a los clientes"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:411
+#: src/apps/inquiries/admin.py:441
 #, python-format
 msgid ""
 "Se omitió la oferta %(reference)s: solo pueden reenviarse ofertas enviadas o "
 "aceptadas."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:431
+#: src/apps/inquiries/admin.py:461
 #, python-format
 msgid ""
 "No se pudo reenviar el correo de la oferta %(reference)s por un error de "
 "entrega."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:444
+#: src/apps/inquiries/admin.py:474
 #, python-format
 msgid ""
 "No se pudo reenviar la oferta %(reference)s porque falta el correo "
 "electrónico del cliente."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:456
+#: src/apps/inquiries/admin.py:486
 #, python-format
 msgid "Correos de oferta reenviados: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:461
+#: src/apps/inquiries/admin.py:491
 msgid "No se reenvió ningún correo de oferta debido a errores de entrega."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:467
+#: src/apps/inquiries/admin.py:497
 msgid "No se reenvió ningún correo de oferta."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:471
+#: src/apps/inquiries/admin.py:501
 msgid "Iniciar el pago de las ofertas seleccionadas"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:485
+#: src/apps/inquiries/admin.py:515
 #, python-format
 msgid "No se pudo iniciar el pago de la oferta %(reference)s (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:496
+#: src/apps/inquiries/admin.py:526
 #, python-format
 msgid "No se pudo iniciar el pago de la oferta %(reference)s (%(error)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:507
+#: src/apps/inquiries/admin.py:537
 #, python-format
 msgid "Pagos iniciados: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:512
+#: src/apps/inquiries/admin.py:542
 msgid "No se inició ningún pago."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:516
+#: src/apps/inquiries/admin.py:546
 msgid "Cancelar las ofertas y notificar a los clientes"
 msgstr "Cancel offers and notify customers"
 
-#: src/apps/inquiries/admin.py:532
+#: src/apps/inquiries/admin.py:562
 #, python-format
 msgid "No se canceló la oferta %(reference)s (%(details)s)."
 msgstr "Offer %(reference)s was not cancelled (%(details)s)."
 
-#: src/apps/inquiries/admin.py:546
+#: src/apps/inquiries/admin.py:576
 #, python-format
 msgid "La oferta %(reference)s se canceló, pero falló el correo al cliente."
 msgstr "Offer %(reference)s was cancelled, but the customer email failed."
 
-#: src/apps/inquiries/admin.py:554
+#: src/apps/inquiries/admin.py:584
 #, python-format
 msgid "Ofertas canceladas: %(count)s."
 msgstr "Cancelled offers: %(count)s."
 
-#: src/apps/inquiries/admin.py:557
+#: src/apps/inquiries/admin.py:587
 msgid "No se canceló ninguna oferta."
 msgstr "No offers were cancelled."
 
-#: src/apps/inquiries/admin.py:632
+#: src/apps/inquiries/admin.py:666
 #, fuzzy
 #| msgid "Paso de pago"
 msgid "Proveedor de pago"
 msgstr "Payment step"
 
-#: src/apps/inquiries/admin.py:662 src/apps/inquiries/admin.py:794
+#: src/apps/inquiries/admin.py:677
+msgid "Datos preparados para facturar"
+msgstr ""
+
+#: src/apps/inquiries/admin.py:701 src/apps/inquiries/admin.py:862
 msgid "Oferta"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:691
+#: src/apps/inquiries/admin.py:709
+#, fuzzy
+#| msgid "Resumen de la oferta:"
+msgid "Resumen fiscal"
+msgstr "Offer summary:"
+
+#: src/apps/inquiries/admin.py:713
+msgid "Todavía no existe snapshot fiscal."
+msgstr ""
+
+#: src/apps/inquiries/admin.py:717
+#, fuzzy
+#| msgid "NIF/CIF/VAT"
+msgid "NIF/VAT"
+msgstr "Tax/VAT ID"
+
+#: src/apps/inquiries/admin.py:718
+msgid "Domicilio"
+msgstr ""
+
+#: src/apps/inquiries/admin.py:719
+msgid "Totales"
+msgstr ""
+
+#: src/apps/inquiries/admin.py:721
+msgid "Emisor"
+msgstr ""
+
+#: src/apps/inquiries/admin.py:724
+#, fuzzy
+#| msgid "Líneas"
+msgid "Líneas fiscales"
+msgstr "Lines"
+
+#: src/apps/inquiries/admin.py:759
 #, python-format
 msgid "El pago %(reference)s no pudo cambiar a %(status)s (%(details)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:706
+#: src/apps/inquiries/admin.py:774
 #, python-format
 msgid "El pago %(reference)s no pudo cambiar a %(status)s (%(error)s)."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:722
+#: src/apps/inquiries/admin.py:790
 #, python-format
 msgid "Pagos actualizados a %(status)s: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:728
+#: src/apps/inquiries/admin.py:796
 #, python-format
 msgid "No se actualizó ningún pago a %(status)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:733
+#: src/apps/inquiries/admin.py:801
 msgid "Marcar los pagos seleccionados como pagados"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:739
+#: src/apps/inquiries/admin.py:807
 msgid "pagado"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:742
+#: src/apps/inquiries/admin.py:810
 msgid "Marcar los pagos seleccionados como fallidos"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:748
+#: src/apps/inquiries/admin.py:816
 msgid "fallido"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:751
+#: src/apps/inquiries/admin.py:819
 msgid "Marcar los pagos seleccionados como cancelados"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:757
+#: src/apps/inquiries/admin.py:825
 msgid "cancelado"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:891
+#: src/apps/inquiries/admin.py:874
+#, fuzzy
+#| msgid "Identidad de facturación"
+msgid "Identidad fiscal"
+msgstr "Billing identity"
+
+#: src/apps/inquiries/admin.py:875
+msgid "Domicilio fiscal"
+msgstr ""
+
+#: src/apps/inquiries/admin.py:878 src/apps/suppliers/admin.py:83
+#: src/templates/base.html:65 src/templates/base.html:142
+#: src/templates/base.html:254 src/templates/inquiries/public_success.html:76
+#: src/templates/pages/contact.html:5 src/templates/pages/contact.html:10
+#: src/templates/pages/legal.html:27
+msgid "Contacto"
+msgstr "Contact"
+
+#: src/apps/inquiries/admin.py:1030
 #, fuzzy
 #| msgid "Siguiente"
 msgid "Seguimiento"
 msgstr "Next"
 
-#: src/apps/inquiries/admin.py:909
+#: src/apps/inquiries/admin.py:1048
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Resolución no ofertable"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/admin.py:954
+#: src/apps/inquiries/admin.py:1093
 msgid "Finalizar las solicitudes seleccionadas como no ofertables"
 msgstr ""
 
-#: src/apps/inquiries/admin.py:968
+#: src/apps/inquiries/admin.py:1107
 #, fuzzy, python-format
 #| msgid "Su solicitud %(reference)s ya tiene una oferta confirmada."
 msgid ""
@@ -1194,29 +1278,29 @@ msgid ""
 "(%(details)s)."
 msgstr "Your inquiry %(reference)s now has a confirmed offer."
 
-#: src/apps/inquiries/admin.py:979
+#: src/apps/inquiries/admin.py:1118
 #, fuzzy, python-format
 #| msgid "Su solicitud %(reference)s ya tiene una oferta confirmada."
 msgid ""
 "La solicitud %(reference)s no pudo finalizarse como no ofertable (%(error)s)."
 msgstr "Your inquiry %(reference)s now has a confirmed offer."
 
-#: src/apps/inquiries/admin.py:991
+#: src/apps/inquiries/admin.py:1130
 #, python-format
 msgid "Solicitudes finalizadas como no ofertables: %(count)s."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:997
+#: src/apps/inquiries/admin.py:1136
 msgid "No se finalizó ninguna solicitud como no ofertable."
 msgstr ""
 
-#: src/apps/inquiries/admin.py:1011 src/apps/inquiries/admin.py:1016
+#: src/apps/inquiries/admin.py:1150 src/apps/inquiries/admin.py:1155
 #, fuzzy
 #| msgid "Carrito de solicitud"
 msgid "Grupo de solicitudes"
 msgstr "Request cart"
 
-#: src/apps/inquiries/admin.py:1026
+#: src/apps/inquiries/admin.py:1165
 #, fuzzy
 #| msgid "Otros vehículos"
 msgid "Artículos"
@@ -1264,9 +1348,9 @@ msgstr "Contact details"
 msgid "Teléfono"
 msgstr "Phone"
 
-#: src/apps/inquiries/forms.py:64
+#: src/apps/inquiries/forms.py:64 src/apps/inquiries/models.py:1424
 msgid "Empresa"
-msgstr ""
+msgstr "Company"
 
 #: src/apps/inquiries/forms.py:75
 #, fuzzy
@@ -1292,653 +1376,1029 @@ msgstr "Contact name is required."
 msgid "El email de contacto es obligatorio."
 msgstr "Contact email is required."
 
-#: src/apps/inquiries/forms.py:195
-msgid "Nombre completo del destinatario"
-msgstr "Recipient full name"
+#: src/apps/inquiries/forms.py:198 src/apps/inquiries/forms.py:209
+msgid "Nombre"
+msgstr "First name"
 
-#: src/apps/inquiries/forms.py:196
+#: src/apps/inquiries/forms.py:199 src/apps/inquiries/forms.py:210
+msgid "Apellidos"
+msgstr "Last name"
+
+#: src/apps/inquiries/forms.py:200
 msgid "Teléfono del destinatario"
 msgstr "Recipient phone"
 
-#: src/apps/inquiries/forms.py:197
+#: src/apps/inquiries/forms.py:201
 msgid "Dirección, línea 1"
 msgstr "Address line 1"
 
-#: src/apps/inquiries/forms.py:198
+#: src/apps/inquiries/forms.py:202
 msgid "Dirección, línea 2 (opcional)"
 msgstr "Address line 2 (optional)"
 
-#: src/apps/inquiries/forms.py:199
+#: src/apps/inquiries/forms.py:203
 msgid "Ciudad / localidad"
 msgstr "City / locality"
 
-#: src/apps/inquiries/forms.py:200
+#: src/apps/inquiries/forms.py:204
 msgid "Provincia / región / estado cotizado"
 msgstr "Quoted province / region / state"
 
-#: src/apps/inquiries/forms.py:201
+#: src/apps/inquiries/forms.py:205
 msgid "Código postal cotizado"
 msgstr "Quoted postal code"
 
-#: src/apps/inquiries/forms.py:202
+#: src/apps/inquiries/forms.py:206
 msgid "País cotizado"
 msgstr "Quoted country"
 
-#: src/apps/inquiries/forms.py:203
+#: src/apps/inquiries/forms.py:207
 msgid "Tipo de facturación"
 msgstr "Billing customer type"
 
-#: src/apps/inquiries/forms.py:204
+#: src/apps/inquiries/forms.py:208
 msgid "La dirección de facturación coincide con la de envío"
 msgstr "Billing address is the same as shipping"
 
-#: src/apps/inquiries/forms.py
-#: src/templates/inquiries/public_offer_payment_details.html
-msgid "La dirección de facturación debe coincidir con la dirección de envío mientras esta opción esté seleccionada."
-msgstr "The billing address must match the shipping address while this option is selected."
+#: src/apps/inquiries/forms.py:211
+msgid "Empresa / razón social"
+msgstr "Company / legal name"
 
-#: src/apps/inquiries/forms.py:205
-msgid "Nombre de facturación / razón social"
-msgstr "Billing name / legal name"
-
-#: src/apps/inquiries/forms.py:206
+#: src/apps/inquiries/forms.py:212
 msgid "NIF/CIF/VAT"
 msgstr "Tax/VAT ID"
 
-#: src/apps/inquiries/forms.py:207
+#: src/apps/inquiries/forms.py:213
 msgid "Dirección de facturación, línea 1"
 msgstr "Billing address line 1"
 
-#: src/apps/inquiries/forms.py:208
+#: src/apps/inquiries/forms.py:214
 msgid "Dirección de facturación, línea 2 (opcional)"
 msgstr "Billing address line 2 (optional)"
 
-#: src/apps/inquiries/forms.py:209
+#: src/apps/inquiries/forms.py:215
 msgid "Ciudad / localidad de facturación"
 msgstr "Billing city / locality"
 
-#: src/apps/inquiries/forms.py:210
+#: src/apps/inquiries/forms.py:216
 msgid "Provincia / región / estado de facturación"
 msgstr "Billing province / region / state"
 
-#: src/apps/inquiries/forms.py:211
+#: src/apps/inquiries/forms.py:217
 msgid "Código postal de facturación"
 msgstr "Billing postal code"
 
-#: src/apps/inquiries/forms.py:212
+#: src/apps/inquiries/forms.py:218
 msgid "País de facturación"
 msgstr "Billing country"
 
-#: src/apps/inquiries/forms.py:304
+#: src/apps/inquiries/forms.py:320
+msgid "La empresa o razón social es obligatoria."
+msgstr "The company or legal name is required."
+
+#: src/apps/inquiries/forms.py:327
+msgid "Este campo es obligatorio para un particular."
+msgstr "This field is required for a private individual."
+
+#: src/apps/inquiries/forms.py:336
+#: src/templates/inquiries/public_offer_payment_details.html:30
+msgid ""
+"La dirección de facturación debe coincidir con la dirección de envío "
+"mientras esta opción esté seleccionada."
+msgstr ""
+"The billing address must match the shipping address while this option is "
+"selected."
+
+#: src/apps/inquiries/forms.py:361
 msgid "Este campo es obligatorio para una dirección distinta."
 msgstr "This field is required when using a different billing address."
 
 #: src/apps/inquiries/migrations/0014_unify_offer_validity.py:59
-#: src/apps/inquiries/models.py:486
+#: src/apps/inquiries/models.py:525
 msgid "fecha límite de vigencia"
 msgstr "validity deadline"
 
 #: src/apps/inquiries/migrations/0014_unify_offer_validity.py:68
-#: src/apps/inquiries/models.py:489
+#: src/apps/inquiries/models.py:528
 msgid "horas de vigencia aplicadas"
 msgstr "applied validity hours"
 
 #: src/apps/inquiries/migrations/0014_unify_offer_validity.py:78
-#: src/apps/inquiries/models.py:1000
+#: src/apps/inquiries/models.py:1158
 msgid "vencimiento de la sesión de pago"
 msgstr "payment session expiry"
 
-#: src/apps/inquiries/models.py:33 src/apps/inquiries/models.py:157
+#: src/apps/inquiries/models.py:34 src/apps/inquiries/models.py:158
 msgid "Español"
 msgstr ""
 
-#: src/apps/inquiries/models.py:34 src/apps/inquiries/models.py:158
+#: src/apps/inquiries/models.py:35 src/apps/inquiries/models.py:159
 msgid "Inglés"
 msgstr ""
 
-#: src/apps/inquiries/models.py:41 src/apps/inquiries/models.py:191
-#: src/apps/inquiries/models.py:441 src/apps/inquiries/models.py:977
+#: src/apps/inquiries/models.py:42 src/apps/inquiries/models.py:192
+#: src/apps/inquiries/models.py:442 src/apps/inquiries/models.py:1132
 msgid "código de referencia"
 msgstr ""
 
-#: src/apps/inquiries/models.py:53 src/apps/inquiries/models.py:211
+#: src/apps/inquiries/models.py:54 src/apps/inquiries/models.py:212
 #: src/apps/suppliers/models.py:232
 msgid "usuario"
 msgstr ""
 
-#: src/apps/inquiries/models.py:55 src/apps/inquiries/models.py:213
+#: src/apps/inquiries/models.py:56 src/apps/inquiries/models.py:214
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "nombre del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:56 src/apps/inquiries/models.py:214
+#: src/apps/inquiries/models.py:57 src/apps/inquiries/models.py:215
 #, fuzzy
 #| msgid "Datos de contacto del cliente:"
 msgid "correo electrónico del cliente"
 msgstr "Customer contact details:"
 
-#: src/apps/inquiries/models.py:57 src/apps/inquiries/models.py:215
+#: src/apps/inquiries/models.py:58 src/apps/inquiries/models.py:216
+#: src/apps/inquiries/models.py:1704
 #, fuzzy
 #| msgid "Teléfono del destinatario"
 msgid "teléfono del cliente"
 msgstr "Recipient phone"
 
-#: src/apps/inquiries/models.py:58 src/apps/inquiries/models.py:216
+#: src/apps/inquiries/models.py:59 src/apps/inquiries/models.py:217
 msgid "empresa"
 msgstr ""
 
-#: src/apps/inquiries/models.py:59 src/apps/inquiries/models.py:217
+#: src/apps/inquiries/models.py:60 src/apps/inquiries/models.py:218
+#: src/apps/inquiries/models.py:1633
 msgid "NIF / VAT"
 msgstr ""
 
-#: src/apps/inquiries/models.py:61 src/apps/inquiries/models.py:219
+#: src/apps/inquiries/models.py:62 src/apps/inquiries/models.py:220
 #, fuzzy
 #| msgid "Idioma"
 msgid "idioma"
 msgstr "Language"
 
-#: src/apps/inquiries/models.py:66 src/apps/inquiries/models.py:231
+#: src/apps/inquiries/models.py:67 src/apps/inquiries/models.py:232
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "notas del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:67 src/apps/inquiries/models.py:233
+#: src/apps/inquiries/models.py:68 src/apps/inquiries/models.py:234
 #, fuzzy
 #| msgid "País de destino"
 msgid "país de destino"
 msgstr "Destination country"
 
-#: src/apps/inquiries/models.py:68 src/apps/inquiries/models.py:234
+#: src/apps/inquiries/models.py:69 src/apps/inquiries/models.py:235
 #, fuzzy
 #| msgid "País de destino"
 msgid "ciudad de destino"
 msgstr "Destination country"
 
-#: src/apps/inquiries/models.py:69 src/apps/inquiries/models.py:235
+#: src/apps/inquiries/models.py:70 src/apps/inquiries/models.py:236
+#: src/apps/inquiries/models.py:1639
 #, fuzzy
 #| msgid "Provincia / región / estado"
 msgid "provincia o región"
 msgstr "Province / region / state"
 
-#: src/apps/inquiries/models.py:71 src/apps/inquiries/models.py:237
+#: src/apps/inquiries/models.py:72 src/apps/inquiries/models.py:238
 #, fuzzy
 #| msgid "Código postal de destino"
 msgid "código postal de destino"
 msgstr "Destination postal code"
 
-#: src/apps/inquiries/models.py:77 src/apps/inquiries/models.py:203
+#: src/apps/inquiries/models.py:78 src/apps/inquiries/models.py:204
 #, fuzzy
 #| msgid "Carrito de solicitud"
 msgid "grupo de solicitudes"
 msgstr "Request cart"
 
-#: src/apps/inquiries/models.py:78
+#: src/apps/inquiries/models.py:79
 #, fuzzy
 #| msgid "Carrito de solicitud"
 msgid "grupos de solicitudes"
 msgstr "Request cart"
 
-#: src/apps/inquiries/models.py:162
+#: src/apps/inquiries/models.py:163
 msgid "Enviada"
 msgstr ""
 
-#: src/apps/inquiries/models.py:164
+#: src/apps/inquiries/models.py:165
 msgid "Pendiente del proveedor"
 msgstr ""
 
-#: src/apps/inquiries/models.py:165
+#: src/apps/inquiries/models.py:166
 #, fuzzy
 #| msgid "Responder a la oferta"
 msgid "Respondida al cliente"
 msgstr "Respond to this offer"
 
-#: src/apps/inquiries/models.py:166 src/apps/inquiries/models.py:416
+#: src/apps/inquiries/models.py:167 src/apps/inquiries/models.py:417
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "Aceptada por el cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:167 src/apps/inquiries/models.py:417
+#: src/apps/inquiries/models.py:168 src/apps/inquiries/models.py:418
 msgid "Rechazada por el cliente"
 msgstr ""
 
-#: src/apps/inquiries/models.py:168
+#: src/apps/inquiries/models.py:169
 msgid "Cerrada"
 msgstr ""
 
-#: src/apps/inquiries/models.py:171
+#: src/apps/inquiries/models.py:172
 #, fuzzy
 #| msgid "Oferta confirmada disponible: %(reference)s"
 msgid "No disponible"
 msgstr "Confirmed offer available: %(reference)s"
 
-#: src/apps/inquiries/models.py:172
+#: src/apps/inquiries/models.py:173
 msgid "El proveedor no puede confirmar"
 msgstr ""
 
-#: src/apps/inquiries/models.py:173
+#: src/apps/inquiries/models.py:174
 msgid "Logística no viable"
 msgstr ""
 
-#: src/apps/inquiries/models.py:174
+#: src/apps/inquiries/models.py:175
 msgid "Otro motivo"
 msgstr ""
 
-#: src/apps/inquiries/models.py:225 src/apps/inquiries/models.py:448
-#: src/apps/inquiries/models.py:986
+#: src/apps/inquiries/models.py:226 src/apps/inquiries/models.py:449
+#: src/apps/inquiries/models.py:1141
 #, fuzzy
 #| msgid "Estado"
 msgid "estado"
 msgstr "Status"
 
-#: src/apps/inquiries/models.py:232 src/apps/inquiries/models.py:479
-#: src/apps/inquiries/models.py:994
+#: src/apps/inquiries/models.py:233 src/apps/inquiries/models.py:518
+#: src/apps/inquiries/models.py:1152
 msgid "notas internas"
 msgstr ""
 
-#: src/apps/inquiries/models.py:240
+#: src/apps/inquiries/models.py:241
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "motivo de resolución no ofertable"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/models.py:247
+#: src/apps/inquiries/models.py:248
 #, fuzzy
 #| msgid "Carrito de solicitud"
 msgid "notas internas de la resolución"
 msgstr "Request cart"
 
-#: src/apps/inquiries/models.py:250
+#: src/apps/inquiries/models.py:251
 #, fuzzy
 #| msgid "Mensajes del sistema"
 msgid "mensaje de resolución para el cliente"
 msgstr "System messages"
 
-#: src/apps/inquiries/models.py:253
+#: src/apps/inquiries/models.py:254
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "resuelta como no ofertable el"
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/models.py:256
+#: src/apps/inquiries/models.py:257
 msgid "fecha límite de respuesta"
 msgstr ""
 
-#: src/apps/inquiries/models.py:259
+#: src/apps/inquiries/models.py:260
 #, fuzzy
 #| msgid "Referencias del producto"
 msgid "respuesta del proveedor recibida el"
 msgstr "Product references"
 
-#: src/apps/inquiries/models.py:265 src/apps/inquiries/models.py:438
-#: src/apps/inquiries/models.py:1424
+#: src/apps/inquiries/models.py:266 src/apps/inquiries/models.py:439
+#: src/apps/inquiries/models.py:1801
 #, fuzzy
 #| msgid "Solicitud"
 msgid "solicitud"
 msgstr "Request"
 
-#: src/apps/inquiries/models.py:266
+#: src/apps/inquiries/models.py:267
 #, fuzzy
 #| msgid "Solicitud"
 msgid "solicitudes"
 msgstr "Request"
 
-#: src/apps/inquiries/models.py:322
+#: src/apps/inquiries/models.py:323
 msgid ""
 "No puede finalizarse la resolución no ofertable porque la solicitud ya tiene "
 "una oferta."
 msgstr ""
 
-#: src/apps/inquiries/models.py:356
+#: src/apps/inquiries/models.py:357
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Debe indicar el motivo de resolución no ofertable."
 msgstr "Offer summary:"
 
-#: src/apps/inquiries/models.py:360
+#: src/apps/inquiries/models.py:361
 msgid "La resolución no ofertable requiere que la solicitud esté cerrada."
 msgstr ""
 
-#: src/apps/inquiries/models.py:364
+#: src/apps/inquiries/models.py:365
 msgid "No puede guardarse una resolución no ofertable si ya existe una oferta."
 msgstr ""
 
-#: src/apps/inquiries/models.py:415
+#: src/apps/inquiries/models.py:416
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "Enviada al cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:418
+#: src/apps/inquiries/models.py:419
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "Caducada"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:419
+#: src/apps/inquiries/models.py:420
 msgid "Cancelada"
 msgstr "Cancelled"
 
-#: src/apps/inquiries/models.py:455
+#: src/apps/inquiries/models.py:456
 #, fuzzy
 #| msgid "Importe total confirmado: %(total)s %(currency)s"
 msgid "total confirmado"
 msgstr "Confirmed total amount: %(total)s %(currency)s"
 
-#: src/apps/inquiries/models.py:459
+#: src/apps/inquiries/models.py:460
 msgid ""
 "Importe comercial final confirmado de la oferta. Es la referencia para "
 "preparar el pago y debe incluir el envío calculado para el destino cotizado "
 "cuando corresponda."
 msgstr ""
 
-#: src/apps/inquiries/models.py:464
+#: src/apps/inquiries/models.py:466
+#, fuzzy
+#| msgid "Referencias del producto"
+msgid "precio del producto sin IVA"
+msgstr "Product references"
+
+#: src/apps/inquiries/models.py:471
+msgid "Precio neto del producto antes de aplicar el IVA indicado."
+msgstr ""
+
+#: src/apps/inquiries/models.py:474
+#, fuzzy
+#| msgid "Datos de envío y facturación"
+msgid "gastos de envío sin IVA"
+msgstr "Shipping and billing details"
+
+#: src/apps/inquiries/models.py:478
+msgid "Importe neto del envío antes de aplicar el IVA indicado."
+msgstr ""
+
+#: src/apps/inquiries/models.py:480
+#, fuzzy
+#| msgid "Ver productos"
+msgid "aplicar IVA al producto"
+msgstr "View products"
+
+#: src/apps/inquiries/models.py:482
+#, fuzzy
+#| msgid "Paginación de productos"
+msgid "motivo fiscal del producto sin IVA"
+msgstr "Product pagination"
+
+#: src/apps/inquiries/models.py:488
+msgid "actualizar el último precio conocido del producto"
+msgstr "update the product's last known price"
+
+#: src/apps/inquiries/models.py:491
+msgid ""
+"Al enviar la oferta, actualiza el último precio conocido de la web pública "
+"con el precio unitario sin IVA (precio del producto dividido entre la "
+"cantidad solicitada), junto con su porcentaje de IVA."
+msgstr ""
+"When the offer is sent, updates the last known price on the public website "
+"with the unit price excluding VAT (product price divided by the requested "
+"quantity), together with its VAT percentage."
+
+#: src/apps/inquiries/models.py:496
+msgid "aplicar IVA al envío"
+msgstr ""
+
+#: src/apps/inquiries/models.py:498
+msgid "motivo fiscal del envío sin IVA"
+msgstr ""
+
+#: src/apps/inquiries/models.py:501
+#, fuzzy
+#| msgid "País de destino"
+msgid "IVA del envío (%)"
+msgstr "Destination country"
+
+#: src/apps/inquiries/models.py:503
 #, fuzzy
 #| msgid "País cotizado"
 msgid "país cotizado"
 msgstr "Quoted country"
 
-#: src/apps/inquiries/models.py:465
+#: src/apps/inquiries/models.py:504
 #, fuzzy
 #| msgid "País cotizado"
 msgid "ciudad cotizada"
 msgstr "Quoted country"
 
-#: src/apps/inquiries/models.py:467
+#: src/apps/inquiries/models.py:506
 #, fuzzy
 #| msgid "Provincia / región / estado cotizado"
 msgid "provincia o región cotizada"
 msgstr "Quoted province / region / state"
 
-#: src/apps/inquiries/models.py:470
+#: src/apps/inquiries/models.py:509
 #, fuzzy
 #| msgid "Código postal cotizado"
 msgid "código postal cotizado"
 msgstr "Quoted postal code"
 
-#: src/apps/inquiries/models.py:476
+#: src/apps/inquiries/models.py:515
 msgid "Código ISO 4217 de la moneda del total confirmado."
 msgstr ""
 
-#: src/apps/inquiries/models.py:478
+#: src/apps/inquiries/models.py:517
 #, fuzzy
 #| msgid "Plazo estimado: %(lead_time)s"
 msgid "plazo estimado"
 msgstr "Estimated lead time: %(lead_time)s"
 
-#: src/apps/inquiries/models.py:480
+#: src/apps/inquiries/models.py:519
 #, fuzzy
 #| msgid "Mensajes del sistema"
 msgid "mensaje para el cliente"
 msgstr "System messages"
 
-#: src/apps/inquiries/models.py:482
+#: src/apps/inquiries/models.py:521
 msgid "token de acceso"
 msgstr ""
 
-#: src/apps/inquiries/models.py:484
+#: src/apps/inquiries/models.py:523
 msgid "enviada el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:491
+#: src/apps/inquiries/models.py:530
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "aceptada el"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:492
+#: src/apps/inquiries/models.py:531
 #, fuzzy
 #| msgid "Oferta rechazada"
 msgid "rechazada el"
 msgstr "Offer rejected"
 
-#: src/apps/inquiries/models.py:493
+#: src/apps/inquiries/models.py:532
 #, fuzzy
 #| msgid "Oferta aceptada"
 msgid "caducada el"
 msgstr "Offer accepted"
 
-#: src/apps/inquiries/models.py:494
+#: src/apps/inquiries/models.py:533
 msgid "cancelada el"
 msgstr "cancelled at"
 
-#: src/apps/inquiries/models.py:496
+#: src/apps/inquiries/models.py:535
 msgid "motivo interno de cancelación"
 msgstr "internal cancellation reason"
 
-#: src/apps/inquiries/models.py:499
+#: src/apps/inquiries/models.py:538
 msgid "mensaje de cancelación para el cliente"
 msgstr "cancellation message for the customer"
 
-#: src/apps/inquiries/models.py:505 src/apps/inquiries/models.py:974
+#: src/apps/inquiries/models.py:544 src/apps/inquiries/models.py:1129
 msgid "oferta"
 msgstr ""
 
-#: src/apps/inquiries/models.py:506
+#: src/apps/inquiries/models.py:545
 msgid "ofertas"
 msgstr ""
 
-#: src/apps/inquiries/models.py:765
+#: src/apps/inquiries/models.py:889
 msgid "Debe indicar el motivo de cancelación."
 msgstr "You must provide the cancellation reason."
 
-#: src/apps/inquiries/models.py:769
+#: src/apps/inquiries/models.py:893
 msgid "Debe indicar el mensaje para el cliente."
 msgstr "You must provide the message for the customer."
 
-#: src/apps/inquiries/models.py:922
+#: src/apps/inquiries/models.py:1057
 msgid "La vigencia aplicada debe ser de al menos una hora."
 msgstr "The applied validity must be at least one hour."
 
-#: src/apps/inquiries/models.py:956
+#: src/apps/inquiries/models.py:1070 src/apps/inquiries/models.py:1076
+msgid "Importe heredado sin desglose de IVA"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1111
 msgid "Pagado"
 msgstr ""
 
-#: src/apps/inquiries/models.py:957
+#: src/apps/inquiries/models.py:1112
 msgid "Fallido"
 msgstr ""
 
-#: src/apps/inquiries/models.py:958
+#: src/apps/inquiries/models.py:1113
 msgid "Cancelado"
 msgstr ""
 
-#: src/apps/inquiries/models.py:983
+#: src/apps/inquiries/models.py:1138
 msgid "importe a pagar"
 msgstr ""
 
-#: src/apps/inquiries/models.py:992
+#: src/apps/inquiries/models.py:1147 src/apps/inquiries/models.py:1691
 #, fuzzy
 #| msgid "Continuar al paso de pago"
 msgid "proveedor de pago"
 msgstr "Continue to payment step"
 
-#: src/apps/inquiries/models.py:993
+#: src/apps/inquiries/models.py:1148
 #, fuzzy
 #| msgid "Referencias del producto"
 msgid "referencia del proveedor"
 msgstr "Product references"
 
-#: src/apps/inquiries/models.py:995
+#: src/apps/inquiries/models.py:1150
+#, fuzzy
+#| msgid "Referencias del producto"
+msgid "referencia de la transacción del proveedor"
+msgstr "Product references"
+
+#: src/apps/inquiries/models.py:1153
 msgid "iniciado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:996
+#: src/apps/inquiries/models.py:1154 src/apps/inquiries/models.py:1690
 msgid "pagado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:997
+#: src/apps/inquiries/models.py:1155
 msgid "fallido el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:998
+#: src/apps/inquiries/models.py:1156
 msgid "cancelado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1006 src/apps/inquiries/models.py:1267
+#: src/apps/inquiries/models.py:1164 src/apps/inquiries/models.py:1430
+#: src/apps/inquiries/models.py:1685
 msgid "pago"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1007
+#: src/apps/inquiries/models.py:1165
 msgid "pagos"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1260
+#: src/apps/inquiries/models.py:1423
 msgid "Particular"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1261
-msgid "Empresa o profesional"
-msgstr ""
-
-#: src/apps/inquiries/models.py:1269
+#: src/apps/inquiries/models.py:1432
 #, fuzzy
 #| msgid "Destino para calcular el envío"
 msgid "destinatario del envío"
 msgstr "Destination for shipping calculation"
 
-#: src/apps/inquiries/models.py:1270
+#: src/apps/inquiries/models.py:1433
+msgid "nombre del destinatario"
+msgstr "Recipient first name"
+
+#: src/apps/inquiries/models.py:1435
+msgid "apellidos del destinatario"
+msgstr "Recipient last name"
+
+#: src/apps/inquiries/models.py:1437
 #, fuzzy
 #| msgid "Teléfono del destinatario"
 msgid "teléfono de envío"
 msgstr "Recipient phone"
 
-#: src/apps/inquiries/models.py:1271
+#: src/apps/inquiries/models.py:1438
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "dirección de envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1273
+#: src/apps/inquiries/models.py:1440
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "información adicional de envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1275
+#: src/apps/inquiries/models.py:1442
 #, fuzzy
 #| msgid "Referencia de pago"
 msgid "ciudad de envío"
 msgstr "Payment reference"
 
-#: src/apps/inquiries/models.py:1276
+#: src/apps/inquiries/models.py:1443
 #, fuzzy
 #| msgid "Coincide con la dirección de envío"
 msgid "provincia o región de envío"
 msgstr "Same as the shipping address"
 
-#: src/apps/inquiries/models.py:1277
+#: src/apps/inquiries/models.py:1444
 #, fuzzy
 #| msgid "Código postal de destino"
 msgid "código postal de envío"
 msgstr "Destination postal code"
 
-#: src/apps/inquiries/models.py:1278
+#: src/apps/inquiries/models.py:1445
 #, fuzzy
 #| msgid "País de destino"
 msgid "país de envío"
 msgstr "Destination country"
 
-#: src/apps/inquiries/models.py:1280
+#: src/apps/inquiries/models.py:1447
 #, fuzzy
 #| msgid "Datos de entrega y facturación"
 msgid "tipo de cliente de facturación"
 msgstr "Delivery and billing details"
 
-#: src/apps/inquiries/models.py:1286
+#: src/apps/inquiries/models.py:1453
 #, fuzzy
 #| msgid "Dirección de envío"
 msgid "facturación igual que envío"
 msgstr "Shipping address"
 
-#: src/apps/inquiries/models.py:1288
+#: src/apps/inquiries/models.py:1455
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "nombre o razón social de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1289
+#: src/apps/inquiries/models.py:1456
+msgid "nombre de facturación"
+msgstr "Billing first name"
+
+#: src/apps/inquiries/models.py:1457
+msgid "apellidos de facturación"
+msgstr "Billing last name"
+
+#: src/apps/inquiries/models.py:1459
+msgid "empresa o razón social de facturación"
+msgstr "Billing company or legal name"
+
+#: src/apps/inquiries/models.py:1461
 #, fuzzy
 #| msgid "Tipo de facturación"
 msgid "NIF / VAT de facturación"
 msgstr "Billing customer type"
 
-#: src/apps/inquiries/models.py:1290
+#: src/apps/inquiries/models.py:1462
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "dirección de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1292
+#: src/apps/inquiries/models.py:1464
 #, fuzzy
 #| msgid "Dirección de facturación"
 msgid "información adicional de facturación"
 msgstr "Billing address"
 
-#: src/apps/inquiries/models.py:1294
+#: src/apps/inquiries/models.py:1466
 #, fuzzy
 #| msgid "Identidad de facturación"
 msgid "ciudad de facturación"
 msgstr "Billing identity"
 
-#: src/apps/inquiries/models.py:1296
+#: src/apps/inquiries/models.py:1468
 #, fuzzy
 #| msgid "Provincia / región / estado de facturación"
 msgid "provincia o región de facturación"
 msgstr "Billing province / region / state"
 
-#: src/apps/inquiries/models.py:1298
+#: src/apps/inquiries/models.py:1470
 #, fuzzy
 #| msgid "Código postal de facturación"
 msgid "código postal de facturación"
 msgstr "Billing postal code"
 
-#: src/apps/inquiries/models.py:1299
+#: src/apps/inquiries/models.py:1471
 #, fuzzy
 #| msgid "País de facturación"
 msgid "país de facturación"
 msgstr "Billing country"
 
-#: src/apps/inquiries/models.py:1300
+#: src/apps/inquiries/models.py:1472
 msgid "completado el"
 msgstr ""
 
-#: src/apps/inquiries/models.py:1305 src/apps/inquiries/models.py:1306
+#: src/apps/inquiries/models.py:1477 src/apps/inquiries/models.py:1478
 #, fuzzy
 #| msgid "Datos de envío y facturación"
 msgid "datos de envío y facturación"
 msgstr "Shipping and billing details"
 
-#: src/apps/inquiries/models.py:1432
+#: src/apps/inquiries/models.py:1632
+msgid "razón social"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1634
+msgid "domicilio fiscal"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1636
+#, fuzzy
+#| msgid "Dirección de envío"
+msgid "información adicional del domicilio fiscal"
+msgstr "Shipping address"
+
+#: src/apps/inquiries/models.py:1638
+msgid "ciudad"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1640
+#, fuzzy
+#| msgid "Código postal cotizado"
+msgid "código postal"
+msgstr "Quoted postal code"
+
+#: src/apps/inquiries/models.py:1642
+#, fuzzy
+#| msgid "Datos de contacto del cliente:"
+msgid "correo electrónico"
+msgstr "Customer contact details:"
+
+#: src/apps/inquiries/models.py:1643
+#, fuzzy
+#| msgid "Teléfono"
+msgid "teléfono"
+msgstr "Phone"
+
+#: src/apps/inquiries/models.py:1648 src/apps/inquiries/models.py:1649
+#, fuzzy
+#| msgid "Configuración base"
+msgid "configuración fiscal del emisor"
+msgstr "Base configuration"
+
+#: src/apps/inquiries/models.py:1687
+#, fuzzy
+#| msgid "Referencia de pago"
+msgid "referencia del pago"
+msgstr "Payment reference"
+
+#: src/apps/inquiries/models.py:1688
+#, fuzzy
+#| msgid "Referencia de pago"
+msgid "referencia de la oferta"
+msgstr "Payment reference"
+
+#: src/apps/inquiries/models.py:1689
+#, fuzzy
+#| msgid "Resumen de solicitud"
+msgid "referencia de la solicitud"
+msgstr "Request summary"
+
+#: src/apps/inquiries/models.py:1692
+#, fuzzy
+#| msgid "Referencia de pago"
+msgid "referencia de Checkout"
+msgstr "Payment reference"
+
+#: src/apps/inquiries/models.py:1694
+#, fuzzy
+#| msgid "Referencia de pago"
+msgid "referencia de la transacción"
+msgstr "Payment reference"
+
+#: src/apps/inquiries/models.py:1697
+msgid "base imponible total"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1698
+msgid "impuestos totales"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1699
+#, fuzzy
+#| msgid "Importe total confirmado: %(total)s %(currency)s"
+msgid "total cobrado"
+msgstr "Confirmed total amount: %(total)s %(currency)s"
+
+#: src/apps/inquiries/models.py:1700
+#, fuzzy
+#| msgid "Notas del cliente:"
+msgid "tipo de cliente"
+msgstr "Customer notes:"
+
+#: src/apps/inquiries/models.py:1701
+#, fuzzy
+#| msgid "Dirección de facturación"
+msgid "nombre o razón social del cliente"
+msgstr "Billing address"
+
+#: src/apps/inquiries/models.py:1702
+#, fuzzy
+#| msgid "Tipo de facturación"
+msgid "NIF / VAT del cliente"
+msgstr "Billing customer type"
+
+#: src/apps/inquiries/models.py:1703
+#, fuzzy
+#| msgid "Notas del cliente:"
+msgid "correo del cliente"
+msgstr "Customer notes:"
+
+#: src/apps/inquiries/models.py:1705
+#, fuzzy
+#| msgid "Notas del cliente:"
+msgid "domicilio fiscal del cliente"
+msgstr "Customer notes:"
+
+#: src/apps/inquiries/models.py:1707
+#, fuzzy
+#| msgid "Dirección de envío"
+msgid "información adicional del domicilio del cliente"
+msgstr "Shipping address"
+
+#: src/apps/inquiries/models.py:1709
+#, fuzzy
+#| msgid "Notas del cliente:"
+msgid "ciudad del cliente"
+msgstr "Customer notes:"
+
+#: src/apps/inquiries/models.py:1710
+#, fuzzy
+#| msgid "Coincide con la dirección de envío"
+msgid "provincia o región del cliente"
+msgstr "Same as the shipping address"
+
+#: src/apps/inquiries/models.py:1711
+#, fuzzy
+#| msgid "Código postal de destino"
+msgid "código postal del cliente"
+msgstr "Destination postal code"
+
+#: src/apps/inquiries/models.py:1712
+#, fuzzy
+#| msgid "Notas del cliente:"
+msgid "país del cliente"
+msgstr "Customer notes:"
+
+#: src/apps/inquiries/models.py:1713
+msgid "razón social del emisor"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1714
+#, fuzzy
+#| msgid "Tipo de facturación"
+msgid "NIF / VAT del emisor"
+msgstr "Billing customer type"
+
+#: src/apps/inquiries/models.py:1715
+msgid "domicilio fiscal del emisor"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1717
+#, fuzzy
+#| msgid "Dirección de envío"
+msgid "información adicional del domicilio del emisor"
+msgstr "Shipping address"
+
+#: src/apps/inquiries/models.py:1719
+#, fuzzy
+#| msgid "País de destino"
+msgid "ciudad del emisor"
+msgstr "Destination country"
+
+#: src/apps/inquiries/models.py:1720
+#, fuzzy
+#| msgid "Coincide con la dirección de envío"
+msgid "provincia o región del emisor"
+msgstr "Same as the shipping address"
+
+#: src/apps/inquiries/models.py:1721
+#, fuzzy
+#| msgid "Código postal de destino"
+msgid "código postal del emisor"
+msgstr "Destination postal code"
+
+#: src/apps/inquiries/models.py:1722
+#, fuzzy
+#| msgid "País de destino"
+msgid "país del emisor"
+msgstr "Destination country"
+
+#: src/apps/inquiries/models.py:1723
+#, fuzzy
+#| msgid "Datos de contacto"
+msgid "correo del emisor"
+msgstr "Contact details"
+
+#: src/apps/inquiries/models.py:1724
+#, fuzzy
+#| msgid "Teléfono del destinatario"
+msgid "teléfono del emisor"
+msgstr "Recipient phone"
+
+#: src/apps/inquiries/models.py:1728
+#, fuzzy
+#| msgid "Paso de pago"
+msgid "snapshot fiscal del pago"
+msgstr "Payment step"
+
+#: src/apps/inquiries/models.py:1729
+msgid "snapshots fiscales de pagos"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1747
+msgid "Transporte"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1753
+msgid "snapshot fiscal"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1755
+msgid "tipo"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1756
+#, fuzzy
+#| msgid "Referencia de pago"
+msgid "SKU / referencia"
+msgstr "Payment reference"
+
+#: src/apps/inquiries/models.py:1760
+#, fuzzy
+#| msgid "Precio unitario sin IVA."
+msgid "precio unitario sin impuestos"
+msgstr "Unit price excluding VAT."
+
+#: src/apps/inquiries/models.py:1762
+#, fuzzy
+#| msgid "Oferta confirmada disponible: %(reference)s"
+msgid "base imponible"
+msgstr "Confirmed offer available: %(reference)s"
+
+#: src/apps/inquiries/models.py:1763
+msgid "tipo impositivo (%)"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1764
+msgid "importe de impuestos"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1765
+msgid "total"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1767
+msgid "motivo fiscal sin impuestos"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1772
+msgid "línea del snapshot fiscal"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1773
+msgid "líneas del snapshot fiscal"
+msgstr ""
+
+#: src/apps/inquiries/models.py:1809
 #, fuzzy
 #| msgid "Cantidad solicitada"
 msgid "cantidad solicitada"
 msgstr "Requested quantity"
 
-#: src/apps/inquiries/models.py:1433
+#: src/apps/inquiries/models.py:1810
 #, fuzzy
 #| msgid "Notas del cliente:"
 msgid "nota del cliente"
 msgstr "Customer notes:"
 
-#: src/apps/inquiries/models.py:1435
+#: src/apps/inquiries/models.py:1812
 #, fuzzy
 #| msgid "Último precio conocido"
 msgid "último precio conocido al solicitar"
 msgstr "Last known price"
 
-#: src/apps/inquiries/models.py:1445
+#: src/apps/inquiries/models.py:1822
 #, fuzzy
 #| msgid "Ver carrito de solicitudes"
 msgid "artículo solicitado"
 msgstr "View request cart"
 
-#: src/apps/inquiries/models.py:1446
+#: src/apps/inquiries/models.py:1823
 #, fuzzy
 #| msgid "No hay artículos registrados."
 msgid "artículos solicitados"
 msgstr "No items are recorded."
+
+#: src/apps/inquiries/payments.py:428
+msgid "Shipping"
+msgstr ""
 
 #: src/apps/inquiries/urls.py:17
 msgid "solicitud/enviar/"
@@ -2060,7 +2520,7 @@ msgid ""
 msgstr ""
 
 #: src/apps/inquiries/views.py:310
-#: src/templates/inquiries/public_offer_detail.html:78
+#: src/templates/inquiries/public_offer_detail.html:86
 msgid "Oferta cancelada"
 msgstr "Cancelled offer"
 
@@ -2226,14 +2686,6 @@ msgstr ""
 #: src/apps/suppliers/admin.py:72 src/apps/vehicles/models.py:103
 msgid "Proveedor"
 msgstr ""
-
-#: src/apps/suppliers/admin.py:83 src/templates/base.html:65
-#: src/templates/base.html:142 src/templates/base.html:254
-#: src/templates/inquiries/public_success.html:76
-#: src/templates/pages/contact.html:5 src/templates/pages/contact.html:10
-#: src/templates/pages/legal.html:27
-msgid "Contacto"
-msgstr "Contact"
 
 #: src/apps/suppliers/admin.py:96
 msgid "Notificaciones automáticas al proveedor"
@@ -3230,11 +3682,11 @@ msgstr "Last known price"
 #: src/templates/catalog/partials/product_card.html:52
 #: src/templates/catalog/partials/product_list_row.html:50
 msgid ""
-"Precio orientativo sujeto a confirmación de disponibilidad, importe final y "
-"plazo."
+"IVA incluido. Precio orientativo sujeto a confirmación de disponibilidad, "
+"importe final y plazo."
 msgstr ""
-"Indicative price subject to confirmation of availability, final amount, and "
-"lead time."
+"VAT included. Indicative price subject to confirmation of availability, "
+"final amount and lead time."
 
 #: src/templates/catalog/partials/product_card.html:63
 #: src/templates/catalog/partials/product_list_row.html:62
@@ -3282,12 +3734,13 @@ msgstr "Availability and pricing"
 
 #: src/templates/catalog/product_detail.html:56
 msgid ""
-"Este valor es informativo y no constituye una oferta final. Antes de "
-"confirmar cualquier operación se valida disponibilidad, precio final y plazo."
+"IVA incluido. Este valor es informativo y no constituye una oferta final. "
+"Antes de confirmar cualquier operación se valida disponibilidad, precio "
+"final y plazo."
 msgstr ""
-"This value is informative and does not constitute a final offer. Before "
-"confirming any operation, availability, final price, and lead time are "
-"validated."
+"VAT included. This value is for information only and does not constitute a "
+"final offer. Availability, final price and lead time are validated before "
+"confirming any transaction."
 
 #: src/templates/catalog/product_detail.html:60
 msgid "Este producto se gestiona bajo consulta previa."
@@ -3325,8 +3778,7 @@ msgstr "3. Receive confirmation before deciding whether to proceed."
 msgid ""
 "El importe final confirmado puede variar respecto al último precio conocido "
 "mostrado."
-msgstr ""
-"The confirmed final amount may differ from the last known price shown."
+msgstr "The confirmed final amount may differ from the last known price shown."
 
 #: src/templates/catalog/product_detail.html:140
 msgid "Descripción técnica"
@@ -3790,7 +4242,7 @@ msgid "Referencia de oferta: %(offer_reference)s"
 msgstr "Offer reference: %(offer_reference)s"
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:6
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:10
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:12
 #: src/templates/inquiries/emails/customer_payment_expired_body.txt:7
 #: src/templates/inquiries/emails/internal_offer_expired_body.txt:6
 #: src/templates/inquiries/emails/internal_payment_expired_body.txt:7
@@ -3810,7 +4262,7 @@ msgid "Puede revisar el estado de la oferta aquí:"
 msgstr ""
 
 #: src/templates/inquiries/emails/customer_offer_expired_body.txt:14
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:22
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:24
 #: src/templates/inquiries/emails/customer_payment_expired_body.txt:16
 #, python-format
 msgid "Si necesita ayuda, responda a %(reply_to)s indicando sus referencias."
@@ -3837,20 +4289,31 @@ msgstr "Shipping address: %(destination)s"
 
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:8
 #, python-format
-msgid "Importe total confirmado: %(total)s %(currency)s"
-msgstr "Confirmed total amount: %(total)s %(currency)s"
+msgid "Precio del producto (IVA incluido): %(price)s %(currency)s"
+msgstr ""
 
 #: src/templates/inquiries/emails/customer_offer_sent_body.txt:9
+#, python-format
+msgid "Gastos de envío (IVA incluido): %(shipping)s %(currency)s"
+msgstr ""
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:10
+#, fuzzy, python-format
+#| msgid "Importe total confirmado: %(total)s %(currency)s"
+msgid "Importe total confirmado: %(total)s %(currency)s (IVA incluido)"
+msgstr "Confirmed total amount: %(total)s %(currency)s"
+
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:11
 #, python-format
 msgid "Plazo estimado: %(lead_time)s"
 msgstr "Estimated lead time: %(lead_time)s"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:11
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:13
 #, python-format
 msgid "Vigencia de la oferta: %(validity_hours)s horas"
 msgstr "Offer validity: %(validity_hours)s hours"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:13
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:15
 msgid ""
 "La disponibilidad final se confirma en el momento de tramitación del pago. "
 "Si hubiera un cambio relevante, le contactaremos antes de continuar."
@@ -3858,17 +4321,17 @@ msgstr ""
 "Final availability is confirmed at the time of payment processing. If there "
 "is any relevant change, we will contact you before continuing."
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:15
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:17
 msgid "Mensaje comercial:"
 msgstr "Commercial message:"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:18
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:20
 msgid ""
 "Revise la oferta y responda (aceptar o rechazar) desde este enlace seguro:"
 msgstr ""
 "Review the offer and respond (accept or reject) using this secure link:"
 
-#: src/templates/inquiries/emails/customer_offer_sent_body.txt:20
+#: src/templates/inquiries/emails/customer_offer_sent_body.txt:22
 msgid ""
 "Tras su aceptación, le guiaremos al pago sin ampliar la vigencia indicada."
 msgstr ""
@@ -4271,51 +4734,59 @@ msgid "Referencia de solicitud"
 msgstr "Request summary"
 
 #: src/templates/inquiries/public_offer_detail.html:63
-#, fuzzy
-#| msgid "Importe total confirmado: %(total)s %(currency)s"
-msgid "Importe total confirmado"
-msgstr "Confirmed total amount: %(total)s %(currency)s"
+msgid "Precio del producto (IVA incluido)"
+msgstr ""
 
 #: src/templates/inquiries/public_offer_detail.html:67
+#, fuzzy
+#| msgid "Datos de envío y facturación"
+msgid "Gastos de envío (IVA incluido)"
+msgstr "Shipping and billing details"
+
+#: src/templates/inquiries/public_offer_detail.html:71
+msgid "Precio total (IVA incluido)"
+msgstr ""
+
+#: src/templates/inquiries/public_offer_detail.html:75
 #, fuzzy
 #| msgid "Plazo estimado: %(lead_time)s"
 msgid "Plazo estimado de entrega"
 msgstr "Estimated lead time: %(lead_time)s"
 
-#: src/templates/inquiries/public_offer_detail.html:72
+#: src/templates/inquiries/public_offer_detail.html:80
 msgid "Pendiente de confirmar"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_detail.html:83
+#: src/templates/inquiries/public_offer_detail.html:91
 #: src/templates/inquiries/public_offer_payment_placeholder.html:68
 msgid "Oferta válida hasta"
 msgstr "Offer valid until"
 
-#: src/templates/inquiries/public_offer_detail.html:89
+#: src/templates/inquiries/public_offer_detail.html:97
 #, python-format
 msgid "Vigencia de la oferta: %(hours)s horas"
 msgstr "Offer validity: %(hours)s hours"
 
-#: src/templates/inquiries/public_offer_detail.html:93
+#: src/templates/inquiries/public_offer_detail.html:101
 #: src/templates/inquiries/public_offer_payment_placeholder.html:73
 msgid "Pendiente de definir"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_detail.html:102
+#: src/templates/inquiries/public_offer_detail.html:110
 #, fuzzy
 #| msgid "Mensaje comercial:"
 msgid "Mensaje comercial"
 msgstr "Commercial message:"
 
-#: src/templates/inquiries/public_offer_detail.html:103
+#: src/templates/inquiries/public_offer_detail.html:111
 msgid "Mensaje de nuestro equipo"
 msgstr "Message from our team"
 
-#: src/templates/inquiries/public_offer_detail.html:109
+#: src/templates/inquiries/public_offer_detail.html:117
 msgid "Aviso de disponibilidad"
 msgstr ""
 
-#: src/templates/inquiries/public_offer_detail.html:110
+#: src/templates/inquiries/public_offer_detail.html:118
 msgid ""
 "La oferta está sujeta a disponibilidad efectiva en el momento de tramitación "
 "del pago. Si hubiera un cambio relevante, le contactaremos antes de "
@@ -4325,17 +4796,17 @@ msgstr ""
 "processing. If there is any relevant change, we will contact you before "
 "continuing."
 
-#: src/templates/inquiries/public_offer_detail.html:115
+#: src/templates/inquiries/public_offer_detail.html:123
 #, fuzzy
 #| msgid "Resumen de la oferta:"
 msgid "Respuesta de oferta"
 msgstr "Offer summary:"
 
-#: src/templates/inquiries/public_offer_detail.html:116
+#: src/templates/inquiries/public_offer_detail.html:124
 msgid "Responder a la oferta"
 msgstr "Respond to this offer"
 
-#: src/templates/inquiries/public_offer_detail.html:118
+#: src/templates/inquiries/public_offer_detail.html:126
 msgid ""
 "Revise los datos y seleccione la opción que corresponda. Si acepta, pasará "
 "al siguiente paso de pago."
@@ -4343,11 +4814,11 @@ msgstr ""
 "Review the details and select the corresponding option. If you accept, you "
 "will proceed to the payment step."
 
-#: src/templates/inquiries/public_offer_detail.html:128
+#: src/templates/inquiries/public_offer_detail.html:136
 msgid "Aceptar oferta y proceder al pago"
 msgstr "Accept offer and proceed to payment"
 
-#: src/templates/inquiries/public_offer_detail.html:136
+#: src/templates/inquiries/public_offer_detail.html:144
 msgid "Rechazar oferta"
 msgstr "Reject offer"
 
@@ -4449,16 +4920,21 @@ msgstr ""
 "To change the country, region, or postal code, contact our team so the "
 "shipping cost can be reviewed."
 
-#: src/templates/inquiries/public_offer_payment_details.html:30
+#: src/templates/inquiries/public_offer_payment_details.html:36
 #: src/templates/inquiries/public_offer_payment_placeholder.html:24
 msgid "Dirección de envío"
 msgstr "Shipping address"
 
-#: src/templates/inquiries/public_offer_payment_details.html:43
+#: src/templates/inquiries/public_offer_payment_details.html:49
 msgid "Datos de facturación"
 msgstr "Billing details"
 
-#: src/templates/inquiries/public_offer_payment_details.html:53
+#: src/templates/inquiries/public_offer_payment_details.html:57
+#: src/templates/inquiries/public_offer_payment_placeholder.html:31
+msgid "Identidad de facturación"
+msgstr "Billing identity"
+
+#: src/templates/inquiries/public_offer_payment_details.html:94
 msgid ""
 "Si la dirección coincide con la de envío, no es necesario repetirla; "
 "guardaremos una copia completa en el registro del pago."
@@ -4466,9 +4942,17 @@ msgstr ""
 "If it matches the shipping address, you do not need to repeat it; a complete "
 "copy will be stored with the payment."
 
-#: src/templates/inquiries/public_offer_payment_details.html:56
+#: src/templates/inquiries/public_offer_payment_details.html:97
 msgid "Guardar y revisar"
 msgstr "Save and review"
+
+#: src/templates/inquiries/public_offer_payment_details.html:157
+msgid "Introduzca la empresa o razón social de facturación."
+msgstr "Enter the billing company or legal name."
+
+#: src/templates/inquiries/public_offer_payment_details.html:158
+msgid "Introduzca el nombre y los apellidos de facturación."
+msgstr "Enter the billing first and last name."
 
 #: src/templates/inquiries/public_offer_payment_placeholder.html:9
 msgid "Pago seguro"
@@ -4489,10 +4973,6 @@ msgstr "Delivery and billing details"
 #: src/templates/inquiries/public_offer_payment_placeholder.html:20
 msgid "Destinatario"
 msgstr "Recipient"
-
-#: src/templates/inquiries/public_offer_payment_placeholder.html:31
-msgid "Identidad de facturación"
-msgstr "Billing identity"
 
 #: src/templates/inquiries/public_offer_payment_placeholder.html:35
 msgid "Dirección de facturación"
@@ -4944,6 +5424,27 @@ msgid ""
 "Para cualquier consulta comercial o legal, utiliza la página de contacto."
 msgstr "For any commercial or legal inquiry, use the contact page."
 
+#~ msgid ""
+#~ "Precio orientativo sujeto a confirmación de disponibilidad, importe final "
+#~ "y plazo."
+#~ msgstr ""
+#~ "Indicative price subject to confirmation of availability, final amount, "
+#~ "and lead time."
+
+#~ msgid ""
+#~ "Este valor es informativo y no constituye una oferta final. Antes de "
+#~ "confirmar cualquier operación se valida disponibilidad, precio final y "
+#~ "plazo."
+#~ msgstr ""
+#~ "This value is informative and does not constitute a final offer. Before "
+#~ "confirming any operation, availability, final price, and lead time are "
+#~ "validated."
+
+#, fuzzy
+#~| msgid "Importe total confirmado: %(total)s %(currency)s"
+#~ msgid "Importe total confirmado"
+#~ msgstr "Confirmed total amount: %(total)s %(currency)s"
+
 #, fuzzy, python-format
 #~| msgid ""
 #~| "\n"
@@ -5056,11 +5557,6 @@ msgstr "For any commercial or legal inquiry, use the contact page."
 #~ msgstr "We have received your inquiry %(reference)s"
 
 #, fuzzy
-#~| msgid "Referencia de pago"
-#~ msgid "Referencia del envío"
-#~ msgstr "Payment reference"
-
-#, fuzzy
 #~| msgid "Solicitud enviada"
 #~ msgid "Solicitudes creadas"
 #~ msgstr "Request submitted"
@@ -5083,24 +5579,3 @@ msgstr "For any commercial or legal inquiry, use the contact page."
 
 #~ msgid "MEJORES PRECIOS Y TRATO PERSONALIZADO"
 #~ msgstr "BEST PRICES AND PERSONALIZED SERVICE"
-
-msgid "Precio unitario sin IVA."
-msgstr "Unit price excluding VAT."
-
-msgid "Porcentaje de IVA que se aplica al último precio conocido."
-msgstr "VAT percentage applied to the last known price."
-
-msgid "último precio conocido actualizado el"
-msgstr "last known price updated at"
-
-msgid "actualizar el último precio conocido del producto"
-msgstr "update the product's last known price"
-
-msgid "Al enviar la oferta, actualiza el último precio conocido de la web pública con el precio unitario sin IVA (precio del producto dividido entre la cantidad solicitada), junto con su porcentaje de IVA."
-msgstr "When the offer is sent, updates the last known price on the public website with the unit price excluding VAT (product price divided by the requested quantity), together with its VAT percentage."
-
-msgid "IVA incluido. Precio orientativo sujeto a confirmación de disponibilidad, importe final y plazo."
-msgstr "VAT included. Indicative price subject to confirmation of availability, final amount and lead time."
-
-msgid "IVA incluido. Este valor es informativo y no constituye una oferta final. Antes de confirmar cualquier operación se valida disponibilidad, precio final y plazo."
-msgstr "VAT included. This value is for information only and does not constitute a final offer. Availability, final price and lead time are validated before confirming any transaction."

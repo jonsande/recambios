@@ -85,21 +85,12 @@
             {% if form.contact_email.errors %}<p id="contact_email-errors" class="form-error" role="alert">{{ form.contact_email.errors|striptags }}</p>{% endif %}
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label for="{{ form.phone.id_for_label }}" class="form-label">
-                {{ form.phone.label }}
-              </label>
-              {{ form.phone }}
-              {% if form.phone.errors %}<p id="phone-errors" class="form-error" role="alert">{{ form.phone.errors|striptags }}</p>{% endif %}
-            </div>
-            <div>
-              <label for="{{ form.tax_id.id_for_label }}" class="form-label">
-                {{ form.tax_id.label }}
-              </label>
-              {{ form.tax_id }}
-              {% if form.tax_id.errors %}<p id="tax_id-errors" class="form-error" role="alert">{{ form.tax_id.errors|striptags }}</p>{% endif %}
-            </div>
+          <div>
+            <label for="{{ form.phone.id_for_label }}" class="form-label">
+              {{ form.phone.label }}
+            </label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<p id="phone-errors" class="form-error" role="alert">{{ form.phone.errors|striptags }}</p>{% endif %}
           </div>
 
           <div>

@@ -71,16 +71,6 @@ class PublicInquirySubmissionForm(forms.Form):
             }
         ),
     )
-    tax_id = forms.CharField(
-        label=_("NIF/CIF"),
-        max_length=64,
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-input",
-            }
-        ),
-    )
     notes_from_customer = forms.CharField(
         label=_("Notas de la solicitud"),
         required=False,
@@ -120,9 +110,6 @@ class PublicInquirySubmissionForm(forms.Form):
 
     def clean_company_name(self) -> str:
         return (self.cleaned_data.get("company_name") or "").strip()
-
-    def clean_tax_id(self) -> str:
-        return (self.cleaned_data.get("tax_id") or "").strip()
 
     def clean_notes_from_customer(self) -> str:
         return (self.cleaned_data.get("notes_from_customer") or "").strip()
@@ -172,7 +159,8 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
     class Meta:
         model = InquiryOfferPaymentDetails
         fields = (
-            "shipping_recipient_name",
+            "shipping_first_name",
+            "shipping_last_name",
             "shipping_phone",
             "shipping_address_line_1",
             "shipping_address_line_2",
@@ -182,7 +170,9 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
             "shipping_country",
             "billing_customer_type",
             "billing_same_as_shipping",
-            "billing_name",
+            "billing_first_name",
+            "billing_last_name",
+            "billing_company_name",
             "billing_tax_id",
             "billing_address_line_1",
             "billing_address_line_2",
@@ -192,7 +182,8 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
             "billing_country",
         )
         labels = {
-            "shipping_recipient_name": _("Nombre completo del destinatario"),
+            "shipping_first_name": _("Nombre"),
+            "shipping_last_name": _("Apellidos"),
             "shipping_phone": _("Teléfono del destinatario"),
             "shipping_address_line_1": _("Dirección, línea 1"),
             "shipping_address_line_2": _("Dirección, línea 2 (opcional)"),
@@ -202,7 +193,9 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
             "shipping_country": _("País cotizado"),
             "billing_customer_type": _("Tipo de facturación"),
             "billing_same_as_shipping": _("La dirección de facturación coincide con la de envío"),
-            "billing_name": _("Nombre de facturación / razón social"),
+            "billing_first_name": _("Nombre"),
+            "billing_last_name": _("Apellidos"),
+            "billing_company_name": _("Empresa / razón social"),
             "billing_tax_id": _("NIF/CIF/VAT"),
             "billing_address_line_1": _("Dirección de facturación, línea 1"),
             "billing_address_line_2": _("Dirección de facturación, línea 2 (opcional)"),
@@ -245,6 +238,9 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
                 field.widget.attrs.setdefault("class", "form-select")
             field.widget.attrs["aria-describedby"] = f"{name}-errors"
         for name in (
+            "billing_first_name",
+            "billing_last_name",
+            "billing_company_name",
             "billing_address_line_1",
             "billing_city",
             "billing_region",
@@ -252,6 +248,8 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
             "billing_country",
         ):
             self.fields[name].required = False
+        self.fields["shipping_first_name"].required = True
+        self.fields["shipping_last_name"].required = True
         for name in (
             "shipping_city",
             "shipping_region",
@@ -263,33 +261,63 @@ class InquiryOfferPaymentDetailsForm(forms.ModelForm):
         if not self.is_bound and not self.instance.pk:
             self.initial.update(
                 {
-                    "shipping_recipient_name": inquiry.guest_name or inquiry.requester_display,
                     "shipping_phone": inquiry.guest_phone,
                     "billing_customer_type": (
                         InquiryOfferPaymentDetails.BillingCustomerType.COMPANY
                         if inquiry.company_name
                         else InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE
                     ),
-                    "billing_name": (
-                        inquiry.company_name or inquiry.guest_name or inquiry.requester_display
-                    ),
+                    "billing_company_name": inquiry.company_name,
                     "billing_tax_id": inquiry.tax_id,
                 }
             )
+        autocomplete = {
+            "shipping_first_name": "shipping given-name",
+            "shipping_last_name": "shipping family-name",
+            "shipping_phone": "shipping tel",
+            "shipping_address_line_1": "shipping address-line1",
+            "shipping_address_line_2": "shipping address-line2",
+            "shipping_city": "shipping address-level2",
+            "shipping_region": "shipping address-level1",
+            "shipping_postal_code": "shipping postal-code",
+            "shipping_country": "shipping country",
+            "billing_first_name": "billing given-name",
+            "billing_last_name": "billing family-name",
+            "billing_company_name": "billing organization",
+            "billing_address_line_1": "billing address-line1",
+            "billing_address_line_2": "billing address-line2",
+            "billing_city": "billing address-level2",
+            "billing_region": "billing address-level1",
+            "billing_postal_code": "billing postal-code",
+            "billing_country": "billing country",
+        }
+        for name, value in autocomplete.items():
+            self.fields[name].widget.attrs["autocomplete"] = value
+        self.fields["billing_customer_type"].widget.attrs["aria-controls"] = (
+            "private-billing-identity company-billing-identity"
+        )
+        self.fields["billing_same_as_shipping"].widget.attrs["aria-controls"] = (
+            "billing-address-fields"
+        )
 
     def clean(self):
         cleaned = super().clean()
+        customer_type = cleaned.get("billing_customer_type")
+        if customer_type == InquiryOfferPaymentDetails.BillingCustomerType.COMPANY:
+            if not cleaned.get("billing_company_name"):
+                self.add_error(
+                    "billing_company_name",
+                    _("La empresa o razón social es obligatoria."),
+                )
+            cleaned["billing_first_name"] = ""
+            cleaned["billing_last_name"] = ""
+        else:
+            for name in ("billing_first_name", "billing_last_name"):
+                if not cleaned.get(name):
+                    self.add_error(name, _("Este campo es obligatorio para un particular."))
+            cleaned["billing_company_name"] = ""
         if cleaned.get("billing_same_as_shipping"):
             shipping_address_line_1 = cleaned.get("shipping_address_line_1")
-            billing_address_line_1 = cleaned.get("billing_address_line_1")
-            if billing_address_line_1 != shipping_address_line_1:
-                self.add_error(
-                    "billing_address_line_1",
-                    _(
-                        "La dirección de facturación debe coincidir con la dirección "
-                        "de envío mientras esta opción esté seleccionada."
-                    ),
-                )
             cleaned.update(
                 {
                     "billing_address_line_1": shipping_address_line_1,

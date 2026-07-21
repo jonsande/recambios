@@ -27,7 +27,6 @@
         class="section-shell space-y-6"
         novalidate
         data-billing-address-form
-        data-address-mismatch-message="{% trans 'La dirección de facturación debe coincidir con la dirección de envío mientras esta opción esté seleccionada.' %}"
       >
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
@@ -47,21 +46,59 @@
 
         <fieldset class="space-y-4">
           <legend class="subsection-title">{% trans "Datos de facturación" %}</legend>
-          {% for field in form %}
-            {% if field.name|slice:":7" == "billing" %}
+          <div>
+            <label for="{{ form.billing_customer_type.id_for_label }}" class="form-label">{{ form.billing_customer_type.label }}</label>
+            {{ form.billing_customer_type }}
+            {% if form.billing_customer_type.errors %}<p id="billing_customer_type-errors" class="form-error" role="alert">{{ form.billing_customer_type.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <fieldset class="space-y-4" aria-describedby="billing-identity-status">
+            <legend class="font-semibold text-text">{% trans "Identidad de facturación" %}</legend>
+            <p id="billing-identity-status" class="text-sm text-text-muted" aria-live="polite" data-billing-identity-status></p>
+            <div id="private-billing-identity" class="space-y-4" data-private-billing-identity {% if form.billing_customer_type.value == "company" %}hidden{% endif %}>
+              {% for field in form %}
+                {% if field.name == "billing_first_name" or field.name == "billing_last_name" %}
+                  <div>
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p id="{{ field.name }}-errors" class="form-error" role="alert">{{ field.errors|striptags }}</p>{% endif %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div id="company-billing-identity" class="space-y-4" data-company-billing-identity {% if form.billing_customer_type.value != "company" %}hidden{% endif %}>
+              <div>
+                <label for="{{ form.billing_company_name.id_for_label }}" class="form-label">{{ form.billing_company_name.label }}</label>
+                {{ form.billing_company_name }}
+                {% if form.billing_company_name.errors %}<p id="billing_company_name-errors" class="form-error" role="alert">{{ form.billing_company_name.errors|striptags }}</p>{% endif %}
+              </div>
+            </div>
+          </fieldset>
+
+          <div>
+            <label for="{{ form.billing_tax_id.id_for_label }}" class="form-label">{{ form.billing_tax_id.label }}</label>
+            {{ form.billing_tax_id }}
+            {% if form.billing_tax_id.errors %}<p id="billing_tax_id-errors" class="form-error" role="alert">{{ form.billing_tax_id.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <div>
+            {{ form.billing_same_as_shipping }}
+            <label for="{{ form.billing_same_as_shipping.id_for_label }}" class="ml-2 text-sm font-medium text-text">{{ form.billing_same_as_shipping.label }}</label>
+            {% if form.billing_same_as_shipping.errors %}<p id="billing_same_as_shipping-errors" class="form-error" role="alert">{{ form.billing_same_as_shipping.errors|striptags }}</p>{% endif %}
+          </div>
+
+          <fieldset id="billing-address-fields" class="space-y-4">
+            <legend class="font-semibold text-text">{% trans "Dirección de facturación" %}</legend>
+            {% for field in form %}
+              {% if field.name == "billing_address_line_1" or field.name == "billing_address_line_2" or field.name == "billing_city" or field.name == "billing_region" or field.name == "billing_postal_code" or field.name == "billing_country" %}
               <div>
                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}<p id="{{ field.name }}-errors" class="form-error" role="alert">{{ field.errors|striptags }}</p>{% endif %}
               </div>
-            {% endif %}
-          {% endfor %}
-          <p
-            class="form-error hidden"
-            role="alert"
-            aria-live="assertive"
-            data-address-mismatch-error
-          ></p>
+              {% endif %}
+            {% endfor %}
+          </fieldset>
           <p class="text-sm text-text-muted">{% trans "Si la dirección coincide con la de envío, no es necesario repetirla; guardaremos una copia completa en el registro del pago." %}</p>
         </fieldset>
 
@@ -79,35 +116,81 @@
       if (!form) return;
 
       const sameAddress = form.querySelector("#id_billing_same_as_shipping");
-      const shippingLine1 = form.querySelector("#id_shipping_address_line_1");
-      const billingLine1 = form.querySelector("#id_billing_address_line_1");
-      const mismatchError = form.querySelector("[data-address-mismatch-error]");
-      if (!sameAddress || !shippingLine1 || !billingLine1 || !mismatchError) return;
+      const customerType = form.querySelector("#id_billing_customer_type");
+      const shippingFirstName = form.querySelector("#id_shipping_first_name");
+      const shippingLastName = form.querySelector("#id_shipping_last_name");
+      const billingFirstName = form.querySelector("#id_billing_first_name");
+      const billingLastName = form.querySelector("#id_billing_last_name");
+      const billingCompanyName = form.querySelector("#id_billing_company_name");
+      const privateIdentity = form.querySelector("[data-private-billing-identity]");
+      const companyIdentity = form.querySelector("[data-company-billing-identity]");
+      const identityStatus = form.querySelector("[data-billing-identity-status]");
+      const addressFieldNames = [
+        "address_line_1", "address_line_2", "city", "region", "postal_code", "country"
+      ];
+      const addressPairs = addressFieldNames.map((name) => ({
+        shipping: form.querySelector(`#id_shipping_${name}`),
+        billing: form.querySelector(`#id_billing_${name}`),
+      }));
+      if (
+        !sameAddress || !customerType || !shippingFirstName || !shippingLastName ||
+        !billingFirstName || !billingLastName || !billingCompanyName || !privateIdentity ||
+        !companyIdentity || !identityStatus ||
+        addressPairs.some((pair) => !pair.shipping || !pair.billing)
+      ) return;
 
-      const clearMismatchError = () => {
-        mismatchError.textContent = "";
-        mismatchError.classList.add("hidden");
-        billingLine1.removeAttribute("aria-invalid");
+      let lastCopiedFirstName = billingFirstName.value;
+      let lastCopiedLastName = billingLastName.value;
+
+      const copyShippingIdentity = () => {
+        if (customerType.value !== "private") return;
+        if (!billingFirstName.value || billingFirstName.value === lastCopiedFirstName) {
+          billingFirstName.value = shippingFirstName.value;
+          lastCopiedFirstName = shippingFirstName.value;
+        }
+        if (!billingLastName.value || billingLastName.value === lastCopiedLastName) {
+          billingLastName.value = shippingLastName.value;
+          lastCopiedLastName = shippingLastName.value;
+        }
       };
 
-      const copyShippingLine1 = () => {
-        if (!sameAddress.checked) return;
-        billingLine1.value = shippingLine1.value;
-        clearMismatchError();
+      const updateBillingIdentity = () => {
+        const isCompany = customerType.value === "company";
+        privateIdentity.hidden = isCompany;
+        companyIdentity.hidden = !isCompany;
+        privateIdentity.setAttribute("aria-hidden", String(isCompany));
+        companyIdentity.setAttribute("aria-hidden", String(!isCompany));
+        billingFirstName.disabled = isCompany;
+        billingLastName.disabled = isCompany;
+        billingCompanyName.disabled = !isCompany;
+        billingFirstName.required = !isCompany;
+        billingLastName.required = !isCompany;
+        billingCompanyName.required = isCompany;
+        identityStatus.textContent = isCompany
+          ? "{% trans 'Introduzca la empresa o razón social de facturación.' %}"
+          : "{% trans 'Introduzca el nombre y los apellidos de facturación.' %}";
+        copyShippingIdentity();
       };
 
-      shippingLine1.addEventListener("input", copyShippingLine1);
-      sameAddress.addEventListener("change", copyShippingLine1);
-      form.addEventListener("submit", (event) => {
-        if (!sameAddress.checked || billingLine1.value === shippingLine1.value) return;
-        event.preventDefault();
-        mismatchError.textContent = form.dataset.addressMismatchMessage;
-        mismatchError.classList.remove("hidden");
-        billingLine1.setAttribute("aria-invalid", "true");
-        billingLine1.focus();
+      const syncBillingAddress = () => {
+        addressPairs.forEach(({ shipping, billing }) => {
+          if (sameAddress.checked) billing.value = shipping.value;
+          billing.disabled = sameAddress.checked;
+          billing.setAttribute("aria-readonly", String(sameAddress.checked));
+        });
+      };
+
+      addressPairs.forEach(({ shipping }) => {
+        shipping.addEventListener("input", syncBillingAddress);
+        shipping.addEventListener("change", syncBillingAddress);
       });
+      shippingFirstName.addEventListener("input", copyShippingIdentity);
+      shippingLastName.addEventListener("input", copyShippingIdentity);
+      customerType.addEventListener("change", updateBillingIdentity);
+      sameAddress.addEventListener("change", syncBillingAddress);
 
-      copyShippingLine1();
+      syncBillingAddress();
+      updateBillingIdentity();
     })();
   </script>
 {% endblock %}

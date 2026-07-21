@@ -478,6 +478,9 @@ class InquiryOffer(models.Model):
         help_text=_("Importe neto del envío antes de aplicar el IVA indicado."),
     )
     product_vat_applicable = models.BooleanField(_("aplicar IVA al producto"), default=True)
+    product_tax_exemption_reason = models.CharField(
+        _("motivo fiscal del producto sin IVA"), max_length=255, blank=True
+    )
     product_vat_rate = models.DecimalField(
         _("IVA del producto (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
     )
@@ -491,6 +494,9 @@ class InquiryOffer(models.Model):
         ),
     )
     shipping_vat_applicable = models.BooleanField(_("aplicar IVA al envío"), default=True)
+    shipping_tax_exemption_reason = models.CharField(
+        _("motivo fiscal del envío sin IVA"), max_length=255, blank=True
+    )
     shipping_vat_rate = models.DecimalField(
         _("IVA del envío (%)"), max_digits=5, decimal_places=2, default=Decimal("21.00")
     )
@@ -673,6 +679,23 @@ class InquiryOffer(models.Model):
 
     def ensure_ready_to_send(self) -> None:
         errors = self._build_send_readiness_errors()
+        if errors:
+            raise ValidationError(errors)
+
+    def ensure_fiscally_ready(self) -> None:
+        errors: dict[str, str] = {}
+        if (
+            not self.product_vat_applicable or self.product_vat_rate == 0
+        ) and not self.product_tax_exemption_reason:
+            errors["product_tax_exemption_reason"] = (
+                "A fiscal reason is required when product VAT is not applied."
+            )
+        if (
+            not self.shipping_vat_applicable or self.shipping_vat_rate == 0
+        ) and not self.shipping_tax_exemption_reason:
+            errors["shipping_tax_exemption_reason"] = (
+                "A fiscal reason is required when shipping VAT is not applied."
+            )
         if errors:
             raise ValidationError(errors)
 
@@ -1043,9 +1066,15 @@ class InquiryOffer(models.Model):
             # Compatibility for callers and historical rows created with the old total-only API.
             self.product_price = self.confirmed_total
             self.product_vat_applicable = False
+            self.product_tax_exemption_reason = self.product_tax_exemption_reason or _(
+                "Importe heredado sin desglose de IVA"
+            )
         elif update_fields and "confirmed_total" in update_fields:
             self.product_price = self.confirmed_total
             self.product_vat_applicable = False
+            self.product_tax_exemption_reason = self.product_tax_exemption_reason or _(
+                "Importe heredado sin desglose de IVA"
+            )
         self.confirmed_total = self.calculate_confirmed_total()
         if update_fields is not None:
             kwargs["update_fields"] = tuple(
@@ -1057,6 +1086,7 @@ class InquiryOffer(models.Model):
         for field_name in (
             "lead_time_text", "internal_notes", "customer_message",
             "cancellation_internal_reason", "cancellation_customer_message",
+            "product_tax_exemption_reason", "shipping_tax_exemption_reason",
         ):
             value = getattr(self, field_name)
             if isinstance(value, str):
@@ -1116,6 +1146,9 @@ class InquiryOfferPayment(models.Model):
     )
     provider = models.CharField(_("proveedor de pago"), max_length=24, default="manual")
     provider_reference = models.CharField(_("referencia del proveedor"), max_length=128, blank=True)
+    provider_transaction_reference = models.CharField(
+        _("referencia de la transacción del proveedor"), max_length=128, blank=True
+    )
     internal_notes = models.TextField(_("notas internas"), blank=True)
     initiated_at = models.DateTimeField(_("iniciado el"), null=True, blank=True, db_index=True)
     paid_at = models.DateTimeField(_("pagado el"), null=True, blank=True, db_index=True)
@@ -1368,7 +1401,12 @@ class InquiryOfferPayment(models.Model):
         if isinstance(self.currency, str):
             self.currency = self.currency.strip().upper()
 
-        for field_name in ("provider", "provider_reference", "internal_notes"):
+        for field_name in (
+            "provider",
+            "provider_reference",
+            "provider_transaction_reference",
+            "internal_notes",
+        ):
             value = getattr(self, field_name)
             if isinstance(value, str):
                 setattr(self, field_name, value.strip())
@@ -1383,7 +1421,7 @@ class InquiryOfferPayment(models.Model):
 class InquiryOfferPaymentDetails(models.Model):
     class BillingCustomerType(models.TextChoices):
         PRIVATE = "private", _("Particular")
-        COMPANY = "company", _("Empresa o profesional")
+        COMPANY = "company", _("Empresa")
 
     payment = models.OneToOneField(
         "inquiries.InquiryOfferPayment",
@@ -1392,6 +1430,10 @@ class InquiryOfferPaymentDetails(models.Model):
         verbose_name=_("pago"),
     )
     shipping_recipient_name = models.CharField(_("destinatario del envío"), max_length=180)
+    shipping_first_name = models.CharField(_("nombre del destinatario"), max_length=100, blank=True)
+    shipping_last_name = models.CharField(
+        _("apellidos del destinatario"), max_length=150, blank=True
+    )
     shipping_phone = models.CharField(_("teléfono de envío"), max_length=50)
     shipping_address_line_1 = models.CharField(_("dirección de envío"), max_length=255)
     shipping_address_line_2 = models.CharField(
@@ -1411,6 +1453,11 @@ class InquiryOfferPaymentDetails(models.Model):
         _("facturación igual que envío"), default=True
     )
     billing_name = models.CharField(_("nombre o razón social de facturación"), max_length=180)
+    billing_first_name = models.CharField(_("nombre de facturación"), max_length=100, blank=True)
+    billing_last_name = models.CharField(_("apellidos de facturación"), max_length=150, blank=True)
+    billing_company_name = models.CharField(
+        _("empresa o razón social de facturación"), max_length=180, blank=True
+    )
     billing_tax_id = models.CharField(_("NIF / VAT de facturación"), max_length=64)
     billing_address_line_1 = models.CharField(_("dirección de facturación"), max_length=255)
     billing_address_line_2 = models.CharField(
@@ -1436,6 +1483,20 @@ class InquiryOfferPaymentDetails(models.Model):
     @property
     def is_complete(self) -> bool:
         return self.completed_at is not None
+
+    @property
+    def shipping_recipient_display_name(self) -> str:
+        return " ".join(
+            value for value in (self.shipping_first_name, self.shipping_last_name) if value
+        ) or self.shipping_recipient_name
+
+    @property
+    def billing_identity_name(self) -> str:
+        if self.billing_customer_type == self.BillingCustomerType.COMPANY:
+            return self.billing_company_name or self.billing_name
+        return " ".join(
+            value for value in (self.billing_first_name, self.billing_last_name) if value
+        ) or self.billing_name
 
     @property
     def matches_quoted_destination(self) -> bool:
@@ -1469,7 +1530,6 @@ class InquiryOfferPaymentDetails(models.Model):
         super().clean()
         errors: dict[str, str] = {}
         required_shipping = (
-            "shipping_recipient_name",
             "shipping_phone",
             "shipping_address_line_1",
             "shipping_city",
@@ -1480,8 +1540,16 @@ class InquiryOfferPaymentDetails(models.Model):
         for field_name in required_shipping:
             if not getattr(self, field_name):
                 errors[field_name] = "This shipping field is required."
-        if not self.billing_name:
-            errors["billing_name"] = "Billing name is required."
+        has_structured_shipping_name = bool(self.shipping_first_name and self.shipping_last_name)
+        if not has_structured_shipping_name and not self.shipping_recipient_name:
+            errors["shipping_first_name"] = "Shipping first name and last name are required."
+        if self.billing_customer_type == self.BillingCustomerType.COMPANY:
+            if not self.billing_company_name and not self.billing_name:
+                errors["billing_company_name"] = "Billing company name is required."
+        elif not (
+            (self.billing_first_name and self.billing_last_name) or self.billing_name
+        ):
+            errors["billing_first_name"] = "Billing first name and last name are required."
         if not self.billing_tax_id:
             errors["billing_tax_id"] = "Tax/VAT identifier is required for billing."
         for field_name in (
@@ -1512,6 +1580,8 @@ class InquiryOfferPaymentDetails(models.Model):
     def save(self, *args, **kwargs) -> None:
         string_fields = (
             "shipping_recipient_name",
+            "shipping_first_name",
+            "shipping_last_name",
             "shipping_phone",
             "shipping_address_line_1",
             "shipping_address_line_2",
@@ -1519,6 +1589,9 @@ class InquiryOfferPaymentDetails(models.Model):
             "shipping_region",
             "shipping_postal_code",
             "billing_name",
+            "billing_first_name",
+            "billing_last_name",
+            "billing_company_name",
             "billing_tax_id",
             "billing_address_line_1",
             "billing_address_line_2",
@@ -1528,6 +1601,20 @@ class InquiryOfferPaymentDetails(models.Model):
         )
         for field_name in string_fields:
             setattr(self, field_name, (getattr(self, field_name) or "").strip())
+        structured_shipping_name = " ".join(
+            value for value in (self.shipping_first_name, self.shipping_last_name) if value
+        )
+        if structured_shipping_name:
+            self.shipping_recipient_name = structured_shipping_name
+        structured_billing_name = (
+            self.billing_company_name
+            if self.billing_customer_type == self.BillingCustomerType.COMPANY
+            else " ".join(
+                value for value in (self.billing_first_name, self.billing_last_name) if value
+            )
+        )
+        if structured_billing_name:
+            self.billing_name = structured_billing_name
         self.shipping_country = str(self.shipping_country or "").strip().upper()
         self.billing_country = str(self.billing_country or "").strip().upper()
         if self.billing_same_as_shipping:
@@ -1539,6 +1626,171 @@ class InquiryOfferPaymentDetails(models.Model):
             self.billing_country = self.shipping_country
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class InvoiceIssuerConfiguration(models.Model):
+    legal_name = models.CharField(_("razón social"), max_length=180)
+    tax_id = models.CharField(_("NIF / VAT"), max_length=64)
+    address_line_1 = models.CharField(_("domicilio fiscal"), max_length=255)
+    address_line_2 = models.CharField(
+        _("información adicional del domicilio fiscal"), max_length=255, blank=True
+    )
+    city = models.CharField(_("ciudad"), max_length=120)
+    region = models.CharField(_("provincia o región"), max_length=120)
+    postal_code = models.CharField(_("código postal"), max_length=32)
+    country = CountryField(_("país"))
+    email = models.EmailField(_("correo electrónico"))
+    phone = models.CharField(_("teléfono"), max_length=50)
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada el"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("configuración fiscal del emisor")
+        verbose_name_plural = _("configuración fiscal del emisor")
+
+    def __str__(self) -> str:
+        return self.legal_name
+
+    @classmethod
+    def get_configured(cls) -> InvoiceIssuerConfiguration:
+        configuration = cls.objects.first()
+        if configuration is None:
+            raise ValidationError("Invoice issuer fiscal configuration is required.")
+        configuration.full_clean()
+        return configuration
+
+    def clean(self) -> None:
+        super().clean()
+        if type(self).objects.exclude(pk=self.pk).exists():
+            raise ValidationError("Only one invoice issuer configuration is allowed.")
+
+    def save(self, *args, **kwargs) -> None:
+        for field_name in (
+            "legal_name", "tax_id", "address_line_1", "address_line_2", "city",
+            "region", "postal_code", "email", "phone",
+        ):
+            value = getattr(self, field_name)
+            if isinstance(value, str):
+                setattr(self, field_name, value.strip())
+        self.country = str(self.country or "").strip().upper()
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class PaymentInvoiceSnapshot(models.Model):
+    payment = models.OneToOneField(
+        "inquiries.InquiryOfferPayment",
+        on_delete=models.PROTECT,
+        related_name="invoice_snapshot",
+        verbose_name=_("pago"),
+    )
+    payment_reference = models.CharField(_("referencia del pago"), max_length=32)
+    offer_reference = models.CharField(_("referencia de la oferta"), max_length=32)
+    inquiry_reference = models.CharField(_("referencia de la solicitud"), max_length=32)
+    paid_at = models.DateTimeField(_("pagado el"))
+    provider = models.CharField(_("proveedor de pago"), max_length=24)
+    checkout_reference = models.CharField(_("referencia de Checkout"), max_length=128, blank=True)
+    transaction_reference = models.CharField(
+        _("referencia de la transacción"), max_length=128, blank=True
+    )
+    currency = models.CharField(_("moneda"), max_length=3)
+    net_total = models.DecimalField(_("base imponible total"), max_digits=12, decimal_places=2)
+    tax_total = models.DecimalField(_("impuestos totales"), max_digits=12, decimal_places=2)
+    grand_total = models.DecimalField(_("total cobrado"), max_digits=12, decimal_places=2)
+    customer_type = models.CharField(_("tipo de cliente"), max_length=16)
+    customer_name = models.CharField(_("nombre o razón social del cliente"), max_length=180)
+    customer_tax_id = models.CharField(_("NIF / VAT del cliente"), max_length=64)
+    customer_email = models.EmailField(_("correo del cliente"))
+    customer_phone = models.CharField(_("teléfono del cliente"), max_length=50)
+    customer_address_line_1 = models.CharField(_("domicilio fiscal del cliente"), max_length=255)
+    customer_address_line_2 = models.CharField(
+        _("información adicional del domicilio del cliente"), max_length=255, blank=True
+    )
+    customer_city = models.CharField(_("ciudad del cliente"), max_length=120)
+    customer_region = models.CharField(_("provincia o región del cliente"), max_length=120)
+    customer_postal_code = models.CharField(_("código postal del cliente"), max_length=32)
+    customer_country = CountryField(_("país del cliente"))
+    issuer_legal_name = models.CharField(_("razón social del emisor"), max_length=180)
+    issuer_tax_id = models.CharField(_("NIF / VAT del emisor"), max_length=64)
+    issuer_address_line_1 = models.CharField(_("domicilio fiscal del emisor"), max_length=255)
+    issuer_address_line_2 = models.CharField(
+        _("información adicional del domicilio del emisor"), max_length=255, blank=True
+    )
+    issuer_city = models.CharField(_("ciudad del emisor"), max_length=120)
+    issuer_region = models.CharField(_("provincia o región del emisor"), max_length=120)
+    issuer_postal_code = models.CharField(_("código postal del emisor"), max_length=32)
+    issuer_country = CountryField(_("país del emisor"))
+    issuer_email = models.EmailField(_("correo del emisor"))
+    issuer_phone = models.CharField(_("teléfono del emisor"), max_length=50)
+    created_at = models.DateTimeField(_("creado el"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("snapshot fiscal del pago")
+        verbose_name_plural = _("snapshots fiscales de pagos")
+
+    def __str__(self) -> str:
+        return self.payment_reference
+
+    def save(self, *args, **kwargs) -> None:
+        if self.pk:
+            raise ValidationError("Payment invoice snapshots are immutable.")
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Payment invoice snapshots cannot be deleted.")
+
+
+class PaymentInvoiceLineSnapshot(models.Model):
+    class LineType(models.TextChoices):
+        PRODUCT = "product", _("Producto")
+        SHIPPING = "shipping", _("Transporte")
+
+    snapshot = models.ForeignKey(
+        "inquiries.PaymentInvoiceSnapshot",
+        on_delete=models.PROTECT,
+        related_name="lines",
+        verbose_name=_("snapshot fiscal"),
+    )
+    line_type = models.CharField(_("tipo"), max_length=16, choices=LineType.choices)
+    sku = models.CharField(_("SKU / referencia"), max_length=64, blank=True)
+    description = models.CharField(_("descripción"), max_length=255)
+    quantity = models.PositiveIntegerField(_("cantidad"))
+    unit_net_price = models.DecimalField(
+        _("precio unitario sin impuestos"), max_digits=14, decimal_places=4
+    )
+    net_amount = models.DecimalField(_("base imponible"), max_digits=12, decimal_places=2)
+    tax_rate = models.DecimalField(_("tipo impositivo (%)"), max_digits=5, decimal_places=2)
+    tax_amount = models.DecimalField(_("importe de impuestos"), max_digits=12, decimal_places=2)
+    gross_amount = models.DecimalField(_("total"), max_digits=12, decimal_places=2)
+    tax_exemption_reason = models.CharField(
+        _("motivo fiscal sin impuestos"), max_length=255, blank=True
+    )
+    created_at = models.DateTimeField(_("creada el"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("línea del snapshot fiscal")
+        verbose_name_plural = _("líneas del snapshot fiscal")
+        ordering = ("id",)
+
+    def __str__(self) -> str:
+        return self.description
+
+    def clean(self) -> None:
+        super().clean()
+        if self.tax_rate == 0 and not self.tax_exemption_reason:
+            raise ValidationError(
+                {"tax_exemption_reason": "A fiscal reason is required for a zero-tax line."}
+            )
+
+    def save(self, *args, **kwargs) -> None:
+        if self.pk:
+            raise ValidationError("Payment invoice snapshot lines are immutable.")
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Payment invoice snapshot lines cannot be deleted.")
 
 
 class InquiryItem(models.Model):

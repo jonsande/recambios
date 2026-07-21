@@ -199,6 +199,10 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
         data={"quantity": "2", "note": "Necesito versión reforzada"},
     )
 
+    form_response = client.get("/es/solicitud/enviar/")
+    assert form_response.status_code == 200
+    assert 'id="id_tax_id"' not in form_response.content.decode()
+
     response = client.post(
         "/es/solicitud/enviar/",
         data={
@@ -223,6 +227,7 @@ def test_guest_submission_creates_submitted_inquiry_and_items(client) -> None:
     assert submission_group.user_id is None
     assert submission_group.guest_name == "Taller Central"
     assert submission_group.guest_email == "compras@tallercentral.example"
+    assert submission_group.tax_id == ""
     assert submission_group.notes_from_customer == "Confirmar plazo para esta semana"
     assert submission_group.destination_country.code == "ES"
     assert submission_group.destination_city == "Madrid"

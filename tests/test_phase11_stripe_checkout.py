@@ -18,6 +18,8 @@ from apps.inquiries.models import (
     InquiryOffer,
     InquiryOfferPayment,
     InquiryOfferPaymentDetails,
+    InvoiceIssuerConfiguration,
+    PaymentInvoiceSnapshot,
 )
 from apps.inquiries.payments import (
     STRIPE_PROVIDER,
@@ -27,10 +29,26 @@ from apps.inquiries.payments import (
     StripeWebhookPayloadError,
     StripeWebhookSignatureError,
     cancel_offer_with_remote_checkout_expiration,
+    confirm_payment,
     create_or_reuse_checkout_session_for_offer,
     process_stripe_checkout_event,
 )
 from apps.suppliers.models import Supplier
+
+
+@pytest.fixture(autouse=True)
+def configured_invoice_issuer(db):
+    return InvoiceIssuerConfiguration.objects.create(
+        legal_name="Recambios Example S.L.",
+        tax_id="B12345678",
+        address_line_1="Calle Fiscal 1",
+        city="Madrid",
+        region="Madrid",
+        postal_code="28001",
+        country="ES",
+        email="billing@example.com",
+        phone="+34 910 000 000",
+    )
 
 
 def make_supplier(
@@ -124,6 +142,101 @@ def make_accepted_offer(
         completed_at=timezone.now(),
     )
     return offer
+
+
+@pytest.mark.django_db
+def test_invoice_issuer_configuration_is_singleton(configured_invoice_issuer) -> None:
+    with pytest.raises(ValidationError, match="Only one"):
+        InvoiceIssuerConfiguration.objects.create(
+            legal_name="Second issuer",
+            tax_id="B99999999",
+            address_line_1="Other street 2",
+            city="Madrid",
+            region="Madrid",
+            postal_code="28002",
+            country="ES",
+            email="second@example.com",
+            phone="+34 900 000 000",
+        )
+
+
+@pytest.mark.django_db
+def test_checkout_is_blocked_without_invoice_issuer_configuration(
+    django_user_model,
+    configured_invoice_issuer,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="missing_invoice_issuer")
+    configured_invoice_issuer.delete()
+
+    with patch("apps.inquiries.payments._require_stripe_secret_key", return_value="sk_test"):
+        with pytest.raises(ValidationError, match="issuer fiscal configuration"):
+            create_or_reuse_checkout_session_for_offer(offer, language_code="es")
+
+
+@pytest.mark.django_db
+def test_confirm_payment_creates_immutable_invoice_snapshot_and_lines(
+    django_user_model,
+    configured_invoice_issuer,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="invoice_snapshot")
+    payment = offer.payment
+    payment.provider = STRIPE_PROVIDER
+    payment.provider_reference = "cs_snapshot"
+    payment.save(update_fields=["provider", "provider_reference", "updated_at"])
+
+    snapshot = confirm_payment(payment, provider_transaction_reference="pi_snapshot")
+
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.PAID
+    assert payment.provider_transaction_reference == "pi_snapshot"
+    assert snapshot.payment_reference == payment.reference_code
+    assert snapshot.checkout_reference == "cs_snapshot"
+    assert snapshot.transaction_reference == "pi_snapshot"
+    assert snapshot.customer_email == "invoice_snapshot@example.com"
+    assert snapshot.customer_tax_id == "12345678Z"
+    assert snapshot.issuer_legal_name == configured_invoice_issuer.legal_name
+    assert snapshot.grand_total == payment.payable_amount
+    assert snapshot.net_total + snapshot.tax_total == snapshot.grand_total
+    assert list(snapshot.lines.values_list("line_type", flat=True)) == ["product", "shipping"]
+    assert snapshot.lines.get(line_type="product").sku == "SKU-INVOICE_SNAPSHOT"
+    assert confirm_payment(payment) == snapshot
+    assert PaymentInvoiceSnapshot.objects.filter(payment=payment).count() == 1
+
+    snapshot.customer_name = "Changed customer"
+    with pytest.raises(ValidationError, match="immutable"):
+        snapshot.save()
+    with pytest.raises(ValidationError, match="cannot be deleted"):
+        snapshot.delete()
+
+
+@pytest.mark.django_db
+def test_confirm_payment_requires_zero_tax_reason(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="missing_tax_reason")
+    offer.product_tax_exemption_reason = ""
+    offer.save(update_fields=["product_tax_exemption_reason"])
+
+    with pytest.raises(ValidationError, match="product_tax_exemption_reason"):
+        confirm_payment(offer.payment)
+
+    offer.payment.refresh_from_db()
+    assert offer.payment.status == InquiryOfferPayment.Status.PENDING
+    assert not PaymentInvoiceSnapshot.objects.filter(payment=offer.payment).exists()
+
+
+@pytest.mark.django_db
+def test_confirm_payment_rolls_back_when_amount_does_not_reconcile(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="snapshot_mismatch")
+    payment = offer.payment
+    payment.payable_amount += Decimal("1.00")
+    payment.save(update_fields=["payable_amount", "updated_at"])
+
+    with pytest.raises(ValidationError, match="does not match"):
+        confirm_payment(payment)
+
+    payment.refresh_from_db()
+    assert payment.status == InquiryOfferPayment.Status.PENDING
+    assert payment.paid_at is None
+    assert not PaymentInvoiceSnapshot.objects.filter(payment=payment).exists()
 
 
 @pytest.mark.django_db
@@ -303,7 +416,8 @@ def test_checkout_details_form_requires_billing_tax_id(django_user_model) -> Non
     form = InquiryOfferPaymentDetailsForm(
         payment=offer.payment,
         data={
-            "shipping_recipient_name": "María García",
+            "shipping_first_name": "María",
+            "shipping_last_name": "García López",
             "shipping_phone": "+34 600 000 000",
             "shipping_address_line_1": "Calle Mayor 1",
             "shipping_city": "Madrid",
@@ -312,7 +426,8 @@ def test_checkout_details_form_requires_billing_tax_id(django_user_model) -> Non
             "shipping_country": "ES",
             "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE,
             "billing_same_as_shipping": "on",
-            "billing_name": "María García",
+            "billing_first_name": "María",
+            "billing_last_name": "García López",
             "billing_tax_id": "",
         },
     )
@@ -322,7 +437,7 @@ def test_checkout_details_form_requires_billing_tax_id(django_user_model) -> Non
 
 
 @pytest.mark.django_db
-def test_checkout_details_form_rejects_mismatched_billing_address_when_same(
+def test_checkout_details_form_overrides_billing_address_when_same(
     django_user_model,
 ) -> None:
     offer = make_accepted_offer(django_user_model, username="billing_address_mismatch")
@@ -331,22 +446,26 @@ def test_checkout_details_form_rejects_mismatched_billing_address_when_same(
         payment=offer.payment,
         instance=details,
         data={
-            "shipping_recipient_name": "María García",
+            "shipping_first_name": "María",
+            "shipping_last_name": "García López",
             "shipping_phone": "+34 600 000 000",
             "shipping_address_line_1": "Calle Mayor 1",
             "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE,
             "billing_same_as_shipping": "on",
-            "billing_name": "María García",
+            "billing_first_name": "María",
+            "billing_last_name": "García López",
             "billing_tax_id": "12345678Z",
             "billing_address_line_1": "Calle Menor 2",
         },
     )
 
-    assert form.is_valid() is False
-    assert "billing_address_line_1" in form.errors
-    assert "debe coincidir con la dirección de envío" in str(
-        form.errors["billing_address_line_1"]
-    )
+    assert form.is_valid(), form.errors
+    details = form.save()
+    assert details.billing_address_line_1 == details.shipping_address_line_1
+    assert details.billing_city == details.shipping_city
+    assert details.billing_region == details.shipping_region
+    assert details.billing_postal_code == details.shipping_postal_code
+    assert details.billing_country == details.shipping_country
 
 
 @pytest.mark.django_db
@@ -362,8 +481,73 @@ def test_checkout_details_page_includes_billing_address_sync(client, django_user
 
     assert response.status_code == 200
     assert b'data-billing-address-form' in response.content
-    assert b'shippingLine1.addEventListener("input", copyShippingLine1)' in response.content
-    assert b'role="alert"' in response.content
+    assert b'const syncBillingAddress = () =>' in response.content
+    assert b'billing.disabled = sameAddress.checked' in response.content
+    assert "Identidad de facturación" in response.content.decode()
+    assert "Empresa o profesional" not in response.content.decode()
+    assert '<option value="company">Empresa</option>' in response.content.decode()
+    assert b'data-private-billing-identity' in response.content
+    assert b'data-company-billing-identity' in response.content
+    assert b'aria-live="polite"' in response.content
+    content = response.content.decode()
+    assert content.index('for="id_billing_tax_id"') < content.index(
+        'for="id_billing_same_as_shipping"'
+    )
+
+
+@pytest.mark.django_db
+def test_checkout_details_form_saves_separate_private_names(django_user_model) -> None:
+    offer = make_accepted_offer(django_user_model, username="private_billing_identity")
+    offer.payment.checkout_details.delete()
+    form = InquiryOfferPaymentDetailsForm(
+        payment=offer.payment,
+        data={
+            "shipping_first_name": "María",
+            "shipping_last_name": "García López",
+            "shipping_phone": "+34 600 000 000",
+            "shipping_address_line_1": "Calle Mayor 1",
+            "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.PRIVATE,
+            "billing_same_as_shipping": "on",
+            "billing_first_name": "Ana",
+            "billing_last_name": "Martín Pérez",
+            "billing_tax_id": "12345678Z",
+            "billing_address_line_1": "Calle Mayor 1",
+        },
+    )
+
+    assert form.is_valid(), form.errors
+    details = form.save()
+    assert details.shipping_recipient_name == "María García López"
+    assert details.billing_name == "Ana Martín Pérez"
+    assert details.billing_company_name == ""
+
+
+@pytest.mark.django_db
+def test_checkout_details_form_requires_only_company_identity_for_company(
+    django_user_model,
+) -> None:
+    offer = make_accepted_offer(django_user_model, username="company_billing_identity")
+    offer.payment.checkout_details.delete()
+    form = InquiryOfferPaymentDetailsForm(
+        payment=offer.payment,
+        data={
+            "shipping_first_name": "María",
+            "shipping_last_name": "García López",
+            "shipping_phone": "+34 600 000 000",
+            "shipping_address_line_1": "Calle Mayor 1",
+            "billing_customer_type": InquiryOfferPaymentDetails.BillingCustomerType.COMPANY,
+            "billing_same_as_shipping": "on",
+            "billing_company_name": "Empresa de Prueba S.L.",
+            "billing_tax_id": "B12345678",
+            "billing_address_line_1": "Calle Mayor 1",
+        },
+    )
+
+    assert form.is_valid(), form.errors
+    details = form.save()
+    assert details.billing_name == "Empresa de Prueba S.L."
+    assert details.billing_first_name == ""
+    assert details.billing_last_name == ""
 
 
 @pytest.mark.django_db

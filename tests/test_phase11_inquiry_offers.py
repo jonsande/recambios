@@ -27,6 +27,7 @@ from apps.inquiries.models import (
     InquiryOffer,
     InquiryOfferPayment,
     InquiryOfferPaymentDetails,
+    InvoiceIssuerConfiguration,
 )
 from apps.suppliers.models import Supplier
 from apps.users.roles import ROLE_INTERNAL_STAFF
@@ -1057,6 +1058,33 @@ def test_payment_admin_actions_apply_and_block_invalid_transitions(
         username="admin_payment_transition",
     )
     payment = InquiryOfferPayment.initiate_from_offer(offer, save=True)
+    product = make_product("SKU-ADMIN-PAYMENT")
+    InquiryItem.objects.create(inquiry=offer.inquiry, product=product, requested_quantity=1)
+    InquiryOfferPaymentDetails.objects.create(
+        payment=payment,
+        shipping_recipient_name="Admin Payment Customer",
+        shipping_phone="+34 600 000 000",
+        shipping_address_line_1="Calle Mayor 1",
+        shipping_city="Madrid",
+        shipping_region="Madrid",
+        shipping_postal_code="28001",
+        shipping_country="ES",
+        billing_name="Admin Payment Customer",
+        billing_tax_id="12345678Z",
+        billing_same_as_shipping=True,
+        completed_at=timezone.now(),
+    )
+    InvoiceIssuerConfiguration.objects.create(
+        legal_name="Recambios Example S.L.",
+        tax_id="B12345678",
+        address_line_1="Calle Fiscal 1",
+        city="Madrid",
+        region="Madrid",
+        postal_code="28001",
+        country="ES",
+        email="billing@example.com",
+        phone="+34 910 000 000",
+    )
     admin_user = django_user_model.objects.create_superuser(
         username="admin_payment_transition_user",
         email="admin_payment_transition_user@example.com",

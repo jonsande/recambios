@@ -9,11 +9,20 @@ from typing import Any
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone, translation
+from django.utils.translation import gettext_lazy as _
 
-from .models import InquiryOffer, InquiryOfferPayment, InquiryOfferPaymentDetails
+from .models import (
+    InquiryOffer,
+    InquiryOfferPayment,
+    InquiryOfferPaymentDetails,
+    InvoiceIssuerConfiguration,
+    PaymentInvoiceLineSnapshot,
+    PaymentInvoiceSnapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +118,8 @@ def create_or_reuse_checkout_session_for_offer(
     Checkout Session and updates the same payment record with the latest session reference.
     """
     _require_stripe_secret_key()
+    InvoiceIssuerConfiguration.get_configured()
+    offer.ensure_fiscally_ready()
 
     now = timezone.now()
     if offer.valid_until is None or now >= offer.valid_until:
@@ -260,6 +271,8 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
             event_type == "checkout.session.completed" and payment_status == "paid"
         )
         if is_paid_transition:
+            if changed_fields:
+                payment.save(update_fields=[*changed_fields, "updated_at"])
             if payment.offer.status == InquiryOffer.Status.CANCELLED:
                 logger.error(
                     "Stripe paid event rejected for commercially cancelled offer (payment=%s).",
@@ -286,14 +299,144 @@ def process_stripe_checkout_event(event: dict[str, Any]) -> bool:
                 inquiry.save(update_fields=["status", "updated_at"])
                 payment.status = InquiryOfferPayment.Status.PENDING
                 payment.cancelled_at = None
-            payment.mark_paid(save=False)
-            payment.save()
+                payment.save(update_fields=["status", "cancelled_at", "updated_at"])
+            confirm_payment(
+                payment,
+                provider_transaction_reference=str(payload.get("payment_intent", "")).strip(),
+            )
             return True
 
         if changed_fields:
             payment.save(update_fields=[*changed_fields, "updated_at"])
 
     return False
+
+
+def confirm_payment(
+    payment: InquiryOfferPayment,
+    *,
+    provider_transaction_reference: str = "",
+) -> PaymentInvoiceSnapshot | None:
+    """Confirm a payment and atomically freeze all invoice-ready fiscal data."""
+    with transaction.atomic():
+        locked_payment = (
+            InquiryOfferPayment.objects.select_for_update(of=("self",))
+            .select_related("offer", "offer__inquiry", "offer__inquiry__user")
+            .get(pk=payment.pk)
+        )
+        if locked_payment.status == InquiryOfferPayment.Status.PAID:
+            return PaymentInvoiceSnapshot.objects.filter(payment=locked_payment).first()
+        if locked_payment.status != InquiryOfferPayment.Status.PENDING:
+            raise ValueError("Only pending payments can transition to paid.")
+
+        issuer = InvoiceIssuerConfiguration.get_configured()
+        locked_payment.offer.ensure_fiscally_ready()
+        try:
+            details = locked_payment.checkout_details
+        except InquiryOfferPaymentDetails.DoesNotExist as error:
+            raise ValidationError("Completed billing details are required.") from error
+        if not details.is_complete:
+            raise ValidationError("Completed billing details are required.")
+
+        items = list(
+            locked_payment.offer.inquiry.items.select_related("product").order_by("pk")[:2]
+        )
+        if len(items) != 1:
+            raise ValidationError("Exactly one invoiceable product is required per payment.")
+
+        if provider_transaction_reference:
+            locked_payment.provider_transaction_reference = provider_transaction_reference
+        locked_payment.mark_paid(save=False)
+        locked_payment.save()
+
+        offer = locked_payment.offer
+        inquiry = offer.inquiry
+        product_item = items[0]
+        product_net = (offer.product_price or Decimal("0.00")).quantize(Decimal("0.01"))
+        shipping_net = offer.shipping_price.quantize(Decimal("0.01"))
+        product_gross = offer.product_price_with_vat
+        shipping_gross = offer.shipping_price_with_vat
+        net_total = product_net + shipping_net
+        tax_total = (product_gross - product_net) + (shipping_gross - shipping_net)
+        grand_total = product_gross + shipping_gross
+        if grand_total != locked_payment.payable_amount:
+            raise ValidationError("Invoice snapshot total does not match the paid amount.")
+
+        customer_email = (
+            inquiry.user.email if inquiry.user_id and inquiry.user.email else inquiry.guest_email
+        )
+        customer_phone = inquiry.guest_phone or details.shipping_phone
+        snapshot = PaymentInvoiceSnapshot.objects.create(
+            payment=locked_payment,
+            payment_reference=locked_payment.reference_code,
+            offer_reference=offer.reference_code,
+            inquiry_reference=inquiry.reference_code,
+            paid_at=locked_payment.paid_at,
+            provider=locked_payment.provider,
+            checkout_reference=locked_payment.provider_reference,
+            transaction_reference=locked_payment.provider_transaction_reference,
+            currency=locked_payment.currency,
+            net_total=net_total,
+            tax_total=tax_total,
+            grand_total=grand_total,
+            customer_type=details.billing_customer_type,
+            customer_name=details.billing_identity_name,
+            customer_tax_id=details.billing_tax_id,
+            customer_email=customer_email,
+            customer_phone=customer_phone,
+            customer_address_line_1=details.billing_address_line_1,
+            customer_address_line_2=details.billing_address_line_2,
+            customer_city=details.billing_city,
+            customer_region=details.billing_region,
+            customer_postal_code=details.billing_postal_code,
+            customer_country=details.billing_country,
+            issuer_legal_name=issuer.legal_name,
+            issuer_tax_id=issuer.tax_id,
+            issuer_address_line_1=issuer.address_line_1,
+            issuer_address_line_2=issuer.address_line_2,
+            issuer_city=issuer.city,
+            issuer_region=issuer.region,
+            issuer_postal_code=issuer.postal_code,
+            issuer_country=issuer.country,
+            issuer_email=issuer.email,
+            issuer_phone=issuer.phone,
+        )
+        product_tax_rate = offer.product_vat_rate if offer.product_vat_applicable else Decimal("0")
+        shipping_tax_rate = (
+            offer.shipping_vat_rate if offer.shipping_vat_applicable else Decimal("0")
+        )
+        PaymentInvoiceLineSnapshot.objects.create(
+            snapshot=snapshot,
+            line_type=PaymentInvoiceLineSnapshot.LineType.PRODUCT,
+            sku=product_item.product.sku,
+            description=product_item.product.title,
+            quantity=product_item.requested_quantity,
+            unit_net_price=(product_net / product_item.requested_quantity).quantize(
+                Decimal("0.0001"), rounding=ROUND_HALF_UP
+            ),
+            net_amount=product_net,
+            tax_rate=product_tax_rate,
+            tax_amount=product_gross - product_net,
+            gross_amount=product_gross,
+            tax_exemption_reason=(
+                offer.product_tax_exemption_reason if product_tax_rate == 0 else ""
+            ),
+        )
+        PaymentInvoiceLineSnapshot.objects.create(
+            snapshot=snapshot,
+            line_type=PaymentInvoiceLineSnapshot.LineType.SHIPPING,
+            description=str(_("Shipping")),
+            quantity=1,
+            unit_net_price=shipping_net,
+            net_amount=shipping_net,
+            tax_rate=shipping_tax_rate,
+            tax_amount=shipping_gross - shipping_net,
+            gross_amount=shipping_gross,
+            tax_exemption_reason=(
+                offer.shipping_tax_exemption_reason if shipping_tax_rate == 0 else ""
+            ),
+        )
+        return snapshot
 
 
 def _create_checkout_session(

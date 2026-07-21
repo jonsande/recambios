@@ -18,7 +18,7 @@
       <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Destinatario" %}</dt>
-          <dd class="mt-1 text-text">{{ details.shipping_recipient_name }}</dd>
+          <dd class="mt-1 text-text">{{ details.shipping_recipient_display_name }}</dd>
         </div>
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Dirección de envío" %}</dt>
@@ -29,7 +29,7 @@
         </div>
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Identidad de facturación" %}</dt>
-          <dd class="mt-1 text-text">{{ details.billing_name }}</dd>
+          <dd class="mt-1 text-text">{{ details.billing_identity_name }}</dd>
         </div>
         <div class="panel-muted">
           <dt class="font-medium text-text-muted">{% trans "Dirección de facturación" %}</dt>
