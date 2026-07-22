@@ -166,7 +166,7 @@ def test_restricted_supplier_cannot_publish_and_cannot_edit_non_draft(django_use
 
 
 @pytest.mark.django_db
-def test_internal_staff_can_publish_and_published_at_is_set(django_user_model) -> None:
+def test_only_superuser_can_publish_and_published_at_is_set(django_user_model) -> None:
     supplier = make_supplier("SUP-PUB")
     brand = make_brand("Delphi", "delphi")
     category = make_category("Ignition", "ignition")
@@ -180,12 +180,19 @@ def test_internal_staff_can_publish_and_published_at_is_set(django_user_model) -
     request = build_request(staff_user)
     product.publication_status = Product.PublicationStatus.PUBLISHED
     product.published_at = None
+    product.is_active = False
 
+    with pytest.raises(PermissionDenied):
+        product_admin.save_model(request, product, form=None, change=True)
+
+    staff_user.is_superuser = True
+    staff_user.save(update_fields=["is_superuser"])
     product_admin.save_model(request, product, form=None, change=True)
     product.refresh_from_db()
 
     assert product.publication_status == Product.PublicationStatus.PUBLISHED
     assert product.published_at is not None
+    assert product.is_active
 
 
 @pytest.mark.django_db

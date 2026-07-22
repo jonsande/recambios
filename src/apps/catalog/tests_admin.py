@@ -40,6 +40,7 @@ class ProductAdminBulkPublicationStatusTests(TestCase):
             category=cls.category,
             condition=cls.condition,
             publication_status=Product.PublicationStatus.DRAFT,
+            is_active=False,
         )
         cls.review_product = Product.objects.create(
             supplier=cls.supplier,
@@ -48,6 +49,7 @@ class ProductAdminBulkPublicationStatusTests(TestCase):
             category=cls.category,
             condition=cls.condition,
             publication_status=Product.PublicationStatus.REVIEW,
+            is_active=False,
         )
 
         User = get_user_model()
@@ -55,6 +57,7 @@ class ProductAdminBulkPublicationStatusTests(TestCase):
             username="publisher",
             password="test-pass",
             is_staff=True,
+            is_superuser=True,
         )
         cls.non_publisher_user = User.objects.create_user(
             username="editor",
@@ -91,7 +94,7 @@ class ProductAdminBulkPublicationStatusTests(TestCase):
         request.user = user
         return request
 
-    def test_authorized_user_can_publish_selected_products_in_bulk(self):
+    def test_superuser_can_publish_selected_products_in_bulk(self):
         request = self._request_for(self.publisher_user)
         queryset = Product.objects.filter(pk__in=[self.draft_product.pk, self.review_product.pk])
 
@@ -109,6 +112,8 @@ class ProductAdminBulkPublicationStatusTests(TestCase):
         )
         self.assertIsNotNone(self.draft_product.published_at)
         self.assertIsNotNone(self.review_product.published_at)
+        self.assertTrue(self.draft_product.is_active)
+        self.assertTrue(self.review_product.is_active)
 
     def test_user_without_publish_permission_cannot_publish_in_bulk(self):
         request = self._request_for(self.non_publisher_user)

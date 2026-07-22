@@ -1,5 +1,14 @@
 {% extends "admin/change_list.html" %}
 
+{% block search %}
+  <p class="help">
+    Suba un archivo XLSX como una nueva importación. Después, un usuario interno debe
+    seleccionarla y ejecutar «Procesar las importaciones seleccionadas». Los productos
+    quedarán en borrador para su revisión.
+  </p>
+  {{ block.super }}
+{% endblock %}
+
 {% block object-tools-items %}
   {% if import_template_download_url %}
     <li>

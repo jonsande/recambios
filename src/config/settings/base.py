@@ -126,6 +126,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Límites de seguridad para las importaciones XLSX de proveedores.
+SUPPLIER_IMPORT_MAX_FILE_SIZE = 10 * 1024 * 1024
+SUPPLIER_IMPORT_MAX_ROWS = 10_000
+
 # Email
 EMAIL_BACKEND = config(
     "EMAIL_BACKEND",

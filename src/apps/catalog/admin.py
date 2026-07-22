@@ -252,6 +252,37 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         "mark_selected_as_in_review",
         "mark_selected_as_published",
     )
+
+    class SupplierImportFilter(admin.SimpleListFilter):
+        title = _("lote de importación")
+        parameter_name = "supplier_import"
+
+        def lookups(self, request, model_admin):
+            return ()
+
+        def queryset(self, request, queryset):
+            if not self.value():
+                return queryset
+            try:
+                import_id = int(self.value())
+            except (TypeError, ValueError):
+                return queryset.none()
+            return queryset.filter(
+                import_rows__supplier_import_id=import_id,
+                import_rows__processing_status="success",
+            ).distinct()
+
+    list_filter = (
+        "publication_status",
+        "price_visibility_mode",
+        "is_active",
+        "featured",
+        "supplier",
+        "brand",
+        "category",
+        "condition",
+        SupplierImportFilter,
+    )
     fieldsets = (
         (
             _("Identificación del producto"),
@@ -319,18 +350,16 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
-        if not is_restricted_supplier_user(request.user):
-            return form
+        if is_restricted_supplier_user(request.user):
+            supplier_ids = self.supplier_ids_for_request(request)
+            if "supplier" in form.base_fields:
+                form.base_fields["supplier"].queryset = form.base_fields[
+                    "supplier"
+                ].queryset.filter(id__in=supplier_ids)
+                if len(supplier_ids) == 1 and obj is None:
+                    form.base_fields["supplier"].initial = supplier_ids[0]
 
-        supplier_ids = self.supplier_ids_for_request(request)
-        if "supplier" in form.base_fields:
-            form.base_fields["supplier"].queryset = form.base_fields["supplier"].queryset.filter(
-                id__in=supplier_ids
-            )
-            if len(supplier_ids) == 1 and obj is None:
-                form.base_fields["supplier"].initial = supplier_ids[0]
-
-        if "publication_status" in form.base_fields:
+        if not request.user.is_superuser and "publication_status" in form.base_fields:
             allowed_choices = {
                 Product.PublicationStatus.DRAFT,
                 Product.PublicationStatus.REVIEW,
@@ -350,10 +379,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        can_publish = request.user.is_superuser or request.user.has_perm(
-            "catalog.can_publish_product"
-        )
-        if is_restricted_supplier_user(request.user) or not can_publish:
+        if not request.user.is_superuser:
             actions.pop("mark_selected_as_published", None)
         return actions
 
@@ -375,11 +401,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 return
             queryset = queryset.filter(publication_status=Product.PublicationStatus.DRAFT)
 
-        if (
-            target_status == Product.PublicationStatus.PUBLISHED
-            and not request.user.is_superuser
-            and not request.user.has_perm("catalog.can_publish_product")
-        ):
+        if target_status == Product.PublicationStatus.PUBLISHED and not request.user.is_superuser:
             self.message_user(
                 request,
                 _("No tiene permiso para publicar productos."),
@@ -392,6 +414,7 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
             updated_count = queryset.update(
                 publication_status=target_status,
                 published_at=timezone.now(),
+                is_active=True,
             )
         else:
             updated_count = queryset.update(publication_status=target_status, published_at=None)
@@ -470,7 +493,6 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
         else:
             if (
                 obj.publication_status == Product.PublicationStatus.PUBLISHED
-                and not request.user.has_perm("catalog.can_publish_product")
                 and not request.user.is_superuser
             ):
                 raise PermissionDenied(_("No tiene permiso para publicar productos."))
@@ -479,6 +501,8 @@ class ProductAdmin(SupplierScopedAdminMixin, admin.ModelAdmin):
                 and not obj.published_at
             ):
                 obj.published_at = timezone.now()
+            if obj.publication_status == Product.PublicationStatus.PUBLISHED:
+                obj.is_active = True
             elif obj.publication_status != Product.PublicationStatus.PUBLISHED:
                 obj.published_at = None
 

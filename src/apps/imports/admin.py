@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import path, reverse
+from django.utils.html import format_html
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
 from apps.suppliers.access import get_active_supplier_ids_for_user, user_can_manage_supplier
@@ -27,6 +30,12 @@ class SupplierImportAdminForm(forms.ModelForm):
         if original_file is not None and not original_file.name.lower().endswith(".xlsx"):
             raise forms.ValidationError(
                 _("Las importaciones de la v1 solo admiten archivos .xlsx.")
+            )
+        max_size = getattr(settings, "SUPPLIER_IMPORT_MAX_FILE_SIZE", 10 * 1024 * 1024)
+        if original_file is not None and original_file.size > max_size:
+            raise forms.ValidationError(
+                _("El archivo supera el tamaño máximo permitido de %(size)s bytes.")
+                % {"size": max_size}
             )
         return original_file
 
@@ -71,6 +80,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
         "started_at",
         "finished_at",
         "processing_notes_short",
+        "review_products_link",
         "updated_at",
     )
     list_filter = ("import_status", "supplier")
@@ -84,7 +94,18 @@ class SupplierImportAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     list_select_related = ("supplier", "uploaded_by")
     autocomplete_fields = ("supplier", "uploaded_by")
-    readonly_fields = ("created_at", "updated_at", "processing_notes")
+    readonly_fields = (
+        "import_status",
+        "total_rows",
+        "successful_rows",
+        "failed_rows",
+        "started_at",
+        "finished_at",
+        "processing_notes",
+        "review_products_link",
+        "created_at",
+        "updated_at",
+    )
     date_hierarchy = "updated_at"
     inlines = (SupplierImportRowInline,)
     actions = ("process_selected_imports",)
@@ -111,6 +132,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
                     "started_at",
                     "finished_at",
                     "processing_notes",
+                    "review_products_link",
                 )
             },
         ),
@@ -128,6 +150,21 @@ class SupplierImportAdmin(admin.ModelAdmin):
         if len(first_line) <= 80:
             return first_line
         return f"{first_line[:77]}..."
+
+    @admin.display(description=_("Revisión del lote"))
+    def review_products_link(self, obj: SupplierImport) -> str:
+        if (
+            obj is None
+            or not obj.pk
+            or not obj.rows.filter(
+                processing_status=SupplierImportRow.ProcessingStatus.SUCCESS,
+                linked_product__isnull=False,
+            ).exists()
+        ):
+            return "-"
+        url = reverse("admin:catalog_product_changelist")
+        query = urlencode({"supplier_import": obj.pk})
+        return format_html('<a href="{}?{}">{}</a>', url, query, _("Revisar productos del lote"))
 
     def supplier_ids_for_request(self, request) -> list[int]:
         return get_active_supplier_ids_for_user(request.user)
@@ -160,7 +197,7 @@ class SupplierImportAdmin(admin.ModelAdmin):
             content,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = 'attachment; filename="supplier_import_template_v1.xlsx"'
+        response["Content-Disposition"] = 'attachment; filename="supplier_import_template_v2.xlsx"'
         return response
 
     def get_actions(self, request):
@@ -275,6 +312,8 @@ class SupplierImportAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
+        if obj is not None:
+            readonly_fields.append("original_file")
         if is_restricted_supplier_user(request.user):
             readonly_fields.extend(
                 (

@@ -3,46 +3,56 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 REQUIRED_IMPORT_COLUMNS: tuple[str, ...] = (
-    "title",
-    "category_name",
+    "product_title",
+    "category_slug",
     "condition_code",
 )
 
 OPTIONAL_IMPORT_COLUMNS: tuple[str, ...] = (
     "brand_name",
-    "sku",
+    "oe_code",
     "supplier_product_code",
-    "short_description",
-    "long_description",
-    "price_visibility_mode",
     "last_known_price",
     "currency",
     "unit_of_sale",
     "quantity",
     "unit_of_quantity",
-    "is_active",
-    "featured",
+    "weight",
+    "length",
+    "width",
+    "height",
+    "short_description",
+    "long_description",
 )
 
 CANONICAL_IMPORT_COLUMNS: tuple[str, ...] = (
-    "title",
+    "product_title",
     "brand_name",
-    "category_name",
+    "category_slug",
     "condition_code",
-    "sku",
+    "oe_code",
     "supplier_product_code",
-    "short_description",
-    "long_description",
-    "price_visibility_mode",
     "last_known_price",
     "currency",
     "unit_of_sale",
     "quantity",
     "unit_of_quantity",
-    "is_active",
-    "featured",
+    "weight",
+    "length",
+    "width",
+    "height",
+    "short_description",
+    "long_description",
 )
 KNOWN_IMPORT_COLUMNS: set[str] = set(CANONICAL_IMPORT_COLUMNS)
+
+PART_NUMBER_REQUIRED_COLUMNS: tuple[str, ...] = (
+    "oe_code",
+    "number",
+    "type_code",
+)
+PART_NUMBER_OPTIONAL_COLUMNS: tuple[str, ...] = ("brand_name", "notes")
+PART_NUMBER_COLUMNS = PART_NUMBER_REQUIRED_COLUMNS + PART_NUMBER_OPTIONAL_COLUMNS
 
 
 @dataclass(frozen=True)

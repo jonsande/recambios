@@ -4,25 +4,35 @@ from dataclasses import dataclass
 from datetime import date, datetime, time
 from decimal import Decimal, InvalidOperation
 from typing import Any
+from zipfile import BadZipFile
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from django.utils.text import slugify
+from django.utils.translation import gettext as _
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
-from apps.catalog.models import Brand, Category, Condition, Product
+from apps.catalog.models import (
+    Brand,
+    Category,
+    Condition,
+    PartNumber,
+    PartNumberType,
+    Product,
+    normalize_part_number,
+)
 
 from .models import SupplierImport, SupplierImportRow
-from .schema import CANONICAL_IMPORT_COLUMNS, REQUIRED_IMPORT_COLUMNS, validate_template_headers
+from .schema import (
+    CANONICAL_IMPORT_COLUMNS,
+    PART_NUMBER_COLUMNS,
+    PART_NUMBER_REQUIRED_COLUMNS,
+    validate_template_headers,
+)
 
-PRICE_MODE_VALUES = {
-    Product.PriceVisibilityMode.HIDDEN,
-    Product.PriceVisibilityMode.VISIBLE_INFO,
-}
-TRUE_VALUES = {"1", "true", "yes", "y", "on"}
-FALSE_VALUES = {"0", "false", "no", "n", "off"}
+CLEAR_VALUE = "__CLEAR__"
 
 
 class ImportProcessingError(Exception):
@@ -35,14 +45,6 @@ class ImportProcessingSummary:
     successful_rows: int = 0
     failed_rows: int = 0
     skipped_rows: int = 0
-    auto_created_brands: set[str] | None = None
-    auto_created_categories: set[str] | None = None
-
-    def __post_init__(self) -> None:
-        if self.auto_created_brands is None:
-            self.auto_created_brands = set()
-        if self.auto_created_categories is None:
-            self.auto_created_categories = set()
 
 
 def run_supplier_import(
@@ -81,6 +83,17 @@ def run_supplier_import(
         if header_result.missing_required:
             missing = ", ".join(header_result.missing_required)
             raise ImportProcessingError(f"Missing required columns: {missing}.")
+        if "part_numbers" in workbook.sheetnames:
+            reference_header_row = next(
+                workbook["part_numbers"].iter_rows(min_row=1, max_row=1, values_only=True),
+                None,
+            )
+            if reference_header_row:
+                reference_headers = [
+                    str(value).strip().lower() if value is not None else ""
+                    for value in reference_header_row
+                ]
+                _validate_part_number_headers(reference_headers)
     except ImportProcessingError as exc:
         if workbook is not None:
             workbook.close()
@@ -88,6 +101,7 @@ def run_supplier_import(
 
     summary = ImportProcessingSummary()
     import_warnings: list[str] = []
+    successful_product_ids: set[int] = set()
     if header_result.unknown_columns:
         unknown = ", ".join(header_result.unknown_columns)
         import_warnings.append(f"Unknown columns ignored: {unknown}.")
@@ -113,7 +127,7 @@ def run_supplier_import(
 
             try:
                 with transaction.atomic():
-                    product, row_messages, created_brand, created_category = _process_data_row(
+                    product, row_messages = _process_data_row(
                         import_record=import_record,
                         raw_payload=raw_payload,
                     )
@@ -126,10 +140,7 @@ def run_supplier_import(
                         error_message="; ".join(row_messages),
                     )
                 summary.successful_rows += 1
-                if created_brand:
-                    summary.auto_created_brands.add(created_brand)
-                if created_category:
-                    summary.auto_created_categories.add(created_category)
+                successful_product_ids.add(product.pk)
             except ImportProcessingError as exc:
                 SupplierImportRow.objects.create(
                     supplier_import=import_record,
@@ -148,6 +159,17 @@ def run_supplier_import(
                     error_message=f"Database integrity error: {exc}",
                 )
                 summary.failed_rows += 1
+        reference_sheet = (
+            workbook["part_numbers"] if "part_numbers" in workbook.sheetnames else None
+        )
+        if reference_sheet is not None:
+            _process_part_number_sheet(
+                import_record=import_record,
+                worksheet=reference_sheet,
+                row_number_offset=worksheet.max_row,
+                successful_product_ids=successful_product_ids,
+                summary=summary,
+            )
     except Exception as exc:
         return _mark_import_failed(import_record, f"Unexpected processing error: {exc}")
     finally:
@@ -163,23 +185,41 @@ def _load_worksheet(import_record: SupplierImport):
     file_name = import_record.original_file.name.lower()
     if not file_name.endswith(".xlsx"):
         raise ImportProcessingError("Only .xlsx files are supported in v1.")
+    max_file_size = getattr(settings, "SUPPLIER_IMPORT_MAX_FILE_SIZE", 10 * 1024 * 1024)
+    if import_record.original_file.size > max_file_size:
+        raise ImportProcessingError(
+            _("El archivo supera el tamaño máximo permitido de %(size)s bytes.")
+            % {"size": max_file_size}
+        )
 
     try:
         import_record.original_file.open("rb")
         workbook = load_workbook(import_record.original_file, read_only=True, data_only=True)
-    except (InvalidFileException, ValueError) as exc:
+    except (BadZipFile, InvalidFileException, OSError, ValueError) as exc:
         raise ImportProcessingError(f"Invalid XLSX file: {exc}") from exc
 
-    worksheet = workbook.active
+    if "products_import" not in workbook.sheetnames:
+        workbook.close()
+        raise ImportProcessingError(_("Falta la hoja obligatoria 'products_import'."))
+    worksheet = workbook["products_import"]
     header_row = next(worksheet.iter_rows(min_row=1, max_row=1, values_only=True), None)
     if not header_row:
         raise ImportProcessingError("The worksheet is empty. Missing header row.")
     normalized_headers = [
-        str(value).strip().lower() if value is not None else ""
-        for value in header_row
+        str(value).strip().lower() if value is not None else "" for value in header_row
     ]
     if not any(normalized_headers):
         raise ImportProcessingError("The header row is empty.")
+    max_rows = getattr(settings, "SUPPLIER_IMPORT_MAX_ROWS", 10_000)
+    product_rows = max(worksheet.max_row - 1, 0)
+    reference_rows = (
+        max(workbook["part_numbers"].max_row - 1, 0) if "part_numbers" in workbook.sheetnames else 0
+    )
+    if product_rows + reference_rows > max_rows:
+        workbook.close()
+        raise ImportProcessingError(
+            _("El archivo supera el máximo de %(rows)s filas de datos.") % {"rows": max_rows}
+        )
     return workbook, worksheet, normalized_headers
 
 
@@ -200,19 +240,16 @@ def _finalize_import(
 ) -> SupplierImport:
     notes: list[str] = []
     notes.extend(warnings)
-    if summary.auto_created_brands:
-        created_brands = ", ".join(sorted(summary.auto_created_brands))
-        notes.append(f"Auto-created brands: {created_brands}.")
-    if summary.auto_created_categories:
-        created_categories = ", ".join(sorted(summary.auto_created_categories))
-        notes.append(f"Auto-created categories: {created_categories}.")
     if summary.skipped_rows:
         notes.append(f"Skipped empty rows: {summary.skipped_rows}.")
 
     if summary.total_rows == 0:
         import_record.import_status = SupplierImport.ImportStatus.FAILED
         notes.append("No data rows found to process.")
-    elif summary.failed_rows == 0 and not warnings:
+    elif summary.successful_rows + summary.failed_rows == 0:
+        import_record.import_status = SupplierImport.ImportStatus.FAILED
+        notes.append(_("No se encontró ninguna fila útil para importar."))
+    elif summary.failed_rows == 0 and not warnings and summary.skipped_rows == 0:
         import_record.import_status = SupplierImport.ImportStatus.COMPLETED
     else:
         import_record.import_status = SupplierImport.ImportStatus.COMPLETED_WITH_ERRORS
@@ -239,23 +276,23 @@ def _finalize_import(
 def _process_data_row(
     import_record: SupplierImport,
     raw_payload: dict[str, Any],
-) -> tuple[Product, list[str], str | None, str | None]:
-    title = _clean_text(raw_payload.get("title"))
+) -> tuple[Product, list[str]]:
+    title = _clean_text(raw_payload.get("product_title"))
     brand_name = _clean_text(raw_payload.get("brand_name"))
-    category_name = _clean_text(raw_payload.get("category_name"))
+    category_slug = _clean_text(raw_payload.get("category_slug"))
     condition_code = _clean_text(raw_payload.get("condition_code"))
-    sku = _clean_text(raw_payload.get("sku"))
+    sku = _clean_text(raw_payload.get("oe_code"))
     supplier_product_code = _clean_text(raw_payload.get("supplier_product_code"))
 
     row_messages: list[str] = []
     if not title:
-        raise ImportProcessingError("Missing required value: title.")
-    if not category_name:
-        raise ImportProcessingError("Missing required value: category_name.")
+        raise ImportProcessingError("Missing required value: product_title.")
+    if not category_slug:
+        raise ImportProcessingError("Missing required value: category_slug.")
     if not condition_code:
         raise ImportProcessingError("Missing required value: condition_code.")
     if not sku and not supplier_product_code:
-        raise ImportProcessingError("Each row must include sku or supplier_product_code.")
+        raise ImportProcessingError("Each row must include OE_code or supplier_product_code.")
 
     target_product = _match_existing_product(
         import_record=import_record,
@@ -265,33 +302,39 @@ def _process_data_row(
 
     if target_product is None and not sku:
         raise ImportProcessingError(
-            "sku is required to create a new product when no existing match is found."
+            "OE_code is required to create a new product when no existing match is found."
         )
 
-    brand = None
-    brand_created = False
-    if brand_name:
-        brand, brand_created = _get_or_create_brand(brand_name)
-    category, category_created = _get_or_create_category(category_name)
-    condition = Condition.objects.filter(code__iexact=condition_code).first()
+    brand = _resolve_brand(brand_name) if brand_name and brand_name != CLEAR_VALUE else None
+    category = _resolve_category(category_slug)
+    condition = Condition.objects.filter(code__iexact=condition_code, is_active=True).first()
     if not condition:
         raise ImportProcessingError(
             f"Unknown condition_code '{condition_code}'. Create it first in canonical conditions."
         )
 
-    price_visibility_mode = _parse_price_visibility_mode(raw_payload.get("price_visibility_mode"))
     last_known_price = _parse_decimal(
         raw_payload.get("last_known_price"),
         field_name="last_known_price",
     )
-    is_active = _parse_bool(raw_payload.get("is_active"), field_name="is_active")
-    featured = _parse_bool(raw_payload.get("featured"), field_name="featured")
+    dimensions = {
+        name: _parse_decimal(raw_payload.get(name), field_name=name)
+        for name in ("weight", "length", "width", "height")
+    }
+    if any(value is not None and value < 0 for value in dimensions.values()):
+        raise ImportProcessingError("weight and dimensions cannot be negative.")
     currency = _clean_text(raw_payload.get("currency")).upper()
     unit_of_sale = _clean_text(raw_payload.get("unit_of_sale"))
     quantity = _parse_positive_integer(raw_payload.get("quantity"), field_name="quantity")
     unit_of_quantity = _clean_text(raw_payload.get("unit_of_quantity"))
     short_description = _clean_text(raw_payload.get("short_description"))
     long_description = _clean_text(raw_payload.get("long_description"))
+    if target_product is None:
+        supplier_product_code = (
+            "" if supplier_product_code == CLEAR_VALUE else supplier_product_code
+        )
+        short_description = "" if short_description == CLEAR_VALUE else short_description
+        long_description = "" if long_description == CLEAR_VALUE else long_description
 
     if currency and len(currency) != 3:
         raise ImportProcessingError("currency must be a 3-letter code.")
@@ -307,20 +350,23 @@ def _process_data_row(
             brand=brand,
             category=category,
             condition=condition,
-            price_visibility_mode=price_visibility_mode or Product.PriceVisibilityMode.HIDDEN,
+            price_visibility_mode=Product.PriceVisibilityMode.VISIBLE_INFO,
             last_known_price=last_known_price,
             currency=currency or "EUR",
             unit_of_sale=unit_of_sale or "unit",
             quantity=quantity or 1,
             unit_of_quantity=unit_of_quantity or "Pcs",
-            is_active=True if is_active is None else is_active,
-            featured=False if featured is None else featured,
+            is_active=False,
+            featured=False,
+            **dimensions,
         )
         product.save()
     else:
         product = target_product
         product.title = title
-        if brand_name:
+        if brand_name == CLEAR_VALUE:
+            product.brand = None
+        elif brand_name:
             product.brand = brand
         product.category = category
         product.condition = condition
@@ -333,14 +379,20 @@ def _process_data_row(
             product.sku = sku
 
         if supplier_product_code:
-            product.supplier_product_code = supplier_product_code
-        if short_description:
+            product.supplier_product_code = (
+                None if supplier_product_code == CLEAR_VALUE else supplier_product_code
+            )
+        if short_description == CLEAR_VALUE:
+            product.short_description = ""
+        elif short_description:
             product.short_description = short_description
-        if long_description:
+        if long_description == CLEAR_VALUE:
+            product.long_description = ""
+        elif long_description:
             product.long_description = long_description
-        if price_visibility_mode:
-            product.price_visibility_mode = price_visibility_mode
-        if last_known_price is not None:
+        if _is_clear(raw_payload.get("last_known_price")):
+            product.last_known_price = None
+        elif last_known_price is not None:
             product.last_known_price = last_known_price
         if currency:
             product.currency = currency
@@ -350,20 +402,18 @@ def _process_data_row(
             product.quantity = quantity
         if unit_of_quantity:
             product.unit_of_quantity = unit_of_quantity
-        if is_active is not None:
-            product.is_active = is_active
-        if featured is not None:
-            product.featured = featured
+        for field_name, value in dimensions.items():
+            if _is_clear(raw_payload.get(field_name)):
+                setattr(product, field_name, None)
+            elif value is not None:
+                setattr(product, field_name, value)
+
+        product.publication_status = Product.PublicationStatus.DRAFT
+        product.published_at = None
 
         product.save()
 
-    created_brand_name = brand.name if brand and brand_created else None
-    created_category_name = category.name if category_created else None
-    if created_brand_name:
-        row_messages.append(f"Auto-created brand '{created_brand_name}'")
-    if created_category_name:
-        row_messages.append(f"Auto-created category '{created_category_name}'")
-    return product, row_messages, created_brand_name, created_category_name
+    return product, row_messages
 
 
 def _match_existing_product(
@@ -397,55 +447,137 @@ def _match_existing_product(
     return matched_product
 
 
-def _get_or_create_brand(name: str) -> tuple[Brand, bool]:
-    normalized_name = _normalize_entity_name(name)
-    brand = Brand.objects.filter(name__iexact=normalized_name).first()
-    if brand:
-        return brand, False
-    brand = Brand.objects.create(
-        name=normalized_name,
-        slug=_build_unique_slug(Brand, normalized_name, max_length=140, fallback_prefix="brand"),
-        brand_type=Brand.BrandType.PARTS,
-    )
-    return brand, True
+def _resolve_brand(name: str) -> Brand:
+    brand = Brand.objects.filter(name__iexact=name, is_active=True).first()
+    if brand is None:
+        raise ImportProcessingError(f"Unknown or inactive brand_name '{name}'.")
+    return brand
 
 
-def _get_or_create_category(name: str) -> tuple[Category, bool]:
-    normalized_name = _normalize_entity_name(name)
-    category = Category.objects.filter(parent__isnull=True, name__iexact=normalized_name).first()
-    if category:
-        return category, False
-    category = Category.objects.create(
-        name=normalized_name,
-        slug=_build_unique_slug(
-            Category,
-            normalized_name,
-            max_length=140,
-            fallback_prefix="category",
-        ),
-        parent=None,
-    )
-    return category, True
+def _resolve_category(category_slug: str) -> Category:
+    category = Category.objects.filter(slug=category_slug, is_active=True).first()
+    if category is None:
+        raise ImportProcessingError(f"Unknown or inactive category_slug '{category_slug}'.")
+    return category
 
 
-def _normalize_entity_name(value: str) -> str:
-    cleaned = " ".join(value.split())
-    if not cleaned:
-        raise ImportProcessingError("Entity names cannot be empty after normalization.")
-    return cleaned
+def _validate_part_number_headers(headers: list[str]) -> None:
+    duplicate_columns = {header for header in headers if header and headers.count(header) > 1}
+    if duplicate_columns:
+        raise ImportProcessingError(
+            f"Duplicate columns in part_numbers: {', '.join(sorted(duplicate_columns))}."
+        )
+    missing = [column for column in PART_NUMBER_REQUIRED_COLUMNS if column not in headers]
+    if missing:
+        raise ImportProcessingError(
+            f"Missing required columns in part_numbers: {', '.join(missing)}."
+        )
 
 
-def _build_unique_slug(model_class, value: str, *, max_length: int, fallback_prefix: str) -> str:
-    base_slug = slugify(value).strip("-") or fallback_prefix
-    base_slug = base_slug[:max_length].rstrip("-") or fallback_prefix
-    candidate = base_slug
-    suffix = 2
-    while model_class.objects.filter(slug=candidate).exists():
-        suffix_text = f"-{suffix}"
-        truncated = base_slug[: max_length - len(suffix_text)].rstrip("-")
-        candidate = f"{truncated}{suffix_text}"
-        suffix += 1
-    return candidate
+def _process_part_number_sheet(
+    *,
+    import_record: SupplierImport,
+    worksheet,
+    row_number_offset: int,
+    successful_product_ids: set[int],
+    summary: ImportProcessingSummary,
+) -> None:
+    header_row = next(worksheet.iter_rows(min_row=1, max_row=1, values_only=True), None)
+    if not header_row:
+        return
+    headers = [str(value).strip().lower() if value is not None else "" for value in header_row]
+    _validate_part_number_headers(headers)
+
+    for sheet_row, row_values in enumerate(
+        worksheet.iter_rows(min_row=2, values_only=True), start=2
+    ):
+        trace_row = row_number_offset + sheet_row
+        payload = _build_raw_payload_for_columns(headers, row_values, PART_NUMBER_COLUMNS)
+        payload["_sheet"] = "part_numbers"
+        payload["_sheet_row"] = sheet_row
+        summary.total_rows += 1
+        if _is_empty_payload(payload, ignored_keys={"_sheet", "_sheet_row"}):
+            SupplierImportRow.objects.create(
+                supplier_import=import_record,
+                row_number=trace_row,
+                raw_payload=payload,
+                processing_status=SupplierImportRow.ProcessingStatus.SKIPPED,
+                error_message=_("Fila vacía omitida en part_numbers."),
+            )
+            summary.skipped_rows += 1
+            continue
+        try:
+            with transaction.atomic():
+                product = _process_part_number_row(
+                    import_record=import_record,
+                    payload=payload,
+                    successful_product_ids=successful_product_ids,
+                )
+                SupplierImportRow.objects.create(
+                    supplier_import=import_record,
+                    row_number=trace_row,
+                    raw_payload=payload,
+                    processing_status=SupplierImportRow.ProcessingStatus.SUCCESS,
+                    linked_product=product,
+                )
+            summary.successful_rows += 1
+        except (ImportProcessingError, IntegrityError) as exc:
+            SupplierImportRow.objects.create(
+                supplier_import=import_record,
+                row_number=trace_row,
+                raw_payload=payload,
+                processing_status=SupplierImportRow.ProcessingStatus.ERROR,
+                error_message=str(exc),
+            )
+            summary.failed_rows += 1
+
+
+def _process_part_number_row(
+    *, import_record: SupplierImport, payload: dict[str, Any], successful_product_ids: set[int]
+) -> Product:
+    sku = _clean_text(payload.get("oe_code"))
+    number = _clean_text(payload.get("number"))
+    type_code = _clean_text(payload.get("type_code"))
+    if not sku or not number or not type_code:
+        raise ImportProcessingError(
+            "part_numbers requires OE_code, number and type_code in every row."
+        )
+    product = Product.objects.filter(supplier=import_record.supplier, sku=sku).first()
+    if product is None or product.pk not in successful_product_ids:
+        raise ImportProcessingError(f"OE_code '{sku}' was not imported successfully in this file.")
+    part_number_type = PartNumberType.objects.filter(code__iexact=type_code, is_active=True).first()
+    if part_number_type is None:
+        raise ImportProcessingError(f"Unknown or inactive type_code '{type_code}'.")
+    brand_name = _clean_text(payload.get("brand_name"))
+    brand = _resolve_brand(brand_name) if brand_name else None
+    normalized = normalize_part_number(number)
+    if not normalized:
+        raise ImportProcessingError("number must contain letters or digits.")
+    part_number = PartNumber.objects.filter(
+        product=product,
+        number_normalized=normalized,
+        part_number_type=part_number_type,
+    ).first()
+    if part_number is None:
+        PartNumber.objects.create(
+            product=product,
+            number_raw=number,
+            part_number_type=part_number_type,
+            brand=brand,
+            notes=_clean_text(payload.get("notes")),
+            is_primary=False,
+        )
+    else:
+        if part_number.is_primary:
+            raise ImportProcessingError(
+                "The additional reference matches the primary SKU reference."
+            )
+        part_number.number_raw = number
+        part_number.brand = brand
+        part_number.notes = _clean_text(payload.get("notes")) or part_number.notes
+        part_number.is_primary = False
+        part_number.save()
+    return product
 
 
 def _clean_text(value: Any) -> str:
@@ -454,21 +586,9 @@ def _clean_text(value: Any) -> str:
     return str(value).strip()
 
 
-def _parse_price_visibility_mode(value: Any) -> str | None:
-    text_value = _clean_text(value).lower()
-    if not text_value:
-        return None
-    if text_value not in PRICE_MODE_VALUES:
-        allowed = ", ".join(sorted(PRICE_MODE_VALUES))
-        raise ImportProcessingError(
-            f"Invalid price_visibility_mode '{text_value}'. Allowed values: {allowed}."
-        )
-    return text_value
-
-
 def _parse_decimal(value: Any, *, field_name: str) -> Decimal | None:
     text_value = _clean_text(value)
-    if not text_value:
+    if not text_value or text_value == CLEAR_VALUE:
         return None
     try:
         return Decimal(text_value)
@@ -496,30 +616,12 @@ def _parse_positive_integer(value: Any, *, field_name: str) -> int | None:
         ) from exc
 
     if parsed_value != parsed_value.to_integral_value():
-        raise ImportProcessingError(
-            f"Invalid integer value for {field_name}: '{text_value}'."
-        )
+        raise ImportProcessingError(f"Invalid integer value for {field_name}: '{text_value}'.")
 
     int_value = int(parsed_value)
     if int_value < 1:
         raise ImportProcessingError(f"{field_name} must be greater than or equal to 1.")
     return int_value
-
-
-def _parse_bool(value: Any, *, field_name: str) -> bool | None:
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return value
-
-    text_value = _clean_text(value).lower()
-    if not text_value:
-        return None
-    if text_value in TRUE_VALUES:
-        return True
-    if text_value in FALSE_VALUES:
-        return False
-    raise ImportProcessingError(f"Invalid boolean value for {field_name}: '{value}'.")
 
 
 def _serialize_cell_value(value: Any) -> Any:
@@ -535,24 +637,35 @@ def _serialize_cell_value(value: Any) -> Any:
 
 
 def _build_raw_payload(headers: list[str], row_values: tuple[Any, ...]) -> dict[str, Any]:
+    return _build_raw_payload_for_columns(headers, row_values, CANONICAL_IMPORT_COLUMNS)
+
+
+def _build_raw_payload_for_columns(
+    headers: list[str], row_values: tuple[Any, ...], known_columns: tuple[str, ...]
+) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     for index, header in enumerate(headers):
         if not header:
             continue
         cell_value = row_values[index] if index < len(row_values) else None
         payload[header] = _serialize_cell_value(cell_value)
-    for required_column in REQUIRED_IMPORT_COLUMNS:
-        payload.setdefault(required_column, None)
-    for known_column in CANONICAL_IMPORT_COLUMNS:
+    for known_column in known_columns:
         payload.setdefault(known_column, None)
     return payload
 
 
-def _is_empty_payload(raw_payload: dict[str, Any]) -> bool:
-    for value in raw_payload.values():
+def _is_empty_payload(raw_payload: dict[str, Any], *, ignored_keys: set[str] | None = None) -> bool:
+    ignored_keys = ignored_keys or set()
+    for key, value in raw_payload.items():
+        if key in ignored_keys:
+            continue
         if value is None:
             continue
         if isinstance(value, str) and value.strip() == "":
             continue
         return False
     return True
+
+
+def _is_clear(value: Any) -> bool:
+    return _clean_text(value).upper() == CLEAR_VALUE
